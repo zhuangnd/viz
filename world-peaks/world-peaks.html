@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>世界之巅 - 高峰可视化</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- SVG Filters for Sketch Effect -->
+  <svg style="display: none;">
+    <filter id="sketch-effect">
+      <!-- Edge detection using feConvolveMatrix -->
+      <feConvolveMatrix order="3 3" preserveAlpha="true" kernelMatrix="-1 -1 -1 -1 8 -1 -1 -1 -1" in="SourceGraphic" result="edges" />
+      <!-- Invert colors to make edges dark on light background, or keep it light for dark theme -->
+      <feColorMatrix type="matrix" values="-1 0 0 0 1  0 -1 0 0 1  0 0 -1 0 1  0 0 0 1 0" in="edges" result="invertedEdges" />
+      <feColorMatrix type="saturate" values="0" in="invertedEdges" result="grayscale" />
+      <!-- Boost contrast for the lines -->
+      <feComponentTransfer in="grayscale" result="sketch">
+        <feFuncR type="linear" slope="3" intercept="-1" />
+        <feFuncG type="linear" slope="3" intercept="-1" />
+        <feFuncB type="linear" slope="3" intercept="-1" />
+      </feComponentTransfer>
+      <feBlend mode="screen" in="sketch" in2="SourceGraphic" result="blended" />
+    </filter>
+    
+    <filter id="sketch-dark">
+      <!-- A simpler sketch effect for dark background -->
+      <feColorMatrix type="saturate" values="0" in="SourceGraphic" result="gray" />
+      <feComponentTransfer in="gray" result="contrast">
+        <feFuncR type="linear" slope="2" intercept="-0.5" />
+        <feFuncG type="linear" slope="2" intercept="-0.5" />
+        <feFuncB type="linear" slope="2" intercept="-0.5" />
+      </feComponentTransfer>
+      <feConvolveMatrix order="3 3" preserveAlpha="true" kernelMatrix="0 1 0 1 -4 1 0 1 0" in="contrast" result="edges" />
+    </filter>
+  </svg>
+
+  <div class="stars"></div>
+  <div class="twinkling"></div>
+
+  <header class="glass-header">
+    <div class="header-content">
+      <h1>世界之巅 <span>Top Peaks</span></h1>
+      <p class="subtitle">探索地球的至高点，感受海拔的震撼</p>
+    </div>
+    <nav class="filter-nav">
+      <button class="filter-btn active" data-filter="all">全景对比</button>
+      <button class="filter-btn" data-filter="top10">十大高峰</button>
+      <button class="filter-btn" data-filter="seven">七大洲最高峰</button>
+    </nav>
+  </header>
+
+  <main class="visualization-container">
+    <div class="y-axis">
+      <span>9000m</span>
+      <span>8000m</span>
+      <span>7000m</span>
+      <span>6000m</span>
+      <span>5000m</span>
+      <span>4000m</span>
+      <span>0m</span>
+    </div>
+    <!-- The mountains will be generated here -->
+    <div class="mountains-canvas" id="mountainsCanvas"></div>
+  </main>
+
+  <!-- Detail Panel -->
+  <div class="detail-overlay" id="detailOverlay"></div>
+  <aside class="detail-panel glass-panel" id="detailPanel">
+    <button class="close-btn" id="closeBtn">&times;</button>
+    
+    <div class="panel-header">
+      <h2 id="peakNameZh">珠穆朗玛峰</h2>
+      <h3 id="peakNameEn">Mount Everest</h3>
+      <div class="peak-meta">
+        <span class="elevation-badge" id="peakElevation">8848 m</span>
+        <span class="country-badge" id="peakCountry">尼泊尔 / 中国</span>
+      </div>
+    </div>
+
+    <div class="visual-area">
+      <!-- Container for hover effect -->
+      <div class="image-sketch-container">
+        <div class="photo-wrapper">
+          <img id="peakPhoto" src="" alt="Peak Photo">
+        </div>
+        <div class="sketch-hint"><span>鼠标悬停查看线条简图</span></div>
+      </div>
+    </div>
+
+    <div class="info-area">
+      <div class="info-item">
+        <h4>首次登顶时间</h4>
+        <p id="firstAscentTime">1953年5月29日</p>
+      </div>
+      <div class="info-item">
+        <h4>首次登顶人员 (国籍)</h4>
+        <p id="firstAscenders">埃德蒙·希拉里(新西兰), 丹增·诺盖(尼泊尔)</p>
+      </div>
+    </div>
+  </aside>
+
+  <script src="data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

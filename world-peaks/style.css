@@ -1,0 +1,441 @@
+:root {
+  --bg-dark: #0B0F19;
+  --bg-gradient-top: #1A233A;
+  --bg-gradient-bottom: #080B12;
+  --accent-color: #00F2FE;
+  --accent-color-hover: #F5A623;
+  --text-primary: #FFFFFF;
+  --text-secondary: #A0B0C0;
+  --glass-bg: rgba(26, 35, 58, 0.4);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+  
+  --max-elevation: 9000; /* For height calculation base */
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', 'Noto Sans SC', sans-serif;
+  background: linear-gradient(135deg, var(--bg-gradient-top) 0%, var(--bg-gradient-bottom) 100%);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow: hidden; /* Prevent scrolling for app-like feel */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Background Stars */
+.stars, .twinkling {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.stars {
+  background: #000 url('https://raw.githubusercontent.com/WebpageFX/html5-canvas-snow/master/images/stars.png') repeat top center;
+}
+
+.twinkling {
+  background: transparent url('https://raw.githubusercontent.com/WebpageFX/html5-canvas-snow/master/images/twinkling.png') repeat top center;
+  animation: move-twink-back 200s linear infinite;
+  opacity: 0.5;
+}
+
+@keyframes move-twink-back {
+  from {background-position: 0 0;}
+  to {background-position: -10000px 5000px;}
+}
+
+/* Header */
+.glass-header {
+  padding: 1.5rem 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--glass-border);
+  z-index: 10;
+}
+
+.header-content h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  margin-bottom: 0.2rem;
+  text-transform: uppercase;
+  background: linear-gradient(to right, #fff, var(--accent-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.header-content h1 span {
+  font-size: 1rem;
+  font-weight: 300;
+  color: var(--text-secondary);
+  -webkit-text-fill-color: var(--text-secondary);
+}
+
+.subtitle {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.filter-nav {
+  display: flex;
+  gap: 1rem;
+}
+
+.filter-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  padding: 0.6rem 1.2rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.filter-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.filter-btn.active {
+  background: var(--accent-color);
+  color: #000;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
+}
+
+/* Visualization Canvas */
+.visualization-container {
+  flex: 1;
+  position: relative;
+  padding: 2rem;
+  display: flex;
+  align-items: flex-end;
+}
+
+.y-axis {
+  position: absolute;
+  left: 2rem;
+  top: 2rem;
+  bottom: 2rem;
+  width: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px dashed rgba(255,255,255,0.2);
+  padding-right: 10px;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  pointer-events: none;
+}
+
+.y-axis span {
+  position: relative;
+  text-align: right;
+  transform: translateY(50%);
+}
+.y-axis span:last-child {
+  transform: translateY(100%);
+}
+
+.mountains-canvas {
+  position: absolute;
+  left: 100px;
+  right: 2rem;
+  bottom: 2rem;
+  top: 2rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  gap: 1%;
+}
+
+/* Mountain Shape */
+.mountain-wrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  cursor: pointer;
+  group: mountain;
+  transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.mountain-wrapper.hidden {
+  opacity: 0;
+  transform: scaleY(0);
+  pointer-events: none;
+  flex: 0;
+  margin: 0;
+}
+
+.mountain {
+  width: 100%;
+  /* Height is set inline dynamically based on elevation */
+  background: linear-gradient(to top, rgba(79, 172, 254, 0.2) 0%, rgba(0, 242, 254, 0.8) 100%);
+  clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+  transform-origin: bottom center;
+  transition: all 0.4s ease;
+  position: relative;
+}
+
+/* Inner mountain texture/lines */
+.mountain::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(90deg, rgba(255,255,255,0.2) 0%, transparent 50%, rgba(0,0,0,0.2) 100%);
+  clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+}
+
+.mountain-wrapper:hover .mountain {
+  background: linear-gradient(to top, rgba(245, 166, 35, 0.3) 0%, rgba(245, 166, 35, 1) 100%);
+  transform: scaleY(1.02) scaleX(1.1);
+  filter: drop-shadow(0 0 20px rgba(245, 166, 35, 0.5));
+  z-index: 5;
+}
+
+.mountain-label {
+  position: absolute;
+  bottom: -2rem; /* Initial hidden position */
+  text-align: center;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  pointer-events: none;
+  z-index: 10;
+  white-space: nowrap;
+}
+
+.mountain-wrapper:hover .mountain-label {
+  opacity: 1;
+  bottom: 20px;
+  transform: translateY(-100%); /* float up slightly above the peak */
+}
+
+/* Dynamic positioning based on height */
+.mountain-wrapper:hover .mountain-label {
+  bottom: calc(var(--mountain-height) + 15px);
+}
+
+.label-zh {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+
+.label-elevation {
+  font-size: 0.8rem;
+  color: var(--accent-color-hover);
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+
+
+/* Detail Panel */
+.detail-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 90;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.detail-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.detail-panel {
+  position: fixed;
+  top: 0;
+  right: -500px;
+  width: 450px;
+  height: 100vh;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-left: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  z-index: 100;
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  transition: right 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+  overflow-y: auto;
+}
+
+.detail-panel.active {
+  right: 0;
+}
+
+.close-btn {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 2rem;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.close-btn:hover {
+  color: var(--text-primary);
+}
+
+.panel-header h2 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin-bottom: 0.2rem;
+}
+
+.panel-header h3 {
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.peak-meta {
+  display: flex;
+  gap: 1rem;
+}
+
+.elevation-badge, .country-badge {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.elevation-badge {
+  color: var(--accent-color);
+  border-color: rgba(0, 242, 254, 0.3);
+}
+
+/* Visual Area - Image & Sketch */
+.visual-area {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  background: #000;
+}
+
+.image-sketch-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  cursor: crosshair;
+}
+
+.photo-wrapper {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0; left: 0;
+}
+
+.photo-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: all 0.6s ease;
+}
+
+/* 核心：照片到线条简图的切换特效 */
+.image-sketch-container:hover .photo-wrapper img {
+  /* Using SVG filter for edge detection + CSS filters */
+  filter: url(#sketch-dark) grayscale(100%) contrast(150%) brightness(1.2);
+  /* Fallback if SVG filter isn't perfect */
+  /* filter: grayscale(100%) contrast(200%) invert(1); */
+  transform: scale(1.05);
+}
+
+.sketch-hint {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0,0,0,0.6);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.8);
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.3s;
+}
+
+.image-sketch-container:hover .sketch-hint {
+  opacity: 0; /* Hide hint on hover */
+}
+
+/* Info Area */
+.info-area {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.info-item h4 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  letter-spacing: 1px;
+  margin-bottom: 0.4rem;
+}
+
+.info-item p {
+  font-size: 1.1rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .detail-panel {
+    width: 100%;
+    right: -100%;
+  }
+  .mountains-canvas {
+    left: 60px;
+    gap: 2px;
+  }
+  .y-axis {
+    width: 40px;
+    left: 10px;
+  }
+  .header-content h1 { font-size: 1.5rem; }
+}
