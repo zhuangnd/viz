@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>世界之巅 · 十大高峰与七大洲最高峰可视化</title>
+<style>
+  :root{
+    --ice-050:#f4f9fc; --ice-100:#e6f1f8; --ice-200:#cfe4f2; --ice-300:#a9cbe4;
+    --ice-400:#7fb0d6; --ice-500:#5b8fc0; --ice-600:#3f6fa3; --ice-700:#2c557f;
+    --rock-800:#22374e; --rock-900:#16263a; --snow:#fbfdff;
+    --ink:#22374e; --ink-soft:#5a7186; --line:#d8e6f0;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Source Han Sans SC",system-ui,sans-serif;
+    background:var(--ice-050); color:var(--ink); overflow-x:hidden;
+  }
+  .container{max-width:1180px;margin:0 auto;padding:0 28px}
+
+  /* ===== Hero ===== */
+  .hero{position:relative;height:340px;overflow:hidden;
+    background:linear-gradient(180deg,#b8d9ef 0%,#dcedf8 55%,var(--ice-050) 100%);}
+  .hero svg{position:absolute;left:0;bottom:0;width:100%;height:100%}
+  .hero-content{position:relative;z-index:3;text-align:center;padding-top:78px}
+  .hero-kicker{font-size:13px;letter-spacing:6px;color:var(--ice-600);text-transform:uppercase;margin-bottom:14px}
+  .hero h1{font-size:52px;font-weight:800;letter-spacing:10px;color:var(--rock-900)}
+  .hero p.sub{margin-top:12px;font-size:15px;color:var(--ink-soft);letter-spacing:2px}
+
+  /* ===== Tabs ===== */
+  .tabbar{position:sticky;top:0;z-index:50;background:rgba(244,249,252,.86);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--line);}
+  .tabbar-inner{display:flex;justify-content:center;gap:10px;padding:12px 0}
+  .tab-btn{border:1px solid var(--line);background:#fff;color:var(--ink-soft);
+    padding:9px 26px;border-radius:999px;font-size:14px;letter-spacing:2px;cursor:pointer;
+    transition:all .25s ease;font-family:inherit}
+  .tab-btn:hover{border-color:var(--ice-400);color:var(--ice-600)}
+  .tab-btn.active{background:var(--ice-600);border-color:var(--ice-600);color:#fff;
+    box-shadow:0 4px 14px rgba(63,111,163,.35)}
+
+  /* ===== Sections ===== */
+  section{padding:56px 0 20px}
+  .sec-head{display:flex;align-items:baseline;gap:16px;margin-bottom:8px}
+  .sec-head h2{font-size:26px;font-weight:700;letter-spacing:3px}
+  .sec-head .en{font-size:13px;letter-spacing:3px;color:var(--ice-500);text-transform:uppercase}
+  .sec-note{font-size:13px;color:var(--ink-soft);margin-bottom:24px;line-height:1.8}
+
+  /* ===== Skyline ===== */
+  .skyline-wrap{position:relative;background:#fff;border:1px solid var(--line);border-radius:18px;
+    padding:18px 10px 8px;box-shadow:0 10px 34px rgba(44,85,127,.08);overflow-x:auto}
+  .skyline-wrap svg{display:block;width:100%;height:auto}
+  .peak-hit{cursor:pointer}
+  .peak-label{font-size:12px;fill:var(--ink);pointer-events:none;text-anchor:middle;font-weight:600}
+  .peak-alt{font-size:11px;fill:var(--ice-500);pointer-events:none;text-anchor:middle}
+  .grid-label{font-size:10.5px;fill:#9db4c6;text-anchor:end}
+  .tooltip{position:fixed;z-index:80;pointer-events:none;background:var(--rock-900);color:#eaf4fc;
+    padding:8px 14px;border-radius:10px;font-size:12.5px;line-height:1.6;opacity:0;
+    transform:translate(-50%,-115%);transition:opacity .15s ease;white-space:nowrap;
+    box-shadow:0 8px 22px rgba(22,38,58,.3)}
+  .tooltip b{color:#fff;font-size:13px}
+
+  /* ===== Bars ===== */
+  .bars{display:flex;flex-direction:column;gap:9px;background:#fff;border:1px solid var(--line);
+    border-radius:18px;padding:26px 28px;box-shadow:0 10px 34px rgba(44,85,127,.08)}
+  .bar-row{display:grid;grid-template-columns:170px 1fr 86px;align-items:center;gap:14px;
+    cursor:pointer;padding:4px 6px;border-radius:10px;transition:background .2s}
+  .bar-row:hover{background:var(--ice-100)}
+  .bar-name{font-size:13.5px;font-weight:600}
+  .bar-name span{display:block;font-size:11px;color:var(--ink-soft);font-weight:400;margin-top:1px}
+  .bar-track{height:20px;background:var(--ice-100);border-radius:6px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:6px 0 0 6px;width:0;
+    transition:width .9s cubic-bezier(.22,.9,.3,1)}
+  .bar-val{font-size:12.5px;color:var(--ice-600);font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+
+  /* ===== Timeline ===== */
+  .timeline-wrap{background:#fff;border:1px solid var(--line);border-radius:18px;padding:30px 26px 20px;
+    box-shadow:0 10px 34px rgba(44,85,127,.08);overflow-x:auto}
+  .timeline-wrap svg{display:block;min-width:900px;width:100%;height:auto}
+
+  /* ===== Combo chart ===== */
+  .combo-wrap{background:#fff;border:1px solid var(--line);border-radius:18px;padding:26px 22px 14px;
+    box-shadow:0 10px 34px rgba(44,85,127,.08);overflow-x:auto}
+  .combo-wrap svg{display:block;min-width:860px;width:100%;height:auto}
+  .combo-bar{transition:height .8s cubic-bezier(.22,.9,.3,1),y .8s cubic-bezier(.22,.9,.3,1)}
+  .combo-hit{cursor:pointer;fill:transparent}
+  .combo-legend{display:flex;justify-content:center;gap:34px;padding:10px 0 6px;
+    font-size:12.5px;color:var(--ink-soft)}
+  .combo-legend span{display:inline-flex;align-items:center;gap:8px}
+  .combo-legend i{display:inline-block;width:16px;height:12px;border-radius:3px}
+  .combo-legend .lg-bar{background:linear-gradient(180deg,#7fb0d6,#33587f)}
+  .combo-legend .lg-line{height:3px;background:#c0552b;border-radius:2px;position:relative}
+  .combo-legend .lg-line::after{content:'';position:absolute;left:50%;top:50%;width:7px;height:7px;
+    background:#c0552b;border:2px solid #fff;border-radius:50%;transform:translate(-50%,-50%)}
+
+  footer{margin-top:60px;padding:34px 0 44px;border-top:1px solid var(--line);
+    font-size:12.5px;color:var(--ink-soft);line-height:2}
+
+  /* ===== Detail overlay ===== */
+  .overlay{position:fixed;inset:0;z-index:100;background:rgba(22,38,58,.45);
+    backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;
+    opacity:0;pointer-events:none;transition:opacity .3s ease;padding:24px}
+  .overlay.open{opacity:1;pointer-events:auto}
+  .card{background:var(--snow);border-radius:22px;width:min(940px,100%);max-height:88vh;overflow-y:auto;
+    padding:34px 38px 30px;position:relative;transform:translateY(26px) scale(.97);
+    transition:transform .35s cubic-bezier(.2,.9,.3,1.1);box-shadow:0 30px 80px rgba(22,38,58,.35)}
+  .overlay.open .card{transform:translateY(0) scale(1)}
+  .card-close{position:absolute;top:16px;right:18px;width:34px;height:34px;border-radius:50%;
+    border:1px solid var(--line);background:#fff;color:var(--ink-soft);font-size:16px;cursor:pointer;
+    transition:all .2s;line-height:1}
+  .card-close:hover{background:var(--ice-600);color:#fff;border-color:var(--ice-600)}
+  .card-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:30px;margin-top:6px}
+  @media (max-width:760px){.card-grid{grid-template-columns:1fr}}
+  .scene-box{border-radius:16px;overflow:hidden;border:1px solid var(--line)}
+  .scene-box svg{display:block;width:100%;height:auto}
+  .photo-box{position:relative}
+  .photo-box img{display:block;width:100%;border-radius:16px;border:1px solid var(--line);
+    aspect-ratio:4/3;object-fit:cover;background:var(--ice-100)}
+  .photo-cap{text-align:center;font-size:11.5px;color:var(--ink-soft);letter-spacing:2px;padding:8px 0 2px}
+  .sketch-box{margin-top:16px;border:1px dashed var(--ice-300);border-radius:16px;padding:14px 10px 6px;background:#fff}
+  .sketch-box svg{display:block;width:100%;height:auto}
+  .sketch-cap{text-align:center;font-size:11.5px;color:var(--ink-soft);letter-spacing:2px;padding:6px 0 8px}
+  .card-title h3{font-size:30px;font-weight:800;letter-spacing:2px}
+  .card-title .en{font-size:15px;color:var(--ice-500);letter-spacing:1px;margin-top:4px;font-style:italic}
+  .alt-big{font-size:40px;font-weight:800;color:var(--ice-600);margin:14px 0 4px;font-variant-numeric:tabular-nums}
+  .alt-big small{font-size:15px;font-weight:500;color:var(--ink-soft);margin-left:4px}
+  .stat-chips{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+  .chip{background:var(--ice-100);border-radius:12px;padding:10px 12px;min-width:0}
+  .chip label{display:block;font-size:11px;color:var(--ice-600);letter-spacing:1.5px;margin-bottom:4px}
+  .chip b{display:block;font-size:13px;color:var(--ink);font-weight:600;line-height:1.55}
+  .chip-danger{background:#fdeee8}
+  .chip-danger label{color:#c0552b}
+  .chip-danger b{color:#a8431d}
+  @media (max-width:480px){.stat-chips{grid-template-columns:1fr}}
+  .info-list{margin-top:14px;border-top:1px solid var(--line)}
+  .info-row{display:grid;grid-template-columns:88px 1fr;gap:12px;padding:10px 2px;
+    border-bottom:1px solid var(--ice-100);font-size:13.5px;line-height:1.7}
+  .info-row dt{color:var(--ink-soft);letter-spacing:2px}
+  .info-row dd{color:var(--ink)}
+  .note-tag{display:inline-block;margin-top:14px;background:var(--ice-100);color:var(--ice-700);
+    font-size:12.5px;padding:9px 14px;border-radius:10px;line-height:1.7}
+
+  ::selection{background:var(--ice-200)}
+</style>
+</head>
+<body>
+
+<!-- ============ HERO ============ -->
+<header class="hero" id="hero">
+  <svg viewBox="0 0 1440 340" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <g id="plx-back" opacity=".55">
+      <path d="M0,340 L0,250 L140,180 L260,235 L400,150 L520,220 L680,130 L820,215 L960,160 L1120,240 L1260,185 L1440,250 L1440,340 Z" fill="#9cc2df"/>
+    </g>
+    <g id="plx-mid" opacity=".75">
+      <path d="M0,340 L0,290 L120,235 L230,275 L360,205 L470,262 L640,190 L760,258 L900,215 L1060,282 L1200,230 L1330,278 L1440,240 L1440,340 Z" fill="#6f9ec4"/>
+    </g>
+    <g id="plx-front">
+      <path d="M0,340 L0,312 L160,272 L300,308 L430,258 L560,305 L720,250 L860,302 L1000,268 L1160,312 L1300,275 L1440,310 L1440,340 Z" fill="#3f6fa3"/>
+      <path d="M700,262 L720,250 L742,263 L730,268 L720,262 L710,269 Z" fill="#eaf4fc" opacity=".9"/>
+    </g>
+  </svg>
+  <div class="hero-content">
+    <div class="hero-kicker">Top of the World</div>
+    <h1>世 界 之 巅</h1>
+    <p class="sub">世界十大高峰 · 七大洲最高峰 — 海拔可视化探索</p>
+  </div>
+</header>
+
+<!-- ============ TABS ============ -->
+<nav class="tabbar">
+  <div class="tabbar-inner">
+    <button class="tab-btn active" data-set="ten">世界十大高峰</button>
+    <button class="tab-btn" data-set="seven">七大洲最高峰</button>
+  </div>
+</nav>
+
+<!-- ============ SKYLINE ============ -->
+<section id="sec-skyline">
+  <div class="container">
+    <div class="sec-head"><h2>海拔天际线</h2><span class="en">Altitude Skyline</span></div>
+    <p class="sec-note" id="skyline-note"></p>
+    <div class="skyline-wrap"><svg id="skyline" viewBox="0 0 1500 560" role="img"></svg></div>
+  </div>
+</section>
+
+<!-- ============ BARS ============ -->
+<section id="sec-bars">
+  <div class="container">
+    <div class="sec-head"><h2>海拔对比</h2><span class="en">Altitude Comparison</span></div>
+    <p class="sec-note">点击任意一行查看该山峰详情。</p>
+    <div class="bars" id="bars"></div>
+  </div>
+</section>
+
+<!-- ============ COMBO CHART ============ -->
+<section id="sec-combo">
+  <div class="container">
+    <div class="sec-head"><h2>登顶热度 × 死亡风险</h2><span class="en">Summits vs Fatality Rate</span></div>
+    <p class="sec-note">柱状为登顶人数（左轴，对数刻度），折线为死亡率（右轴）。人数为公开资料通行约数：标 * 者为<b>每年</b>登顶人数，其余为<b>累计</b>登顶人数；死亡率为历史估算值，统计口径不同会有出入。悬停查看数值，点击柱子查看山峰详情。</p>
+    <div class="combo-wrap">
+      <svg id="combo" viewBox="0 0 1400 480" role="img"></svg>
+      <div class="combo-legend">
+        <span><i class="lg-bar"></i>登顶人数（左轴 · 对数）</span>
+        <span><i class="lg-line"></i>死亡率（右轴）</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TIMELINE ============ -->
+<section id="sec-timeline">
+  <div class="container">
+    <div class="sec-head"><h2>首登时间轴</h2><span class="en">First Ascent Timeline</span></div>
+    <p class="sec-note">人类首次站上这些顶峰的时间。</p>
+    <div class="timeline-wrap"><svg id="timeline" viewBox="0 0 1400 300" role="img"></svg></div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>数据来源：公开登山资料（海拔采用普遍认可值，珠峰采用 2020 年中尼联合公布的 8,848.86 米）。</p>
+    <p>七大洲最高峰采用主流 "Seven Summits" 版本：欧洲取厄尔布鲁士峰（另有勃朗峰版本）、大洋洲取查亚峰（另有澳大利亚大陆科西阿斯科峰版本）。</p>
+    <p>山形线稿为基于各峰著名实际形态的示意描摹，非精确测绘。本页面为纯前端单文件，全部图形由 SVG 代码绘制。</p>
+    <p>详情中的登顶窗口期、死亡率与累计登顶人数为公开登山资料的通行约数，随年份与统计口径（登顶人次 / 登顶人数、死亡率的计算基准）不同会有出入，仅供参考。</p>
+  </div>
+</footer>
+
+<!-- ============ TOOLTIP ============ -->
+<div class="tooltip" id="tooltip"></div>
+
+<!-- ============ DETAIL OVERLAY ============ -->
+<div class="overlay" id="overlay">
+  <div class="card">
+    <button class="card-close" id="cardClose" aria-label="关闭">✕</button>
+    <div id="cardBody"></div>
+  </div>
+</div>
+
+<script>
+/* ==================== 数据 ==================== */
+/* shape: 归一化山形轮廓点集 (x:0-100, y:0-100; y=100 为山脚, y=0 为最高点)，基于各峰著名实际形态的示意描摹 */
+const PEAKS = {
+ten: [
+ {id:'everest', cn:'珠穆朗玛峰', en:'Mount Everest', alt:8848.86, country:'中国 / 尼泊尔', range:'喜马拉雅山脉',
+  date:'1953-05-29', year:1953, who:[['埃德蒙·希拉里','新西兰'],['丹增·诺尔盖','尼泊尔']],
+  note:'世界之巅。2020 年中尼联合公布新高程 8,848.86 米，岩面高度仍在缓慢上升。',
+  shape:[[0,100],[30,35],[40,45],[52,0],[62,35],[100,100]]},
+ {id:'k2', cn:'乔戈里峰', en:'K2 (Mount Godwin-Austen)', alt:8611, country:'中国 / 巴基斯坦', range:'喀喇昆仑山脉',
+  date:'1954-07-31', year:1954, who:[['阿基莱·孔帕尼奥尼','意大利'],['利诺·拉切德利','意大利']],
+  note:'"野蛮巨峰"。完美的金字塔山形，攀登死亡率在八千米级山峰中名列前茅。',
+  shape:[[0,100],[42,15],[50,0],[58,15],[100,100]]},
+ {id:'kangchenjunga', cn:'干城章嘉峰', en:'Kangchenjunga', alt:8586, country:'尼泊尔 / 印度', range:'喜马拉雅山脉',
+  date:'1955-05-25', year:1955, who:[['乔·布朗','英国'],['乔治·班德','英国']],
+  note:'意为"五雪宝"。登山者遵循传统，在距峰顶数步处停下以示对神山的敬意。',
+  shape:[[0,100],[15,62],[28,42],[38,55],[50,0],[62,48],[72,35],[85,68],[100,100]]},
+ {id:'lhotse', cn:'洛子峰', en:'Lhotse', alt:8516, country:'中国 / 尼泊尔', range:'喜马拉雅山脉',
+  date:'1956-05-18', year:1956, who:[['弗里茨·卢赫辛格','瑞士'],['恩斯特·赖斯','瑞士']],
+  note:'与珠峰共用南坳攀登路线，其南壁是世界上最陡峭的高海拔岩壁之一。',
+  shape:[[0,100],[38,38],[50,0],[61,38],[100,100]]},
+ {id:'makalu', cn:'马卡鲁峰', en:'Makalu', alt:8485, country:'中国 / 尼泊尔', range:'喜马拉雅山脉',
+  date:'1955-05-15', year:1955, who:[['让·库齐','法国'],['莱昂内尔·泰雷','法国']],
+  note:'标志性的完美四棱锥山形，是八千米级山峰中最上镜的几何体之一。',
+  shape:[[0,100],[42,8],[50,0],[58,8],[100,100]]},
+ {id:'chooyu', cn:'卓奥友峰', en:'Cho Oyu', alt:8188, country:'中国 / 尼泊尔', range:'喜马拉雅山脉',
+  date:'1954-10-19', year:1954, who:[['赫伯特·蒂希','奥地利'],['约瑟夫·约赫勒','奥地利'],['帕桑·达瓦·拉马','尼泊尔']],
+  note:'山形宽缓如穹顶，被普遍认为是技术难度最低的八千米级山峰。',
+  shape:[[0,100],[18,58],[38,16],[50,0],[62,16],[82,58],[100,100]]},
+ {id:'dhaulagiri', cn:'道拉吉里峰', en:'Dhaulagiri I', alt:8167, country:'尼泊尔', range:'喜马拉雅山脉（道拉吉里山系）',
+  date:'1960-05-13', year:1960, who:[['库尔特·迪姆贝格尔','奥地利'],['瑞士-奥地利联合队','瑞士 / 奥地利']],
+  note:'意为"白山"，巨大的白色山体曾一度被误认为是世界最高峰。',
+  shape:[[0,100],[10,62],[25,38],[40,0],[55,22],[70,42],[85,72],[100,100]]},
+ {id:'manaslu', cn:'马纳斯鲁峰', en:'Manaslu', alt:8163, country:'尼泊尔', range:'喜马拉雅山脉',
+  date:'1956-05-09', year:1956, who:[['今西寿雄','日本'],['嘉增·诺布','尼泊尔']],
+  note:'意为"灵魂之山"，由日本登山队首登，此后成为日本登山界的"圣山"。',
+  shape:[[0,100],[20,52],[35,0],[45,18],[55,2],[70,45],[100,100]]},
+ {id:'nangaparbat', cn:'南迦帕尔巴特峰', en:'Nanga Parbat', alt:8125, country:'巴基斯坦', range:'喜马拉雅山脉（西端）',
+  date:'1953-07-03', year:1953, who:[['赫尔曼·布尔','奥地利']],
+  note:'"杀手山峰"。布尔在无氧、无后援的情况下独自完成首登，堪称登山史传奇。',
+  shape:[[0,100],[30,45],[48,0],[60,18],[75,58],[100,100]]},
+ {id:'annapurna', cn:'安纳普尔纳峰', en:'Annapurna I', alt:8091, country:'尼泊尔', range:'喜马拉雅山脉（安纳普尔纳山系）',
+  date:'1950-06-03', year:1950, who:[['莫里斯·埃尔佐','法国'],['路易·拉什纳尔','法国']],
+  note:'人类登顶的第一座八千米级山峰（1950 年），至今仍是死亡率最高的八千米级山峰之一。',
+  shape:[[0,100],[15,65],[35,32],[50,0],[65,35],[80,62],[100,100]]},
+],
+seven: [
+ {id:'everest', cn:'珠穆朗玛峰', en:'Mount Everest', alt:8848.86, country:'中国 / 尼泊尔', range:'喜马拉雅山脉', continent:'亚洲',
+  date:'1953-05-29', year:1953, who:[['埃德蒙·希拉里','新西兰'],['丹增·诺尔盖','尼泊尔']],
+  note:'既是亚洲最高峰，也是世界最高峰。',
+  shape:[[0,100],[30,35],[40,45],[52,0],[62,35],[100,100]]},
+ {id:'aconcagua', cn:'阿空加瓜峰', en:'Aconcagua', alt:6961, country:'阿根廷', range:'安第斯山脉', continent:'南美洲',
+  date:'1897-01-14', year:1897, who:[['马蒂亚斯·楚布里根','瑞士']],
+  note:'西半球与南半球最高峰，也是亚洲之外的世界最高峰。',
+  shape:[[0,100],[20,60],[40,25],[50,35],[60,22],[80,58],[100,100]]},
+ {id:'denali', cn:'迪纳利峰', en:'Denali (Mount McKinley)', alt:6190, country:'美国（阿拉斯加州）', range:'阿拉斯加山脉', continent:'北美洲',
+  date:'1913-06-07', year:1913, who:[['哈德森·斯塔克','美国'],['哈里·卡斯滕斯','美国']],
+  note:'原名麦金利山，2015 年恢复当地原住民名称"迪纳利"，意为"伟大者"。',
+  shape:[[0,100],[15,72],[30,42],[42,0],[55,32],[68,52],[85,78],[100,100]]},
+ {id:'kilimanjaro', cn:'乞力马扎罗山', en:'Kilimanjaro', alt:5895, country:'坦桑尼亚', range:'东非裂谷（独立休眠火山）', continent:'非洲',
+  date:'1889-10-06', year:1889, who:[['汉斯·迈尔','德国'],['路德维希·普特舍勒','奥地利'],['约哈尼斯·劳沃','坦桑尼亚']],
+  note:'"赤道上的雪山"，标志性的平顶火山锥，也是世界最高的独立山体。',
+  shape:[[0,100],[25,55],[38,0],[62,0],[75,55],[100,100]]},
+ {id:'elbrus', cn:'厄尔布鲁士峰', en:'Mount Elbrus', alt:5642, country:'俄罗斯', range:'高加索山脉', continent:'欧洲',
+  date:'1874-07-28', year:1874, who:[['克劳福德·格罗夫','英国'],['霍勒斯·沃克','英国'],['瑞士向导团队','瑞士']],
+  note:'双峰休眠火山，西峰为欧洲之巅（欧洲最高峰另有勃朗峰 4,808 米版本之争）。',
+  shape:[[0,100],[20,58],[38,0],[45,10],[52,0],[65,42],[100,100]]},
+ {id:'vinson', cn:'文森峰', en:'Vinson Massif', alt:4892, country:'南极洲（智利声索区）', range:'埃尔斯沃思山脉', continent:'南极洲',
+  date:'1966-12-18', year:1966, who:[['尼古拉斯·克林奇','美国'],['美国登山队','美国']],
+  note:'七大洲最高峰中最后被登顶的一座，1967 年前后才为人所知。',
+  shape:[[0,100],[20,55],[40,0],[60,15],[75,48],[100,100]]},
+ {id:'puncakjaya', cn:'查亚峰', en:'Puncak Jaya (Carstensz Pyramid)', alt:4884, country:'印度尼西亚', range:'苏迪曼山脉', continent:'大洋洲',
+  date:'1962-02-13', year:1962, who:[['海因里希·哈勒','奥地利'],['奥地利登山队','奥地利']],
+  note:'赤道上罕见的冰川岩峰，Seven Summits 中技术攀登难度最高的一座。',
+  shape:[[0,100],[30,50],[45,0],[52,32],[58,8],[70,48],[100,100]]},
+]};
+
+const MAX_ALT = 9000;              // 统一海拔标尺上限（两组数据共用，便于直观对比）
+const SNOWLINE = 30;               // 线稿/插画中的雪线（归一化坐标）
+
+/* 每座峰的宽高比系数（宽/高），贴近各峰实际山形：K2、马卡鲁陡峭窄削，卓奥友、乞力马扎罗宽缓 */
+const ASPECT = {
+  everest:1.28, k2:0.8, kangchenjunga:1.45, lhotse:0.95, makalu:0.85,
+  chooyu:1.5, dhaulagiri:1.45, manaslu:1.28, nangaparbat:1.35, annapurna:1.35,
+  aconcagua:1.5, denali:1.6, kilimanjaro:1.7, elbrus:1.5, vinson:1.45, puncakjaya:1.2
+};
+
+/* 扩充维度：登顶窗口期 / 死亡率 / 累计登顶人数（公开登山资料通行约数，随年份变化） */
+const STATS = {
+  everest:      {season:'4–5月（5月中下旬最佳），次为9–10月', death:'约 1%（近年）', summits:'6,600+ 人（截至2024年）'},
+  k2:           {season:'7–8月（夏季）', death:'约 13%', summits:'约 800 人'},
+  kangchenjunga:{season:'4–5月', death:'约 14%', summits:'约 300 人'},
+  lhotse:       {season:'4–5月', death:'约 3%', summits:'约 600 人'},
+  makalu:       {season:'4–5月', death:'约 9%', summits:'约 500 人'},
+  chooyu:       {season:'9–10月（秋季最热门）', death:'约 1.4%', summits:'3,800+ 人'},
+  dhaulagiri:   {season:'4–5月', death:'约 16%', summits:'约 500 人'},
+  manaslu:      {season:'9–10月（秋季为主），次为4–5月', death:'约 9%', summits:'2,000+ 人'},
+  nangaparbat:  {season:'6–8月（夏季）', death:'约 20%', summits:'约 350 人'},
+  annapurna:    {season:'3–5月', death:'约 20%（8000米级最高之一）', summits:'约 300 人'},
+  aconcagua:    {season:'11月–次年3月（12–2月最佳）', death:'低于 0.5%', summits:'每年数千人登顶'},
+  denali:       {season:'5–7月', death:'约 0.3%', summits:'30,000+ 人'},
+  kilimanjaro:  {season:'全年可登，1–3月与6–10月旱季最佳', death:'极低（约 0.03%）', summits:'每年约 35,000 人'},
+  elbrus:       {season:'5–9月（6–8月最佳）', death:'约 0.4%', summits:'每年数千人登顶'},
+  vinson:       {season:'11月–次年1月（南极夏季）', death:'极低（接近 0）', summits:'约 1,500 人'},
+  puncakjaya:   {season:'全年可登，4–11月旱季更佳', death:'低', summits:'约 500 人（受进入许可限制）'}
+};
+
+/* 组合图数值数据：n=登顶人数（annual=true 表示每年，否则为累计），d=死亡率(%)。
+   与 STATS 文本对应，为公开资料通行约数 */
+const CHART_DATA = {
+  everest:      {n:6600,  d:1},
+  k2:           {n:800,   d:13},
+  kangchenjunga:{n:300,   d:14},
+  lhotse:       {n:600,   d:3},
+  makalu:       {n:500,   d:9},
+  chooyu:       {n:3800,  d:1.4},
+  dhaulagiri:   {n:500,   d:16},
+  manaslu:      {n:2000,  d:9},
+  nangaparbat:  {n:350,   d:20},
+  annapurna:    {n:300,   d:20},
+  aconcagua:    {n:3500,  d:0.5,  annual:true},
+  denali:       {n:30000, d:0.3},
+  kilimanjaro:  {n:35000, d:0.03, annual:true},
+  elbrus:       {n:3000,  d:0.4,  annual:true},
+  vinson:       {n:1500,  d:0.05},
+  puncakjaya:   {n:500,   d:0.5}
+};
+
+/* 实拍照片（Wikimedia Commons，维基百科词条主图）；加载失败时自动回退为 SVG 场景插画 */
+const PHOTO = {
+  everest:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Mt._Everest_from_Gokyo_Ri_November_5%2C_2012.jpg/960px-Mt._Everest_from_Gokyo_Ri_November_5%2C_2012.jpg',
+  k2:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Chogori.jpg/960px-Chogori.jpg',
+  kangchenjunga:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Kangchenjunga_PangPema.JPG/960px-Kangchenjunga_PangPema.JPG',
+  lhotse:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Lhotse-fromChukhungRi.jpg/960px-Lhotse-fromChukhungRi.jpg',
+  makalu:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Makalu.jpg/960px-Makalu.jpg',
+  chooyu:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Chooyu.jpg/960px-Chooyu.jpg',
+  dhaulagiri:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Dhaulagiri_-_view_from_aircraft.jpg/960px-Dhaulagiri_-_view_from_aircraft.jpg',
+  manaslu:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Sunrise%2C_Manaslu.jpg/960px-Sunrise%2C_Manaslu.jpg',
+  nangaparbat:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Fairy_Meadows_and_the_view_of_Nanga_Parbat.jpg/960px-Fairy_Meadows_and_the_view_of_Nanga_Parbat.jpg',
+  annapurna:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/South_Face_of_Annapurna_I_%28Main%29.jpg/960px-South_Face_of_Annapurna_I_%28Main%29.jpg',
+  aconcagua:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Aconcagua2016.jpg/960px-Aconcagua2016.jpg',
+  denali:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Wonder_Lake_and_Denali.jpg/960px-Wonder_Lake_and_Denali.jpg',
+  kilimanjaro:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Kilimanjaro_from_Amboseli.jpg/960px-Kilimanjaro_from_Amboseli.jpg',
+  elbrus:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Mount_Elbrus_%28cropped%29.jpg/960px-Mount_Elbrus_%28cropped%29.jpg',
+  vinson:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Mount_Vinson_from_NW_at_Vinson_Plateau_by_Christian_Stangl_%28flickr%29.jpg/960px-Mount_Vinson_from_NW_at_Vinson_Plateau_by_Christian_Stangl_%28flickr%29.jpg',
+  puncakjaya:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Carstenzs_Piramida_Mountain.jpg/960px-Carstenzs_Piramida_Mountain.jpg'
+};
+
+/* ==================== 工具 ==================== */
+const $ = s => document.querySelector(s);
+const fmt = a => a >= 8000 ? a.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:2}) : a.toLocaleString('en-US');
+let current = 'ten';
+let animId = null;
+
+/* 海拔 -> 天空顶部颜色（越高越深邃，模拟"死亡地带"的深色天空） */
+function skyTop(alt){
+  const t = Math.min(1, Math.max(0, (alt-4800)/(8849-4800)));
+  const lerp=(a,b)=>Math.round(a+(b-a)*t);
+  return `rgb(${lerp(168,22)},${lerp(208,37)},${lerp(240,63)})`;
+}
+/* 海拔 -> 山体基色（越高越冷峻深蓝，越低越温润浅蓝） */
+function rockColor(alt){
+  const t = Math.min(1, Math.max(0, (alt-4800)/(8849-4800)));
+  const lerp=(a,b)=>Math.round(a+(b-a)*t);
+  return `rgb(${lerp(127,63)},${lerp(176,111)},${lerp(214,163)})`;
+}
+/* 归一化山形 -> 绝对路径 */
+function shapePath(shape, x0, baseY, w, h, prog=1){
+  return shape.map((p,i)=>{
+    const x = x0 + p[0]/100*w;
+    const y = baseY - (100-p[1])/100*h*prog;
+    return (i===0?'M':'L')+x.toFixed(1)+','+y.toFixed(1);
+  }).join(' ')+` L${(x0+w).toFixed(1)},${baseY} L${x0.toFixed(1)},${baseY} Z`;
+}
+/* 归一化山形 -> 雪顶多边形（截取 y <= snow 的顶部区域），返回与 shapePath 同坐标系的路径 */
+function snowPath(shape, x0, baseY, w, h, snow=SNOWLINE, prog=1){
+  const P = shape.map(p=>({x:x0+p[0]/100*w, y:baseY-(100-p[1])/100*h*prog, v:p[1]}));
+  const snowY = baseY-(100-snow)/100*h*prog;
+  const pts=[];
+  for(let i=0;i<P.length-1;i++){
+    const a=P[i], b=P[i+1];
+    if(a.v<=snow) pts.push([a.x,a.y]);
+    if((a.v-snow)*(b.v-snow)<0){
+      const t=(snow-a.v)/(b.v-a.v);
+      pts.push([a.x+(b.x-a.x)*t, snowY]);
+    }
+  }
+  if(pts.length<3) return '';
+  return 'M'+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' L')+' Z';
+}
+const easeOut = t => 1-Math.pow(1-t,3);
+
+/* ==================== 天际线 ==================== */
+function renderSkyline(){
+  const data = PEAKS[current];
+  const svg = $('#skyline');
+  const viewW=1400, padL=64, padR=40, topY=26, GAP=12, labelH=58;
+  const plotW = viewW-padL-padR;
+  svg.innerHTML='';
+
+  /* 真实比例一次纵览：高度 ∝ 海拔、宽度 = 高度 × 各峰宽高比系数，
+     由总宽度约束反推缩放系数，使全部山峰在视图内完整显示、无需横向滚动 */
+  const sumW = data.reduce((s,pk)=>s + pk.alt*(ASPECT[pk.id]||1.1), 0);
+  const scale = (plotW - GAP*(data.length-1)) / sumW;
+  const groups = [];
+  let cursor = padL, maxH = 0;
+  data.forEach(pk=>{
+    const h = pk.alt*scale;
+    const w = h*(ASPECT[pk.id]||1.1);
+    maxH = Math.max(maxH, h);
+    groups.push({pk, x0:cursor, w, h, cx:cursor+w/2});
+    cursor += w + GAP;
+  });
+  const baseY = topY + Math.ceil(maxH) + 8;
+  const H = baseY + labelH;
+  svg.setAttribute('viewBox', `0 0 ${viewW} ${H}`);
+  svg.removeAttribute('width');
+  svg.removeAttribute('height');
+
+  /* 网格线与海拔刻度：空间不足时只保留 2000m 主刻度线 */
+  const minorOK = 1000*scale >= 12;
+  let g='';
+  for(let a=0;a<=MAX_ALT;a+=1000){
+    if(!minorOK && a%2000!==0) continue;
+    const major = a%2000===0;
+    const y = baseY-a*scale;
+    g+=`<line x1="${padL}" y1="${y}" x2="${viewW-padR}" y2="${y}" stroke="${a===0?'#b9cfe0':(major?'#dce9f4':'#eef5fb')}" stroke-width="${a===0?1.5:1}"/>`;
+    if(major) g+=`<text class="grid-label" x="${padL-10}" y="${y+3.5}">${a===0?'0':(a/1000)+'k'}</text>`;
+  }
+  g+=`<text class="grid-label" x="${padL-10}" y="${topY-10}" style="font-size:11px">海拔/米</text>`;
+
+  const defs = ['<defs>'];
+  const paths = [];
+  groups.forEach((gr,i)=>{
+    const col = rockColor(gr.pk.alt);
+    defs.push(`<linearGradient id="mg-${gr.pk.id}-${i}" gradientUnits="userSpaceOnUse" x1="0" y1="${baseY-gr.h}" x2="0" y2="${baseY}">
+      <stop offset="0" stop-color="#f4fafe"/><stop offset=".28" stop-color="#dbeaf7"/>
+      <stop offset=".55" stop-color="${col}"/><stop offset="1" stop-color="#33587f"/></linearGradient>`);
+    paths.push(`<g class="peak-hit" data-i="${i}">
+      <path class="peak-body" d="" fill="url(#mg-${gr.pk.id}-${i})" stroke="#2c557f" stroke-opacity=".35" stroke-width="1.2"/>
+      <text class="peak-label" x="${gr.cx}" y="${baseY+24}">${gr.pk.cn}</text>
+      <text class="peak-alt" x="${gr.cx}" y="${baseY+42}">${fmt(gr.pk.alt)} m</text>
+    </g>`);
+  });
+  svg.innerHTML = defs.join('')+ '</defs>' + g + paths.join('');
+
+  /* 生长动画（交错延迟） */
+  const bodies = svg.querySelectorAll('.peak-body');
+  const start = performance.now();
+  if(animId) cancelAnimationFrame(animId);
+  function frame(now){
+    const el = now-start;
+    let done = true;
+    groups.forEach((gr,i)=>{
+      const t = Math.min(1, Math.max(0,(el - i*90)/700));
+      if(t<1) done=false;
+      const prog = easeOut(t);
+      bodies[i].setAttribute('d', shapePath(gr.pk.shape, gr.x0, baseY, gr.w, gr.h, Math.max(prog,0.001)));
+    });
+    if(!done) animId=requestAnimationFrame(frame);
+  }
+  animId=requestAnimationFrame(frame);
+
+  /* 交互 */
+  const tip = $('#tooltip');
+  svg.querySelectorAll('.peak-hit').forEach(el=>{
+    const pk = data[+el.dataset.i];
+    el.addEventListener('mousemove', e=>{
+      tip.innerHTML = `<b>${pk.cn}</b> ${pk.en}<br>海拔 ${fmt(pk.alt)} 米 · ${pk.country}<br><span style="opacity:.75">点击查看详情</span>`;
+      tip.style.left = e.clientX+'px'; tip.style.top = e.clientY+'px'; tip.style.opacity=1;
+    });
+    el.addEventListener('mouseleave', ()=> tip.style.opacity=0);
+    el.addEventListener('click', ()=> openDetail(pk));
+  });
+
+  $('#skyline-note').textContent = current==='ten'
+    ? '全球海拔前十的山峰全部位于亚洲的喜马拉雅与喀喇昆仑山脉，且高度均超过 8,000 米。全部山峰一次纵览、无需滚动；山体按真实比例绘制（高度 ∝ 海拔，宽度 ∝ 各峰实际山形），悬停查看概要、点击查看详情。'
+    : '七大洲最高峰（Seven Summits 主流版本），与十大高峰共用同一套真实比例——可以直观看到洲际之巅与世界之巅的差距。全部山峰一次纵览，悬停查看概要、点击查看详情。';
+}
+
+/* ==================== 柱状图 ==================== */
+function renderBars(){
+  const data = [...PEAKS[current]].sort((a,b)=>b.alt-a.alt);
+  const box = $('#bars');
+  box.innerHTML = data.map(pk=>`
+    <div class="bar-row" data-id="${pk.id}">
+      <div class="bar-name">${pk.cn}<span>${pk.en}</span></div>
+      <div class="bar-track"><div class="bar-fill" data-w="${(pk.alt/MAX_ALT*100).toFixed(1)}"
+        style="background:linear-gradient(90deg,${rockColor(pk.alt)},#33587f)"></div></div>
+      <div class="bar-val">${fmt(pk.alt)} m</div>
+    </div>`).join('');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    box.querySelectorAll('.bar-fill').forEach(f=> f.style.width=f.dataset.w+'%');
+  }));
+  box.querySelectorAll('.bar-row').forEach(r=>{
+    r.addEventListener('click', ()=>{
+      const pk = PEAKS[current].find(p=>p.id===r.dataset.id);
+      if(pk) openDetail(pk);
+    });
+  });
+}
+
+/* ==================== 组合图：登顶人数(柱) × 死亡率(线) ==================== */
+function renderCombo(){
+  const data = [...PEAKS[current]].sort((a,b)=>b.alt-a.alt).filter(pk=>CHART_DATA[pk.id]);
+  const svg = $('#combo');
+  const W=1400, H=480, padL=70, padR=70, top=36, bottom=88;
+  const plotW = W-padL-padR, plotH = H-top-bottom, baseY = top+plotH;
+
+  /* 左轴：登顶人数，对数刻度 10^2 ~ 10^5 */
+  const LG_MIN=2, LG_MAX=5;
+  const yN = n => top + plotH*(1-(Math.log10(Math.max(n,100))-LG_MIN)/(LG_MAX-LG_MIN));
+  /* 右轴：死亡率，线性，上限取数据最大值向上取整到 5 的倍数（最小 2%） */
+  const maxD = Math.max(2, Math.ceil(Math.max(...data.map(pk=>CHART_DATA[pk.id].d))/5)*5);
+  const yD = d => top + plotH*(1-d/maxD);
+
+  const fmtN = n => n>=10000 ? (n/10000).toLocaleString('zh-CN',{maximumFractionDigits:1})+'万'
+                   : n>=1000 ? (n/1000).toLocaleString('en-US',{maximumFractionDigits:1})+'k' : String(n);
+  const fmtD = d => d<0.1 ? '<0.1%' : d+'%';
+
+  let s = '<defs>';
+  data.forEach((pk,i)=>{
+    s += `<linearGradient id="cb-${pk.id}-${i}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="${rockColor(pk.alt)}"/><stop offset="1" stop-color="#33587f"/></linearGradient>`;
+  });
+  s += '</defs>';
+
+  /* 网格与左右轴刻度 */
+  for(let e=LG_MIN;e<=LG_MAX;e++){
+    const y = yN(Math.pow(10,e));
+    s += `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="${e===LG_MIN?'#b9cfe0':'#e6f0f8'}" stroke-width="${e===LG_MIN?1.5:1}"/>
+          <text class="grid-label" x="${padL-10}" y="${y+3.5}">${e>=4?(e===4?'1万':'10万'):(e===3?'1k':'100')}</text>`;
+  }
+  const dStep = maxD<=2 ? 0.5 : 5;
+  for(let d=0;d<=maxD+1e-9;d+=dStep){
+    const y = yD(d);
+    s += `<text class="grid-label" style="text-anchor:start;fill:#d08a6a" x="${W-padR+10}" y="${y+3.5}">${d}%</text>`;
+  }
+  s += `<text class="grid-label" x="${padL-10}" y="${top-12}" style="font-size:11px">登顶人数</text>
+        <text class="grid-label" style="text-anchor:start;fill:#d08a6a;font-size:11px" x="${W-padR+10}" y="${top-12}">死亡率</text>`;
+
+  /* 柱子 + X 轴标签 + 数值 */
+  const slot = plotW/data.length, bw = Math.min(54, slot*0.5);
+  data.forEach((pk,i)=>{
+    const cd = CHART_DATA[pk.id];
+    const cx = padL + slot*(i+0.5);
+    const y = yN(cd.n), h = baseY-y;
+    s += `<g>
+      <rect class="combo-bar" data-x="${(cx-bw/2).toFixed(1)}" data-y="${y.toFixed(1)}" data-h="${h.toFixed(1)}"
+        x="${(cx-bw/2).toFixed(1)}" y="${baseY}" width="${bw}" height="0" rx="5" fill="url(#cb-${pk.id}-${i})"/>
+      <text x="${cx}" y="${y-8}" text-anchor="middle" style="font-size:11.5px;font-weight:600;fill:#5a7186">${fmtN(cd.n)}${cd.annual?'*':''}</text>
+      <text x="${cx}" y="${baseY+22}" text-anchor="end" transform="rotate(-32 ${cx} ${baseY+22})"
+        style="font-size:12px;fill:#22374e;font-weight:600">${pk.cn}</text>
+      <rect class="combo-hit" data-i="${i}" x="${(cx-slot/2).toFixed(1)}" y="${top}" width="${slot.toFixed(1)}" height="${plotH}"/>
+    </g>`;
+  });
+
+  /* 死亡率折线 */
+  const pts = data.map((pk,i)=>[padL+slot*(i+0.5), yD(CHART_DATA[pk.id].d)]);
+  const line = 'M'+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' L');
+  s += `<path id="combo-line" d="${line}" fill="none" stroke="#c0552b" stroke-width="2.4"
+         stroke-linejoin="round" stroke-linecap="round"/>`;
+  data.forEach((pk,i)=>{
+    const cd = CHART_DATA[pk.id];
+    const [cx,cy] = pts[i];
+    const labY = cd.d>=maxD*0.82 ? cy+20 : cy-12; /* 顶部的点标签放下方，避免出界 */
+    s += `<circle class="combo-dot" data-i="${i}" cx="${cx}" cy="${cy}" r="4.6" fill="#c0552b" stroke="#fff" stroke-width="2"/>
+          <text x="${cx}" y="${labY}" text-anchor="middle" style="font-size:11px;font-weight:700;fill:#a8431d">${fmtD(cd.d)}</text>`;
+  });
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML = s;
+
+  /* 柱子生长动画 */
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    svg.querySelectorAll('.combo-bar').forEach(r=>{
+      r.setAttribute('y', r.dataset.y);
+      r.setAttribute('height', r.dataset.h);
+    });
+  }));
+  /* 折线描摹动画 */
+  const lp = svg.querySelector('#combo-line');
+  const len = lp.getTotalLength();
+  lp.style.strokeDasharray = len;
+  lp.style.strokeDashoffset = len;
+  lp.style.transition = 'stroke-dashoffset 1.2s ease .3s';
+  requestAnimationFrame(()=> lp.style.strokeDashoffset = 0);
+  setTimeout(()=>{ lp.style.transition='none'; lp.style.strokeDasharray='none'; }, 1800);
+
+  /* 交互：悬停提示 + 点击打开详情 */
+  const tip = $('#tooltip');
+  const showTip = (e,i)=>{
+    const pk = data[i], cd = CHART_DATA[pk.id];
+    tip.innerHTML = `<b>${pk.cn}</b><br>登顶人数：${fmtN(cd.n)}${cd.annual?'（每年）':'（累计）'}<br>死亡率：${fmtD(cd.d)}<br><span style="opacity:.75">点击查看详情</span>`;
+    tip.style.left = e.clientX+'px'; tip.style.top = e.clientY+'px'; tip.style.opacity=1;
+  };
+  svg.querySelectorAll('.combo-hit').forEach(el=>{
+    const i = +el.dataset.i;
+    el.addEventListener('mousemove', e=> showTip(e,i));
+    el.addEventListener('mouseleave', ()=> tip.style.opacity=0);
+    el.addEventListener('click', ()=> openDetail(data[i]));
+  });
+  svg.querySelectorAll('.combo-dot').forEach(el=>{
+    const i = +el.dataset.i;
+    el.addEventListener('mousemove', e=> showTip(e,i));
+    el.addEventListener('mouseleave', ()=> tip.style.opacity=0);
+  });
+}
+
+/* ==================== 时间轴 ==================== */
+function renderTimeline(){
+  const data = [...PEAKS[current]].sort((a,b)=>a.year-b.year);
+  const svg = $('#timeline');
+  const W=1400, padL=70, padR=50;
+  const minY = Math.min(...data.map(p=>p.year))-3, maxY = Math.max(...data.map(p=>p.year))+3;
+  const X = y => padL + (y-minY)/(maxY-minY)*(W-padL-padR);
+
+  /* 估算文本宽度：CJK 字符 ≈ 字号，ASCII ≈ 0.56×字号 */
+  const estW = (s,fs)=>{ let w=0; for(const ch of s) w += (ch.charCodeAt(0)>255?1:0.56)*fs; return w; };
+  const labelW = pk => Math.max(
+    estW(String(pk.year),13),
+    estW(pk.cn,11.5),
+    estW(pk.who[0][0]+'（'+pk.who[0][1]+'）',10.5)
+  ) + 20; /* 两侧留白 */
+
+  /* 碰撞检测分层：级别 0/1/2/3… 依次为上1、下1、上2、下2…，
+     每个级别记录已占用的 x 区间，标签放到不产生重叠的最靠近轴线的级别 */
+  const ROW_H = 56, GAP = 8;
+  const levels = [];
+  const placed = data.map(pk=>{
+    const x = X(pk.year), hw = labelW(pk)/2;
+    for(let li=0;;li++){
+      if(!levels[li]) levels[li] = {up: li%2===0, slots: []};
+      const lv = levels[li];
+      if(lv.slots.every(([a,b]) => x+hw < a-GAP || x-hw > b+GAP)){
+        lv.slots.push([x-hw, x+hw]);
+        return {pk, x, up: lv.up, row: Math.floor(li/2)};
+      }
+    }
+  });
+
+  /* 根据实际用到的行数动态计算画布高度 */
+  const upRows   = Math.max(0, ...placed.filter(p=> p.up).map(p=>p.row));
+  const downRows = Math.max(0, ...placed.filter(p=>!p.up).map(p=>p.row));
+  const axisY = 40 + (upRows+1)*ROW_H;
+  const H = axisY + (downRows+1)*ROW_H + 40;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+  let s = `<line x1="${padL-20}" y1="${axisY}" x2="${W-padR+16}" y2="${axisY}" stroke="#b9cfe0" stroke-width="1.5"/>
+           <path d="M${W-padR+16},${axisY} l-9,-4 v8 Z" fill="#b9cfe0"/>`;
+  placed.forEach(({pk,x,up,row})=>{
+    const ly = up ? axisY-40-row*ROW_H : axisY+34+row*ROW_H;
+    const ty = up ? axisY-78-row*ROW_H : axisY+62+row*ROW_H;
+    s += `<line x1="${x}" y1="${axisY}" x2="${x}" y2="${ly}" stroke="#cfe4f2" stroke-width="1.2"/>
+      <circle cx="${x}" cy="${axisY}" r="6" fill="${rockColor(pk.alt)}" stroke="#fff" stroke-width="2.5"/>
+      <text x="${x}" y="${ty}" text-anchor="middle" style="font-size:13px;font-weight:700;fill:#22374e">${pk.year}</text>
+      <text x="${x}" y="${ty+17}" text-anchor="middle" style="font-size:11.5px;fill:#5a7186">${pk.cn}</text>
+      <text x="${x}" y="${ty+32}" text-anchor="middle" style="font-size:10.5px;fill:#8fa5b8">${pk.who[0][0]}（${pk.who[0][1]}）</text>`;
+  });
+  svg.innerHTML = s;
+}
+
+/* ==================== 详情面板 ==================== */
+function openDetail(pk){
+  const body = $('#cardBody');
+  const sceneW=420, sceneH=300, baseY=252, mh=195, mw=340, mx0=(sceneW-mw)/2;
+  const sky = skyTop(pk.alt);
+  const col = rockColor(pk.alt);
+  const stars = pk.alt>=8000
+    ? Array.from({length:14},()=>`<circle cx="${(Math.random()*sceneW).toFixed(0)}" cy="${(Math.random()*110).toFixed(0)}" r="${(Math.random()*1.1+0.5).toFixed(1)}" fill="#fff" opacity="${(Math.random()*.5+.4).toFixed(2)}"/>`).join('')
+    : '';
+  const sunY = pk.alt>=8000 ? 200 : 74;
+  const sunFill = pk.alt>=8000 ? '#dfe9f5' : '#fff7e0';
+
+  const scene = `
+  <svg viewBox="0 0 ${sceneW} ${sceneH}">
+    <defs>
+      <linearGradient id="dsky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="${sky}"/><stop offset="1" stop-color="#dceef9"/>
+      </linearGradient>
+      <linearGradient id="drock" x1="0" y1="${baseY-mh}" x2="0" y2="${baseY}" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#f2f9ff"/><stop offset=".3" stop-color="#d3e6f5"/>
+        <stop offset=".6" stop-color="${col}"/><stop offset="1" stop-color="#2c557f"/>
+      </linearGradient>
+    </defs>
+    <rect width="${sceneW}" height="${sceneH}" fill="url(#dsky)"/>
+    ${stars}
+    <circle cx="330" cy="${sunY}" r="26" fill="${sunFill}" opacity=".95"/>
+    <circle cx="330" cy="${sunY}" r="38" fill="${sunFill}" opacity=".25"/>
+    <path d="${shapePath(pk.shape, mx0, baseY, mw, mh)}" fill="url(#drock)" stroke="#2c557f" stroke-opacity=".4" stroke-width="1.4"/>
+    <path d="${snowPath(pk.shape, mx0, baseY, mw, mh)}" fill="#fbfdff" opacity=".96"/>
+    <rect x="0" y="${baseY}" width="${sceneW}" height="${sceneH-baseY}" fill="#eaf3fa"/>
+    <line x1="0" y1="${baseY}" x2="${sceneW}" y2="${baseY}" stroke="#c4d8e8" stroke-width="1.2"/>
+    <text x="${sceneW/2}" y="${sceneH-12}" text-anchor="middle" style="font-size:11px;letter-spacing:3px;fill:#7d96ac">海拔 ${fmt(pk.alt)} 米</text>
+  </svg>`;
+
+  /* 线稿（描摹动画）：轮廓 + 两条山脊线 */
+  const skW=420, skH=190, skBase=160, skHgt=130, skMw=300, skMx=(skW-skMw)/2;
+  const outline = shapePath(pk.shape, skMx, skBase, skMw, skHgt);
+  const minY = Math.min(...pk.shape.map(p=>p[1]));
+  const apexPts = pk.shape.filter(p=>p[1]===minY);
+  const apexNorm = apexPts.reduce((s,p)=>s+p[0],0)/apexPts.length;
+  const apexX = skMx + apexNorm/100*skMw;
+  const ridge1 = `M${apexX},${skBase-skHgt} L${skMx+skMw*0.3},${skBase-skHgt*0.45}`;
+  const ridge2 = `M${apexX},${skBase-skHgt} L${skMx+skMw*0.68},${skBase-skHgt*0.5}`;
+  const sketch = `
+  <svg viewBox="0 0 ${skW} ${skH}">
+    <path id="sk-outline" d="${outline}" fill="none" stroke="#22374e" stroke-width="1.8" stroke-linejoin="round"/>
+    <path id="sk-r1" d="${ridge1}" fill="none" stroke="#5b8fc0" stroke-width="1.1" stroke-dasharray="3 3"/>
+    <path id="sk-r2" d="${ridge2}" fill="none" stroke="#5b8fc0" stroke-width="1.1" stroke-dasharray="3 3"/>
+    <line x1="${skMx-16}" y1="${skBase}" x2="${skMx+skMw+16}" y2="${skBase}" stroke="#b9cfe0" stroke-width="1.2"/>
+  </svg>`;
+
+  const whoRows = pk.who.map(w=>`<div>${w[0]}<span style="color:var(--ice-600)">（${w[1]}）</span></div>`).join('');
+  const st = STATS[pk.id];
+  /* 死亡率 ≥10% 视为高危，用警示色标出（取字符串中第一个数字） */
+  const deathMatch = st ? st.death.match(/[\d.]+/) : null;
+  const danger = deathMatch ? parseFloat(deathMatch[0]) >= 10 : false;
+  const chips = st ? `
+        <div class="stat-chips">
+          <div class="chip"><label>登顶窗口期</label><b>${st.season}</b></div>
+          <div class="chip${danger?' chip-danger':''}"><label>死亡率</label><b>${st.death}</b></div>
+          <div class="chip"><label>累计登顶</label><b>${st.summits}</b></div>
+        </div>` : '';
+
+  /* 照片加载失败（离线/图源不可用）时回退为 SVG 场景插画 */
+  window.__sceneFallback = `<div class="scene-box">${scene}</div><div class="photo-cap">场 景 插 画 · SVG 绘 制</div>`;
+  const photoUrl = PHOTO[pk.id];
+
+  body.innerHTML = `
+    <div class="card-title">
+      <h3>${pk.cn}</h3>
+      <div class="en">${pk.en}</div>
+    </div>
+    <div class="card-grid">
+      <div>
+        <div class="photo-box">
+          ${photoUrl
+            ? `<img src="${photoUrl}" alt="${pk.cn}实拍照片" loading="lazy"
+                 onerror="this.closest('.photo-box').innerHTML=window.__sceneFallback">`
+            : window.__sceneFallback}
+          <div class="photo-cap">${photoUrl?'实 拍 照 片 · WIKIMEDIA COMMONS':''}</div>
+        </div>
+        <div class="sketch-box">${sketch}<div class="sketch-cap">山 形 线 稿 · 示 意 描 摹</div></div>
+      </div>
+      <div>
+        <div class="alt-big">${fmt(pk.alt)}<small>米</small></div>
+        ${chips}
+        <dl class="info-list">
+          <div class="info-row"><dt>所在国家</dt><dd>${pk.country}</dd></div>
+          <div class="info-row"><dt>所属山脉</dt><dd>${pk.range}</dd></div>
+          ${pk.continent?`<div class="info-row"><dt>所在大洲</dt><dd>${pk.continent}最高峰</dd></div>`:''}
+          <div class="info-row"><dt>首次登顶</dt><dd>${pk.date}（${pk.year} 年）</dd></div>
+          <div class="info-row"><dt>登顶者</dt><dd>${whoRows}</dd></div>
+        </dl>
+        <span class="note-tag">${pk.note}</span>
+      </div>
+    </div>`;
+
+  $('#overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+
+  /* 描摹动画 */
+  requestAnimationFrame(()=>{
+    ['sk-outline','sk-r1','sk-r2'].forEach((id,idx)=>{
+      const p = document.getElementById(id);
+      if(!p) return;
+      const len = p.getTotalLength();
+      const savedDash = p.getAttribute('stroke-dasharray');
+      p.style.strokeDasharray = len;
+      p.style.strokeDashoffset = len;
+      p.style.transition = `stroke-dashoffset ${idx===0?1.4:0.7}s ease ${idx*0.5}s`;
+      requestAnimationFrame(()=> p.style.strokeDashoffset = 0);
+      setTimeout(()=>{ p.style.transition='none'; p.style.strokeDasharray = savedDash || 'none'; }, 1600+idx*500);
+    });
+  });
+}
+function closeDetail(){
+  $('#overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+$('#cardClose').addEventListener('click', closeDetail);
+$('#overlay').addEventListener('click', e=>{ if(e.target.id==='overlay') closeDetail(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeDetail(); });
+
+/* ==================== Tab 切换 ==================== */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    if(btn.dataset.set===current) return;
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b===btn));
+    current = btn.dataset.set;
+    renderAll();
+  });
+});
+
+/* ==================== Hero 视差 ==================== */
+window.addEventListener('scroll', ()=>{
+  const y = window.scrollY;
+  if(y>400) return;
+  $('#plx-back').style.transform  = `translateY(${y*0.12}px)`;
+  $('#plx-mid').style.transform   = `translateY(${y*0.24}px)`;
+  $('#plx-front').style.transform = `translateY(${y*0.38}px)`;
+},{passive:true});
+
+/* ==================== 初始化 ==================== */
+function renderAll(){ renderSkyline(); renderBars(); renderCombo(); renderTimeline(); }
+renderAll();
+</script>
+</body>
+</html>

@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>世界之巅 · 星夜远征 — 十大高峰与七大洲最高峰可视化</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg0:#070b1c; --bg1:#0b1129; --bg2:#111a38;
+    --panel:rgba(148,163,255,.055); --panel-edge:rgba(148,163,255,.15);
+    --line:rgba(148,163,255,.12);
+    --ink:#e8edfb; --ink-dim:#9aa6cc; --ink-faint:#5c6a94;
+    --amber:#ffb454; --amber-soft:#ffd9a0; --amber-deep:#b96f1d;
+    --cyan:#4cc9f0; --violet:#a78bfa; --red:#f87171;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --serif:"Noto Serif SC","Songti SC","SimSun",serif;
+    --sans:"Noto Sans SC","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--sans); background:var(--bg0); color:var(--ink);
+    font-size:14px; line-height:1.7; overflow-x:hidden;
+  }
+  ::selection{background:rgba(255,180,84,.35); color:#fff}
+  .wrap{max-width:1200px;margin:0 auto;padding:0 28px}
+
+  /* ================= HERO ================= */
+  .hero{position:relative;min-height:88vh;overflow:hidden;
+    background:linear-gradient(180deg,#05081a 0%,#0a1128 55%,#0d1531 100%)}
+  .hero svg.hero-sky{position:absolute;inset:0;width:100%;height:100%}
+  .hero-layer{will-change:transform}
+  .star{animation:twinkle var(--tw,2.6s) ease-in-out infinite alternate}
+  @keyframes twinkle{from{opacity:.15}to{opacity:1}}
+  .aurora{animation:drift 26s ease-in-out infinite alternate}
+  @keyframes drift{from{transform:translateX(-60px)}to{transform:translateX(60px)}}
+  .hero-content{position:relative;z-index:5;height:88vh;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;padding:0 24px}
+  .hero-kicker{font-family:var(--mono);font-size:12px;letter-spacing:6px;color:var(--amber);
+    margin-bottom:22px;text-transform:uppercase}
+  .hero h1{font-family:var(--serif);font-weight:900;font-size:clamp(46px,9vw,92px);
+    letter-spacing:.18em;text-indent:.18em;color:#f4f7ff;line-height:1.1;
+    text-shadow:0 0 60px rgba(167,139,250,.35),0 2px 0 rgba(0,0,0,.4)}
+  .hero h1 em{font-style:normal;color:var(--amber);
+    text-shadow:0 0 40px rgba(255,180,84,.55)}
+  .hero-sub{margin-top:20px;font-size:14.5px;color:var(--ink-dim);letter-spacing:3px;font-weight:300}
+  .hero-stats{display:flex;gap:34px;margin-top:34px;flex-wrap:wrap;justify-content:center}
+  .hero-stats .hs{font-family:var(--mono);font-size:12px;color:var(--ink-faint);letter-spacing:1px}
+  .hero-stats .hs b{display:block;font-size:16px;color:var(--amber-soft);font-weight:500;margin-bottom:2px}
+  .scroll-hint{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:5;
+    color:var(--ink-faint);font-size:11px;letter-spacing:4px;font-family:var(--mono);animation:bob 2.2s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+  /* ================= NAV ================= */
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(7,11,28,.72);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--line);transition:background .3s}
+  .topnav.solid{background:rgba(7,11,28,.94)}
+  .topnav .wrap{display:flex;align-items:center;gap:22px;height:58px}
+  .brand{font-family:var(--serif);font-weight:700;font-size:16px;letter-spacing:4px;cursor:pointer;white-space:nowrap}
+  .brand span{font-family:var(--mono);font-size:9px;color:var(--ink-faint);letter-spacing:3px;margin-left:8px}
+  .seg{display:flex;background:rgba(148,163,255,.07);border:1px solid var(--line);
+    border-radius:999px;padding:3px}
+  .seg button{border:0;background:transparent;color:var(--ink-dim);font-family:inherit;
+    font-size:12.5px;letter-spacing:2px;padding:6px 18px;border-radius:999px;cursor:pointer;transition:all .25s}
+  .seg button.active{background:linear-gradient(120deg,rgba(255,180,84,.9),rgba(232,121,74,.9));
+    color:#1a1205;font-weight:600;box-shadow:0 4px 16px rgba(255,180,84,.3)}
+  .anchors{display:flex;gap:4px;margin-left:auto}
+  .anchors a{color:var(--ink-dim);text-decoration:none;font-size:12px;letter-spacing:2px;
+    padding:6px 12px;border-radius:8px;transition:all .2s;border-bottom:2px solid transparent}
+  .anchors a:hover{color:#fff}
+  .anchors a.on{color:var(--amber);border-bottom-color:var(--amber)}
+  @media (max-width:860px){.anchors{display:none}}
+
+  /* ================= SECTIONS ================= */
+  section{padding:78px 0 8px;scroll-margin-top:74px}
+  .sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;
+    margin-bottom:14px;flex-wrap:wrap}
+  .sec-head .kicker{font-family:var(--mono);font-size:11px;letter-spacing:4px;color:var(--amber);
+    display:block;margin-bottom:6px}
+  .sec-head h2{font-family:var(--serif);font-weight:700;font-size:clamp(24px,3.4vw,32px);letter-spacing:4px}
+  .sec-head h2 small{font-family:var(--mono);font-size:11px;color:var(--ink-faint);
+    letter-spacing:2px;font-weight:400;margin-left:12px}
+  .sec-note{font-size:12.5px;color:var(--ink-dim);max-width:640px;line-height:1.9}
+  .sec-note b{color:var(--amber-soft);font-weight:500}
+  .panel{background:linear-gradient(180deg,rgba(148,163,255,.06),rgba(148,163,255,.015));
+    border:1px solid var(--panel-edge);border-radius:20px;padding:22px 18px 14px;
+    box-shadow:0 24px 70px rgba(2,6,23,.55), inset 0 1px 0 rgba(255,255,255,.04);
+    overflow:hidden}
+  .panel svg{display:block;width:100%;height:auto}
+
+  /* charts shared */
+  .axis-lab{font-family:var(--mono);font-size:10.5px;fill:var(--ink-faint)}
+  .death-tag{font-family:var(--mono);font-size:10px;letter-spacing:2px;fill:var(--red);opacity:.9}
+  [data-id]{transition:opacity .22s ease, filter .22s ease}
+  [data-id].dim{opacity:.16;filter:saturate(.35)}
+  .chart-tip-hit{cursor:pointer}
+
+  /* ================= LEGEND (risk) ================= */
+  .legend{display:flex;gap:34px;flex-wrap:wrap;align-items:center;
+    padding:12px 8px 4px;font-size:11.5px;color:var(--ink-dim)}
+  .legend .lg{display:inline-flex;align-items:center;gap:9px}
+  .legend .lg-col i{display:inline-block;width:90px;height:8px;border-radius:4px;
+    background:linear-gradient(90deg,#38bdf8,#fbbf24,#f87171)}
+  .legend .bub{display:inline-block;border-radius:50%;background:rgba(148,163,255,.35);
+    border:1px solid rgba(148,163,255,.5);vertical-align:middle;margin-right:2px}
+
+  /* ================= TOOLTIP ================= */
+  .tooltip{position:fixed;z-index:90;pointer-events:none;background:rgba(10,16,40,.96);
+    border:1px solid rgba(148,163,255,.3);border-radius:12px;padding:10px 14px;
+    font-size:12px;line-height:1.75;color:var(--ink-dim);opacity:0;
+    transform:translate(-50%,-118%);transition:opacity .16s ease;
+    box-shadow:0 14px 44px rgba(0,0,0,.6);white-space:nowrap;backdrop-filter:blur(6px)}
+  .tooltip b{color:#fff;font-size:13px}
+  .tooltip .tip-alt{font-family:var(--mono);color:var(--amber-soft)}
+  .tooltip .tip-more{display:block;font-size:10.5px;color:var(--ink-faint);letter-spacing:1px;margin-top:2px}
+
+  /* ================= MODAL ================= */
+  .modal{position:fixed;inset:0;z-index:100;background:rgba(4,8,20,.74);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    display:flex;align-items:center;justify-content:center;padding:26px;
+    opacity:0;pointer-events:none;transition:opacity .3s ease}
+  .modal.open{opacity:1;pointer-events:auto}
+  .modal-card{background:linear-gradient(180deg,#0d1430,#0a0f24);border:1px solid var(--panel-edge);
+    border-radius:24px;width:min(1080px,100%);max-height:90vh;overflow-y:auto;position:relative;
+    padding:36px 38px 34px;transform:translateY(24px) scale(.98);transition:transform .35s cubic-bezier(.2,.9,.3,1.05);
+    box-shadow:0 40px 120px rgba(0,0,0,.7)}
+  .modal.open .modal-card{transform:translateY(0) scale(1)}
+  .modal-close{position:absolute;top:16px;right:18px;width:36px;height:36px;border-radius:50%;
+    border:1px solid var(--line);background:rgba(148,163,255,.08);color:var(--ink-dim);
+    font-size:15px;cursor:pointer;transition:all .2s;line-height:1;z-index:5}
+  .modal-close:hover{background:var(--amber);color:#1a1205;border-color:var(--amber)}
+  .modal-grid{display:grid;grid-template-columns:1.04fr .96fr;gap:32px;margin-top:4px}
+  @media (max-width:820px){.modal-grid{grid-template-columns:1fr}}
+  .mtitle h3{font-family:var(--serif);font-size:30px;font-weight:900;letter-spacing:3px}
+  .mtitle .en{font-size:14px;color:var(--ink-dim);letter-spacing:1px;margin-top:3px;font-style:italic}
+  .malt{font-family:var(--mono);font-size:40px;font-weight:700;color:var(--amber);
+    margin:14px 0 2px;font-variant-numeric:tabular-nums;letter-spacing:1px}
+  .malt small{font-size:14px;font-weight:400;color:var(--ink-dim);margin-left:6px;letter-spacing:2px}
+  .mchips{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+  @media (max-width:480px){.mchips{grid-template-columns:1fr}}
+  .chip{background:rgba(148,163,255,.08);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0}
+  .chip label{display:block;font-family:var(--mono);font-size:10px;color:var(--cyan);
+    letter-spacing:2px;margin-bottom:5px;opacity:.85}
+  .chip b{display:block;font-size:12px;font-weight:500;line-height:1.55;color:var(--ink)}
+  .chip.danger{background:rgba(244,63,94,.1);border-color:rgba(244,63,94,.35)}
+  .chip.danger label{color:var(--red)}
+  .chip.danger b{color:#ffb4b4}
+  .mlist{margin-top:16px;border-top:1px solid var(--line)}
+  .mrow{display:grid;grid-template-columns:84px 1fr;gap:12px;padding:9px 2px;
+    border-bottom:1px solid rgba(148,163,255,.09);font-size:12.5px;line-height:1.75}
+  .mrow dt{color:var(--ink-faint);letter-spacing:2px;font-size:11.5px;padding-top:1px}
+  .mrow dd{color:var(--ink)}
+  .mrow dd .who{color:var(--amber-soft)}
+  .mnote{margin-top:16px;background:rgba(255,180,84,.07);border:1px solid rgba(255,180,84,.22);
+    color:var(--amber-soft);font-size:12px;padding:10px 14px;border-radius:12px;line-height:1.8}
+  .scene-box{border-radius:16px;overflow:hidden;border:1px solid var(--line)}
+  .scene-box svg{display:block;width:100%;height:auto}
+  .photo-box{position:relative}
+  .photo-box img{display:block;width:100%;border-radius:16px;border:1px solid var(--line);
+    aspect-ratio:4/3;object-fit:cover;background:var(--bg2)}
+  .cap{text-align:center;font-family:var(--mono);font-size:10px;color:var(--ink-faint);
+    letter-spacing:3px;padding:8px 0 0}
+  .profile-box{margin-top:14px;border:1px dashed rgba(148,163,255,.28);border-radius:16px;
+    padding:12px 12px 6px;background:rgba(7,11,28,.5)}
+  .profile-box svg{display:block;width:100%;height:auto}
+
+  /* ================= FOOTER ================= */
+  footer{margin-top:90px;border-top:1px solid var(--line);padding:36px 0 48px}
+  footer p{font-size:11.5px;color:var(--ink-faint);line-height:2.1;letter-spacing:.5px}
+  footer .f-badge{font-family:var(--mono);font-size:10px;color:var(--amber);letter-spacing:4px;margin-bottom:10px}
+
+  /* reveal */
+  .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease}
+  .reveal.in{opacity:1;transform:none}
+</style>
+</head>
+<body>
+
+<!-- ================= HERO ================= -->
+<header class="hero" id="hero">
+  <svg class="hero-sky" viewBox="0 0 1440 720" preserveAspectRatio="xMidYMax slice" role="img" aria-label="星夜下的山峰剪影">
+    <defs>
+      <filter id="hblur" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="56"/></filter>
+      <radialGradient id="moonGlow" cx=".5" cy=".5" r=".5">
+        <stop offset="0" stop-color="#fef3c7" stop-opacity=".5"/>
+        <stop offset="1" stop-color="#fef3c7" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="moonBody" cx=".38" cy=".34" r=".75">
+        <stop offset="0" stop-color="#fffdf4"/><stop offset=".7" stop-color="#fde68a"/><stop offset="1" stop-color="#e7c25f"/>
+      </radialGradient>
+      <linearGradient id="aur1" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#5eead4" stop-opacity=".5"/><stop offset="1" stop-color="#5eead4" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="aur2" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#a78bfa" stop-opacity=".4"/><stop offset="1" stop-color="#a78bfa" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+
+    <!-- stars -->
+    <g id="heroStars"></g>
+
+    <!-- moon -->
+    <g class="hero-layer" data-rate=".14">
+      <circle cx="1128" cy="128" r="150" fill="url(#moonGlow)"/>
+      <circle cx="1128" cy="128" r="64" fill="url(#moonBody)"/>
+    </g>
+
+    <!-- aurora -->
+    <g filter="url(#hblur)">
+      <path class="aurora" d="M-160,540 C140,400 360,500 640,428 C920,356 1180,470 1600,360 L1600,760 L-160,760 Z" fill="url(#aur1)" opacity=".30"/>
+      <path class="aurora" style="animation-delay:-9s" d="M-200,600 C120,470 420,560 760,470 C1060,392 1300,520 1620,430 L1620,760 L-200,760 Z" fill="url(#aur2)" opacity=".26"/>
+    </g>
+
+    <!-- ridges -->
+    <g class="hero-layer" data-rate=".30">
+      <path d="M0,720 L0,470 L120,428 L240,452 L380,400 L520,446 L660,392 L800,442 L940,398 L1080,448 L1220,406 L1350,450 L1440,428 L1440,720 Z" fill="#222b58" opacity=".85"/>
+      <path d="M560,436 L660,392 L762,438 L742,430 L720,424 L700,432 Z" fill="rgba(226,232,255,.30)"/>
+    </g>
+    <g class="hero-layer" data-rate=".52">
+      <path d="M0,720 L0,560 L140,522 L260,548 L420,496 L580,540 L740,488 L900,536 L1060,500 L1210,544 L1440,510 L1440,720 Z" fill="#121a3c"/>
+      <path d="M690,522 L740,488 L792,524 L768,516 L740,508 L712,516 Z" fill="rgba(226,232,255,.28)"/>
+    </g>
+  </svg>
+
+  <div class="hero-content">
+    <div class="hero-kicker">Night Expedition · Roof of the World</div>
+    <h1>世界<em>之巅</em></h1>
+    <p class="hero-sub">世界十大高峰 × 七大洲最高峰 —— 海拔 · 风险 · 首登 星夜档案</p>
+    <div class="hero-stats">
+      <div class="hs"><b>8,848.86m</b>最高点 · 珠峰</div>
+      <div class="hs"><b>≥ 8,000m</b>死亡地带</div>
+      <div class="hs"><b>1874</b>首座洲际之巅</div>
+      <div class="hs"><b>14 座</b>档案收录</div>
+    </div>
+  </div>
+  <div class="scroll-hint">SCROLL ↓</div>
+</header>
+
+<!-- ================= NAV ================= -->
+<nav class="topnav" id="topnav">
+  <div class="wrap">
+    <div class="brand" id="brand">世界之巅<span>ROOF OF THE WORLD</span></div>
+    <div class="seg" id="seg">
+      <button data-set="ten" class="active">十大高峰</button>
+      <button data-set="seven">七大洲最高峰</button>
+    </div>
+    <div class="anchors" id="anchors">
+      <a href="#sec-ridge" data-sec="sec-ridge">山脊线</a>
+      <a href="#sec-ladder" data-sec="sec-ladder">海拔阶梯</a>
+      <a href="#sec-risk" data-sec="sec-risk">风险矩阵</a>
+      <a href="#sec-time" data-sec="sec-time">首登时刻</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <!-- ================= RIDGE ================= -->
+  <section id="sec-ridge" class="reveal">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <span class="kicker">01 · RIDGELINE PROFILE</span>
+          <h2>山脊线<small>把主峰连成一条天际线</small></h2>
+        </div>
+        <p class="sec-note" id="ridge-note"></p>
+      </div>
+      <div class="panel"><svg id="ridgeChart" viewBox="0 0 1160 560" role="img"></svg></div>
+    </div>
+  </section>
+
+  <!-- ================= LADDER ================= -->
+  <section id="sec-ladder" class="reveal">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <span class="kicker">02 · ALTITUDE LADDER</span>
+          <h2>海拔阶梯<small>每一级都是人类的高度</small></h2>
+        </div>
+        <p class="sec-note">横轴为海拔。红色虚线以上是 8,000 米「<b>死亡地带</b>」——空气含氧量不足海平面三分之一，任何失误都没有第二次机会。点击任意一行打开峰顶档案。</p>
+      </div>
+      <div class="panel"><svg id="ladderChart" viewBox="0 0 1160 640" role="img"></svg></div>
+    </div>
+  </section>
+
+  <!-- ================= RISK ================= -->
+  <section id="sec-risk" class="reveal">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <span class="kicker">03 · RISK MATRIX</span>
+          <h2>风险矩阵<small>海拔 × 死亡率 × 登顶人数</small></h2>
+        </div>
+        <p class="sec-note">气泡图：横轴为<b>死亡率</b>（平方根刻度），纵轴为海拔，气泡大小 = 登顶人数。越靠近右上角，越是「高海拔 × 高死亡率」的凶险之地。悬停查看数值，点击打开档案。</p>
+      </div>
+      <div class="panel">
+        <svg id="riskChart" viewBox="0 0 1160 560" role="img"></svg>
+        <div class="legend">
+          <span class="lg lg-col"><i></i>死亡率：低 → 高（0 – 20%+）</span>
+          <span class="lg"><i class="bub" style="width:9px;height:9px"></i>≈300 人</span>
+          <span class="lg"><i class="bub" style="width:14px;height:14px"></i>≈3,000 人</span>
+          <span class="lg"><i class="bub" style="width:21px;height:21px"></i>≈35,000 人</span>
+          <span class="lg" style="color:var(--ink-faint)">注：标 * 者为每年登顶人数，其余为累计</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TIMELINE ================= -->
+  <section id="sec-time" class="reveal">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <span class="kicker">04 · FIRST ASCENT</span>
+          <h2>首登时刻<small>人类第一次站上这些顶端</small></h2>
+        </div>
+        <p class="sec-note">从 1874 年厄尔布鲁士峰首登，到 1966 年文森峰——人类用了将近一个世纪，才把足迹印上七大洲的每一个顶点。悬停查看细节，点击打开档案。</p>
+      </div>
+      <div class="panel"><svg id="timeChart" viewBox="0 0 1160 300" role="img"></svg></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="f-badge">EXPEDITION LOG · 数据与口径说明</div>
+    <p>数据来源：公开登山资料。海拔采用普遍认可值；珠峰采用 2020 年中尼联合公布的 8,848.86 米。</p>
+    <p>七大洲最高峰采用主流 "Seven Summits" 版本：欧洲取厄尔布鲁士峰（另有勃朗峰版本），大洋洲取查亚峰（另有澳大利亚大陆科西阿斯科峰版本）。</p>
+    <p>登顶窗口期、死亡率与登顶人数为公开资料的通行约数，随年份与统计口径（登顶人次 / 登顶人数、死亡率计算基准）不同会有出入；标 * 者为每年登顶人数，其余为累计。山形为基于各峰著名形态的示意描摹，非精确测绘。</p>
+    <p>本页面为纯前端单文件，全部图形由 D3 与 SVG 绘制，照片来自 Wikimedia Commons（加载失败时自动回退为程序绘制的场景插画）。</p>
+  </div>
+</footer>
+
+<!-- ================= TOOLTIP ================= -->
+<div class="tooltip" id="tooltip"></div>
+
+<!-- ================= MODAL ================= -->
+<div class="modal" id="modal" aria-hidden="true">
+  <div class="modal-card">
+    <button class="modal-close" id="modalClose" aria-label="关闭">✕</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script>
+/* ================================================================
+   世界之巅 · 星夜远征 — D3 数据可视化
+   数据：世界十大高峰 + 七大洲最高峰（Seven Summits 主流版本）
+   ================================================================ */
+
+/* ---------------- 数据 ---------------- */
+/* shape: 归一化山形轮廓 (x:0-100, y:0-100; y=100 山脚, y=0 峰顶)，示意描摹 */
+const PEAKS = {
+ten: [
+ {id:'everest', cn:'珠穆朗玛峰', en:'Mount Everest', alt:8848.86, country:'中国 / 尼泊尔', range:'喜马拉雅山脉',
+  date:'1953-05-29', year:1953, who:[['埃德蒙·希拉里','新西兰'],['丹增·诺尔盖','尼泊尔']],
+  note:'世界之巅。2020 年中尼联合公布新高程 8,848.86 米，岩面高度仍在缓慢上升。',
+  shape:[[0,100],[30,35],[40,45],[52,0],[62,35],[100,100]]},
+ {id:'k2', cn:'乔戈里峰', en:'K2 (Mount Godwin-Austen)', alt:8611, country:'中国 / 巴基斯坦', range:'喀喇昆仑山脉',
+  date:'1954-07-31', year:1954, who:[['阿基莱·孔帕尼奥尼','意大利'],['利诺·拉切德利','意大利']],
+  note:'"野蛮巨峰"。完美的金字塔山形，攀登死亡率在八千米级山峰中名列前茅。',
+  shape:[[0,100],[42,15],[50,0],[58,15],[100,100]]},
+ {id:'kangchenjunga', cn:'干城章嘉峰', en:'Kangchenjunga', alt:8586, country:'尼泊尔 / 印度', range:'喜马拉雅山脉',
+  date:'1955-05-25', year:1955, who:[['乔·布朗','英国'],['乔治·班德','英国']],
+  note:'意为"五雪宝"。登山者遵循传统，在距峰顶数步处停下以示对神山的敬意。',
+  shape:[[0,100],[15,62],[28,42],[38,55],[50,0],[62,48],[72,35],[85,68],[100,100]]},
+ {id:'lhotse', cn:'洛子峰', en:'Lhotse', alt:8516, country:'中国 / 尼泊尔', range:'喜马拉雅山脉',
+  date:'1956-05-18', year:1956, who:[['弗里茨·卢赫辛格','瑞士'],['恩斯特·赖斯','瑞士']],
+  note:'与珠峰共用南坳攀登路线，其南壁是世界上最陡峭的高海拔岩壁之一。',
+  shape:[[0,100],[38,38],[50,0],[61,38],[100,100]]},
+ {id:'makalu', cn:'马卡鲁峰', en:'Makalu', alt:8485, country:'中国 / 尼泊尔', range:'喜马拉雅山脉',
+  date:'1955-05-15', year:1955, who:[['让·库齐','法国'],['莱昂内尔·泰雷','法国']],
+  note:'标志性的完美四棱锥山形，是八千米级山峰中最上镜的几何体之一。',
+  shape:[[0,100],[42,8],[50,0],[58,8],[100,100]]},
+ {id:'chooyu', cn:'卓奥友峰', en:'Cho Oyu', alt:8188, country:'中国 / 尼泊尔', range:'喜马拉雅山脉',
+  date:'1954-10-19', year:1954, who:[['赫伯特·蒂希','奥地利'],['约瑟夫·约赫勒','奥地利'],['帕桑·达瓦·拉马','尼泊尔']],
+  note:'山形宽缓如穹顶，被普遍认为是技术难度最低的八千米级山峰。',
+  shape:[[0,100],[18,58],[38,16],[50,0],[62,16],[82,58],[100,100]]},
+ {id:'dhaulagiri', cn:'道拉吉里峰', en:'Dhaulagiri I', alt:8167, country:'尼泊尔', range:'喜马拉雅山脉（道拉吉里山系）',
+  date:'1960-05-13', year:1960, who:[['库尔特·迪姆贝格尔','奥地利'],['瑞士-奥地利联合队','瑞士 / 奥地利']],
+  note:'意为"白山"，巨大的白色山体曾一度被误认为是世界最高峰。',
+  shape:[[0,100],[10,62],[25,38],[40,0],[55,22],[70,42],[85,72],[100,100]]},
+ {id:'manaslu', cn:'马纳斯鲁峰', en:'Manaslu', alt:8163, country:'尼泊尔', range:'喜马拉雅山脉',
+  date:'1956-05-09', year:1956, who:[['今西寿雄','日本'],['嘉增·诺布','尼泊尔']],
+  note:'意为"灵魂之山"，由日本登山队首登，此后成为日本登山界的"圣山"。',
+  shape:[[0,100],[20,52],[35,0],[45,18],[55,2],[70,45],[100,100]]},
+ {id:'nangaparbat', cn:'南迦帕尔巴特峰', en:'Nanga Parbat', alt:8125, country:'巴基斯坦', range:'喜马拉雅山脉（西端）',
+  date:'1953-07-03', year:1953, who:[['赫尔曼·布尔','奥地利']],
+  note:'"杀手山峰"。布尔在无氧、无后援的情况下独自完成首登，堪称登山史传奇。',
+  shape:[[0,100],[30,45],[48,0],[60,18],[75,58],[100,100]]},
+ {id:'annapurna', cn:'安纳普尔纳峰', en:'Annapurna I', alt:8091, country:'尼泊尔', range:'喜马拉雅山脉（安纳普尔纳山系）',
+  date:'1950-06-03', year:1950, who:[['莫里斯·埃尔佐','法国'],['路易·拉什纳尔','法国']],
+  note:'人类登顶的第一座八千米级山峰（1950 年），至今仍是死亡率最高的八千米级山峰之一。',
+  shape:[[0,100],[15,65],[35,32],[50,0],[65,35],[80,62],[100,100]]},
+],
+seven: [
+ {id:'everest', cn:'珠穆朗玛峰', en:'Mount Everest', alt:8848.86, country:'中国 / 尼泊尔', range:'喜马拉雅山脉', continent:'亚洲',
+  date:'1953-05-29', year:1953, who:[['埃德蒙·希拉里','新西兰'],['丹增·诺尔盖','尼泊尔']],
+  note:'既是亚洲最高峰，也是世界最高峰。',
+  shape:[[0,100],[30,35],[40,45],[52,0],[62,35],[100,100]]},
+ {id:'aconcagua', cn:'阿空加瓜峰', en:'Aconcagua', alt:6961, country:'阿根廷', range:'安第斯山脉', continent:'南美洲',
+  date:'1897-01-14', year:1897, who:[['马蒂亚斯·楚布里根','瑞士']],
+  note:'西半球与南半球最高峰，也是亚洲之外的世界最高峰。',
+  shape:[[0,100],[20,60],[40,25],[50,35],[60,22],[80,58],[100,100]]},
+ {id:'denali', cn:'迪纳利峰', en:'Denali (Mount McKinley)', alt:6190, country:'美国（阿拉斯加州）', range:'阿拉斯加山脉', continent:'北美洲',
+  date:'1913-06-07', year:1913, who:[['哈德森·斯塔克','美国'],['哈里·卡斯滕斯','美国']],
+  note:'原名麦金利山，2015 年恢复当地原住民名称"迪纳利"，意为"伟大者"。',
+  shape:[[0,100],[15,72],[30,42],[42,0],[55,32],[68,52],[85,78],[100,100]]},
+ {id:'kilimanjaro', cn:'乞力马扎罗山', en:'Kilimanjaro', alt:5895, country:'坦桑尼亚', range:'东非裂谷（独立休眠火山）', continent:'非洲',
+  date:'1889-10-06', year:1889, who:[['汉斯·迈尔','德国'],['路德维希·普特舍勒','奥地利'],['约哈尼斯·劳沃','坦桑尼亚']],
+  note:'"赤道上的雪山"，标志性的平顶火山锥，也是世界最高的独立山体。',
+  shape:[[0,100],[25,55],[38,0],[62,0],[75,55],[100,100]]},
+ {id:'elbrus', cn:'厄尔布鲁士峰', en:'Mount Elbrus', alt:5642, country:'俄罗斯', range:'高加索山脉', continent:'欧洲',
+  date:'1874-07-28', year:1874, who:[['克劳福德·格罗夫','英国'],['霍勒斯·沃克','英国'],['瑞士向导团队','瑞士']],
+  note:'双峰休眠火山，西峰为欧洲之巅（欧洲最高峰另有勃朗峰 4,808 米版本之争）。',
+  shape:[[0,100],[20,58],[38,0],[45,10],[52,0],[65,42],[100,100]]},
+ {id:'vinson', cn:'文森峰', en:'Vinson Massif', alt:4892, country:'南极洲（智利声索区）', range:'埃尔斯沃思山脉', continent:'南极洲',
+  date:'1966-12-18', year:1966, who:[['尼古拉斯·克林奇','美国'],['美国登山队','美国']],
+  note:'七大洲最高峰中最后被登顶的一座，1967 年前后才为人所知。',
+  shape:[[0,100],[20,55],[40,0],[60,15],[75,48],[100,100]]},
+ {id:'puncakjaya', cn:'查亚峰', en:'Puncak Jaya (Carstensz Pyramid)', alt:4884, country:'印度尼西亚', range:'苏迪曼山脉', continent:'大洋洲',
+  date:'1962-02-13', year:1962, who:[['海因里希·哈勒','奥地利'],['奥地利登山队','奥地利']],
+  note:'赤道上罕见的冰川岩峰，Seven Summits 中技术攀登难度最高的一座。',
+  shape:[[0,100],[30,50],[45,0],[52,32],[58,8],[70,48],[100,100]]},
+]};
+
+const MAX_ALT = 9000;
+const SNOWLINE = 30;
+
+const STATS = {
+  everest:      {season:'4–5月（5月中下旬最佳），次为9–10月', death:'约 1%（近年）', summits:'6,600+ 人（截至2024年）'},
+  k2:           {season:'7–8月（夏季）', death:'约 13%', summits:'约 800 人'},
+  kangchenjunga:{season:'4–5月', death:'约 14%', summits:'约 300 人'},
+  lhotse:       {season:'4–5月', death:'约 3%', summits:'约 600 人'},
+  makalu:       {season:'4–5月', death:'约 9%', summits:'约 500 人'},
+  chooyu:       {season:'9–10月（秋季最热门）', death:'约 1.4%', summits:'3,800+ 人'},
+  dhaulagiri:   {season:'4–5月', death:'约 16%', summits:'约 500 人'},
+  manaslu:      {season:'9–10月（秋季为主），次为4–5月', death:'约 9%', summits:'2,000+ 人'},
+  nangaparbat:  {season:'6–8月（夏季）', death:'约 20%', summits:'约 350 人'},
+  annapurna:    {season:'3–5月', death:'约 20%（8000米级最高之一）', summits:'约 300 人'},
+  aconcagua:    {season:'11月–次年3月（12–2月最佳）', death:'低于 0.5%', summits:'每年数千人登顶'},
+  denali:       {season:'5–7月', death:'约 0.3%', summits:'30,000+ 人'},
+  kilimanjaro:  {season:'全年可登，1–3月与6–10月旱季最佳', death:'极低（约 0.03%）', summits:'每年约 35,000 人'},
+  elbrus:       {season:'5–9月（6–8月最佳）', death:'约 0.4%', summits:'每年数千人登顶'},
+  vinson:       {season:'11月–次年1月（南极夏季）', death:'极低（接近 0）', summits:'约 1,500 人'},
+  puncakjaya:   {season:'全年可登，4–11月旱季更佳', death:'低', summits:'约 500 人（受进入许可限制）'}
+};
+
+const CHART_DATA = {
+  everest:      {n:6600,  d:1},
+  k2:           {n:800,   d:13},
+  kangchenjunga:{n:300,   d:14},
+  lhotse:       {n:600,   d:3},
+  makalu:       {n:500,   d:9},
+  chooyu:       {n:3800,  d:1.4},
+  dhaulagiri:   {n:500,   d:16},
+  manaslu:      {n:2000,  d:9},
+  nangaparbat:  {n:350,   d:20},
+  annapurna:    {n:300,   d:20},
+  aconcagua:    {n:3500,  d:0.5,  annual:true},
+  denali:       {n:30000, d:0.3},
+  kilimanjaro:  {n:35000, d:0.03, annual:true},
+  elbrus:       {n:3000,  d:0.4,  annual:true},
+  vinson:       {n:1500,  d:0.05},
+  puncakjaya:   {n:500,   d:0.5}
+};
+
+const PHOTO = {
+  everest:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Mt._Everest_from_Gokyo_Ri_November_5%2C_2012.jpg/960px-Mt._Everest_from_Gokyo_Ri_November_5%2C_2012.jpg',
+  k2:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Chogori.jpg/960px-Chogori.jpg',
+  kangchenjunga:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Kangchenjunga_PangPema.JPG/960px-Kangchenjunga_PangPema.JPG',
+  lhotse:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Lhotse-fromChukhungRi.jpg/960px-Lhotse-fromChukhungRi.jpg',
+  makalu:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Makalu.jpg/960px-Makalu.jpg',
+  chooyu:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Chooyu.jpg/960px-Chooyu.jpg',
+  dhaulagiri:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Dhaulagiri_-_view_from_aircraft.jpg/960px-Dhaulagiri_-_view_from_aircraft.jpg',
+  manaslu:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Sunrise%2C_Manaslu.jpg/960px-Sunrise%2C_Manaslu.jpg',
+  nangaparbat:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Fairy_Meadows_and_the_view_of_Nanga_Parbat.jpg/960px-Fairy_Meadows_and_the_view_of_Nanga_Parbat.jpg',
+  annapurna:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/South_Face_of_Annapurna_I_%28Main%29.jpg/960px-South_Face_of_Annapurna_I_%28Main%29.jpg',
+  aconcagua:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Aconcagua2016.jpg/960px-Aconcagua2016.jpg',
+  denali:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Wonder_Lake_and_Denali.jpg/960px-Wonder_Lake_and_Denali.jpg',
+  kilimanjaro:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Kilimanjaro_from_Amboseli.jpg/960px-Kilimanjaro_from_Amboseli.jpg',
+  elbrus:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Mount_Elbrus_%28cropped%29.jpg/960px-Mount_Elbrus_%28cropped%29.jpg',
+  vinson:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Mount_Vinson_from_NW_at_Vinson_Plateau_by_Christian_Stangl_%28flickr%29.jpg/960px-Mount_Vinson_from_NW_at_Vinson_Plateau_by_Christian_Stangl_%28flickr%29.jpg',
+  puncakjaya:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Carstenzs_Piramida_Mountain.jpg/960px-Carstenzs_Piramida_Mountain.jpg'
+};
+
+/* ---------------- 工具 ---------------- */
+const $ = s => document.querySelector(s);
+const fmt = a => a >= 8000
+  ? a.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:2})
+  : a.toLocaleString('en-US');
+const fmtN = n => n>=10000 ? (n/10000).toLocaleString('zh-CN',{maximumFractionDigits:1})+'万'
+               : n>=1000 ? (n/1000).toLocaleString('en-US',{maximumFractionDigits:1})+'k' : String(n);
+const fmtD = d => d<0.1 ? '<0.1%' : d+'%';
+const estW = (s,fs)=>{ let w=0; for(const ch of s) w += (ch.charCodeAt(0)>255?1:0.56)*fs; return w; };
+const clamp = (v,a,b)=>Math.min(b,Math.max(a,v));
+
+/* 海拔 -> 颜色（低暖高冷，与夜空主题一致） */
+const altColor = alt => d3.interpolateRgb('#4cc9f0','#a78bfa')(clamp((alt-4000)/5000,0,1));
+/* 死亡率 -> 风险色 */
+const riskColor = d => d3.interpolateRgbBasis(['#38bdf8','#fbbf24','#f87171'])(clamp(d/20,0,1));
+
+let current = 'ten';
+let dataset = PEAKS[current];
+
+/* 归一化山形 -> 绝对路径（封闭山体） */
+function shapePath(shape, x0, baseY, w, h){
+  return shape.map((p,i)=> (i?'L':'M')+(x0+p[0]/100*w).toFixed(1)+','+(baseY-(100-p[1])/100*h).toFixed(1)).join(' ')
+    + ` L${(x0+w).toFixed(1)},${baseY} L${x0.toFixed(1)},${baseY} Z`;
+}
+/* 归一化山形 -> 雪顶多边形 */
+function snowPath(shape, x0, baseY, w, h, snow=SNOWLINE){
+  const P = shape.map(p=>({x:x0+p[0]/100*w, y:baseY-(100-p[1])/100*h, v:p[1]}));
+  const snowY = baseY-(100-snow)/100*h;
+  const pts=[];
+  for(let i=0;i<P.length-1;i++){
+    const a=P[i], b=P[i+1];
+    if(a.v<=snow) pts.push([a.x,a.y]);
+    if((a.v-snow)*(b.v-snow)<0){ const t=(snow-a.v)/(b.v-a.v); pts.push([a.x+(b.x-a.x)*t, snowY]); }
+  }
+  if(pts.length<3) return '';
+  return 'M'+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' L')+' Z';
+}
+/* 星点 HTML（用于场景插画） */
+function starsHTML(n, w, h, maxY){
+  return Array.from({length:n},()=>
+    `<circle cx="${(Math.random()*w).toFixed(0)}" cy="${(Math.random()*maxY).toFixed(0)}" r="${(Math.random()*1.1+0.5).toFixed(1)}" fill="#fff" opacity="${(Math.random()*.5+.35).toFixed(2)}"/>`).join('');
+}
+
+/* ---------------- 共享交互：tooltip / spotlight ---------------- */
+const tip = $('#tooltip');
+let lastTip = '';
+function showTip(html, x, y){
+  lastTip = html;
+  tip.innerHTML = html;
+  tip.style.left = x+'px'; tip.style.top = y+'px'; tip.style.opacity = 1;
+}
+function hideTip(){ tip.style.opacity = 0; }
+function spotlight(id){
+  document.querySelectorAll('[data-id]').forEach(el=>{
+    const on = id && el.dataset.id===id;
+    el.classList.toggle('dim', id!=null && !on);
+  });
+}
+
+/* 标签防碰撞分层：同一层级记录占用区间，返回 {above, row} */
+function placeLabels(items, halfW, gap){
+  const levels = [];
+  return items.map(it=>{
+    const hw = halfW(it);
+    for(let li=0;;li++){
+      if(!levels[li]) levels[li]={above:li%2===0, slots:[]};
+      const lv = levels[li];
+      if(lv.slots.every(([a,b])=> it.x+hw < a-gap || it.x-hw > b+gap)){
+        lv.slots.push([it.x-hw, it.x+hw]);
+        return {...it, above:lv.above, row:Math.floor(li/2)};
+      }
+    }
+  });
+}
+
+/* ---------------- 01 山脊线 ---------------- */
+function renderRidge(){
+  const data = dataset;
+  const svg = d3.select('#ridgeChart');
+  const W=1160, H=560, m={t:66,r:70,b:56,l:64};
+  const iw=W-m.l-m.r, ih=H-m.t-m.b;
+  const x = d3.scaleBand().domain(d3.range(data.length)).range([0,iw]).padding(0.42);
+  const y = d3.scaleLinear().domain([0,MAX_ALT]).range([ih,0]);
+  svg.attr('viewBox',`0 0 ${W} ${H}`);
+  svg.selectAll('*').remove();
+  const g = svg.append('g').attr('transform',`translate(${m.l},${m.t})`);
+  svg.attr('role','img').attr('aria-label','山峰海拔天际线图');
+
+  /* 死亡地带 */
+  g.append('rect').attr('x',0).attr('y',y(8000)).attr('width',iw).attr('height',y(0)-y(8000))
+    .attr('fill','rgba(244,63,94,.05)');
+  g.append('line').attr('x1',0).attr('x2',iw).attr('y1',y(8000)).attr('y2',y(8000))
+    .attr('stroke','#f87171').attr('stroke-dasharray','5 5').attr('opacity',.6);
+  g.append('text').attr('x',iw).attr('y',y(8000)-9).attr('text-anchor','end').attr('class','death-tag')
+    .text('死亡地带 ≥ 8,000m');
+
+  /* 网格 */
+  const altTicks=[0,2000,4000,6000,8000,9000];
+  g.selectAll('.grid').data(altTicks).join('line')
+    .attr('x1',0).attr('x2',iw).attr('y1',d=>y(d)).attr('y2',d=>y(d))
+    .attr('stroke','rgba(148,163,255,.09)').attr('stroke-dasharray', d=>d===0?'none':'3 6');
+  g.selectAll('.ylab').data(altTicks.filter(d=>d>0)).join('text')
+    .attr('x',-10).attr('y',d=>y(d)+3).attr('text-anchor','end').attr('class','axis-lab')
+    .text(d=> d>=1000 ? (d/1000)+'k' : '0');
+
+  /* 峰点 */
+  const pts = data.map((pk,i)=>({pk,i, xc:x(i)+x.bandwidth()/2, yp:y(pk.alt)}));
+
+  /* 天际线面积 + 折线 */
+  const area = d3.area().x(d=>d.xc).y0(ih).y1(d=>d.yp).curve(d3.curveMonotoneX);
+  const line = d3.line().x(d=>d.xc).y(d=>d.yp).curve(d3.curveMonotoneX);
+  g.append('path').datum(pts).attr('d',area).attr('fill','url(#ridgeFill)')
+    .style('opacity',0).transition().duration(900).style('opacity',1);
+  const top = g.append('path').datum(pts).attr('d',line).attr('fill','none')
+    .attr('stroke','#8b9cf7').attr('stroke-width',2).attr('opacity',.9);
+  const tlen = top.node().getTotalLength();
+  top.attr('stroke-dasharray',tlen).attr('stroke-dashoffset',tlen)
+    .transition().duration(1400).ease(d3.easeCubicOut).attr('stroke-dashoffset',0);
+
+  /* 渐变 defs */
+  const defs = svg.append('defs');
+  const ag = defs.append('linearGradient').attr('id','ridgeFill').attr('x1',0).attr('y1',0).attr('x2',0).attr('y2',1);
+  ag.append('stop').attr('offset',0).attr('stop-color','#a78bfa').attr('stop-opacity',.5);
+  ag.append('stop').attr('offset',.45).attr('stop-color','#4c6ef5').attr('stop-opacity',.26);
+  ag.append('stop').attr('offset',1).attr('stop-color','#1e2a5e').attr('stop-opacity',.04);
+
+  /* 标签分层（上方优先，顶部放不下则下方） */
+  const placed = placeLabels(pts.map(p=>({
+    x:p.xc,
+    half: Math.max(estW(p.pk.cn,12.5), estW(fmt(p.pk.alt)+' m',10))/2 + 8
+  })), it=>it.half, 12);
+  placed.forEach((p,i)=>{
+    const pt = pts[i];
+    const labY = p.above ? pt.yp-30-p.row*46 : pt.yp+16+p.row*46;
+    const anchorY = p.above ? pt.yp-8 : pt.yp+8;
+    const gx = g.append('g').attr('class','summit').attr('data-id',pt.pk.id).attr('data-i',i);
+    gx.append('circle').attr('cx',pt.xc).attr('cy',pt.yp).attr('r',11)
+      .attr('fill','#ffd9a0').attr('opacity',.18);
+    gx.append('circle').attr('class','dot').attr('cx',pt.xc).attr('cy',pt.yp).attr('r',4.5)
+      .attr('fill','#ffd9a0').attr('stroke','#0b1026').attr('stroke-width',1.5);
+    gx.append('line').attr('x1',pt.xc).attr('y1',anchorY).attr('x2',pt.xc).attr('y2', p.above ? labY+21 : labY-10)
+      .attr('stroke','rgba(148,163,255,.35)').attr('stroke-width',1);
+    gx.append('text').attr('class','ridge-name').attr('x',pt.xc).attr('y',labY)
+      .attr('text-anchor','middle').attr('fill','#e8edfb').attr('font-size',12.5).attr('font-weight',600)
+      .text(pt.pk.cn);
+    gx.append('text').attr('class','ridge-alt').attr('x',pt.xc).attr('y',labY+15)
+      .attr('text-anchor','middle').attr('fill','#ffd9a0').attr('font-size',10)
+      .attr('font-family','var(--mono)').text(fmt(pt.pk.alt)+' m');
+    /* 透明命中区（整列） */
+    gx.append('rect').attr('x',x(i)).attr('y',-m.t).attr('width',x.bandwidth()).attr('height',ih+m.t)
+      .attr('fill','transparent').attr('class','chart-tip-hit');
+  });
+
+  /* 悬停引导线 */
+  const guide = g.append('line').attr('y1',0).attr('y2',ih)
+    .attr('stroke','rgba(255,212,160,.5)').attr('stroke-dasharray','3 4')
+    .style('display','none').style('pointer-events','none');
+
+  g.selectAll('.summit').each(function(d){
+    const el = d3.select(this);
+    const idx = +el.attr('data-i');
+    el.on('mouseenter', function(ev){
+      spotlight(dataset[idx].id);
+      guide.attr('x1',pts[idx].xc).attr('x2',pts[idx].xc).style('display',null);
+      el.select('.dot').transition().duration(160).attr('r',7);
+      const pk = dataset[idx];
+      showTip(`<b>${pk.cn}</b> ${pk.en}<br><span class="tip-alt">海拔 ${fmt(pk.alt)} 米</span> · ${pk.country}<br>${pk.range}<span class="tip-more">点击打开峰顶档案</span>`, ev.clientX, ev.clientY);
+    });
+    el.on('mousemove', ev=> showTip(lastTip, ev.clientX, ev.clientY));
+    el.on('mouseleave', function(){
+      guide.style('display','none');
+      el.select('.dot').transition().duration(160).attr('r',4.5);
+      hideTip(); spotlight(null);
+    });
+    el.on('click', ()=> openDetail(dataset[idx]));
+  });
+
+  $('#ridge-note').textContent = current==='ten'
+    ? '全球海拔前十全部位于亚洲——喜马拉雅与喀喇昆仑山脉，且均超过 8,000 米。将十座主峰连成一条天际线，越往右海拔越低；悬停任一点，全页联动高亮，点击打开峰顶档案。'
+    : '七大洲最高峰（Seven Summits 主流版本）。把七座洲际之巅连成天际线——世界之巅与洲际之巅的差距一目了然；悬停任一点，全页联动高亮，点击打开峰顶档案。';
+}
+
+/* ---------------- 02 海拔阶梯 ---------------- */
+function renderLadder(){
+  const rows = [...dataset].sort((a,b)=>b.alt-a.alt);
+  const svg = d3.select('#ladderChart');
+  const W=1160, H=74+rows.length*58+18, m={t:64,r:64,b:20,l:236};
+  const iw = W-m.l-m.r;
+  const x = d3.scaleLinear().domain([0,MAX_ALT]).range([0,iw]);
+  const y = d3.scaleBand().domain(rows.map(d=>d.id)).range([0,H-m.t-m.b]).padding(0.26);
+  svg.attr('viewBox',`0 0 ${W} ${H}`).attr('role','img').attr('aria-label','海拔对比阶梯图');
+  svg.selectAll('*').remove();
+  const g = svg.append('g').attr('transform',`translate(${m.l},${m.t})`);
+
+  /* 死亡地带 */
+  g.append('rect').attr('x',x(8000)).attr('width',iw-x(8000)).attr('y',0).attr('height',H-m.t-m.b)
+    .attr('fill','rgba(244,63,94,.05)');
+  g.append('line').attr('x1',x(8000)).attr('x2',x(8000)).attr('y1',0).attr('y2',H-m.t-m.b)
+    .attr('stroke','#f87171').attr('stroke-dasharray','5 5').attr('opacity',.6);
+  g.append('text').attr('x',iw).attr('y',-12).attr('text-anchor','end').attr('class','death-tag')
+    .text('死亡地带 ≥ 8,000m');
+
+  /* 垂直网格 + 刻度 */
+  const ticks=[0,2000,4000,6000,8000,9000];
+  g.selectAll('.vgrid').data(ticks).join('line')
+    .attr('x1',d=>x(d)).attr('x2',d=>x(d)).attr('y1',0).attr('y2',H-m.t-m.b)
+    .attr('stroke','rgba(148,163,255,.08)');
+  g.selectAll('.vlab').data(ticks.filter(d=>d>0)).join('text')
+    .attr('x',d=>x(d)).attr('y',H-m.t-m.b+20).attr('text-anchor','middle').attr('class','axis-lab')
+    .text(d=>d/1000+'k');
+
+  /* 行 */
+  const rowG = g.selectAll('.lrow').data(rows).join('g')
+    .attr('class','lrow').attr('data-id',d=>d.id)
+    .attr('transform',d=>`translate(0,${y(d.id)})`);
+
+  rowG.append('text').attr('class','rank').attr('x',-96).attr('y',y.bandwidth()/2+4)
+    .attr('text-anchor','end').attr('font-family','var(--mono)').attr('font-size',12)
+    .attr('fill','var(--ink-faint)').text((d,i)=>String(i+1).padStart(2,'0'));
+  rowG.append('text').attr('class','lname').attr('x',-82).attr('y',y.bandwidth()/2+4)
+    .attr('fill','#e8edfb').attr('font-size',12.5).attr('font-weight',500).text(d=>d.cn);
+  rowG.append('text').attr('x',-82).attr('y',y.bandwidth()/2+19)
+    .attr('fill','var(--ink-faint)').attr('font-size',9.5).attr('opacity',.8)
+    .text(d=>d.en.length>16 ? d.en.slice(0,15)+'…' : d.en);
+
+  rowG.append('rect').attr('class','lbar-bg').attr('x',0).attr('width',iw)
+    .attr('y',0).attr('height',y.bandwidth()).attr('rx',7)
+    .attr('fill','rgba(148,163,255,.05)');
+  rowG.append('rect').attr('class','lbar').attr('x',0).attr('width',0)
+    .attr('y',y.bandwidth()*0.16).attr('height',y.bandwidth()*0.68).attr('rx',6)
+    .attr('fill',d=>altColor(d.alt)).attr('fill-opacity',.92)
+    .attr('stroke','rgba(255,255,255,.12)');
+  rowG.append('text').attr('class','lval')
+    .attr('x',d=> x(d.alt)>iw-70 ? iw+36 : x(d.alt)+10)
+    .attr('text-anchor',d=> x(d.alt)>iw-70 ? 'end':'start')
+    .attr('y',y.bandwidth()/2+4).attr('opacity',0)
+    .attr('font-family','var(--mono)').attr('font-size',12).attr('fill','var(--amber-soft)')
+    .text(d=>fmt(d.alt)+' m');
+
+  /* 生长动画 */
+  rowG.selectAll('.lbar').transition().delay((d,i)=>i*70).duration(850).ease(d3.easeCubicOut)
+    .attr('width',d=>x(d.alt));
+  rowG.selectAll('.lval').transition().delay((d,i)=>i*70+620).duration(350)
+    .attr('opacity',1);
+
+  rowG.on('mouseenter', function(ev,d){
+    spotlight(d.id);
+    d3.select(this).select('.lbar-bg').attr('fill','rgba(255,180,84,.10)');
+    const st = STATS[d.id];
+    showTip(`<b>${d.cn}</b> ${d.en}<br><span class="tip-alt">海拔 ${fmt(d.alt)} 米</span> · ${d.country}${st?`<br>登顶窗口：${st.season}`:''}<span class="tip-more">点击打开峰顶档案</span>`, ev.clientX, ev.clientY);
+  });
+  rowG.on('mousemove', ev=> showTip(tip.innerHTML, ev.clientX, ev.clientY));
+  rowG.on('mouseleave', function(){
+    d3.select(this).select('.lbar-bg').attr('fill','rgba(148,163,255,.05)');
+    hideTip(); spotlight(null);
+  });
+  rowG.on('click', (ev,d)=> openDetail(d));
+}
+
+/* ---------------- 03 风险矩阵 ---------------- */
+function renderRisk(){
+  const rows = [...dataset].sort((a,b)=>b.alt-a.alt);
+  const pts = rows.map(pk=>({pk, ...CHART_DATA[pk.id]})).filter(p=>p.n!=null);
+  const maxD = Math.max(...pts.map(p=>p.d));
+  const svg = d3.select('#riskChart');
+  const W=1160, H=560, m={t:58,r:64,b:66,l:66};
+  const iw=W-m.l-m.r, ih=H-m.t-m.b;
+  const x = d3.scaleSqrt().domain([0, maxD*1.08]).range([0,iw]);
+  const y = d3.scaleLinear().domain([0,MAX_ALT]).range([ih,0]);
+  const r = d3.scaleSqrt().domain(d3.extent(pts,p=>p.n)).range([5,26]);
+  svg.attr('viewBox',`0 0 ${W} ${H}`).attr('role','img').attr('aria-label','海拔与死亡率风险散点图');
+  svg.selectAll('*').remove();
+  const g = svg.append('g').attr('transform',`translate(${m.l},${m.t})`);
+
+  /* 死亡地带 */
+  g.append('rect').attr('x',0).attr('y',y(8000)).attr('width',iw).attr('height',y(0)-y(8000))
+    .attr('fill','rgba(244,63,94,.05)');
+  g.append('line').attr('x1',0).attr('x2',iw).attr('y1',y(8000)).attr('y2',y(8000))
+    .attr('stroke','#f87171').attr('stroke-dasharray','5 5').attr('opacity',.6);
+  g.append('text').attr('x',iw).attr('y',y(8000)-9).attr('text-anchor','end').attr('class','death-tag')
+    .text('死亡地带 ≥ 8,000m');
+
+  /* 网格 */
+  g.selectAll('.hgrid').data([0,2000,4000,6000,8000]).join('line')
+    .attr('x1',0).attr('x2',iw).attr('y1',d=>y(d)).attr('y2',d=>y(d))
+    .attr('stroke','rgba(148,163,255,.09)').attr('stroke-dasharray','3 6');
+  const xTicks = [0,1,2,5,10,20].filter(d=>d<=maxD);
+  if(!xTicks.includes(maxD)) xTicks.push(maxD);
+  g.selectAll('.vgrid').data(xTicks).join('line')
+    .attr('x1',d=>x(d)).attr('x2',d=>x(d)).attr('y1',0).attr('y2',ih)
+    .attr('stroke','rgba(148,163,255,.09)').attr('stroke-dasharray','3 6');
+
+  /* 轴 */
+  g.append('g').call(d3.axisLeft(y).tickValues([0,2000,4000,6000,8000]).tickSize(0).tickPadding(10)
+      .tickFormat(d=> d>=1000?(d/1000)+'k':d))
+    .call(gx=> gx.selectAll('text').attr('class','axis-lab').attr('fill','var(--ink-faint)'))
+    .call(gx=> gx.selectAll('path,line').remove());
+  g.append('g').attr('transform',`translate(0,${ih})`)
+    .call(d3.axisBottom(x).tickValues(xTicks).tickSize(0).tickPadding(10)
+      .tickFormat(d=> d===0?'0':d+'%'))
+    .call(gx=> gx.selectAll('text').attr('class','axis-lab').attr('fill','var(--ink-faint)'))
+    .call(gx=> gx.selectAll('path,line').remove());
+  g.append('text').attr('x',-34).attr('y',-18).attr('class','axis-lab').attr('fill','var(--ink-faint)')
+    .text('海拔 / 米').attr('transform','rotate(-90 -34 -18)');
+  g.append('text').attr('x',iw).attr('y',ih+40).attr('text-anchor','end').attr('class','axis-lab')
+    .attr('fill','var(--ink-faint)').text('死亡率 %');
+
+  /* 气泡 */
+  g.selectAll('.risk').data(pts).join('circle').attr('class','risk').attr('data-id',d=>d.pk.id)
+    .attr('cx',d=>x(d.d)).attr('cy',d=>y(d.alt)).attr('r',0)
+    .attr('fill',d=>riskColor(d.d)).attr('fill-opacity',.82)
+    .attr('stroke','#0b1026').attr('stroke-width',1.6)
+    .transition().delay((d,i)=>i*80).duration(750).ease(d3.easeCubicOut).attr('r',d=>r(d.n));
+
+  /* 注释：死亡率最高的峰 + 登顶人数最多的峰（去重，避免同坐标重叠） */
+  const maxN = Math.max(...pts.map(p=>p.n));
+  const topDeath = pts.reduce((a,b)=> b.d>a.d ? b : a);
+  const annos = [];
+  if(topDeath.d>=15) annos.push(topDeath);
+  if(maxN!==topDeath.n) annos.push(pts.find(p=>p.n===maxN));
+  annos.forEach(p=>{
+    const cx = x(p.d), cy = y(p.alt), cr = r(p.n);
+    let ly = cy-cr-14, below = false;
+    if(ly<6){ ly = cy+cr+16; below = true; }
+    const gx = g.append('g').attr('class','anno').attr('data-id',p.pk.id).style('opacity',0);
+    gx.transition().delay(850).duration(400).style('opacity',1);
+    gx.append('line').attr('x1',cx).attr('y1',below?cy+cr+2:cy-cr-2)
+      .attr('x2',cx).attr('y2',below?ly-10:ly+8)
+      .attr('stroke','rgba(255,255,255,.25)').attr('stroke-width',1);
+    gx.append('text').attr('x',cx).attr('y',ly).attr('text-anchor','middle')
+      .attr('fill','#ffd9a0').attr('font-size',10.5).attr('font-family','var(--mono)')
+      .text(p.d>=15 ? `${p.pk.cn} ${fmtD(p.d)}` : `${p.pk.cn} · 登顶 ${fmtN(p.n)}${p.annual?'/年':''}`);
+  });
+
+  /* 悬停 / 点击（附加到圆与注释） */
+  g.selectAll('.risk').on('mouseenter', function(ev,d){
+    spotlight(d.pk.id);
+    d3.select(this).transition().duration(150).attr('r',d=>r(d.n)+3)
+      .attr('stroke','#ffd9a0').attr('stroke-width',2.2);
+    showTip(`<b>${d.pk.cn}</b> ${d.pk.en}<br>海拔 <span class="tip-alt">${fmt(d.pk.alt)} 米</span> · 死亡率 ${fmtD(d.d)}<br>登顶人数 ${fmtN(d.n)}${d.annual?'（每年）':'（累计）'}<span class="tip-more">点击打开峰顶档案</span>`, ev.clientX, ev.clientY);
+  }).on('mousemove', ev=> showTip(tip.innerHTML, ev.clientX, ev.clientY))
+    .on('mouseleave', function(){
+      d3.select(this).transition().duration(150).attr('r',d=>r(d.n))
+        .attr('stroke','#0b1026').attr('stroke-width',1.6);
+      hideTip(); spotlight(null);
+    })
+    .on('click', (ev,d)=> openDetail(d.pk));
+}
+
+/* ---------------- 04 首登时刻 ---------------- */
+function renderTime(){
+  const data = [...dataset].sort((a,b)=>a.year-b.year);
+  const svg = d3.select('#timeChart');
+  const W=1160, m={t:54,r:56,b:44,l:56};
+  const minY = Math.min(...data.map(p=>p.year))-5, maxY = Math.max(...data.map(p=>p.year))+5;
+  const x = d3.scaleLinear().domain([minY,maxY]).range([0,W-m.l-m.r]);
+
+  /* 标签防碰撞 */
+  const placed = placeLabels(data.map(pk=>({
+    pk, x: x(pk.year),
+    half: (estW(pk.cn,12.5)+estW(String(pk.year),15)+estW(pk.who[0][0],10))/2 + 16
+  })), it=>it.half, 14);
+
+  const upRows = Math.max(0, ...placed.filter(p=>p.above).map(p=>p.row));
+  const dnRows = Math.max(0, ...placed.filter(p=>!p.above).map(p=>p.row));
+  const ROW=56, axisY=60+(upRows+1)*ROW, H=m.t+axisY+(dnRows+1)*ROW+46;
+  svg.attr('viewBox',`0 0 ${W} ${H}`).attr('role','img').attr('aria-label','首登时间轴');
+  svg.selectAll('*').remove();
+  const g = svg.append('g').attr('transform',`translate(${m.l},${m.t})`);
+  const aY = axisY;
+
+  /* 进度渐变线 */
+  const defs = svg.append('defs');
+  const lg = defs.append('linearGradient').attr('id','timeGrad').attr('x1',0).attr('y1',0).attr('x2',1).attr('y2',0);
+  lg.append('stop').attr('offset',0).attr('stop-color','#33507f');
+  lg.append('stop').attr('offset',1).attr('stop-color','#ffb454');
+  const axisLine = g.append('line').attr('x1',0).attr('x2',W-m.l-m.r).attr('y1',aY).attr('y2',aY)
+    .attr('stroke','url(#timeGrad)').attr('stroke-width',2).attr('opacity',.85);
+  const alen = W-m.l-m.r;
+  axisLine.attr('stroke-dasharray',alen).attr('stroke-dashoffset',alen)
+    .transition().duration(1500).ease(d3.easeCubicOut).attr('stroke-dashoffset',0);
+  g.append('path').attr('d',`M${W-m.l-m.r},${aY} l-9,-4 v8 Z`).attr('fill','#ffb454');
+
+  /* 节点 + 标签 */
+  placed.forEach((p,i)=>{
+    const pk = p.pk;
+    const ly = p.above ? aY-40-p.row*ROW : aY+30+p.row*ROW;
+    const ty = p.above ? aY-74-p.row*ROW : aY+58+p.row*ROW;
+    const gx = g.append('g').attr('class','tnode').attr('data-id',pk.id)
+      .attr('opacity',0).attr('transform',`translate(0,${p.above?10:-10})`);
+    gx.append('line').attr('x1',p.x).attr('y1',aY).attr('x2',p.x).attr('y2',ly)
+      .attr('stroke','rgba(148,163,255,.35)').attr('stroke-width',1);
+    gx.append('rect').attr('x',p.x-5).attr('y',aY-5).attr('width',10).attr('height',10)
+      .attr('transform',`rotate(45 ${p.x} ${aY})`).attr('fill',altColor(pk.alt))
+      .attr('stroke','#0b1026').attr('stroke-width',1.5);
+    gx.append('text').attr('x',p.x).attr('y',ty).attr('text-anchor','middle')
+      .attr('fill','#e8edfb').attr('font-family','var(--serif)').attr('font-weight',700).attr('font-size',15)
+      .text(pk.year);
+    gx.append('text').attr('x',p.x).attr('y',ty+17).attr('text-anchor','middle')
+      .attr('fill','var(--ink-dim)').attr('font-size',11.5).text(pk.cn);
+    gx.append('text').attr('x',p.x).attr('y',ty+31).attr('text-anchor','middle')
+      .attr('fill','var(--ink-faint)').attr('font-size',9.5).attr('font-family','var(--mono)')
+      .text(`${pk.who[0][0]} · ${pk.who[0][1]}`);
+    gx.append('rect').attr('x',p.x-22).attr('y',aY-ROW).attr('width',44).attr('height',ROW*2)
+      .attr('fill','transparent').attr('class','chart-tip-hit');
+    gx.transition().delay(i*110).duration(450).attr('opacity',1).attr('transform','translate(0,0)');
+    gx.on('mouseenter', ev=>{
+      spotlight(pk.id);
+      showTip(`<b>${pk.cn}</b> ${pk.en}<br>首登 ${pk.year} 年 · ${pk.date}<br>${pk.who.map(w=>w[0]).join('、')}<span class="tip-more">点击打开峰顶档案</span>`, ev.clientX, ev.clientY);
+    }).on('mousemove', ev=> showTip(tip.innerHTML, ev.clientX, ev.clientY))
+      .on('mouseleave', ()=>{ hideTip(); spotlight(null); })
+      .on('click', ()=> openDetail(pk));
+  });
+}
+
+/* ---------------- 峰顶档案（模态） ---------------- */
+function openDetail(pk){
+  const body = $('#modalBody');
+  const st = STATS[pk.id];
+  const danger = st && parseFloat((st.death.match(/[\d.]+/)||['0'])[0]) >= 10;
+
+  /* 夜空场景（越高越深邃） */
+  const sky = pk.alt>=8000 ? ['#060a1c','#0d1533']
+           : pk.alt>=6000 ? ['#0a122e','#152142']
+           : pk.alt>=5000 ? ['#0e1836','#1c2a52']
+           : ['#121d40','#24325e'];
+  const sceneW=520, sceneH=360, baseY=300, mh=240, mw=420, mx0=(sceneW-mw)/2;
+  const stars = pk.alt>=8000 ? starsHTML(16, sceneW, 120) : starsHTML(6, sceneW, 90);
+  const moonY = pk.alt>=8000 ? 208 : 86;
+  const col = altColor(pk.alt);
+  const scene = `
+  <svg viewBox="0 0 ${sceneW} ${sceneH}">
+    <defs>
+      <linearGradient id="msky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="${sky[0]}"/><stop offset="1" stop-color="${sky[1]}"/>
+      </linearGradient>
+      <linearGradient id="mrock" x1="0" y1="${baseY-mh}" x2="0" y2="${baseY}" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#f4f8ff"/>
+        <stop offset=".22" stop-color="${d3.rgb(col).brighter(.4)}"/>
+        <stop offset=".6" stop-color="${col}"/>
+        <stop offset="1" stop-color="#121a3c"/>
+      </linearGradient>
+      <radialGradient id="msun" cx=".5" cy=".5" r=".5">
+        <stop offset="0" stop-color="#fef3c7" stop-opacity=".5"/><stop offset="1" stop-color="#fef3c7" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect width="${sceneW}" height="${sceneH}" fill="url(#msky)"/>
+    ${stars}
+    <circle cx="412" cy="${moonY}" r="60" fill="url(#msun)"/>
+    <circle cx="412" cy="${moonY}" r="22" fill="#fde8a0" opacity=".95"/>
+    <path id="m-mtn" d="${shapePath(pk.shape, mx0, baseY, mw, mh)}" fill="url(#mrock)" stroke="rgba(148,163,255,.3)" stroke-width="1"/>
+    <path d="${snowPath(pk.shape, mx0, baseY, mw, mh)}" fill="#f6f9ff" opacity=".96"/>
+    <rect x="0" y="${baseY}" width="${sceneW}" height="${sceneH-baseY}" fill="#0a1024"/>
+    <line x1="0" y1="${baseY}" x2="${sceneW}" y2="${baseY}" stroke="rgba(148,163,255,.25)" stroke-width="1"/>
+    <text x="${sceneW/2}" y="${sceneH-12}" text-anchor="middle"
+      style="font-family:var(--mono);font-size:10.5px;letter-spacing:3px;fill:var(--ink-faint)">海拔 ${fmt(pk.alt)} 米 · 示意场景</text>
+  </svg>`;
+  window.__sceneHTML = `<div class="scene-box">${scene}</div><div class="cap">程 序 绘 制 · SVG 夜 景</div>`;
+
+  const whoRows = pk.who.map(w=>`<span class="who">${w[0]}</span>（${w[1]}）`).join('　');
+  const chips = st ? `
+    <div class="mchips">
+      <div class="chip"><label>登顶窗口期</label><b>${st.season}</b></div>
+      <div class="chip${danger?' danger':''}"><label>死亡率</label><b>${st.death}</b></div>
+      <div class="chip"><label>累计登顶</label><b>${st.summits}</b></div>
+    </div>` : '';
+
+  body.innerHTML = `
+    <div class="mtitle">
+      <h3>${pk.cn}</h3>
+      <div class="en">${pk.en}</div>
+    </div>
+    <div class="modal-grid">
+      <div>
+        <div class="photo-box">
+          ${PHOTO[pk.id]
+            ? `<img src="${PHOTO[pk.id]}" alt="${pk.cn}实拍照片" loading="lazy"
+                 onerror="this.closest('.photo-box').innerHTML=window.__sceneHTML">`
+            : window.__sceneHTML}
+          <div class="cap">${PHOTO[pk.id]?'实 拍 照 片 · WIKIMEDIA COMMONS':''}</div>
+        </div>
+        <div class="profile-box"><svg id="modalProfile" viewBox="0 0 560 150" role="img"></svg><div class="cap">海 拔 剖 面 · 示 意 描 摹</div></div>
+      </div>
+      <div>
+        <div class="malt">${fmt(pk.alt)}<small>米</small></div>
+        ${chips}
+        <dl class="mlist">
+          <div class="mrow"><dt>所在国家</dt><dd>${pk.country}</dd></div>
+          <div class="mrow"><dt>所属山脉</dt><dd>${pk.range}</dd></div>
+          ${pk.continent?`<div class="mrow"><dt>所在大洲</dt><dd>${pk.continent}最高峰</dd></div>`:''}
+          <div class="mrow"><dt>首次登顶</dt><dd>${pk.date}（${pk.year} 年）</dd></div>
+          <div class="mrow"><dt>登顶者</dt><dd>${whoRows}</dd></div>
+        </dl>
+        <div class="mnote">${pk.note}</div>
+      </div>
+    </div>`;
+
+  /* 微型海拔剖面 */
+  renderProfile(pk);
+
+  $('#modal').classList.add('open');
+  $('#modal').setAttribute('aria-hidden','false');
+  document.body.style.overflow='hidden';
+}
+function renderProfile(pk){
+  const svg = d3.select('#modalProfile');
+  const W=560, H=150, m={t:10,r:44,b:22,l:8};
+  const iw=W-m.l-m.r, ih=H-m.t-m.b;
+  const base = Math.round(pk.alt*0.45);
+  const px = d3.scaleLinear().domain([0,100]).range([0,iw]);
+  const py = d3.scaleLinear().domain([base, pk.alt+140]).range([ih,0]);
+  svg.selectAll('*').remove();
+  const g = svg.append('g').attr('transform',`translate(${m.l},${m.t})`);
+
+  const pts = pk.shape.map(p=>({x:px(p[0]), y:py(base+(100-p[1])/100*(pk.alt-base))}));
+  const area = d3.area().x(d=>d.x).y0(ih).y1(d=>d.y).curve(d3.curveMonotoneX);
+  const line = d3.line().x(d=>d.x).y(d=>d.y).curve(d3.curveMonotoneX);
+  const col = altColor(pk.alt);
+
+  const defs = svg.append('defs');
+  const ag = defs.append('linearGradient').attr('id','pf').attr('x1',0).attr('y1',0).attr('x2',0).attr('y2',1);
+  ag.append('stop').attr('offset',0).attr('stop-color',col).attr('stop-opacity',.9);
+  ag.append('stop').attr('offset',1).attr('stop-color','#1e2a5e').attr('stop-opacity',.15);
+
+  g.append('path').datum(pts).attr('d',area).attr('fill','url(#pf)');
+  const top = g.append('path').datum(pts).attr('d',line).attr('fill','none')
+    .attr('stroke',col).attr('stroke-width',1.6);
+  const tlen = top.node().getTotalLength();
+  top.attr('stroke-dasharray',tlen).attr('stroke-dashoffset',tlen)
+    .transition().duration(900).ease(d3.easeCubicOut).attr('stroke-dashoffset',0);
+
+  if(pk.alt>8000){
+    g.append('line').attr('x1',0).attr('x2',iw).attr('y1',py(8000)).attr('y2',py(8000))
+      .attr('stroke','#f87171').attr('stroke-dasharray','4 4').attr('opacity',.8);
+    g.append('text').attr('x',iw+4).attr('y',py(8000)+3).attr('font-size',9)
+      .attr('fill','var(--red)').attr('font-family','var(--mono)').text('8k');
+  }
+  g.append('text').attr('x',iw+4).attr('y',py(pk.alt)-4).attr('font-size',9)
+    .attr('fill','var(--amber-soft)').attr('font-family','var(--mono)').text('▲');
+}
+function closeModal(){
+  $('#modal').classList.remove('open');
+  $('#modal').setAttribute('aria-hidden','true');
+  document.body.style.overflow='';
+}
+$('#modalClose').addEventListener('click', closeModal);
+$('#modal').addEventListener('click', e=>{ if(e.target.id==='modal') closeModal(); });
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape') closeModal();
+  if($('#modal').classList.contains('open')) return;
+  if(e.key==='ArrowLeft' || e.key==='ArrowRight'){
+    const btns=[...document.querySelectorAll('#seg button')];
+    const i = btns.findIndex(b=>b.dataset.set===current);
+    btns[(i+1)%btns.length].click();
+  }
+});
+
+/* ---------------- Tab 切换 ---------------- */
+document.querySelectorAll('#seg button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    if(btn.dataset.set===current) return;
+    document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('active', b===btn));
+    current = btn.dataset.set;
+    dataset = PEAKS[current];
+    renderAll();
+  });
+});
+
+function renderAll(){ renderRidge(); renderLadder(); renderRisk(); renderTime(); }
+
+/* ---------------- Hero：星空 / 视差 ---------------- */
+(function heroFX(){
+  const g = d3.select('#heroStars');
+  const rnd = mulberry32(8848);
+  function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+  for(let i=0;i<130;i++){
+    g.append('circle').attr('cx',rnd()*1440).attr('cy',rnd()*640)
+      .attr('r', rnd()<.82 ? .5+rnd()*.7 : 1.2+rnd()*.9)
+      .attr('fill', rnd()<.12 ? '#ffd9a0' : '#dbe4ff')
+      .style('--tw', (1.6+rnd()*3)+'s')
+      .attr('class','star')
+      .attr('opacity',.2+rnd()*.8);
+  }
+  window.addEventListener('scroll', ()=>{
+    const y = Math.min(window.scrollY, 700);
+    document.querySelectorAll('.hero-layer').forEach(el=>{
+      el.style.transform = `translateY(${y*(+el.dataset.rate)}px)`;
+    });
+    const hc = $('.hero-content');
+    if(hc) hc.style.opacity = Math.max(0, 1-y/420);
+    $('#topnav').classList.toggle('solid', y>30);
+  },{passive:true});
+})();
+
+/* ---------------- 滚动显现 + 导航高亮 ---------------- */
+const io = new IntersectionObserver(es=>{
+  es.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('in'); });
+},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+const spy = new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(!e.isIntersecting) return;
+    document.querySelectorAll('#anchors a').forEach(a=>
+      a.classList.toggle('on', a.dataset.sec===e.target.id));
+  });
+},{rootMargin:'-40% 0px -55% 0px'});
+['sec-ridge','sec-ladder','sec-risk','sec-time'].forEach(id=>spy.observe(document.getElementById(id)));
+
+$('#brand').addEventListener('click', ()=> window.scrollTo({top:0, behavior:'smooth'}));
+
+/* ---------------- 初始化 ---------------- */
+renderAll();
+</script>
+</body>
+</html>
