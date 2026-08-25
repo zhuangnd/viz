@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数据可视化为何未能成为大众文本 — 门槛与局限的辨析</title>
+<style>
+/* ============ 基础 ============ */
+:root {
+  --bg: #FAFAF8;
+  --surface: #FFFFFF;
+  --surface-2: #F4F4F0;
+  --text: #1C1C28;
+  --text-2: #55555F;
+  --text-3: #9E9EA8;
+  --border: #E6E6E2;
+  --border-2: #D8D8D2;
+  --c-text: #C2410C;
+  --c-image: #0369A1;
+  --c-viz: #6D28D9;
+  --c-math: #78716C;
+  --c-ai: #047857;
+  --c-limit: #B91C1C;
+  --c-ok: #15803D;
+  --serif: "Songti SC", "Noto Serif SC", "STSong", "SimSun", serif;
+  --sans: "PingFang SC", -apple-system, "Helvetica Neue", "Microsoft YaHei", sans-serif;
+  --maxw: 880px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.85;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: rgba(109,40,217,.15); }
+
+/* ============ 滚动进度 ============ */
+#progress {
+  position: fixed; top: 0; left: 0; height: 3px; width: 0;
+  background: linear-gradient(90deg, var(--c-viz), var(--c-ai));
+  z-index: 100; transition: width .1s linear;
+}
+
+/* ============ 侧边导航 ============ */
+#sideNav {
+  position: fixed; right: 24px; top: 50%; transform: translateY(-50%);
+  z-index: 90; display: flex; flex-direction: column; gap: 2px;
+  font-size: 12px;
+}
+#sideNav a {
+  color: var(--text-3); text-decoration: none; padding: 4px 10px;
+  border-right: 2px solid transparent; text-align: right;
+  transition: all .25s; white-space: nowrap;
+}
+#sideNav a:hover { color: var(--text); }
+#sideNav a.active { color: var(--c-viz); border-right-color: var(--c-viz); font-weight: 600; }
+@media (max-width: 1200px) { #sideNav { display: none; } }
+
+/* ============ Hero ============ */
+.hero {
+  min-height: 92vh; display: flex; flex-direction: column;
+  justify-content: center; align-items: center; text-align: center;
+  padding: 60px 24px 40px; position: relative; overflow: hidden;
+}
+.hero-bg { position: absolute; inset: 0; opacity: .5; pointer-events: none; }
+.hero-kicker {
+  font-size: 13px; letter-spacing: .35em; color: var(--c-viz);
+  text-transform: uppercase; margin-bottom: 22px; font-weight: 600;
+}
+.hero h1 {
+  font-family: var(--serif); font-size: clamp(30px, 5vw, 52px);
+  font-weight: 700; line-height: 1.35; max-width: 800px;
+  margin-bottom: 16px;
+}
+.hero .subtitle {
+  font-family: var(--serif); font-size: clamp(16px, 2.2vw, 21px);
+  color: var(--text-2); margin-bottom: 44px;
+}
+.hero-question {
+  max-width: 660px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 26px 32px; text-align: left;
+  font-size: 15px; color: var(--text-2); line-height: 1.95;
+  box-shadow: 0 8px 30px rgba(28,28,40,.06);
+  position: relative;
+}
+.hero-question::before {
+  content: "?"; position: absolute; top: -18px; left: 24px;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--c-viz); color: #fff; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; font-size: 20px;
+  font-family: var(--serif);
+}
+.hero-question em { color: var(--c-viz); font-style: normal; font-weight: 600; }
+.hero-meta { margin-top: 40px; font-size: 13px; color: var(--text-3); display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
+.hero-meta span::before { content: "·"; margin-right: 8px; color: var(--c-viz); }
+.scroll-hint {
+  position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%);
+  color: var(--text-3); font-size: 12px; letter-spacing: .2em;
+  animation: bob 2s ease-in-out infinite;
+}
+@keyframes bob { 0%,100%{transform:translate(-50%,0)} 50%{transform:translate(-50%,8px)} }
+
+/* ============ 通用 Section ============ */
+section.block {
+  max-width: var(--maxw); margin: 0 auto; padding: 72px 24px;
+}
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity .8s ease, transform .8s ease; }
+.reveal.in { opacity: 1; transform: translateY(0); }
+.sec-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 12.5px; letter-spacing: .22em; font-weight: 600;
+  color: var(--c-viz); margin-bottom: 14px; text-transform: uppercase;
+}
+.sec-tag::before { content: ""; width: 26px; height: 2px; background: var(--c-viz); }
+section.block h2 {
+  font-family: var(--serif); font-size: clamp(24px, 3.4vw, 34px);
+  line-height: 1.4; margin-bottom: 18px; font-weight: 700;
+}
+section.block h3 {
+  font-family: var(--serif); font-size: 20px; margin: 40px 0 14px; font-weight: 700;
+  display: flex; align-items: baseline; gap: 10px;
+}
+section.block h3 .num {
+  font-size: 13px; color: var(--c-viz); font-family: var(--sans); font-weight: 600;
+  letter-spacing: .05em;
+}
+section.block p { margin-bottom: 16px; color: var(--text-2); }
+section.block p strong, section.block li strong { color: var(--text); }
+section.block ul { margin: 0 0 16px 22px; color: var(--text-2); }
+section.block li { margin-bottom: 8px; }
+.big-quote {
+  border-left: 3px solid var(--c-viz); background: var(--surface);
+  padding: 20px 26px; border-radius: 0 12px 12px 0; margin: 24px 0;
+  font-family: var(--serif); font-size: 17.5px; line-height: 1.9; color: var(--text);
+}
+.divider { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+.divider hr { border: none; border-top: 1px solid var(--border); }
+
+/* ============ 三家定位卡 ============ */
+.pos-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 26px 0; }
+.pos-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+  padding: 20px 18px; text-align: center; transition: transform .3s, box-shadow .3s;
+}
+.pos-card:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(28,28,40,.08); }
+.pos-card .src { font-size: 12px; color: var(--text-3); letter-spacing: .1em; margin-bottom: 8px; font-weight: 600; }
+.pos-card .pos { font-family: var(--serif); font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+.pos-card .desc { font-size: 12.5px; color: var(--text-2); line-height: 1.7; }
+.pos-card.c1 { border-top: 3px solid var(--c-text); }
+.pos-card.c2 { border-top: 3px solid var(--c-image); }
+.pos-card.c3 { border-top: 3px solid var(--c-viz); }
+.pos-card.c1 .pos { color: var(--c-text); }
+.pos-card.c2 .pos { color: var(--c-image); }
+.pos-card.c3 .pos { color: var(--c-viz); }
+@media (max-width: 640px) { .pos-cards { grid-template-columns: 1fr; } }
+
+/* ============ 对比表 ============ */
+.cmp-table-wrap { overflow-x: auto; margin: 26px 0; border-radius: 14px; border: 1px solid var(--border); background: var(--surface); }
+table.cmp { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 640px; }
+table.cmp th, table.cmp td { padding: 13px 16px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.7; }
+table.cmp thead th { background: var(--surface-2); font-weight: 600; font-size: 13px; color: var(--text); }
+table.cmp thead th:nth-child(2) { color: var(--c-text); }
+table.cmp thead th:nth-child(3) { color: var(--c-image); }
+table.cmp thead th:nth-child(4) { color: var(--c-viz); }
+table.cmp tbody tr:last-child td { border-bottom: none; }
+table.cmp tbody tr { transition: background .2s; }
+table.cmp tbody tr:hover { background: rgba(109,40,217,.035); }
+table.cmp td:first-child { font-weight: 600; color: var(--text); white-space: nowrap; }
+
+/* ============ 论证脉络 手风琴 ============ */
+.acc { margin: 18px 0; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--surface); }
+.acc + .acc { margin-top: 14px; }
+.acc-head {
+  display: flex; align-items: center; gap: 14px; padding: 18px 22px;
+  cursor: pointer; user-select: none; transition: background .2s;
+}
+.acc-head:hover { background: var(--surface-2); }
+.acc-head .badge {
+  width: 64px; height: 26px; border-radius: 13px; font-size: 11.5px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0;
+}
+.acc-head .badge.b1 { background: var(--c-text); }
+.acc-head .badge.b2 { background: var(--c-image); }
+.acc-head .badge.b3 { background: var(--c-viz); }
+.acc-head .title { font-weight: 600; font-size: 15px; flex: 1; }
+.acc-head .arrow { color: var(--text-3); transition: transform .3s; font-size: 12px; }
+.acc.open .acc-head .arrow { transform: rotate(180deg); }
+.acc-body { max-height: 0; overflow: hidden; transition: max-height .5s ease; }
+.acc.open .acc-body { max-height: 2000px; }
+.acc-body-inner { padding: 4px 24px 22px; border-top: 1px solid var(--border); }
+.acc-body-inner p { font-size: 14.5px; margin: 14px 0; }
+.acc-body-inner .kw { font-weight: 600; }
+.acc-body-inner .kw.k1 { color: var(--c-text); }
+.acc-body-inner .kw.k2 { color: var(--c-image); }
+.acc-body-inner .kw.k3 { color: var(--c-viz); }
+
+/* ============ 交互图通用容器 ============ */
+.viz-panel {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+  padding: 26px; margin: 28px 0; box-shadow: 0 4px 18px rgba(28,28,40,.04);
+}
+.viz-panel .viz-title { font-size: 13px; font-weight: 600; color: var(--text-3); letter-spacing: .08em; margin-bottom: 18px; text-transform: uppercase; }
+.viz-caption { font-size: 13px; color: var(--text-3); margin-top: 16px; line-height: 1.7; }
+
+/* Tabs */
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.tabs button {
+  padding: 8px 20px; border-radius: 20px; border: 1.5px solid var(--border-2);
+  background: var(--surface); color: var(--text-2); font-size: 14px; cursor: pointer;
+  font-family: var(--sans); transition: all .25s; font-weight: 500;
+}
+.tabs button:hover { border-color: var(--text-3); }
+.tabs button.active { color: #fff; font-weight: 600; }
+
+/* ============ 条形图（四种表达） ============ */
+.four-chart { padding: 26px 10px 0 36px; }
+.four-plot { position: relative; height: 200px; }
+.four-plot .grid-line { position: absolute; left: 0; right: 0; height: 1px; background: var(--border); z-index: 0; }
+.four-plot .grid-line.zero { background: var(--border-2); }
+.four-plot .grid-line .gv {
+  position: absolute; left: -28px; top: -7px; width: 20px; text-align: right;
+  font-size: 11px; color: var(--text-3); font-weight: 500;
+}
+.bars-row { display: flex; align-items: flex-end; height: 100%; position: relative; z-index: 1; }
+.bar-col { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; }
+.bar-col .bar {
+  width: 60%; max-width: 58px; border-radius: 6px 6px 0 0;
+  transition: height .7s cubic-bezier(.4,0,.2,1), background .4s;
+  position: relative;
+}
+.bar-val {
+  position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
+  font-size: 12px; font-weight: 700; transition: color .4s;
+}
+.labels-row { display: flex; margin-top: 10px; }
+.labels-row .l { flex: 1; text-align: center; font-size: 11px; color: var(--text-2); font-weight: 500; }
+
+/* 双重门槛 */
+.thr-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.thr-col { background: var(--surface-2); border-radius: 12px; padding: 18px; }
+.thr-col h4 { font-size: 15px; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+.thr-col h4 .dot { width: 9px; height: 9px; border-radius: 50%; }
+.thr-col .sub { font-size: 12px; color: var(--text-3); margin-bottom: 14px; }
+.thr-item { margin-bottom: 12px; }
+.thr-item .lbl { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 5px; color: var(--text-2); }
+.thr-item .lbl b { color: var(--text); }
+.thr-item .track { height: 10px; background: var(--border); border-radius: 5px; overflow: hidden; }
+.thr-item .fill { height: 100%; width: 0; border-radius: 5px; transition: width 1.1s cubic-bezier(.4,0,.2,1); }
+.thr-note { font-size: 12px; color: var(--text-3); margin-top: 8px; line-height: 1.6; }
+@media (max-width: 640px) { .thr-grid { grid-template-columns: 1fr; } }
+
+/* ============ 信息边界 翻牌 ============ */
+.b-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+@media (max-width: 860px) { .b-grid { grid-template-columns: repeat(2, 1fr); } }
+.b-card {
+  aspect-ratio: 1.35; perspective: 900px; cursor: pointer;
+}
+.b-inner {
+  position: relative; width: 100%; height: 100%;
+  transform-style: preserve-3d; transition: transform .55s cubic-bezier(.4,0,.2,1);
+}
+.b-card.flipped .b-inner { transform: rotateY(180deg); }
+.b-face {
+  position: absolute; inset: 0; backface-visibility: hidden; border-radius: 12px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 14px; text-align: center;
+}
+.b-front { background: var(--surface); border: 1.5px solid var(--border); }
+.b-front .q { font-size: 14.5px; font-weight: 600; color: var(--text); line-height: 1.5; }
+.b-front .hint { margin-top: 10px; font-size: 11px; color: var(--text-3); letter-spacing: .1em; }
+.b-front .icon { font-size: 22px; margin-bottom: 8px; opacity: .55; }
+.b-back { transform: rotateY(180deg); color: #fff; }
+.b-back.ok { background: linear-gradient(135deg, #15803D, #166534); }
+.b-back.no { background: linear-gradient(135deg, #B91C1C, #991B1B); }
+.b-back .verdict { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.b-back .why { font-size: 12px; line-height: 1.6; opacity: .92; }
+.b-back .chart-type { margin-top: 8px; font-size: 11px; background: rgba(255,255,255,.2); padding: 3px 10px; border-radius: 10px; }
+
+/* ============ 嵌套圆（门槛⊂局限） ============ */
+.nested-wrap { display: flex; gap: 30px; align-items: flex-start; flex-wrap: wrap; }
+.nested-svg-wrap { flex: 0 0 340px; display: flex; justify-content: center; }
+.nested-info { flex: 1; min-width: 260px; }
+.nested-info p { font-size: 14.5px; margin-bottom: 12px; }
+.btn {
+  padding: 10px 24px; border-radius: 24px; border: none; cursor: pointer;
+  font-size: 14px; font-weight: 600; font-family: var(--sans);
+  background: var(--c-viz); color: #fff; transition: all .25s;
+  box-shadow: 0 4px 14px rgba(109,40,217,.3);
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(109,40,217,.4); }
+.btn:disabled { opacity: .5; cursor: default; transform: none; }
+.btn.reset { background: var(--text-3); box-shadow: none; }
+#nestedMsg { margin-top: 14px; font-size: 14px; padding: 12px 16px; border-radius: 10px; background: var(--surface-2); color: var(--text-2); line-height: 1.7; min-height: 104px; transition: all .3s; }
+
+/* ============ 演化趋势图 ============ */
+.trend-svg-wrap { width: 100%; overflow-x: auto; }
+.trend-legend { display: flex; gap: 22px; margin-top: 12px; flex-wrap: wrap; font-size: 13px; color: var(--text-2); }
+.trend-legend span { display: flex; align-items: center; gap: 7px; }
+.trend-legend i { width: 22px; height: 3px; border-radius: 2px; display: inline-block; }
+
+/* 时间线 */
+.timeline { margin-top: 30px; }
+.tl-track { position: relative; padding-left: 22px; border-left: 2px solid var(--border); }
+.tl-item { position: relative; padding-bottom: 22px; }
+.tl-item::before {
+  content: ""; position: absolute; left: -28.5px; top: 6px;
+  width: 11px; height: 11px; border-radius: 50%; background: var(--surface);
+  border: 2.5px solid var(--text-3);
+}
+.tl-item.t1::before { border-color: var(--c-text); }
+.tl-item.t2::before { border-color: var(--c-image); }
+.tl-item.t3::before { border-color: var(--c-viz); }
+.tl-item .tl-when { font-size: 12px; color: var(--text-3); font-weight: 600; letter-spacing: .05em; }
+.tl-item .tl-what { font-size: 14.5px; color: var(--text); font-weight: 500; }
+.tl-item .tl-note { font-size: 13px; color: var(--text-2); }
+
+/* ============ 寄生性散点图 ============ */
+.toggle-row { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.switch { position: relative; width: 52px; height: 28px; flex-shrink: 0; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch .slider {
+  position: absolute; inset: 0; background: var(--border-2); border-radius: 14px;
+  cursor: pointer; transition: .3s;
+}
+.switch .slider::before {
+  content: ""; position: absolute; width: 22px; height: 22px; left: 3px; top: 3px;
+  background: #fff; border-radius: 50%; transition: .3s; box-shadow: 0 2px 6px rgba(0,0,0,.2);
+}
+.switch input:checked + .slider { background: var(--c-viz); }
+.switch input:checked + .slider::before { transform: translateX(24px); }
+.toggle-row .tlabel { font-size: 14px; color: var(--text-2); font-weight: 500; }
+.scatter-svg-wrap { width: 100%; overflow-x: auto; }
+#scatterSvg text { font-family: var(--sans); }
+.anno { transition: opacity .45s; }
+#parasiteQ { margin-top: 14px; font-size: 14px; color: var(--text-2); padding: 12px 16px; border-radius: 10px; background: var(--surface-2); line-height: 1.7; transition: all .3s; }
+
+/* ============ 冷暖对比 ============ */
+.warmcold { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 720px) { .warmcold { grid-template-columns: 1fr; } }
+.wc-card { border-radius: 14px; padding: 20px; border: 1px solid var(--border); }
+.wc-card.cold { background: #FCFCFC; }
+.wc-card.warm { background: #FFFBF5; border-color: #F3E4CE; }
+.wc-card .wc-tag { font-size: 11.5px; font-weight: 700; letter-spacing: .12em; margin-bottom: 10px; }
+.wc-card.cold .wc-tag { color: #71717A; }
+.wc-card.warm .wc-tag { color: #B45309; }
+.wc-card .wc-title { font-size: 14.5px; font-weight: 600; margin-bottom: 14px; font-family: var(--serif); }
+.wc-card.cold .wc-title { color: #3F3F46; }
+.wc-card.warm .wc-title { color: #78350F; }
+.wc-bars { display: flex; align-items: flex-end; gap: 8px; height: 130px; }
+.wc-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+.wc-bar-col .wc-bar { width: 70%; border-radius: 4px 4px 0 0; }
+.wc-bar-col .wc-lbl { font-size: 10.5px; margin-top: 6px; color: var(--text-2); }
+.wc-card.cold .wc-lbl { color: #A1A1AA; }
+.wc-card.warm .wc-lbl { color: #92400E; }
+.wc-card .wc-note { font-size: 12px; margin-top: 12px; line-height: 1.6; }
+.wc-card.cold .wc-note { color: #A1A1AA; }
+.wc-card.warm .wc-note { color: #92400E; }
+.wc-star { position: relative; }
+.wc-star::after { content: "★ 性价比之王"; position: absolute; top: -24px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #B45309; white-space: nowrap; font-weight: 700; }
+
+/* ============ AI 管线 ============ */
+.pipe { display: none; }
+.pipe.show { display: block; animation: fadeIn .5s; }
+@keyframes fadeIn { from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none} }
+.pipe-flow { display: flex; align-items: center; gap: 0; flex-wrap: wrap; row-gap: 20px; justify-content: center; padding: 14px 0; }
+.pipe-node {
+  background: var(--surface); border: 1.5px solid var(--border-2); border-radius: 12px;
+  padding: 12px 18px; text-align: center; min-width: 108px; transition: transform .3s;
+}
+.pipe-node:hover { transform: translateY(-3px); }
+.pipe-node .pn-icon { font-size: 20px; margin-bottom: 4px; }
+.pipe-node .pn-name { font-size: 13.5px; font-weight: 600; }
+.pipe-node .pn-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+.pipe-node.human { border-color: var(--c-text); }
+.pipe-node.human .pn-name { color: var(--c-text); }
+.pipe-node.ai { border-color: var(--c-ai); background: #F0FAF5; }
+.pipe-node.ai .pn-name { color: var(--c-ai); }
+.pipe-arrow { color: var(--text-3); font-size: 18px; padding: 0 10px; flex-shrink: 0; }
+.pipe-arrow.loop { color: var(--c-ai); transform: rotate(90deg) scaleX(-1); }
+.pipe-convo {
+  margin-top: 22px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+}
+.bubble {
+  max-width: 300px; padding: 12px 18px; border-radius: 16px; font-size: 13.5px; line-height: 1.7;
+}
+.bubble.user { background: var(--c-text); color: #fff; border-bottom-right-radius: 4px; }
+.bubble.ai-b { background: var(--surface); border: 1.5px solid var(--c-ai); color: var(--text); border-bottom-left-radius: 4px; }
+.bubble.ai-b b { color: var(--c-ai); }
+
+/* ============ 结论 ============ */
+.conclusion-wrap {
+  background: linear-gradient(160deg, #1C1329 0%, #2A1B4A 60%, #1B2B3A 100%);
+  border-radius: 20px; padding: 54px 44px; color: #EDEDF2; margin-top: 20px;
+  position: relative; overflow: hidden;
+}
+@media (max-width: 640px) { .conclusion-wrap { padding: 36px 24px; } }
+.conclusion-wrap::before {
+  content: ""; position: absolute; top: -80px; right: -80px; width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(109,40,217,.25), transparent 70%); border-radius: 50%;
+}
+.conclusion-wrap h2 { color: #fff !important; }
+.conclusion-wrap .sec-tag { color: #A78BFA; }
+.conclusion-wrap .sec-tag::before { background: #A78BFA; }
+.conclusion-wrap p { color: #C9C9D6; }
+.conclusion-wrap .big-quote { background: rgba(255,255,255,.06); border-left-color: #A78BFA; color: #fff; }
+.takeaways { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 30px; position: relative; }
+@media (max-width: 640px) { .takeaways { grid-template-columns: 1fr; } }
+.tk-card { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12); border-radius: 14px; padding: 20px; backdrop-filter: blur(4px); }
+.tk-card .tk-num { font-size: 12px; color: #A78BFA; font-weight: 700; letter-spacing: .15em; margin-bottom: 8px; }
+.tk-card .tk-title { font-size: 15.5px; font-weight: 700; color: #fff; margin-bottom: 8px; font-family: var(--serif); }
+.tk-card .tk-desc { font-size: 13px; color: #B5B5C4; line-height: 1.7; }
+
+/* ============ 附录 ============ */
+.appendix-wrap { overflow-x: auto; border-radius: 14px; border: 1px solid var(--border); background: var(--surface); margin-top: 24px; }
+table.app { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 560px; }
+table.app th, table.app td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); line-height: 1.7; }
+table.app thead th { background: var(--surface-2); font-weight: 600; font-size: 12.5px; }
+table.app tbody tr:last-child td { border-bottom: none; }
+table.app td:first-child { font-weight: 600; white-space: nowrap; }
+table.app td:last-child { font-size: 12px; color: var(--text-3); white-space: nowrap; }
+
+/* ============ Footer ============ */
+footer {
+  text-align: center; padding: 50px 24px 60px; color: var(--text-3); font-size: 13px;
+  border-top: 1px solid var(--border); margin-top: 40px; line-height: 2;
+}
+footer .f-links { display: flex; gap: 18px; justify-content: center; margin-bottom: 8px; flex-wrap: wrap; }
+footer .f-links span { color: var(--text-2); }
+footer .f-links span::before { content: "—"; margin-right: 8px; color: var(--border-2); }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<nav id="sideNav">
+  <a href="#overview" class="active">总览</a>
+  <a href="#sec-acc">论证脉络</a>
+  <a href="#sec-diverge">关键分歧</a>
+  <a href="#sec-four">四种表达方式</a>
+  <a href="#sec-threshold">双重门槛</a>
+  <a href="#sec-boundary">信息边界</a>
+  <a href="#sec-root">辨析·同源性</a>
+  <a href="#sec-evolution">辨析·演化路径</a>
+  <a href="#sec-parasite">辨析·寄生性</a>
+  <a href="#sec-social">辨析·社会学</a>
+  <a href="#sec-ai">辨析·AI时代</a>
+  <a href="#sec-conclusion">综合结论</a>
+  <a href="#sec-appendix">附录</a>
+</nav>
+
+<!-- ==================== HERO ==================== -->
+<header class="hero">
+  <svg class="hero-bg" width="100%" height="100%" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <g opacity="0.06" stroke="#6D28D9" stroke-width="1.5" fill="none">
+      <path d="M100,650 L300,520 L500,580 L700,380 L900,440 L1100,240"/>
+      <circle cx="300" cy="520" r="5" fill="#6D28D9"/><circle cx="700" cy="380" r="5" fill="#6D28D9"/><circle cx="1100" cy="240" r="5" fill="#6D28D9"/>
+      <rect x="120" y="200" width="34" height="120" rx="4"/><rect x="170" y="150" width="34" height="170" rx="4"/><rect x="220" y="240" width="34" height="80" rx="4"/>
+      <path d="M900,150 L950,190 L1030,110" stroke-width="2.5"/>
+    </g>
+    <g opacity="0.05" stroke="#0369A1" fill="none">
+      <circle cx="180" cy="420" r="60"/><path d="M120,420 a60,60 0 0,1 120,0"/><circle cx="960" cy="600" r="45"/>
+    </g>
+  </svg>
+  <div class="hero-kicker">VIZ · AS · LANGUAGE</div>
+  <h1>数据可视化为何未能<br>成为大众文本</h1>
+  <div class="subtitle">—— 门槛与局限的辨析</div>
+  <div class="hero-question">
+    数据可视化 / 信息可视化虽然在特定领域不可或缺，但其本身有文字和图像所没有的信息表达优势，为什么没能像文字、图像一样，成为普通场景的主要文本之一，没法被非专业人士所理解和接受——是<em>门槛问题</em>，还是<em>可视化本身的局限性</em>？
+  </div>
+  <div class="hero-meta">
+    <span>三篇 AI 文档总结</span>
+    <span>五维补充辨析</span>
+    <span>可交互图景</span>
+  </div>
+  <div class="scroll-hint">▼ 向下滚动</div>
+</header>
+
+<!-- ==================== §1 总览 ==================== -->
+<section class="block reveal" id="overview">
+  <div class="sec-tag">一 · 三篇文档总结</div>
+  <h2>三家的答案：殊途同归</h2>
+  <p>ChatGPT、Gemini、Claude 三篇文档虽然论证路径不同，但收敛于同一个结论——</p>
+  <div class="big-quote">
+    数据可视化不是一种通用信息表达媒介，而是一种针对<strong>「数量关系」的专用语言</strong>。它服务于「理性计算与科学决策」，而非「生物本能与社会叙事」，因此无法像文字和图像那样成为人人日常使用的基础表达方式。
+  </div>
+  <p>三家分别给出了不同的类比定位：</p>
+  <div class="pos-cards">
+    <div class="pos-card c1">
+      <div class="src">ChatGPT</div>
+      <div class="pos">专用语言</div>
+      <div class="desc">文字负责叙事，图像负责感知，可视化负责关系——它是数量关系的专用语言</div>
+    </div>
+    <div class="pos-card c2">
+      <div class="src">Gemini</div>
+      <div class="pos">高级副语言</div>
+      <div class="desc">文字图像服务生物本能与社会叙事，可视化服务于理性计算——天然带有精英主义底色</div>
+    </div>
+    <div class="pos-card c3">
+      <div class="src">Claude</div>
+      <div class="pos">专用记号系统</div>
+      <div class="desc">类似乐谱或数学符号——服务于特定类型的内容，而非全部人类表达</div>
+    </div>
+  </div>
+
+  <h3><span class="num">1.2</span>核心论点对比</h3>
+  <div class="cmp-table-wrap">
+    <table class="cmp">
+      <thead>
+        <tr><th>维度</th><th>ChatGPT</th><th>Gemini</th><th>Claude</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>根本原因</td><td>使用频率低，学习不值得投入</td><td>进化认知差距（人脑非为数据演化）</td><td>结构性限制（内容须天然可量化）</td></tr>
+        <tr><td>门槛可否降低</td><td>可降低，但不影响结论</td><td>深嵌于进化，难以根本改变</td><td>可降低（生产端已快速塌陷）</td></tr>
+        <tr><td>不可磨灭的局限</td><td>覆盖的信息空间小（仅数量信息）</td><td>叙事缺失、高认知负载、信任危机</td><td>内容是否天然可量化</td></tr>
+        <tr><td>可视化的定位</td><td>数量关系的专用语言</td><td>高级副语言</td><td>专用记号系统（如乐谱）</td></tr>
+        <tr><td>对 AI 时代的预期</td><td>乐观：成为 AI 的中间语言</td><td>未深入分析</td><td>审慎：门槛降低但结构性限制不变</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ==================== §2 论证脉络 ==================== -->
+<section class="block reveal" id="sec-acc">
+  <h3><span class="num">1.3</span>论证脉络 <span style="font-size:13px;color:var(--text-3);font-family:var(--sans);font-weight:400">（点击展开全文）</span></h3>
+
+  <div class="acc" id="acc1">
+    <div class="acc-head">
+      <span class="badge b1">ChatGPT</span>
+      <span class="title">四种表达能力 · 使用频率定律 · AI 中间语言</span>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="acc-body">
+      <div class="acc-body-inner">
+        <p>论证链条最为完整。从<span class="kw k1">「信息表达的四种能力」</span>出发——文字负责叙事、图像负责感知、可视化负责关系、数学公式负责精确定义——指出可视化覆盖的信息空间其实很小。</p>
+        <p>进而从进化角度解释为什么人脑擅长看照片却不擅长看折线图：人类大脑演化出的是<strong>视觉感知</strong>（面孔识别、颜色、动作、空间、物体），而非<strong>抽象数量认知</strong>（百分比、坐标轴、对数尺度、多变量关系）。看一张猫的照片只需 0.2 秒；看一张折线图需要先理解横轴、纵轴、单位、比例、坐标轴是否截断。</p>
+        <p>最有原创性的观点：<span class="kw k1">「一张图胜千言」是错觉——很多图比文章更难</span>。可视化并没有减少信息，而是把文字翻译成了一套新的语言，任何语言都需要学习。而真正限制普及的不是学习门槛，而是<strong>使用频率</strong>——普通人一年也用不上几次散点图，心理学规律「使用频率越低，学习成本越不值得投入」决定了大众不会主动学习。</p>
+        <p>此外，可视化还有天然缺陷：<strong>不能脱离数据</strong>——文字可以虚构、图片可以想象，但可视化必须回答「数据在哪里」。最后展望 AI 时代可视化将变为「中间语言」。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="acc" id="acc2">
+    <div class="acc-head">
+      <span class="badge b2">Gemini</span>
+      <span class="title">进化差距 · 视觉语法缺失 · 读写不对称 · 三重局限</span>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="acc-body">
+      <div class="acc-body-inner">
+        <p>论证从媒介本质出发，核心框架是<span class="kw k2">「文字和图像顺应生物进化，可视化是后天发明的抽象符号系统」</span>。图像是对物理世界的直接映射，人脑经数百万年进化具备极强的视觉场景解析能力；文字复刻口语，承载人类天然的因果叙事思维；可视化则剥离现实，将抽象的数学逻辑折射为几何元素。</p>
+        <p>门槛层面提出两点：一是<strong>「视觉语法」的缺失</strong>——学校不教如何阅读散点图、对数坐标的意义，不懂编码逻辑的普通人在复杂图表眼里只看到一堆几何图形；二是<strong>读写不对称（Prosumer Gap）</strong>——大众是文字和图像的消费者同时也是低成本生产者（随手拍照、随手发微信），但可视化的生产端门槛极高，生产端和消费端的断层导致普通人缺乏与可视化高频交互的场景。</p>
+        <p>局限性层面提出三点：<strong>叙事能力的缺失</strong>（文字擅长表达情感、假设、复杂逻辑条件，可视化是确定性数据的结果呈现）、<strong>高认知负载</strong>（读文字是被动吸收，读图表需要主动解码，在图例、坐标轴和数据点之间来回跳动视线）、<strong>信任危机</strong>（图表涉及人为的数据过滤和视觉映射，极易被操纵）。最后以「精英主义与工具理性」作结。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="acc" id="acc3">
+    <div class="acc-head">
+      <span class="badge b3">Claude</span>
+      <span class="title">双重门槛 · 二阶表达 · 寄生性 · 专用记号系统</span>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="acc-body">
+      <div class="acc-body-inner">
+        <p>论证最为精炼，核心判断是<span class="kw k3">「门槛和局限性其实是同一件事的两面，只是门槛可以随时间被磨低，而局限性磨不掉」</span>。</p>
+        <p>指出可视化卡在<strong>两端都贵</strong>的独特位置：文字的门槛集中在生产端（书写系统需学习），但阅读端一旦扫盲教育普及，理解成本几乎为零；图像更极端，生产端随手机摄像头普及后成本趋近于零，理解端几乎不需要学习。可视化不幸两端都贵：生产端需要先把内容整理成结构化数据再做编码设计（本身就是专业判断）；理解端的「视觉语法」（柱状图高度对应数值、散点图位置对应变量关系）是近两三百年才逐渐成型的约定俗成，远没有沉淀为本能，且不同工具、不同作者的编码习惯常常不统一。</p>
+        <p>更根本的是<strong>结构性限制</strong>：可视化是对「已经量化的内容」的二阶表达，而文字和图像可以直接承载一阶的、未经量化的人类经验。日常交流中绝大多数内容（情绪、态度、叙事、暗示、幽默）不是天然量化的，你没法把「我今天有点烦但说不清为什么」画成一张图，除非先粗暴地把它简化成「心情指数」，而这个简化本身就丢失了最重要的部分。</p>
+        <p>此外指出可视化的<strong>寄生性</strong>：它几乎从不能独立成立，通常需要配文字（标题、图例、坐标轴说明）才能被正确解读。这种「必须寄生在文字之上」的特性，决定了它很难成为独立的一级媒介。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== §3 关键分歧 ==================== -->
+<section class="block reveal" id="sec-diverge">
+  <h3><span class="num">1.4</span>关键分歧：门槛与局限，何者更根本？</h3>
+  <div class="viz-panel">
+    <div class="viz-title">三家的立场</div>
+    <div class="pos-cards" style="grid-template-columns:1fr;gap:10px;margin:0">
+      <div style="display:flex;gap:16px;align-items:baseline;padding:14px 18px;background:var(--surface-2);border-radius:12px">
+        <span style="color:var(--c-text);font-weight:700;font-size:13px;white-space:nowrap">ChatGPT</span>
+        <span style="font-size:14px;color:var(--text-2)"><strong style="color:var(--text)">绕过二分法，提出第三选项：使用频率。</strong>即使门槛降低、即使局限性存在，如果人不需要用，就不会学。</span>
+      </div>
+      <div style="display:flex;gap:16px;align-items:baseline;padding:14px 18px;background:var(--surface-2);border-radius:12px">
+        <span style="color:var(--c-image);font-weight:700;font-size:13px;white-space:nowrap">Gemini</span>
+        <span style="font-size:14px;color:var(--text-2)"><strong style="color:var(--text)">倾向于将两者视为交织。</strong>进化认知差距既是门槛的根源也是局限的根源，难以分离。</span>
+      </div>
+      <div style="display:flex;gap:16px;align-items:baseline;padding:14px 18px;background:var(--surface-2);border-radius:12px">
+        <span style="color:var(--c-viz);font-weight:700;font-size:13px;white-space:nowrap">Claude</span>
+        <span style="font-size:14px;color:var(--text-2)"><strong style="color:var(--text)">最明确地做了分离。</strong>门槛可被技术压低，局限性不可被技术压低——这是三篇中最锐利的分析框架。</span>
+      </div>
+    </div>
+    <div class="viz-caption">下文 §四种表达方式 至 §信息边界 将三家论证中的核心图景做成可交互演示；之后进入本文的五个补充辨析。</div>
+  </div>
+</section>
+
+<!-- ==================== §4 四种信息表达方式 ==================== -->
+<section class="block reveal" id="sec-four">
+  <div class="sec-tag">图景 · 一</div>
+  <h2>信息表达的四种能力</h2>
+  <p>ChatGPT 的论证起点：文字负责叙事，图像负责感知，可视化负责关系，数学公式负责精确定义。文字和图片回答的是<strong>「是什么？」</strong>，而数据可视化回答的是<strong>「它们之间是什么关系？」</strong>——这本来就是两个不同层次的问题。</p>
+  <div class="viz-panel">
+    <div class="viz-title">各媒介的表达能力强项（点击切换，0–5 分制）</div>
+    <div class="tabs" id="fourTabs">
+      <button data-m="text" class="active" style="--c:var(--c-text)">文字</button>
+      <button data-m="image" style="--c:var(--c-image)">图像</button>
+      <button data-m="viz" style="--c:var(--c-viz)">可视化</button>
+      <button data-m="math" style="--c:var(--c-math)">数学公式</button>
+    </div>
+    <div class="four-chart" id="fourBars">
+      <div class="four-plot">
+        <div class="grid-line zero" style="bottom:0"><span class="gv">0</span></div>
+        <div class="grid-line" style="bottom:40px"><span class="gv">1</span></div>
+        <div class="grid-line" style="bottom:80px"><span class="gv">2</span></div>
+        <div class="grid-line" style="bottom:120px"><span class="gv">3</span></div>
+        <div class="grid-line" style="bottom:160px"><span class="gv">4</span></div>
+        <div class="grid-line" style="bottom:200px"><span class="gv">5</span></div>
+        <div class="bars-row">
+          <div class="bar-col"><div class="bar" style="height:100%"><span class="bar-val">5</span></div></div>
+          <div class="bar-col"><div class="bar" style="height:40%"><span class="bar-val">2</span></div></div>
+          <div class="bar-col"><div class="bar" style="height:40%"><span class="bar-val">2</span></div></div>
+          <div class="bar-col"><div class="bar" style="height:60%"><span class="bar-val">3</span></div></div>
+          <div class="bar-col"><div class="bar" style="height:80%"><span class="bar-val">4</span></div></div>
+          <div class="bar-col"><div class="bar" style="height:100%"><span class="bar-val">5</span></div></div>
+        </div>
+      </div>
+      <div class="labels-row">
+        <div class="l">叙事能力</div><div class="l">感知速度</div><div class="l">数量关系</div><div class="l">精确性</div><div class="l">情感表达</div><div class="l">通用性</div>
+      </div>
+    </div>
+    <div class="viz-caption" id="fourCaption">文字：擅长概念、逻辑、故事与情感，通用性最强——顺序阅读，人脑天然亲和。</div>
+  </div>
+  <p>从进化角度看：几十万年来，人每天面对的是谁是敌人、食物在哪里、谁高兴谁生气、哪条路危险。所以人脑天生擅长<strong>视觉感知</strong>——面孔识别、颜色、动作、空间、物体；而不会天然处理百分比、坐标轴、对数尺度、多变量关系这些<strong>抽象数量认知</strong>。一张猫的照片 0.2 秒就知道是猫；一张折线图需要先理解横轴、纵轴、单位、比例、是否截断坐标轴，然后才能理解内容。</p>
+</section>
+
+<!-- ==================== §5 双重门槛 ==================== -->
+<section class="block reveal" id="sec-threshold">
+  <div class="sec-tag">图景 · 二</div>
+  <h2>双重门槛：可视化卡在两端都贵的独特位置</h2>
+  <p>Claude 的核心观察：文字的门槛集中在<strong>生产端</strong>（书写系统需学习），但阅读端一旦扫盲普及，理解成本几乎为零；图像两端都近乎免费（手机拍照 + 进化本能）；可视化不幸<strong>两端都贵</strong>——生产端需要结构化数据 + 编码设计，阅读端需要习得「视觉语法」。</p>
+  <div class="viz-panel" id="thrPanel">
+    <div class="viz-title">三种媒介的门槛结构（进入视野时动画演示）</div>
+    <div class="thr-grid">
+      <div class="thr-col">
+        <h4><span class="dot" style="background:var(--c-text)"></span>文字</h4>
+        <div class="sub">门槛集中在生产端</div>
+        <div class="thr-item">
+          <div class="lbl"><span>生产门槛</span><b>高（历史上）</b></div>
+          <div class="track"><div class="fill" data-w="70" style="background:var(--c-text)"></div></div>
+        </div>
+        <div class="thr-item">
+          <div class="lbl"><span>阅读门槛</span><b>低（扫盲后）</b></div>
+          <div class="track"><div class="fill" data-w="10" style="background:var(--c-text);opacity:.55"></div></div>
+        </div>
+        <div class="thr-note">书写系统学习数千年演化，但扫盲教育普及后「见字能读」</div>
+      </div>
+      <div class="thr-col">
+        <h4><span class="dot" style="background:var(--c-image)"></span>图像</h4>
+        <div class="sub">两端都近乎免费</div>
+        <div class="thr-item">
+          <div class="lbl"><span>生产门槛</span><b>极低</b></div>
+          <div class="track"><div class="fill" data-w="8" style="background:var(--c-image)"></div></div>
+        </div>
+        <div class="thr-item">
+          <div class="lbl"><span>阅读门槛</span><b>几乎为零</b></div>
+          <div class="track"><div class="fill" data-w="3" style="background:var(--c-image);opacity:.55"></div></div>
+        </div>
+        <div class="thr-note">手机摄像头让生产成本趋近于零；视觉识别是进化本能</div>
+      </div>
+      <div class="thr-col">
+        <h4><span class="dot" style="background:var(--c-viz)"></span>可视化</h4>
+        <div class="sub">两端都贵</div>
+        <div class="thr-item">
+          <div class="lbl"><span>生产门槛</span><b>高</b></div>
+          <div class="track"><div class="fill" data-w="75" style="background:var(--c-viz)"></div></div>
+        </div>
+        <div class="thr-item">
+          <div class="lbl"><span>阅读门槛</span><b>中高</b></div>
+          <div class="track"><div class="fill" data-w="55" style="background:var(--c-viz);opacity:.55"></div></div>
+        </div>
+        <div class="thr-note">生产端：清洗数据 + 选择图表类型 + 避免视觉误导；阅读端：视觉语法是近两三百年才成型的约定俗成</div>
+      </div>
+    </div>
+    <div class="viz-caption">Gemini 补充了「读写不对称」：大众是文字/图像的消费者<strong>兼低成本生产者</strong>（随手拍照、随手发微信），但只是可视化的消费者——生产端与消费端的断层，让普通人缺乏与可视化高频交互的场景。</div>
+  </div>
+</section>
+
+<!-- ==================== §6 信息边界 ==================== -->
+<section class="block reveal" id="sec-boundary">
+  <div class="sec-tag">图景 · 三</div>
+  <h2>可视化的信息边界：哪些内容天生适合，哪些不适合</h2>
+  <p>可视化并不是万能表达方式，它有非常明确的信息边界。三篇文档共同指出：可视化只覆盖<strong>数量信息（Quantitative Information）</strong>这一块空间。<strong>点击下方每张卡片</strong>，看看哪些场景适合可视化、哪些更适合文字或图像。</p>
+  <div class="viz-panel">
+    <div class="viz-title">场景判定 · 点击翻转</div>
+    <div class="b-grid" id="bGrid">
+      <div class="b-card"><div class="b-inner">
+        <div class="b-face b-front"><div class="icon">🏢</div><div class="q">200 家公司营收对比</div><div class="hint">点击判定</div></div>
+        <div class="b-face b-back ok"><div class="verdict">✓ 适合</div><div class="why">数量比较，一眼看出差异</div><div class="chart-type">柱状图</div></div>
+      </div></div>
+      <div class="b-card"><div class="b-inner">
+        <div class="b-face b-front"><div class="icon">💔</div><div class="q">一个爱情故事</div><div class="hint">点击判定</div></div>
+        <div class="b-face b-back no"><div class="verdict">✗ 不适合</div><div class="why">叙事与情感，文字远远胜过图表</div><div class="chart-type">→ 文字</div></div>
+      </div></div>
+      <div class="b-card"><div class="b-inner">
+        <div class="b-face b-front"><div class="icon">📈</div><div class="q">GDP 十年变化趋势</div><div class="hint">点击判定</div></div>
+        <div class="b-face b-back ok"><div class="verdict">✓ 适合</div><div class="why">时间序列变化，趋势一目了然</div><div class="chart-type">折线图</div></div>
+      </div></div>
+      <div class="b-card"><div class="b-inner">
+        <div class="b-face b-front"><div class="icon">🤔</div><div class="q">一段哲学论证</div><div class="hint">点击判定</div></div>
+        <div class="b-face b-back no"><div class="verdict">✗ 不适合</div><div class="why">逻辑推理而非数量关系</div><div class="chart-type">→ 文字</div></div>
+      </div></div>
+      <div class="b-card"><div class="b-inner">
+        <div class="b-face b-front"><div class="icon">👥</div><div class="q">各国人口年龄结构</div><div class="hint">点击判定</div></div>
+        <div class="b-face b-back ok"><div class="verdict">✓ 适合</div><div class="why">组成比例比较</div><div class="chart-type">堆积图</div></div>
+      </div></div>
+      <div class="b-card"><div class="b-inner">
+        <div class="b-face b-front"><div class="icon">🎵</div><div class="q">一首交响乐</div><div class="hint">点击判定</div></div>
+        <div class="b-face b-back no"><div class="verdict">✗ 不适合</div><div class="why">图表几乎无法表达</div><div class="chart-type">→ 声音本身</div></div>
+      </div></div>
+      <div class="b-card"><div class="b-inner">
+        <div class="b-face b-front"><div class="icon">🗺️</div><div class="q">城市热力分布</div><div class="hint">点击判定</div></div>
+        <div class="b-face b-back ok"><div class="verdict">✓ 适合</div><div class="why">空间分布</div><div class="chart-type">地图</div></div>
+      </div></div>
+      <div class="b-card"><div class="b-inner">
+        <div class="b-face b-front"><div class="icon">🌫️</div><div class="q">暧昧不清的情绪</div><div class="hint">点击判定</div></div>
+        <div class="b-face b-back no"><div class="verdict">✗ 不适合</div><div class="why">无法量化——强行变成「心情指数」反而丢失最重要的部分</div><div class="chart-type">→ 文字</div></div>
+      </div></div>
+    </div>
+    <div class="viz-caption">一个普通人一天处理的是微信聊天、新闻、视频、小说、路标、商品图片；但真正需要比较 200 家公司营收、看 GDP 变化、分析股票走势的场景，一年可能没有几次。<strong>使用频率越低，学习成本越不值得投入。</strong></div>
+  </div>
+</section>
+
+<div class="divider"><hr></div>
+
+<!-- ==================== §7 辨析一：同源性 ==================== -->
+<section class="block reveal" id="sec-root">
+  <div class="sec-tag">二 · 补充辨析 · 其一</div>
+  <h2>门槛与局限能否真正分离？</h2>
+  <p>Claude 的「可磨低 vs 磨不掉」框架是三篇中最有分析力的，但值得追问：<strong>门槛和局限真的是两个独立因素吗？</strong></p>
+  <p>我认为它们并非独立，而是同一件事的两面。可视化之所以有学习门槛，恰恰是因为它是抽象数量关系的符号系统——这个「门槛」不是偶然的摩擦，而是媒介本质的必然产物：</p>
+  <div class="big-quote">
+    门槛是局限性的<strong>经验表现</strong>，局限性是门槛的<strong>结构性根源</strong>。<br>
+    人看不懂折线图（门槛体验），是因为折线图编码的是数量关系而人脑不天然处理数量关系（结构局限）。两者不是「两个原因」，而是同一个原因在体验层面和结构层面的显影。
+  </div>
+  <div class="viz-panel">
+    <div class="viz-title">交互演示：尝试降低门槛</div>
+    <div class="nested-wrap">
+      <div class="nested-svg-wrap">
+        <svg id="nestedSvg" width="320" height="320" viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg">
+          <circle id="circleLimit" cx="160" cy="160" r="145" fill="rgba(185,28,28,.05)" stroke="#B91C1C" stroke-width="2" stroke-dasharray="6 4"/>
+          <circle id="circleThr" cx="160" cy="160" r="80" fill="rgba(245,158,11,.13)" stroke="#D97706" stroke-width="2.5"/>
+          <text x="160" y="118" text-anchor="middle" font-size="15" font-weight="700" fill="#B45309" font-family="PingFang SC, sans-serif">门槛</text>
+          <text x="160" y="140" text-anchor="middle" font-size="11" fill="#92400E" font-family="PingFang SC, sans-serif">可被技术压低</text>
+          <text x="160" y="252" text-anchor="middle" font-size="15" font-weight="700" fill="#B91C1C" font-family="PingFang SC, sans-serif">结构性局限</text>
+          <text x="160" y="274" text-anchor="middle" font-size="11" fill="#991B1B" font-family="PingFang SC, sans-serif">内容须天然可量化</text>
+        </svg>
+      </div>
+      <div class="nested-info">
+        <p>文字同样是抽象符号系统，同样有学习门槛（扫盲教育花了几千年才普及），但文字最终成为通用媒介。所以「抽象符号系统」本身并不排斥通用性。</p>
+        <p>差异在于：<strong>文字的符号映射到口语</strong>（口语是人类普遍能力，文字只是口语的书面化）；而<strong>可视化的符号映射到数量关系</strong>（大多数日常场景不涉及）。</p>
+        <button class="btn" id="shrinkBtn">尝试压低门槛 →</button>
+        <button class="btn reset" id="resetBtn" style="display:none">重置</button>
+        <div id="nestedMsg">点击按钮，看看门槛被压低之后会发生什么。</div>
+      </div>
+    </div>
+  </div>
+  <p>结论：门槛原则上可以与局限分离——但实践中，门槛与局限的耦合如此之深，降低门槛并不会改变根本约束。这解释了一个现象：即使「一句话生成图表」已让生产门槛塌陷，可视化的使用场景并未显著扩张——<strong>因为门槛不是唯一的约束，甚至不是主要的约束。</strong></p>
+</section>
+
+<!-- ==================== §8 辨析二：演化路径 ==================== -->
+<section class="block reveal" id="sec-evolution">
+  <div class="sec-tag">二 · 补充辨析 · 其二</div>
+  <h2>媒介演化史：文字在简化，可视化在复杂化</h2>
+  <p>回顾三种媒介的演化路径，可以发现一个三篇文档都没有指出的关键差异——<strong>文字的降门槛路径是「简化符号集 + 普及教育」，可视化的路径却恰恰相反：它在不断发明新的「方言」。</strong></p>
+  <div class="viz-panel">
+    <div class="viz-title">符号集复杂度演化趋势（示意）</div>
+    <div class="trend-svg-wrap">
+      <svg width="820" height="300" viewBox="0 0 820 300" xmlns="http://www.w3.org/2000/svg" style="min-width:640px">
+        <!-- 坐标轴 -->
+        <line x1="60" y1="20" x2="60" y2="250" stroke="#D8D8D2" stroke-width="1.5"/>
+        <line x1="60" y1="250" x2="790" y2="250" stroke="#D8D8D2" stroke-width="1.5"/>
+        <text x="30" y="40" font-size="11" fill="#9E9EA8" font-family="PingFang SC">复杂</text>
+        <text x="30" y="248" font-size="11" fill="#9E9EA8" font-family="PingFang SC">简单</text>
+        <text x="60" y="275" font-size="11" fill="#9E9EA8" font-family="PingFang SC" text-anchor="middle">前 14 世纪</text>
+        <text x="400" y="275" font-size="11" fill="#9E9EA8" font-family="PingFang SC" text-anchor="middle">—</text>
+        <text x="760" y="275" font-size="11" fill="#9E9EA8" font-family="PingFang SC" text-anchor="middle">今天</text>
+        <!-- 文字：下降 -->
+        <path d="M90,60 C250,90 450,150 760,215" fill="none" stroke="#C2410C" stroke-width="3" stroke-linecap="round"/>
+        <!-- 图像：下降 -->
+        <path d="M90,110 C300,130 500,180 760,238" fill="none" stroke="#0369A1" stroke-width="3" stroke-linecap="round"/>
+        <!-- 可视化：上升 -->
+        <path d="M420,235 C550,180 650,120 760,52" fill="none" stroke="#6D28D9" stroke-width="3" stroke-linecap="round"/>
+        <!-- 端点 -->
+        <circle cx="760" cy="215" r="6" fill="#C2410C"/>
+        <circle cx="760" cy="238" r="6" fill="#0369A1"/>
+        <circle cx="760" cy="52" r="6" fill="#6D28D9"/>
+        <!-- 标注 -->
+        <text x="745" y="196" font-size="12.5" font-weight="700" fill="#C2410C" text-anchor="end" font-family="PingFang SC">文字 ↓ 持续简化</text>
+        <text x="745" y="268" dy="-4" font-size="12.5" font-weight="700" fill="#0369A1" text-anchor="end" font-family="PingFang SC">图像 ↓ 生产成本趋零</text>
+        <text x="750" y="40" font-size="12.5" font-weight="700" fill="#6D28D9" text-anchor="end" font-family="PingFang SC">可视化 ↑ 持续复杂化</text>
+        <!-- 可视化起点标注 -->
+        <text x="420" y="258" font-size="11" fill="#9E9EA8" text-anchor="middle" font-family="PingFang SC">1786 Playfair 折线图 / 柱状图</text>
+      </svg>
+    </div>
+    <div class="trend-legend">
+      <span><i style="background:#C2410C"></i>文字：甲骨文 → 篆隶楷 → 简体字 → 拼音输入</span>
+      <span><i style="background:#0369A1"></i>图像：壁画 → 绘画 → 摄影 → 手机拍照</span>
+      <span><i style="background:#6D28D9"></i>可视化：折线图 → 箱线图 → 桑基图 → 交互式</span>
+    </div>
+  </div>
+  <div class="timeline">
+    <div class="tl-track">
+      <div class="tl-item t1">
+        <div class="tl-when">文字 · 数千年</div>
+        <div class="tl-what">符号集持续简化，「一个字符集服务所有场景」</div>
+        <div class="tl-note">学习一次，处处可用——像学习一种语言</div>
+      </div>
+      <div class="tl-item t2">
+        <div class="tl-when">图像 · 近 200 年</div>
+        <div class="tl-what">生产端成本从「熟练画师」降至接近零</div>
+        <div class="tl-note">理解端始终免费——视觉识别是进化本能</div>
+      </div>
+      <div class="tl-item t3">
+        <div class="tl-when">可视化 · 1786 至今</div>
+        <div class="tl-what">符号集不仅没有简化，反而持续扩张</div>
+        <div class="tl-note">更多图表类型、更多编码维度、更复杂的交互模式——每种图表类型编码一种不同的关系（柱状图编码比较、折线图编码趋势、散点图编码关联、桑基图编码流向）</div>
+      </div>
+    </div>
+  </div>
+  <p>学习者需要掌握的不是一套通用符号，而是<strong>多套专用编码</strong>。这更接近于「每种图表类型是一种独立方言」，而非文字的「一套字母表服务所有场景」。<strong>学习文字像学习一种语言；学习可视化像学习一个语言家族。</strong>这从符号系统层面解释了为什么可视化的门槛难以像文字那样被「扫盲运动」式地消灭。</p>
+</section>
+
+<!-- ==================== §9 辨析三：寄生性 ==================== -->
+<section class="block reveal" id="sec-parasite">
+  <div class="sec-tag">二 · 补充辨析 · 其三</div>
+  <h2>「寄生性」辨析：不能独立成立 = 不能成为一级媒介？</h2>
+  <p>Claude 提出可视化「必须寄生在文字之上」——脱离标题、图例、坐标轴说明的图表歧义极大。这个观察准确，但需要辨析其推论是否过强。<strong>亲手试试：</strong>关闭下面这张图的全部文字注释，你还能说出它在讲什么吗？</p>
+  <div class="viz-panel">
+    <div class="viz-title">交互演示：注释的去与留</div>
+    <div class="toggle-row">
+      <label class="switch">
+        <input type="checkbox" id="annoToggle" checked>
+        <span class="slider"></span>
+      </label>
+      <span class="tlabel">显示文字注释（标题 / 坐标轴 / 图例）</span>
+    </div>
+    <div class="scatter-svg-wrap">
+      <svg id="scatterSvg" width="800" height="360" viewBox="0 0 800 360" xmlns="http://www.w3.org/2000/svg" style="min-width:640px">
+        <!-- 网格 -->
+        <g stroke="#EFEFEB" stroke-width="1">
+          <line x1="90" y1="60" x2="740" y2="60"/><line x1="90" y1="120" x2="740" y2="120"/>
+          <line x1="90" y1="180" x2="740" y2="180"/><line x1="90" y1="240" x2="740" y2="240"/>
+          <line x1="227" y1="40" x2="227" y2="300"/><line x1="365" y1="40" x2="365" y2="300"/><line x1="502" y1="40" x2="502" y2="300"/><line x1="640" y1="40" x2="640" y2="300"/>
+        </g>
+        <!-- 轴线 -->
+        <line x1="90" y1="40" x2="90" y2="300" stroke="#D8D8D2" stroke-width="1.5"/>
+        <line x1="90" y1="300" x2="740" y2="300" stroke="#D8D8D2" stroke-width="1.5"/>
+        <!-- 注释组 -->
+        <g class="anno" id="annoGroup">
+          <text x="415" y="28" text-anchor="middle" font-size="15" font-weight="700" fill="#1C1C28" font-family="PingFang SC">某品牌月度广告投入与销售额的关系（2025）</text>
+          <text x="415" y="338" text-anchor="middle" font-size="12" fill="#55555F" font-family="PingFang SC">广告投入（万元）</text>
+          <text x="28" y="170" font-size="12" fill="#55555F" font-family="PingFang SC" transform="rotate(-90 28 170)" text-anchor="middle">销售额（万元）</text>
+          <text x="87" y="304" font-size="11" fill="#9E9EA8" text-anchor="end" font-family="PingFang SC">0</text>
+          <text x="87" y="244" font-size="11" fill="#9E9EA8" text-anchor="end" font-family="PingFang SC">50</text>
+          <text x="87" y="124" font-size="11" fill="#9E9EA8" text-anchor="end" font-family="PingFang SC">150</text>
+          <text x="87" y="64" font-size="11" fill="#9E9EA8" text-anchor="end" font-family="PingFang SC">200</text>
+          <text x="227" y="318" font-size="11" fill="#9E9EA8" text-anchor="middle" font-family="PingFang SC">20</text>
+          <text x="365" y="318" font-size="11" fill="#9E9EA8" text-anchor="middle" font-family="PingFang SC">40</text>
+          <text x="502" y="318" font-size="11" fill="#9E9EA8" text-anchor="middle" font-family="PingFang SC">60</text>
+          <text x="640" y="318" font-size="11" fill="#9E9EA8" text-anchor="middle" font-family="PingFang SC">80</text>
+          <!-- 趋势线 -->
+          <line x1="120" y1="268" x2="720" y2="78" stroke="#6D28D9" stroke-width="2" stroke-dasharray="7 5" opacity=".65"/>
+          <!-- 关键点标注 -->
+          <circle cx="612" cy="112" r="10" fill="none" stroke="#B45309" stroke-width="2"/>
+          <line x1="620" y1="104" x2="668" y2="70" stroke="#B45309" stroke-width="1.2"/>
+          <text x="674" y="66" font-size="12" font-weight="600" fill="#B45309" font-family="PingFang SC">投放峰值月</text>
+          <text x="674" y="82" font-size="11" fill="#92400E" font-family="PingFang SC">投入 74 万</text>
+        </g>
+        <!-- 散点（由 JS 生成） -->
+        <g id="dots"></g>
+      </svg>
+    </div>
+    <div id="parasiteQ">注释开启：你知道这是广告投入与销售额的正相关关系，甚至能看出投放峰值月。</div>
+  </div>
+  <p>关闭注释后，图中只剩下「一堆点」——没有标题你不知道主题，没有坐标轴你不知道单位，没有图例你不知道每个点代表什么。<strong>寄生性是真实的。</strong>但需要辨析三点：</p>
+  <ul>
+    <li><strong>脱离语境的单个文字同样歧义极大。</strong>一个孤立的「打」字，是打架、打字、打电话还是打酱油？可视化的寄生性在程度上更严重，但在性质上与文字并无本质不同。</li>
+    <li><strong>交互式可视化正在消解寄生性。</strong>悬停显示数据标签、点击钻取查看明细、自动 tooltip——当图表可以「自我解释」时，对寄生文字的依赖就降低了。</li>
+    <li><strong>但寄生性最深的根源在于编码约定的不可见性。</strong>为什么柱子的高度代表数值？为什么颜色深浅代表密度？这些映射规则是「看不见的文字」，只要编码规则本身需要学习，寄生性就无法完全消除。</li>
+  </ul>
+  <p>因此，寄生性不是「永远不能成为一级媒介」的充分证明——它是<strong>程度问题</strong>，而非有/无问题。地图就是寄生性最弱的可视化形态：地理空间本身是直觉感知的，编码（位置对应位置）几乎不需要学习——这也是地图成为最「大众化」的可视化类型的原因。</p>
+</section>
+
+<!-- ==================== §10 辨析四：社会学 ==================== -->
+<section class="block reveal" id="sec-social">
+  <div class="sec-tag">二 · 补充辨析 · 其四</div>
+  <h2>社会学维度：设计能否消解「冰冷数字」的排斥？</h2>
+  <p>Gemini 提到可视化「天然带有精英主义和工具理性的底色」，大众对冰冷数字和图表潜意识里带有防备。但三篇文档都没有深入探讨一个关键问题：</p>
+  <div class="big-quote">这种「冰冷感」是媒介的<strong>固有属性</strong>，还是当前<strong>设计惯例的产物</strong>？</div>
+  <p>同样的数据，两种呈现方式，感受完全不同：</p>
+  <div class="viz-panel">
+    <div class="viz-title">同一组数据 · 两种设计</div>
+    <div class="warmcold">
+      <div class="wc-card cold">
+        <div class="wc-tag">COLD · Excel 遗产</div>
+        <div class="wc-title">各门店月均评分统计</div>
+        <div class="wc-bars">
+          <div class="wc-bar-col"><div class="wc-bar" style="height:72%;background:#A1A1AA"></div><div class="wc-lbl">A店</div></div>
+          <div class="wc-bar-col"><div class="wc-bar" style="height:80%;background:#A1A1AA"></div><div class="wc-lbl">B店</div></div>
+          <div class="wc-bar-col"><div class="wc-bar" style="height:58%;background:#A1A1AA"></div><div class="wc-lbl">C店</div></div>
+          <div class="wc-bar-col"><div class="wc-bar" style="height:88%;background:#71717A"></div><div class="wc-lbl">D店</div></div>
+          <div class="wc-bar-col"><div class="wc-bar" style="height:64%;background:#A1A1AA"></div><div class="wc-lbl">E店</div></div>
+          <div class="wc-bar-col"><div class="wc-bar" style="height:76%;background:#A1A1AA"></div><div class="wc-lbl">F店</div></div>
+        </div>
+        <div class="wc-note">灰色、无叙事、无重点——「与我无关」的冰冷统计</div>
+      </div>
+      <div class="wc-card warm">
+        <div class="wc-tag">WARM · 数据新闻风格</div>
+        <div class="wc-title">哪家咖啡店最值得去？</div>
+        <div class="wc-bars">
+          <div class="wc-bar-col"><div class="wc-bar" style="height:72%;background:#FDE68A"></div><div class="wc-lbl">A店</div></div>
+          <div class="wc-bar-col"><div class="wc-bar" style="height:80%;background:#FCD34D"></div><div class="wc-lbl">B店</div></div>
+          <div class="wc-bar-col"><div class="wc-bar" style="height:58%;background:#FDE68A"></div><div class="wc-lbl">C店</div></div>
+          <div class="wc-bar-col wc-star"><div class="wc-bar" style="height:88%;background:#D97706"></div><div class="wc-lbl">D店</div></div>
+          <div class="wc-bar-col"><div class="wc-bar" style="height:64%;background:#FDE68A"></div><div class="wc-lbl">E店</div></div>
+          <div class="wc-bar-col"><div class="wc-bar" style="height:76%;background:#FCD34D"></div><div class="wc-lbl">F店</div></div>
+        </div>
+        <div class="wc-note">有温度的叙事——有人物（你）、有冲突（选择）、有转折（D 店胜出）、有共情</div>
+      </div>
+    </div>
+    <div class="viz-caption">数据新闻的实践（纽约时报交互报道、The Pudding 叙事可视化、FiveThirtyEight 选举分析）已经证明：可视化可以是有温度的、叙事性的、情感共鸣的。读者不需要「专业训练」就能被带入数据故事。</div>
+  </div>
+  <p>这暗示：「冰冷感」在很大程度上是<strong>设计选择</strong>（Excel 默认样式的美学遗产），而非媒介本质。但设计能消解的是「社会门槛」，不能消解的是「结构性局限」：即使最温暖的数据故事，仍然要求内容先被量化——你无法用图表讲述一个还没有结构化数据的暧昧情绪。</p>
+</section>
+
+<!-- ==================== §11 辨析五：AI ==================== -->
+<section class="block reveal" id="sec-ai">
+  <div class="sec-tag">二 · 补充辨析 · 其五</div>
+  <h2>AI 时代的分歧辨析：AI 能改变多少？</h2>
+  <p>三篇文档对 AI 的影响预期不同：ChatGPT 最为乐观（AI 成为中间人，用户无需学习可视化）；Claude 较为审慎（门槛降低但结构性限制不变）；Gemini 未深入分析。AI 对可视化的影响实际上可以分为三个层次：</p>
+  <ul>
+    <li><strong>第一层：生产端门槛——已经在快速塌陷。</strong>「一句话生成图表」已成现实，清洗数据、选择图表类型、避免视觉误导这些专业判断正被 AI 逐步接管。</li>
+    <li><strong>第二层：阅读端门槛——正在降低。</strong>通过自动标注、对话式解读、智能缩放，AI 承担传统上由图例和注释承担的「翻译」工作。</li>
+    <li><strong>第三层：量化环节——关键变数。</strong>Claude 的结构性限制建立在「内容必须先被量化」之上。如果 AI 能可靠地将定性经验结构化为数据，那么结构性限制本身也被部分侵蚀。</li>
+  </ul>
+  <div class="viz-panel">
+    <div class="viz-title">交互演示：管线之变</div>
+    <div class="tabs" id="pipeTabs">
+      <button data-p="old" class="active" style="--c:var(--c-text)">过去</button>
+      <button data-p="new" style="--c:var(--c-ai)">AI 时代</button>
+    </div>
+    <div class="pipe show" id="pipe-old">
+      <div class="pipe-flow">
+        <div class="pipe-node"><div class="pn-icon">🗂️</div><div class="pn-name">数据</div><div class="pn-sub">散落各处</div></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node human"><div class="pn-icon">👤</div><div class="pn-name">人工整理</div><div class="pn-sub">Excel / 清洗</div></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node human"><div class="pn-icon">✏️</div><div class="pn-name">人工设计</div><div class="pn-sub">选图表 / 编码</div></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node"><div class="pn-icon">📊</div><div class="pn-name">静态图表</div><div class="pn-sub">最终产品</div></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node human"><div class="pn-icon">🧑‍🏫</div><div class="pn-name">人工解读</div><div class="pn-sub">写报告</div></div>
+      </div>
+      <div class="viz-caption" style="text-align:center">每个环节都需要「懂可视化的人」——双重门槛的完整链条</div>
+    </div>
+    <div class="pipe" id="pipe-new">
+      <div class="pipe-flow">
+        <div class="pipe-node"><div class="pn-icon">🗂️</div><div class="pn-name">数据</div></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node ai"><div class="pn-icon">🤖</div><div class="pn-name">AI</div><div class="pn-sub">整理 · 设计 · 解读</div></div>
+        <div class="pipe-arrow">⇄</div>
+        <div class="pipe-node human"><div class="pn-icon">🙋</div><div class="pn-name">用户</div><div class="pn-sub">只需提问</div></div>
+      </div>
+      <div class="pipe-convo">
+        <div class="bubble user">为什么三月下降了？</div>
+        <div class="bubble ai-b">三月广告投入减少 40%，且竞品同期促销分流了约 15% 客流。<b>已高亮相关数据点并放大该区间</b>——右侧图表已更新。</div>
+      </div>
+      <div class="viz-caption" style="text-align:center">图表不再是最终产品，而是<strong>交互界面</strong>——AI 自动生成、重组、标注甚至动画化图表，用户无需掌握图表语法</div>
+    </div>
+  </div>
+  <p>但第三层引出一个更深的问题：<strong>如果 AI 包揽了量化、编码、生成和解读，用户面对的还算是「可视化」吗？</strong>当用户只说「为什么这里下降」就获得一个自动标注、自动放大、自动解释的图表时，可视化已经不再是用户需要掌握的「语言」，而变成了 AI 的内部表示——用户消费的是 AI 的解释，图表只是中间产物。</p>
+  <p>这恰好印证并深化了 ChatGPT 的判断：可视化将成为 AI 的<strong>「中间语言」</strong>，而非人类的「第三种文字」。用户不需要学会可视化，就像用户不需要学会 SQL——数据库查询语言同样强大、同样不可或缺，但从未有人期待它成为大众媒介。<strong>可视化的未来更接近 SQL 而非汉字：重要性上升，普及性不变。</strong></p>
+</section>
+
+<!-- ==================== §12 综合结论 ==================== -->
+<section class="block reveal" id="sec-conclusion">
+  <div class="conclusion-wrap">
+    <div class="sec-tag">三 · 综合结论</div>
+    <h2>门槛问题，还是可视化本身的局限性？</h2>
+    <p style="margin-top:10px">答案是：</p>
+    <div class="big-quote">
+      两者都是，但它们并非独立。<strong>门槛是局限性的经验表现，局限性是门槛的结构性根源。</strong>技术会持续压低门槛——尤其是 AI 在生产端、阅读端甚至量化环节的介入——但「可视化要求内容天然可量化，而大多数日常人类经验不是天然量化的」这一结构性限制，不会因工具进步而消失。
+    </div>
+    <p>可视化不会像文字和图像那样成为人人主动使用的基础表达媒介。但这不是缺陷，而是它该待的位置——正如乐谱不会成为大众日常语言，但音乐仍然是人类文明的核心；正如 SQL 从未成为大众媒介，但驱动着整个数字世界。</p>
+    <div class="takeaways">
+      <div class="tk-card">
+        <div class="tk-num">TAKEAWAY 01</div>
+        <div class="tk-title">专用而非通用</div>
+        <div class="tk-desc">可视化是数量关系的专用语言，覆盖的信息空间很小——但它覆盖的那一块（数量、关系、变化）几乎没有替代品。</div>
+      </div>
+      <div class="tk-card">
+        <div class="tk-num">TAKEAWAY 02</div>
+        <div class="tk-title">门槛与局限同源</div>
+        <div class="tk-desc">降低门槛不会改变根本约束。即使「一句话生成图表」已让生产门槛塌陷，可视化的使用场景并未显著扩张。</div>
+      </div>
+      <div class="tk-card">
+        <div class="tk-num">TAKEAWAY 03</div>
+        <div class="tk-title">数据世界的乐谱</div>
+        <div class="tk-desc">可视化将在数据密集型领域持续不可替代，并在 AI 时代作为连接数据、算法和人类决策的「中间语言」获得更重要的地位。它的未来不是第三种文字，而是数据世界的乐谱——不是人人都会读，但文明离不开它。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 附录 ==================== -->
+<section class="block reveal" id="sec-appendix">
+  <div class="sec-tag">附录</div>
+  <h2>核心概念速查</h2>
+  <div class="appendix-wrap">
+    <table class="app">
+      <thead><tr><th>概念</th><th>含义</th><th>提出者</th></tr></thead>
+      <tbody>
+        <tr><td>视觉感知 vs 抽象数量认知</td><td>人脑天生长于前者，可视化依赖后者</td><td>ChatGPT</td></tr>
+        <tr><td>Prosumer Gap（读写不对称）</td><td>大众是文字/图像的低成本产销者，但只是可视化的消费者</td><td>Gemini</td></tr>
+        <tr><td>认知负载</td><td>读文字是被动吸收，读图表是主动解码</td><td>Gemini</td></tr>
+        <tr><td>双重门槛</td><td>可视化在生产端和理解端都贵（文字只贵生产端，图像两端都便宜）</td><td>Claude</td></tr>
+        <tr><td>二阶表达</td><td>可视化是对「已量化内容」的表达，文字图像可直接承载未经量化的经验</td><td>Claude</td></tr>
+        <tr><td>寄生性</td><td>可视化离不开标题/图例/坐标轴文字才能被正确解读</td><td>Claude</td></tr>
+        <tr><td>使用频率定律</td><td>使用频率越低，学习成本越不值得投入</td><td>ChatGPT</td></tr>
+        <tr><td>中间语言</td><td>可视化成为人与 AI 围绕数据交流的界面，而非人人掌握的表达方式</td><td>ChatGPT</td></tr>
+        <tr><td>方言化</td><td>每种图表类型是独立编码方言，可视化学习是「语言家族」而非「一种语言」</td><td>本文补充</td></tr>
+        <tr><td>门槛-局限同源性</td><td>门槛是局限性的经验表现，局限性是门槛的结构性根源</td><td>本文补充</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<footer>
+  <div class="f-links">
+    <span>基于 viz_as_language/docs 三篇 AI 文档</span>
+    <span>总结 · 辨析 · 可视化</span>
+    <span>2026.08</span>
+  </div>
+  <div>门槛与局限的辨析 —— 数据可视化为何未能成为大众文本</div>
+</footer>
+
+<script>
+const $ = (s, el=document) => el.querySelector(s);
+const $$ = (s, el=document) => [...el.querySelectorAll(s)];
+
+/* ===== 滚动进度 ===== */
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const p = h.scrollTop / (h.scrollHeight - h.clientHeight);
+  $('#progress').style.width = (p * 100) + '%';
+}, {passive: true});
+
+/* ===== Section Reveal + 触发动画 ===== */
+const thrDone = {done: false};
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    e.target.classList.add('in');
+    if (e.target.id === 'sec-threshold' && !thrDone.done) {
+      thrDone.done = true;
+      setTimeout(() => {
+        $$('#thrPanel .fill').forEach(f => f.style.width = f.dataset.w + '%');
+      }, 350);
+    }
+    io.unobserve(e.target);
+  });
+}, {threshold: 0.12});
+$$('.reveal').forEach(el => io.observe(el));
+
+/* ===== 侧边导航高亮 ===== */
+const navLinks = $$('#sideNav a');
+const sections = navLinks.map(a => $(a.getAttribute('href'))).filter(Boolean);
+window.addEventListener('scroll', () => {
+  let cur = 0;
+  sections.forEach((s, i) => {
+    if (s.getBoundingClientRect().top <= window.innerHeight * 0.4) cur = i;
+  });
+  navLinks.forEach((a, i) => a.classList.toggle('active', i === cur));
+}, {passive: true});
+
+/* ===== 手风琴 ===== */
+$$('.acc-head').forEach(h => h.addEventListener('click', () => {
+  h.parentElement.classList.toggle('open');
+}));
+
+/* ===== 四种表达方式 Tab ===== */
+const fourData = {
+  text:  {v: [5,2,2,3,4,5],  c: '#C2410C', cap: '文字：擅长概念、逻辑、故事与情感，通用性最强——顺序阅读，人脑天然亲和。'},
+  image: {v: [2,5,1,1,5,4],  c: '#0369A1', cap: '图像：瞬时感知，擅长外观、情绪与空间——零延迟的直觉反应，进化赋予的能力。'},
+  viz:   {v: [2,3,5,4,1,2],  c: '#6D28D9', cap: '可视化：数量关系最强，但情感表达与通用性弱——模式识别，需要习得视觉语法。'},
+  math:  {v: [1,1,4,5,0,1],  c: '#78716C', cap: '数学公式：精确性最强，但几乎所有其他维度都弱——推理计算，专业中的专业。'}
+};
+const fourBars = $$('#fourBars .bar');
+function setFour(key) {
+  const d = fourData[key];
+  fourBars.forEach((bar, i) => {
+    bar.style.height = (d.v[i] * 20) + '%';
+    bar.style.background = d.c;
+    const val = $('.bar-val', bar);
+    val.textContent = d.v[i];
+    val.style.color = d.c;
+  });
+  $('#fourCaption').innerHTML = d.cap;
+}
+$$('#fourTabs button').forEach(btn => btn.addEventListener('click', () => {
+  $$('#fourTabs button').forEach(b => { b.classList.remove('active'); b.style.background = ''; b.style.color = ''; b.style.borderColor = ''; });
+  btn.classList.add('active');
+  const c = getComputedStyle(document.documentElement).getPropertyValue(btn.style.getPropertyValue('--c')) || btn.style.getPropertyValue('--c');
+  btn.style.background = c.trim(); btn.style.color = '#fff'; btn.style.borderColor = c.trim();
+  setFour(btn.dataset.m);
+}));
+// 初始激活第一个 tab 样式
+(() => {
+  const b = $('#fourTabs button.active');
+  b.style.background = 'var(--c-text)'; b.style.color = '#fff'; b.style.borderColor = 'var(--c-text)';
+})();
+setFour('text');
+
+/* ===== 信息边界 翻牌 ===== */
+$$('.b-card').forEach(card => card.addEventListener('click', () => {
+  card.classList.toggle('flipped');
+}));
+
+/* ===== 嵌套圆：降低门槛演示 ===== */
+const shrinkBtn = $('#shrinkBtn'), resetBtn = $('#resetBtn');
+const circleThr = $('#circleThr'), nestedMsg = $('#nestedMsg');
+let shrunk = false;
+shrinkBtn.addEventListener('click', () => {
+  if (shrunk) return;
+  shrunk = true;
+  circleThr.style.transition = 'r .9s cubic-bezier(.4,0,.2,1), cy .9s cubic-bezier(.4,0,.2,1)';
+  circleThr.setAttribute('r', '22');
+  circleThr.setAttribute('cy', '178');
+  const t1 = $('#nestedSvg text:nth-of-type(1)'), t2 = $('#nestedSvg text:nth-of-type(2)');
+  t1.setAttribute('y', '176'); t2.setAttribute('y', '196');
+  nestedMsg.innerHTML = '门槛被压低了（AI 正在做这件事：一句话生成图表、自动标注、对话式解读）……<br>但<strong style="color:var(--c-limit)">红色虚线圈——结构性局限——纹丝不动</strong>：内容若不是天然可量化的，工具再先进也无物可视。';
+  nestedMsg.style.background = 'rgba(185,28,28,.06)';
+  shrinkBtn.style.display = 'none';
+  resetBtn.style.display = 'inline-block';
+});
+resetBtn.addEventListener('click', () => {
+  shrunk = false;
+  circleThr.setAttribute('r', '80');
+  circleThr.setAttribute('cy', '160');
+  const t1 = $('#nestedSvg text:nth-of-type(1)'), t2 = $('#nestedSvg text:nth-of-type(2)');
+  t1.setAttribute('y', '118'); t2.setAttribute('y', '140');
+  nestedMsg.textContent = '点击按钮，看看门槛被压低之后会发生什么。';
+  nestedMsg.style.background = 'var(--surface-2)';
+  resetBtn.style.display = 'none';
+  shrinkBtn.style.display = 'inline-block';
+});
+
+/* ===== 寄生性散点图 ===== */
+(() => {
+  const g = $('#dots');
+  const pts = [
+    [105,278],[125,262],[142,270],[160,240],[178,252],[196,225],[214,238],
+    [232,210],[250,222],[268,198],[286,214],[304,188],[322,200],[340,178],
+    [358,192],[376,168],[394,182],[412,158],[430,172],[448,148],[466,164],
+    [484,140],[502,156],[520,132],[538,148],[556,124],[574,140],[612,112],
+    [648,100],[684,88],[706,80]
+  ];
+  pts.forEach(([x,y],i) => {
+    const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx',x); c.setAttribute('cy',y);
+    c.setAttribute('r', i===27 ? 7 : 5);
+    c.setAttribute('fill', i===27 ? '#B45309' : '#6D28D9');
+    c.setAttribute('opacity', i===27 ? 1 : .78);
+    g.appendChild(c);
+  });
+})();
+const annoToggle = $('#annoToggle'), parasiteQ = $('#parasiteQ');
+annoToggle.addEventListener('change', () => {
+  const on = annoToggle.checked;
+  $('#annoGroup').style.opacity = on ? 1 : 0;
+  parasiteQ.innerHTML = on
+    ? '注释开启：你知道这是广告投入与销售额的正相关关系，甚至能看出投放峰值月。'
+    : '注释关闭：这只是一堆点。<strong style="color:var(--c-limit)">没有标题你不知道主题，没有坐标轴你不知道单位，没有图例你不知道每个点代表什么</strong>——这就是寄生性：图表离不开文字。';
+  parasiteQ.style.background = on ? 'var(--surface-2)' : 'rgba(185,28,28,.06)';
+});
+
+/* ===== AI 管线 Tab ===== */
+$$('#pipeTabs button').forEach(btn => btn.addEventListener('click', () => {
+  $$('#pipeTabs button').forEach(b => { b.classList.remove('active'); b.style.background=''; b.style.color=''; b.style.borderColor=''; });
+  btn.classList.add('active');
+  btn.style.background = btn.dataset.p === 'old' ? 'var(--c-text)' : 'var(--c-ai)';
+  btn.style.color = '#fff'; btn.style.borderColor = 'transparent';
+  $('#pipe-old').classList.toggle('show', btn.dataset.p === 'old');
+  $('#pipe-new').classList.toggle('show', btn.dataset.p === 'new');
+}));
+(() => {
+  const b = $('#pipeTabs button.active');
+  b.style.background = 'var(--c-text)'; b.style.color = '#fff'; b.style.borderColor = 'transparent';
+})();
+</script>
+</body>
+</html>

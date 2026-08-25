@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数据可视化为何未能成为大众文本 — 知识卡片</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+/* ============ Base ============ */
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:"PingFang SC",-apple-system,"Helvetica Neue","Microsoft YaHei",sans-serif;background:#F5F5F3;color:#1C1C28;line-height:1.85;font-size:15px;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(109,40,217,.15)}
+
+/* ============ Layout ============ */
+.page{max-width:1140px;margin:0 auto;padding:0 20px}
+
+/* ============ Header ============ */
+.page-header{text-align:center;padding:48px 20px 28px;max-width:760px;margin:0 auto}
+.page-title{font-size:26px;font-weight:700;color:#1C1C28;font-family:"Songti SC","Noto Serif SC","STSong",serif;margin-bottom:6px;letter-spacing:1px}
+.page-subtitle{font-size:14px;color:#6D28D9;font-weight:600;margin-bottom:10px}
+.page-intro{font-size:13px;color:#55555F;line-height:1.7;margin-bottom:18px}
+.btn-export-all{display:inline-flex;align-items:center;gap:6px;background:#1C1C28;color:#fff;border:none;padding:9px 20px;border-radius:8px;font-size:13px;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-export-all:hover{background:#2A2A3A;transform:translateY(-1px);box-shadow:0 4px 12px rgba(28,28,40,.2)}
+.btn-export-all:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-export-all svg{width:15px;height:15px}
+
+/* ============ Section Headers ============ */
+.section{margin-bottom:8px}
+.section-h{font-size:15px;font-weight:700;color:#1C1C28;margin:36px 0 18px;padding-bottom:8px;border-bottom:2px solid #E8E8E4;display:flex;align-items:center;gap:10px}
+.section-num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:#1C1C28;color:#fff;font-size:12px;font-weight:700}
+.section-h .s-label{font-family:"Songti SC","Noto Serif SC",serif}
+.section-count{font-size:12px;color:#9E9EA8;font-weight:400;margin-left:auto}
+
+/* ============ Masonry ============ */
+.masonry{column-count:3;column-gap:18px}
+@media(max-width:1024px){.masonry{column-count:2}}
+@media(max-width:640px){.masonry{column-count:1}}
+
+/* ============ Card Base ============ */
+.card{position:relative;background:#fff;border:1px solid #E8E8E4;border-left:4px solid var(--accent,#6D28D9);border-radius:8px;padding:18px 18px 42px;margin-bottom:18px;break-inside:avoid;box-shadow:0 1px 3px rgba(0,0,0,.04);transition:box-shadow .2s,transform .2s;opacity:0;transform:translateY(14px)}
+.card.in{opacity:1;transform:translateY(0)}
+.card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);transform:translateY(-2px)}
+
+.card-top{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.card-num{font-size:11px;font-weight:700;color:#9E9EA8;font-family:"Helvetica Neue",monospace;letter-spacing:.5px}
+.card-tag{font-size:10px;font-weight:600;color:var(--accent,#6D28D9);background:var(--accent-bg,rgba(109,40,217,.07));padding:2px 8px;border-radius:10px;letter-spacing:.3px}
+
+.card-title{font-size:16px;font-weight:700;color:#1C1C28;margin-bottom:8px;line-height:1.45}
+.card-body{font-size:13.5px;color:#55555F;line-height:1.75}
+.card-body p{margin-bottom:6px}
+.card-body p:last-child{margin-bottom:0}
+
+.card-ki{font-size:13.5px;font-weight:600;color:#1C1C28;padding:8px 12px;border-radius:0 6px 6px 0;margin:8px 0;line-height:1.65}
+
+/* ============ Card Export Button ============ */
+.card-export{position:absolute;bottom:10px;right:10px;display:flex;align-items:center;gap:4px;background:#F4F4F0;border:1px solid #E8E8E4;border-radius:6px;padding:4px 9px;font-size:11px;color:#9E9EA8;cursor:pointer;transition:all .2s;font-family:inherit}
+.card-export:hover{background:var(--accent,#6D28D9);color:#fff;border-color:var(--accent,#6D28D9)}
+.card-export svg{width:12px;height:12px}
+.card-export.loading{pointer-events:none;opacity:.5}
+
+/* ============ Hero Card ============ */
+.hero-card{background:#1C1C28;color:#FAFAF8;border:none;border-radius:14px;padding:36px 32px 40px;max-width:680px;margin:0 auto 28px;text-align:center;position:relative;box-shadow:0 4px 24px rgba(28,28,40,.12)}
+.hero-card .card-export{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:rgba(255,255,255,.5)}
+.hero-card .card-export:hover{background:rgba(255,255,255,.18);color:#fff;border-color:rgba(255,255,255,.25)}
+.hero-tag{font-size:11px;font-weight:600;color:rgba(255,255,255,.4);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px}
+.hero-title{font-size:22px;font-weight:700;color:#FAFAF8;font-family:"Songti SC","Noto Serif SC",serif;line-height:1.5;margin-bottom:14px}
+.hero-body{font-size:14px;color:rgba(255,255,255,.7);line-height:1.8;margin-bottom:10px}
+.hero-q{font-size:15px;color:rgba(255,255,255,.9);line-height:1.7;margin-top:16px;padding:12px 20px;border:1px solid rgba(255,255,255,.15);border-radius:10px;display:inline-block}
+.hero-q strong{color:#A78BFA}
+.hero-q em{color:#FBBF24;font-style:normal;font-weight:700}
+
+/* ============ Card Visuals ============ */
+.card-visual{margin:10px 0 4px}
+
+/* Flow chain */
+.flow{display:flex;flex-direction:column;align-items:center;gap:3px;margin:10px 0}
+.flow-node{padding:5px 14px;border-radius:6px;font-size:11.5px;font-weight:600;text-align:center;min-width:100px}
+.flow-arrow{font-size:13px;line-height:1}
+
+/* Mini table */
+.cmp-table{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:8px}
+.cmp-table th{font-size:10.5px;font-weight:600;padding:6px 5px;text-align:left;border-bottom:2px solid #E8E8E4}
+.cmp-table td{padding:6px 5px;border-bottom:1px solid #F2F2EE;color:#55555F;line-height:1.5}
+.cmp-row{font-weight:600;color:#1C1C28;white-space:nowrap}
+
+/* Key items list */
+.ki-list{list-style:none;margin-top:8px}
+.ki-list li{font-size:12.5px;color:#55555F;padding:5px 0;border-bottom:1px solid #F2F2EE;line-height:1.65}
+.ki-list li:last-child{border-bottom:none}
+.ki-list .ki-label{font-weight:600;color:#1C1C28}
+.ki-list .ki-src{font-size:10px;color:#9E9EA8;margin-left:4px}
+
+/* Three positions */
+.pos-grid{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.pos-item{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border-radius:6px;font-size:12.5px;line-height:1.6}
+.pos-name{font-weight:700;white-space:nowrap;flex-shrink:0}
+.pos-text{color:#55555F}
+
+/* Nested circles container */
+.nested-vis{display:flex;justify-content:center;margin:8px 0}
+
+/* Layers */
+.layers{display:flex;flex-direction:column;gap:0;margin-top:10px;border-radius:8px;overflow:hidden;border:1px solid #E8E8E4}
+.layer{display:flex;align-items:center;gap:10px;padding:8px 12px;font-size:12px}
+.layer-num{display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:11px;font-weight:700;flex-shrink:0}
+.layer-text{font-weight:600;color:#1C1C28}
+.layer-sub{color:#55555F;font-size:11px}
+
+/* Gradient bar */
+.grad-bar{margin-top:10px}
+.grad-track{height:14px;border-radius:7px;background:linear-gradient(90deg,#60A5FA,#FBBF24,#F87171)}
+.grad-labels{display:flex;justify-content:space-between;margin-top:6px;font-size:10.5px;color:#9E9EA8}
+
+/* Diverging paths */
+.diverge{display:flex;gap:20px;justify-content:center;margin:10px 0}
+.diverge-col{display:flex;flex-direction:column;align-items:center;gap:6px}
+
+/* Concept grid */
+.concept-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.concept-item{display:flex;align-items:center;gap:6px;font-size:11.5px;padding:5px 8px;border-radius:5px;background:#F8F8F5}
+.concept-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.concept-name{font-weight:600;color:#1C1C28;font-size:11px}
+.concept-src{color:#9E9EA8;font-size:9.5px}
+
+/* ============ Footer ============ */
+.page-footer{text-align:center;padding:32px 20px 48px;font-size:12px;color:#9E9EA8;line-height:1.7}
+.page-footer a{color:#6D28D9;text-decoration:none}
+
+/* ============ Toast ============ */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1C1C28;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;opacity:0;transition:all .3s;z-index:200;pointer-events:none}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+</style>
+</head>
+<body>
+
+<!-- ============ Header ============ -->
+<header class="page-header">
+  <h1 class="page-title">数据可视化为何未能成为大众文本</h1>
+  <p class="page-subtitle">门槛与局限的辨析 · 知识卡片版</p>
+  <p class="page-intro">基于 ChatGPT / Gemini / Claude 三篇文档的总结与补充辨析，提炼为 15 张可独立理解、可导出为图片的知识卡片。</p>
+  <button id="exportAllBtn" class="btn-export-all" onclick="exportAll()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    导出全部卡片
+  </button>
+</header>
+
+<div class="page">
+
+<!-- ============ Hero Card 00 ============ -->
+<div class="card hero-card" data-id="00" data-title="核心问题" style="--accent:#FAFAF8;opacity:1;transform:none">
+  <button class="card-export" onclick="exportCard(this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    导出
+  </button>
+  <div class="hero-tag">CORE QUESTION</div>
+  <h2 class="hero-title">可视化为何没能成为大众文本？</h2>
+  <p class="hero-body">数据可视化有文字和图像不具备的信息表达优势，在特定领域不可或缺。</p>
+  <p class="hero-body">但它未能像文字、图像那样，成为非专业人士日常理解和接受的主要信息载体。</p>
+  <div class="hero-q">这究竟是学习<strong>门槛</strong>问题，还是可视化本身的<em>根本局限</em>？</div>
+</div>
+
+<!-- ============ Section 1 ============ -->
+<section class="section">
+  <h2 class="section-h">
+    <span class="section-num">一</span>
+    <span class="s-label">三篇文档总结</span>
+    <span class="section-count">7 张卡片</span>
+  </h2>
+  <div class="masonry">
+
+    <!-- Card 01 -->
+    <div class="card" data-id="01" data-title="三家殊途同归" style="--accent:#6D28D9;--accent-bg:rgba(109,40,217,.07)">
+      <button class="card-export" onclick="exportCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>导出</button>
+      <div class="card-top"><span class="card-num">01</span><span class="card-tag">一 · 总结</span></div>
+      <h3 class="card-title">三家殊途同归</h3>
+      <div class="card-body">
+        <p>ChatGPT、Gemini、Claude 论证路径不同，但收敛于同一判断——</p>
+      </div>
+      <div class="card-ki" style="background:rgba(109,40,217,.07);border-left:3px solid #6D28D9">
+        可视化不是通用信息媒介，而是"数量关系"的专用语言。
+      </div>
+      <div class="card-body">
+        <p>服务于理性计算与科学决策，而非生物本能与社会叙事。</p>
+      </div>
+      <div class="card-visual">
+        <svg viewBox="0 0 300 60" style="width:100%;max-width:300px;display:block;margin:0 auto">
+          <text x="30" y="14" text-anchor="middle" font-size="10" fill="#6D28D9" font-weight="600">ChatGPT</text>
+          <text x="150" y="14" text-anchor="middle" font-size="10" fill="#6D28D9" font-weight="600">Gemini</text>
+          <text x="270" y="14" text-anchor="middle" font-size="10" fill="#6D28D9" font-weight="600">Claude</text>
+          <path d="M30 20 Q60 35 130 38" stroke="#C4B5FD" stroke-width="1.5" fill="none"/>
+          <path d="M150 20 L150 38" stroke="#C4B5FD" stroke-width="1.5" fill="none"/>
+          <path d="M270 20 Q240 35 170 38" stroke="#C4B5FD" stroke-width="1.5" fill="none"/>
+          <circle cx="150" cy="44" r="13" fill="#6D28D9"/>
+          <text x="150" y="42" text-anchor="middle" font-size="7" fill="#fff" font-weight="700">专用</text>
+          <text x="150" y="49" text-anchor="middle" font-size="7" fill="#fff" font-weight="700">语言</text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Card 02 -->
+    <div class="card" data-id="02" data-title="三种类比一个共识" style="--accent:#6D28D9;--accent-bg:rgba(109,40,217,.07)">
+      <button class="card-export" onclick="exportCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>导出</button>
+      <div class="card-top"><span class="card-num">02</span><span class="card-tag">一 · 总结</span></div>
+      <h3 class="card-title">三种类比，一个共识</h3>
+      <div class="card-visual">
+        <div class="pos-grid">
+          <div class="pos-item" style="background:rgba(109,40,217,.06)">
+            <span class="pos-name" style="color:#6D28D9">ChatGPT</span>
+            <span class="pos-text">数量关系的<strong>专用语言</strong>（文字叙事，图像感知，可视化关系）</span>
+          </div>
+          <div class="pos-item" style="background:rgba(109,40,217,.06)">
+            <span class="pos-name" style="color:#6D28D9">Gemini</span>
+            <span class="pos-text">服务于理性计算的<strong>高级副语言</strong></span>
+          </div>
+          <div class="pos-item" style="background:rgba(109,40,217,.06)">
+            <span class="pos-name" style="color:#6D28D9">Claude</span>
+            <span class="pos-text">类似乐谱/数学符号的<strong>专用记号系统</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 03 -->
+    <div class="card" data-id="03" data-title="核心论点对比" style="--accent:#6D28D9;--accent-bg:rgba(109,40,217,.07)">
+      <button class="card-export" onclick="exportCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>导出</button>
+      <div class="card-top"><span class="card-num">03</span><span class="card-tag">一 · 总结</span></div>
+      <h3 class="card-title">根因 · 门槛 · 局限 · 预期</h3>
+      <table class="cmp-table">
+        <thead><tr><th>维度</th><th style="color:#6D28D9">ChatGPT</th><th style="color:#0369A1">Gemini</th><th style="color:#C2410C">Claude</th></tr></thead>
+        <tbody>
+          <tr><td class="cmp-row">根本原因</td><td>使用频率低</td><td>进化认知差距</td><td>结构性限制</td></tr>
+          <tr><td class="cmp-row">门槛可否降低</td><td>可降低</td><td>难以根本改变</td><td>可降低</td></tr>
+          <tr><td class="cmp-row">不可磨灭的局限</td><td>覆盖信息空间小</td><td>叙事缺失/认知负载/信任危机</td><td>内容须天然可量化</td></tr>
+          <tr><td class="cmp-row">AI 预期</td><td style="color:#047857;font-weight:600">乐观</td><td style="color:#9E9EA8">未深入</td><td style="color:#B91C1C;font-weight:600">审慎</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Card 04 -->
+    <div class="card" data-id="04" data-title="ChatGPT论证脉络" style="--accent:#6D28D9;--accent-bg:rgba(109,40,217,.07)">
+      <button class="card-export" onclick="exportCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>导出</button>
+      <div class="card-top"><span class="card-num">04</span><span class="card-tag">一 · 总结</span></div>
+      <h3 class="card-title">ChatGPT：能力分工与频率定律</h3>
+      <div class="card-visual">
+        <div class="flow">
+          <span class="flow-node" style="background:rgba(109,40,217,.1);color:#6D28D9">四种能力分工</span>
+          <span class="flow-arrow" style="color:#C4B5FD">↓</span>
+          <span class="flow-node" style="background:rgba(109,40,217,.1);color:#6D28D9">覆盖信息空间小</span>
+          <span class="flow-arrow" style="color:#C4B5FD">↓</span>
+          <span class="flow-node" style="background:rgba(109,40,217,.1);color:#6D28D9">进化认知差距</span>
+          <span class="flow-arrow" style="color:#C4B5FD">↓</span>
+          <span class="flow-node" style="background:rgba(109,40,217,.1);color:#6D28D9">使用频率定律</span>
+        </div>
+      </div>
+      <div class="card-ki" style="background:rgba(109,40,217,.07);border-left:3px solid #6D28D9">
+        "一图胜千言"是错觉——可视化不减少信息，而是翻译成新语言。
+      </div>
+      <div class="card-body">
+        <p>使用频率越低，学习成本越不值得投入 → 大众不会主动学。</p>
+      </div>
+    </div>
+
+    <!-- Card 05 -->
+    <div class="card" data-id="05" data-title="Gemini论证脉络" style="--accent:#6D28D9;--accent-bg:rgba(109,40,217,.07)">
+      <button class="card-export" onclick="exportCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>导出</button>
+      <div class="card-top"><span class="card-num">05</span><span class="card-tag">一 · 总结</span></div>
+      <h3 class="card-title">Gemini：进化差距与读写不对称</h3>
+      <div class="card-visual">
+        <div class="flow">
+          <span class="flow-node" style="background:rgba(109,40,217,.1);color:#6D28D9">文字/图像顺应进化</span>
+          <span class="flow-arrow" style="color:#C4B5FD">↓</span>
+          <span class="flow-node" style="background:rgba(109,40,217,.1);color:#6D28D9">可视化是后天抽象符号</span>
+          <span class="flow-arrow" style="color:#C4B5FD">↓</span>
+          <span class="flow-node" style="background:rgba(109,40,217,.1);color:#6D28D9">视觉语法缺失 + 读写不对称</span>
+        </div>
+      </div>
+      <div class="card-ki" style="background:rgba(109,40,217,.07);border-left:3px solid #6D28D9">
+        三大局限——叙事缺失 / 高认知负载 / 信任危机
+      </div>
+    </div>
+
+    <!-- Card 06 -->
+    <div class="card" data-id="06" data-title="Claude论证脉络" style="--accent:#6D28D9;--accent-bg:rgba(109,40,217,.07)">
+      <button class="card-export" onclick="exportCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>导出</button>
+      <div class="card-top"><span class="card-num">06</span><span class="card-tag">一 · 总结</span></div>
+      <h3 class="card-title">Claude：双重门槛与结构性限制</h3>
+      <div class="card-visual">
+        <div class="flow">
+          <span class="flow-node" style="background:rgba(109,40,217,.1);color:#6D28D9">两端都贵（生产+理解）</span>
+          <span class="flow-arrow" style="color:#C4B5FD">↓</span>
+          <span class="flow-node" style="background:rgba(109,40,217,.1);color:#6D28D9">二阶表达（对已量化内容）</span>
+          <span class="flow-arrow" style="color:#C4B5FD">↓</span>
+          <span class="flow-node" style="background:rgba(109,40,217,.1);color:#6D28D9">寄生性（离不开文字）</span>
+        </div>
+      </div>
+      <div class="card-ki" style="background:rgba(109,40,217,.07);border-left:3px solid #6D28D9">
+        门槛可被技术磨低，局限性不可被技术磨掉。
+      </div>
+      <div class="card-body">
+        <p>文字只贵生产端，图像两端都便宜，可视化不幸两端都贵。</p>
+      </div>
+    </div>
+
+    <!-- Card 07 -->
+    <div class="card" data-id="07" data-title="关键分歧门槛vs局限" style="--accent:#6D28D9;--accent-bg:rgba(109,40,217,.07)">
+      <button class="card-export" onclick="exportCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>导出</button>
+      <div class="card-top"><span class="card-num">07</span><span class="card-tag">一 · 总结</span></div>
+      <h3 class="card-title">门槛 vs 局限，何者更根本？</h3>
+      <div class="card-visual">
+        <div class="pos-grid">
+          <div class="pos-item" style="background:rgba(109,40,217,.06)">
+            <span class="pos-name" style="color:#6D28D9">ChatGPT</span>
+            <span class="pos-text">绕过二分法——提出第三选项：<strong>使用频率</strong>。不需要就不学。</span>
+          </div>
+          <div class="pos-item" style="background:rgba(109,40,217,.06)">
+            <span class="pos-name" style="color:#6D28D9">Gemini</span>
+            <span class="pos-text">两者<strong>交织</strong>——进化差距既是门槛根源也是局限根源，难以分离。</span>
+          </div>
+          <div class="pos-item" style="background:rgba(109,40,217,.06)">
+            <span class="pos-name" style="color:#6D28D9">Claude</span>
+            <span class="pos-text"><strong>可分离</strong>——门槛可磨低，局限磨不掉。三篇中最锐利的分析框架。</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ Section 2 ============ -->
+<section class="section">
+  <h2 class="section-h">
+    <span class="section-num">二</span>
+    <span class="s-label">补充辨析</span>
+    <span class="section-count">5 张卡片</span>
+  </h2>
+  <div class="masonry">
+
+    <!-- Card 08 -->
+    <div class="card" data-id="08" data-title="门槛与局限能否分离" style="--accent:#C2410C;--accent-bg:rgba(194,65,12,.07)">
+      <button class="card-export" onclick="exportCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>导出</button>
+      <div class="card-top"><span class="card-num">08</span><span class="card-tag">二 · 辨析</span></div>
+      <h3 class="card-title">门槛与局限能否真正分离？</h3>
+      <div class="card-ki" style="background:rgba(194,65,12,.07);border-left:3px solid #C2410C">
+        门槛是局限性的经验表现，局限性是门槛的结构性根源。
+      </div>
+      <div class="card-body">
+        <p>人看不懂折线图（门槛），是因为折线图编码数量关系而人脑不天然处理数量关系（局限）。同一原因，不同层面。</p>
+      </div>
+      <div class="card-visual nested-vis">
+        <svg viewBox="0 0 260 130" style="width:100%;max-width:260px;display:block">
+          <circle cx="130" cy="65" r="58" fill="rgba(194,65,12,.06)" stroke="#C2410C" stroke-width="1.5"/>
+          <text x="130" y="20" text-anchor="middle" font-size="11" fill="#C2410C" font-weight="700">局限性</text>
+          <text x="130" y="32" text-anchor="middle" font-size="8.5" fill="#C2410C">结构性根源</text>
+          <circle cx="130" cy="72" r="32" fill="rgba(194,65,12,.1)" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <text x="130" y="70" text-anchor="middle" font-size="11" fill="#C2410C" font-weight="700">门槛</text>
+          <text x="130" y="82" text-anchor="middle" font-size="8.5" fill="#C2410C">经验表现</text>
+        </svg>
+      </div>
+      <div class="card-body">
+        <p>文字映射口语（普遍能力），可视化映射数量关系（非普遍场景）。文字门槛 = 学会编码即可；可视化门槛 = 学会编码 + 场景有可编码内容。</p>
+      </div>
+    </div>
+
+    <!-- Card 09 -->
+    <div class="card" data-id="09" data-title="文字在简化可视化在复杂化" style="--accent:#C2410C;--accent-bg:rgba(194,65,12,.07)">
+      <button class="card-export" onclick="exportCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>导出</button>
+      <div class="card-top"><span class="card-num">09</span><span class="card-tag">二 · 辨析</span></div>
+      <h3 class="card-title">文字在简化，可视化在复杂化</h3>
+      <div class="card-visual">
+        <div class="diverge">
+          <div class="diverge-col">
+            <span class="flow-node" style="background:rgba(109,40,217,.1);color:#6D28D9">文字</span>
+            <span style="font-size:22px;color:#6D28D9">↓</span>
+            <span style="font-size:11px;color:#6D28D9;font-weight:600">简化</span>
+            <span style="font-size:10px;color:#9E9EA8">甲骨文→简体字→拼音</span>
+          </div>
+          <div class="diverge-col">
+            <span class="flow-node" style="background:rgba(194,65,12,.1);color:#C2410C">可视化</span>
+            <span style="font-size:22px;color:#C2410C">↑</span>
+            <span style="font-size:11px;color:#C2410C;font-weight:600">复杂化</span>
+            <span style="font-size:10px;color:#9E9EA8">折线→箱线→交互</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-ki" style="background:rgba(194,65,12,.07);border-left:3px solid #C2410C">
+        学文字像学一种语言；学可视化像学一个语言家族。
+      </div>
+      <div class="card-body">
+        <p>每种图表类型是独立编码方言——柱状图编码比较、折线图编码趋势、散点图编码关联。学习者需掌握多套专用编码，而非一套通用符号。</p>
+      </div>
+    </div>
+
+    <!-- Card 10 -->
+    <div class="card" data-id="10" data-title="寄生性程度而非有无" style="--accent:#C2410C;--accent-bg:rgba(194,65,12,.07)">
+      <button class="card-export" onclick="exportCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>导出</button>
+      <div class="card-top"><span class="card-num">10</span><span class="card-tag">二 · 辨析</span></div>
+      <h3 class="card-title">寄生性：程度问题，而非有无</h3>
+      <div class="card-visual">
+        <svg viewBox="0 0 300 110" style="width:100%;display:block">
+          <!-- Left: with annotations -->
+          <text x="70" y="14" text-anchor="middle" font-size="10" fill="#55555F" font-weight="600">有注释 → 可读懂</text>
+          <rect x="10" y="20" width="125" height="70" fill="rgba(109,40,217,.03)" stroke="#E8E8E4"/>
+          <line x1="10" y1="90" x2="135" y2="90" stroke="#9E9EA8" stroke-width="1"/>
+          <line x1="10" y1="20" x2="10" y2="90" stroke="#9E9EA8" stroke-width="1"/>
+          <text x="72" y="100" text-anchor="middle" font-size="8" fill="#9E9EA8">时间 →</text>
+          <text x="4" y="55" font-size="8" fill="#9E9EA8" transform="rotate(-90 4 55)">值</text>
+          <circle cx="22" cy="78" r="2.5" fill="#6D28D9"/><circle cx="38" cy="68" r="2.5" fill="#6D28D9"/><circle cx="54" cy="52" r="2.5" fill="#6D28D9"/><circle cx="70" cy="40" r="2.5" fill="#6D28D9"/><circle cx="86" cy="33" r="2.5" fill="#6D28D9"/><circle cx="102" cy="29" r="2.5" fill="#6D28D9"/><circle cx="118" cy="27" r="2.5" fill="#6D28D9"/>
+          <line x1="22" y1="78" x2="118" y2="27" stroke="#6D28D9" stroke-width="1" stroke-dasharray="3 2"/>
+          <!-- Right: without annotations -->
+          <text x="225" y="14" text-anchor="middle" font-size="10" fill="#55555F" font-weight="600">无注释 → 一堆点</text>
+          <circle cx="170" cy="78" r="2.5" fill="#9E9EA8"/><circle cx="186" cy="68" r="2.5" fill="#9E9EA8"/><circle cx="202" cy="52" r="2.5" fill="#9E9EA8"/><circle cx="218" cy="40" r="2.5" fill="#9E9EA8"/><circle cx="234" cy="33" r="2.5" fill="#9E9EA8"/><circle cx="250" cy="29" r="2.5" fill="#9E9EA8"/><circle cx="266" cy="27" r="2.5" fill="#9E9EA8"/>
+          <text x="225" y="100" text-anchor="middle" font-size="8" fill="#9E9EA8">只剩无意义的几何图形</text>
+        </svg>
+      </div>
+      <div class="card-body">
+        <p>脱离语境的单个文字同样歧义极大（"打"字是打架还是打字？）。交互式可视化正在消解寄生性——tooltip、钻取让图表"自我解释"。</p>
+      </div>
+      <div class="card-ki" style="background:rgba(194,65,12,.07);border-left:3px solid #C2410C">
+        地图是寄生性最弱的可视化——地理空间本身是直觉感知的，编码几乎不需要学习。
+      </div>
+    </div>
+
+    <!-- Card 11 -->
+    <div class="card" data-id="11" data-title="冰冷感是设计选择非媒介本质" style="--accent:#C2410C;--accent-bg:rgba(194,65,12,.07)">
+      <button class="card-export" onclick="exportCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>导出</button>
+      <div class="card-top"><span class="card-num">11</span><span class="card-tag">二 · 辨析</span></div>
+      <h3 class="card-title">"冰冷感"是设计选择，非媒介本质</h3>
+      <div class="card-body">
+        <p>冰冷感是媒介固有属性，还是当前设计惯例的产物？</p>
+      </div>
+      <div class="card-visual">
+        <div class="grad-bar">
+          <div class="grad-track"></div>
+          <div class="grad-labels">
+            <span>冰冷（Excel 默认）</span>
+            <span>温暖（叙事可视化）</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>纽约时报交互报道、The Pudding 叙事可视化已证明：可视化可以有温度、有叙事、有共情——读者无需专业训练就能被带入数据故事。</p>
+      </div>
+      <div class="card-ki" style="background:rgba(194,65,12,.07);border-left:3px solid #C2410C">
+        设计能消解"社会门槛"，不能消解"结构性局限"——最温暖的数据故事仍要求内容先被量化。
+      </div>
+    </div>
+
+    <!-- Card 12 -->
+    <div class="card" data-id="12" data-title="AI能改变多少" style="--accent:#C2410C;--accent-bg:rgba(194,65,12,.07)">
+      <button class="card-export" onclick="exportCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>导出</button>
+      <div class="card-top"><span class="card-num">12</span><span class="card-tag">二 · 辨析</span></div>
+      <h3 class="card-title">AI 能改变多少？</h3>
+      <div class="card-visual">
+        <div class="layers">
+          <div class="layer" style="background:rgba(4,120,87,.18)">
+            <span class="layer-num" style="background:#047857;color:#fff">3</span>
+            <span class="layer-text">量化环节</span>
+            <span class="layer-sub">— 关键变数：若 AI 能结构化定性经验，限制被侵蚀</span>
+          </div>
+          <div class="layer" style="background:rgba(4,120,87,.12)">
+            <span class="layer-num" style="background:#047857;color:#fff">2</span>
+            <span class="layer-text">阅读端门槛</span>
+            <span class="layer-sub">— 降低中：AI 承担翻译工作</span>
+          </div>
+          <div class="layer" style="background:rgba(4,120,87,.06)">
+            <span class="layer-num" style="background:#047857;color:#fff">1</span>
+            <span class="layer-text">生产端门槛</span>
+            <span class="layer-sub">— 已塌陷：一句话生成图表</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>若 AI 包揽量化、编码、生成和解读，用户面对的还算是"可视化"吗？用户消费的是 AI 的解释，图表只是中间产物。</p>
+      </div>
+      <div class="card-ki" style="background:rgba(194,65,12,.07);border-left:3px solid #C2410C">
+        未来更接近 SQL 而非汉字——重要性上升，普及性不变。
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ Section 3 ============ -->
+<section class="section">
+  <h2 class="section-h">
+    <span class="section-num">三</span>
+    <span class="s-label">综合结论 + 附录</span>
+    <span class="section-count">2 张卡片</span>
+  </h2>
+  <div class="masonry">
+
+    <!-- Card 13 -->
+    <div class="card" data-id="13" data-title="数据世界的乐谱" style="--accent:#047857;--accent-bg:rgba(4,120,87,.07)">
+      <button class="card-export" onclick="exportCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>导出</button>
+      <div class="card-top"><span class="card-num">13</span><span class="card-tag">三 · 结论</span></div>
+      <h3 class="card-title">数据世界的乐谱</h3>
+      <div class="card-ki" style="background:rgba(4,120,87,.07);border-left:3px solid #047857">
+        门槛是局限性的经验表现，局限性是门槛的结构性根源。
+      </div>
+      <div class="card-body">
+        <p>技术会持续压低门槛——尤其是 AI 在生产端、阅读端甚至量化环节的介入——但"可视化要求内容天然可量化，而大多数日常经验不是天然量化的"这一结构性限制不会消失。</p>
+      </div>
+      <div class="card-ki" style="background:rgba(4,120,87,.07);border-left:3px solid #047857">
+        可视化的未来不是"第三种文字"，而是数据世界的乐谱——不是人人都会读，但文明离不开它。
+      </div>
+      <div class="card-visual" style="text-align:center;margin-top:14px">
+        <span style="font-size:28px">♪</span>
+        <span style="font-size:12px;color:#9E9EA8;margin:0 12px">≈</span>
+        <span style="font-size:13px;font-weight:700;color:#047857;font-family:monospace">SQL</span>
+        <div style="font-size:11px;color:#9E9EA8;margin-top:6px">重要性 ↑&nbsp;&nbsp;&nbsp;普及性 →</div>
+      </div>
+    </div>
+
+    <!-- Card 14 -->
+    <div class="card" data-id="14" data-title="核心概念速查" style="--accent:#78716C;--accent-bg:rgba(120,113,108,.07)">
+      <button class="card-export" onclick="exportCard(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>导出</button>
+      <div class="card-top"><span class="card-num">14</span><span class="card-tag">附录</span></div>
+      <h3 class="card-title">核心概念速查</h3>
+      <div class="concept-grid">
+        <div class="concept-item"><span class="concept-dot" style="background:#6D28D9"></span><div><div class="concept-name">视觉感知 vs 抽象数量认知</div><div class="concept-src">ChatGPT</div></div></div>
+        <div class="concept-item"><span class="concept-dot" style="background:#6D28D9"></span><div><div class="concept-name">使用频率定律</div><div class="concept-src">ChatGPT</div></div></div>
+        <div class="concept-item"><span class="concept-dot" style="background:#6D28D9"></span><div><div class="concept-name">中间语言</div><div class="concept-src">ChatGPT</div></div></div>
+        <div class="concept-item"><span class="concept-dot" style="background:#0369A1"></span><div><div class="concept-name">Prosumer Gap</div><div class="concept-src">Gemini</div></div></div>
+        <div class="concept-item"><span class="concept-dot" style="background:#0369A1"></span><div><div class="concept-name">认知负载</div><div class="concept-src">Gemini</div></div></div>
+        <div class="concept-item"><span class="concept-dot" style="background:#C2410C"></span><div><div class="concept-name">双重门槛</div><div class="concept-src">Claude</div></div></div>
+        <div class="concept-item"><span class="concept-dot" style="background:#C2410C"></span><div><div class="concept-name">二阶表达</div><div class="concept-src">Claude</div></div></div>
+        <div class="concept-item"><span class="concept-dot" style="background:#C2410C"></span><div><div class="concept-name">寄生性</div><div class="concept-src">Claude</div></div></div>
+        <div class="concept-item"><span class="concept-dot" style="background:#047857"></span><div><div class="concept-name">方言化</div><div class="concept-src">本文补充</div></div></div>
+        <div class="concept-item"><span class="concept-dot" style="background:#047857"></span><div><div class="concept-name">门槛-局限同源性</div><div class="concept-src">本文补充</div></div></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+</div><!-- /.page -->
+
+<!-- ============ Footer ============ -->
+<footer class="page-footer">
+  基于 ChatGPT · Gemini · Claude 三篇文档总结与补充辨析<br>
+  门槛与局限的辨析 · 知识卡片版 · 2026
+</footer>
+
+<!-- ============ Toast ============ -->
+<div id="toast"></div>
+
+<!-- ============ Script ============ -->
+<script>
+// Fade-in on scroll
+var io = new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+  });
+},{threshold:0.08});
+document.querySelectorAll('.card').forEach(function(c){ io.observe(c); });
+
+// Toast
+function showToast(msg){
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(function(){ t.classList.remove('show'); }, 2500);
+}
+
+// Export single card
+function exportCard(btn){
+  if(typeof html2canvas === 'undefined'){
+    showToast('html2canvas 未加载，请检查网络连接');
+    return;
+  }
+  var card = btn.closest('.card');
+  var id = card.getAttribute('data-id') || '00';
+  var title = card.getAttribute('data-title') || 'card';
+
+  card.classList.add('in'); // ensure visible
+  btn.classList.add('loading');
+  btn.querySelector('span') ? null : null;
+  var orig = btn.innerHTML;
+  btn.innerHTML = '<span>生成中…</span>';
+
+  html2canvas(card, {
+    scale: 2,
+    backgroundColor: '#FFFFFF',
+    useCORS: true,
+    logging: false,
+    onclone: function(doc){
+      var btns = doc.querySelectorAll('.card-export');
+      btns.forEach(function(b){ b.style.display = 'none'; });
+    }
+  }).then(function(canvas){
+    var link = document.createElement('a');
+    link.download = id + '_' + title + '.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    btn.classList.remove('loading');
+    btn.innerHTML = orig;
+    showToast('卡片 ' + id + ' 已导出');
+  }).catch(function(err){
+    console.error(err);
+    btn.classList.remove('loading');
+    btn.innerHTML = orig;
+    showToast('导出失败，请重试');
+  });
+}
+
+// Export all cards
+function exportAll(){
+  if(typeof html2canvas === 'undefined'){
+    showToast('html2canvas 未加载，请检查网络连接');
+    return;
+  }
+  var cards = document.querySelectorAll('.card');
+  var total = cards.length;
+  var i = 0;
+  var btn = document.getElementById('exportAllBtn');
+  btn.disabled = true;
+
+  function next(){
+    if(i >= total){
+      btn.disabled = false;
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>导出全部卡片';
+      showToast('全部 ' + total + ' 张卡片已导出');
+      return;
+    }
+    var card = cards[i];
+    var id = card.getAttribute('data-id') || String(i);
+    var title = card.getAttribute('data-title') || 'card';
+    var fileName = id + '_' + title + '.png';
+
+    card.classList.add('in');
+    btn.innerHTML = '<span>正在导出 ' + (i+1) + '/' + total + '…</span>';
+
+    html2canvas(card, {
+      scale: 2,
+      backgroundColor: '#FFFFFF',
+      useCORS: true,
+      logging: false,
+      onclone: function(doc){
+        var btns = doc.querySelectorAll('.card-export');
+        btns.forEach(function(b){ b.style.display = 'none'; });
+      }
+    }).then(function(canvas){
+      var link = document.createElement('a');
+      link.download = fileName;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      i++;
+      setTimeout(next, 350);
+    }).catch(function(){
+      i++;
+      setTimeout(next, 350);
+    });
+  }
+  next();
+}
+</script>
+</body>
+</html>
