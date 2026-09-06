@@ -92,6 +92,60 @@ body::before {
 }
 @keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
 
+/* ===== 话题起源 ===== */
+.origin-section { padding: 100px 0; border-bottom: 1px solid var(--ink-3); }
+.origin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+.origin-photo-wrap { position: sticky; top: 40px; }
+.origin-photo {
+  width: 100%; height: auto;
+  border: 1px solid var(--ink-3);
+  display: block;
+}
+.origin-photo-caption {
+  margin-top: 12px;
+  font-size: 11px; color: var(--paper-dim);
+  line-height: 1.7; font-family: var(--mono);
+}
+.caption-label {
+  display: inline-block;
+  padding: 2px 6px; margin-right: 6px;
+  background: var(--ink-3); color: var(--amber);
+  font-size: 10px; letter-spacing: 1px;
+}
+.origin-text { min-width: 0; }
+.origin-question {
+  background: var(--ink-2); border: 1px solid var(--ink-3);
+  padding: 24px 28px; margin-bottom: 32px;
+  border-left: 3px solid var(--amber);
+}
+.origin-question-label {
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 2px; color: var(--amber);
+  margin-bottom: 10px; text-transform: uppercase;
+}
+.origin-question-text {
+  font-family: var(--serif); font-size: 17px;
+  font-weight: 600; line-height: 1.7; color: var(--paper);
+}
+.origin-flow { display: flex; flex-direction: column; gap: 24px; }
+.flow-step { display: flex; gap: 16px; align-items: flex-start; }
+.flow-num {
+  flex-shrink: 0; width: 32px; height: 32px;
+  border: 1px solid var(--amber-dim); color: var(--amber);
+  font-family: var(--serif); font-size: 16px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.flow-title {
+  font-family: var(--serif); font-size: 15px;
+  font-weight: 700; margin-bottom: 4px; color: var(--paper);
+}
+.flow-desc { font-size: 13px; color: var(--paper-dim); line-height: 1.8; }
+
 /* ===== 8 AI 卡片 ===== */
 .ai-section { padding: 100px 0; border-bottom: 1px solid var(--ink-3); }
 .ai-grid {
@@ -349,6 +403,7 @@ body::before {
   .container { padding: 0 20px; }
   .hero-stats { grid-template-columns: repeat(2, 1fr); }
   .origin-grid { grid-template-columns: 1fr; gap: 32px; }
+  .origin-photo-wrap { position: static; }
   .origin-flow { gap: 4px; }
   .flow-node { padding: 8px 10px; font-size: 10px; }
   .flow-node .num { font-size: 14px; }
@@ -403,6 +458,52 @@ body::before {
           <div class="flow-node"><span class="num">5</span>份独立分析</div>
           <span class="flow-arrow">→</span>
           <div class="flow-node"><span class="num">1</span>本页汇总</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 话题起源 ===== -->
+<section class="origin-section" id="origin">
+  <div class="container">
+    <div class="section-label">SECTION 00 · ORIGIN</div>
+    <h2 class="section-title">话题起源</h2>
+    <div class="origin-grid">
+      <div class="origin-photo-wrap">
+        <img src="https://aka.doubaocdn.com/s/U9Pvq6mKXr" alt="好莱坞六巨星海景露台聚会 AI 生成图" class="origin-photo">
+        <div class="origin-photo-caption">
+          <span class="caption-label">原图</span>
+          AI 生成图 · 六人海景露台聚会 · 后排：布拉德·皮特、莱昂纳多·迪卡普里奥 · 前排：桑德拉·布洛克、基努·里维斯、凯瑞-安·莫斯、汤姆·克鲁斯
+        </div>
+      </div>
+      <div class="origin-text">
+        <div class="origin-question">
+          <div class="origin-question-label">原始问题</div>
+          <p class="origin-question-text">「不受限制，以任意的方式、从任意的角度，有创意地介绍、解读这张照片及照片里的人物」</p>
+        </div>
+        <div class="origin-flow">
+          <div class="flow-step">
+            <div class="flow-num">1</div>
+            <div class="flow-content">
+              <div class="flow-title">8 个 AI 回答同一问题</div>
+              <div class="flow-desc">ChatGPT、Claude、Gemini、Grok、DeepSeek、Doubao、Kimi、Qwen 分别对同一张照片给出创意解读，形成 8 份风格迥异的原始回复。</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num">2</div>
+            <div class="flow-content">
+              <div class="flow-title">5 个 AI 分析这 8 份回复</div>
+              <div class="flow-desc">ChatGPT、WorkBuddy（腾讯 hy4）、Qwen、Gemini、Doubao 分别独立分析 8 份回复的特点、思路原则，并猜测每份回复出自哪个模型。</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num">3</div>
+            <div class="flow-content">
+              <div class="flow-title">本页：交叉汇总与验证</div>
+              <div class="flow-desc">从 5 份分析中交叉提炼 8 份回复的风格 DNA 与共有思路原则，同时对照真实答案验证 5 位分析者的猜测准确性。</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

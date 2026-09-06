@@ -34,6 +34,23 @@
   h2 .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block}
   .lead{color:var(--tx2); font-size:13px; margin:0 0 16px; max-width:860px}
 
+  /* 话题起源 */
+  .origin{display:grid; grid-template-columns:1.1fr .9fr; gap:22px; background:var(--panel); border:1px solid var(--line); border-radius:var(--r); padding:20px 22px; box-shadow:var(--shadow); margin-top:24px}
+  .origin h2{margin-bottom:10px}
+  .q{margin:0 0 12px; padding:11px 15px; border-left:3px solid var(--accent); background:var(--accentbg); border-radius:0 9px 9px 0; font-size:14.5px; line-height:1.7}
+  .q small{display:block; color:var(--tx2); font-size:12px; margin-bottom:3px}
+  .origin p.d{font-size:13.5px; color:var(--tx2); margin:0 0 4px}
+  .steps{display:flex; gap:6px; flex-wrap:wrap; margin:14px 0 0; padding:0; list-style:none}
+  .steps li{font-size:12px; background:#f3f3f5; border-radius:999px; padding:4px 11px; color:var(--tx2)}
+  .steps li b{color:var(--tx); font-weight:640; margin-right:3px}
+  .origin figure{margin:0}
+  .origin figure img{width:100%; border-radius:11px; border:1px solid var(--line); display:block; background:#eee}
+  .origin figcaption{font-size:12px; color:var(--tx2); margin-top:9px; line-height:1.75}
+  .origin figcaption b{color:var(--tx)}
+  .tells{margin:6px 0 0; padding-left:16px; font-size:12px; color:var(--tx2)}
+  .tells li{margin-bottom:2px}
+  @media(max-width:860px){ .origin{grid-template-columns:1fr} }
+
   /* 口径切换 */
   .bar{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:14px}
   .seg{display:inline-flex; background:#ececef; border-radius:9px; padding:3px}
@@ -129,6 +146,39 @@
   <div class="sub">同一张 AI 合成照、同一个开放提问，8 个模型给出 8 份答卷；再让 5 个模型反推"谁写的谁"。40 次品牌归因，只有 11 次命中。这张图鉴把 5 份分析交叉汇总，看看哪些"风格指纹"真的有效、哪些只是我们共有的先验偏见。</div>
   <div class="kpis" id="kpis"></div>
 </header>
+
+<section class="origin">
+  <div>
+    <h2><span class="dot"></span>话题起源</h2>
+    <blockquote class="q">
+      <small>给 8 个模型的原始提问（一字未改）</small>
+      "不受限制，以任意的方式、从任意的角度，有创意地介绍、解读这张照片及照片里的人物"
+    </blockquote>
+    <p class="d">这不是一次普通的"看图解图"，而是一个两轮对照实验：<b>第一轮</b>——同一张图、同一个开放提问，交给 8 个模型自由作答，得到 8 份风格迥异的答卷（AI-1 ~ AI-8）；<b>第二轮</b>——把 8 份答卷隐去品牌，再交给 5 个模型反推"谁写的谁"，得到 5 份归因分析（wbd / ChatGPT / Doubao / Gemini / Qwen）。</p>
+    <p class="d">答案揭晓后，40 次品牌归因只命中 11 次。这一页就是把 5 份分析交叉汇总后的结果：哪些"风格指纹"真的有效，哪些只是我们共有的先验偏见。</p>
+    <ol class="steps">
+      <li><b>①</b>一图一问</li>
+      <li><b>②</b>八份答卷</li>
+      <li><b>③</b>五份归因分析</li>
+      <li><b>④</b>揭晓真实出处</li>
+      <li><b>⑤</b>本页交叉汇总</li>
+    </ol>
+  </div>
+  <figure>
+    <img src="IMG_5302.JPG" alt="六位酷似好莱坞巨星的人物在海景露台聚会，桌上摆着切开的蛋糕与香槟" onerror="this.style.display='none';this.nextElementSibling.insertAdjacentHTML('afterbegin','&lt;b&gt;（图片未能加载：请确认 IMG_5302.JPG 与本页同目录）&lt;/b&gt;')">
+    <figcaption>
+      <b>IMG_5302.JPG</b> —— 一张由扩散模型生成的"好莱坞六巨星海边聚会"合成图。后排站立者酷似布拉德·皮特（端着蛋糕）与莱昂纳多·迪卡普里奥；前排就坐者依次酷似桑德拉·布洛克、基努·里维斯、凯莉-安·莫斯与汤姆·克鲁斯。<br>
+      它是假的，但破绽不在脸上，而在物理里：
+      <ul class="tells">
+        <li>香槟瓶身无标、瓶口多出一圈畸形玻璃环</li>
+        <li>酒杯折射错误：空杯里"装着"一副刀叉</li>
+        <li>桌上蛋糕是楔形缺口，被端走的却是一块长方"三明治"</li>
+        <li>手指与盘沿、刀叉柄部互相粘连</li>
+        <li>六人全部直视镜头，彼此之间没有任何眼神交流</li>
+      </ul>
+    </figcaption>
+  </figure>
+</section>
 
 <section>
   <h2><span class="dot"></span>八份答卷 · 特点与思路</h2>
