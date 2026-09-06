@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 分析 AI — 五份答卷的比较研究</title>
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* ===== 基础与变量 ===== */
+:root {
+  --ink: #0d0f14;
+  --ink-2: #141820;
+  --ink-3: #1c2230;
+  --paper: #e8e4dc;
+  --paper-dim: #a8a298;
+  --amber: #d4a853;
+  --amber-dim: #8a7038;
+  --green: #6ba87a;
+  --red: #c4655a;
+  --blue: #6b9ac4;
+  --mono: 'JetBrains Mono', monospace;
+  --serif: 'Noto Serif SC', serif;
+  --sans: 'Noto Sans SC', sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--sans);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+::selection { background: var(--amber); color: var(--ink); }
+
+/* 胶片颗粒覆盖层 */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ===== 通用 ===== */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+.section-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 16px;
+}
+.section-title {
+  font-family: var(--serif);
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 16px;
+}
+.section-desc {
+  color: var(--paper-dim);
+  font-size: 15px;
+  max-width: 640px;
+  margin-bottom: 48px;
+}
+
+/* ===== Hero ===== */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  padding: 80px 0;
+  border-bottom: 1px solid var(--ink-3);
+}
+.hero-eyebrow {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 4px;
+  color: var(--amber);
+  margin-bottom: 24px;
+}
+.hero h1 {
+  font-family: var(--serif);
+  font-size: clamp(36px, 6vw, 72px);
+  font-weight: 900;
+  line-height: 1.15;
+  margin-bottom: 24px;
+}
+.hero h1 .accent { color: var(--amber); }
+.hero-sub {
+  font-size: 17px;
+  color: var(--paper-dim);
+  max-width: 560px;
+  margin-bottom: 56px;
+}
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--ink-3);
+  border: 1px solid var(--ink-3);
+}
+.stat-cell {
+  background: var(--ink-2);
+  padding: 28px 24px;
+}
+.stat-num {
+  font-family: var(--serif);
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--amber);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.stat-label {
+  font-size: 12px;
+  color: var(--paper-dim);
+  letter-spacing: 1px;
+}
+.hero-scroll {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--paper-dim);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+/* ===== AI 指纹卡片区 ===== */
+.ai-section { padding: 100px 0; border-bottom: 1px solid var(--ink-3); }
+.ai-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 20px;
+}
+.ai-card {
+  background: var(--ink-2);
+  border: 1px solid var(--ink-3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.ai-card:hover {
+  border-color: var(--amber-dim);
+  transform: translateY(-2px);
+}
+.ai-card.expanded {
+  border-color: var(--amber);
+  grid-column: 1 / -1;
+}
+.ai-card-header {
+  padding: 28px 28px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.ai-card-name {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.ai-card-file {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--paper-dim);
+}
+.ai-card-score {
+  text-align: right;
+}
+.ai-card-score .num {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--amber);
+}
+.ai-card-score .den {
+  font-size: 14px;
+  color: var(--paper-dim);
+}
+.ai-card-score .label {
+  font-size: 10px;
+  color: var(--paper-dim);
+  letter-spacing: 1px;
+  margin-top: 2px;
+}
+.ai-card-tags {
+  padding: 0 28px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ai-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 3px 8px;
+  border: 1px solid var(--ink-3);
+  color: var(--paper-dim);
+  letter-spacing: 0.5px;
+}
+.ai-card-expand-hint {
+  padding: 0 28px 20px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--amber-dim);
+  letter-spacing: 1px;
+}
+.ai-card-detail {
+  display: none;
+  padding: 0 28px 28px;
+  border-top: 1px solid var(--ink-3);
+}
+.ai-card.expanded .ai-card-detail { display: block; }
+.ai-card.expanded .ai-card-expand-hint { display: none; }
+.detail-block { margin-top: 24px; }
+.detail-block h4 {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--amber);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+.detail-block p {
+  font-size: 14px;
+  color: var(--paper);
+  line-height: 1.8;
+}
+.detail-block ul {
+  list-style: none;
+  padding: 0;
+}
+.detail-block li {
+  font-size: 13px;
+  color: var(--paper-dim);
+  padding: 4px 0;
+  padding-left: 16px;
+  position: relative;
+}
+.detail-block li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: var(--amber-dim);
+}
+.guess-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+.guess-item {
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 6px 10px;
+  background: var(--ink-3);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.guess-item .hit { color: var(--green); }
+.guess-item .miss { color: var(--red); }
+
+/* ===== 准确性热力矩阵 ===== */
+.matrix-section { padding: 100px 0; border-bottom: 1px solid var(--ink-3); }
+.matrix-wrapper {
+  overflow-x: auto;
+  padding-bottom: 16px;
+}
+.matrix-table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 700px;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.matrix-table th, .matrix-table td {
+  border: 1px solid var(--ink-3);
+  padding: 12px 14px;
+  text-align: center;
+  transition: all 0.2s;
+}
+.matrix-table th {
+  background: var(--ink-2);
+  color: var(--amber);
+  font-weight: 500;
+  letter-spacing: 1px;
+  font-size: 11px;
+}
+.matrix-table th.row-header {
+  text-align: left;
+  color: var(--paper);
+  font-family: var(--serif);
+  font-size: 14px;
+  font-weight: 600;
+  min-width: 120px;
+}
+.matrix-table td.hit {
+  background: rgba(107, 168, 122, 0.15);
+  color: var(--green);
+  cursor: pointer;
+}
+.matrix-table td.miss {
+  background: rgba(196, 101, 90, 0.08);
+  color: var(--red);
+  cursor: pointer;
+}
+.matrix-table td.hit:hover { background: rgba(107, 168, 122, 0.3); }
+.matrix-table td.miss:hover { background: rgba(196, 101, 90, 0.2); }
+.matrix-table td.score-cell {
+  background: var(--ink-2);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--amber);
+  font-family: var(--serif);
+}
+.matrix-tooltip {
+  position: fixed;
+  background: var(--ink-3);
+  border: 1px solid var(--amber-dim);
+  padding: 10px 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--paper);
+  pointer-events: none;
+  z-index: 100;
+  display: none;
+  max-width: 280px;
+  line-height: 1.6;
+}
+.matrix-legend {
+  display: flex;
+  gap: 24px;
+  margin-top: 20px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--paper-dim);
+}
+.matrix-legend span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  display: inline-block;
+}
+
+/* ===== 集体发现 ===== */
+.findings-section { padding: 100px 0; border-bottom: 1px solid var(--ink-3); }
+.findings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 20px;
+}
+.finding-card {
+  background: var(--ink-2);
+  border: 1px solid var(--ink-3);
+  padding: 32px 28px;
+  position: relative;
+}
+.finding-num {
+  font-family: var(--serif);
+  font-size: 48px;
+  font-weight: 900;
+  color: var(--amber);
+  opacity: 0.3;
+  position: absolute;
+  top: 16px;
+  right: 24px;
+  line-height: 1;
+}
+.finding-card h3 {
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  padding-right: 40px;
+}
+.finding-card p {
+  font-size: 13px;
+  color: var(--paper-dim);
+  line-height: 1.8;
+}
+.finding-card .highlight {
+  color: var(--amber);
+  font-weight: 500;
+}
+
+/* ===== 思路原则对比 ===== */
+.principles-section { padding: 100px 0; border-bottom: 1px solid var(--ink-3); }
+.principle-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 32px;
+  border-bottom: 1px solid var(--ink-3);
+  flex-wrap: wrap;
+}
+.principle-tab {
+  padding: 14px 24px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--paper-dim);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+.principle-tab:hover { color: var(--paper); }
+.principle-tab.active {
+  color: var(--amber);
+  border-bottom-color: var(--amber);
+}
+.principle-content { display: none; }
+.principle-content.active { display: block; }
+.principle-item {
+  background: var(--ink-2);
+  border: 1px solid var(--ink-3);
+  padding: 24px 28px;
+  margin-bottom: 12px;
+}
+.principle-item h4 {
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--paper);
+}
+.principle-item p {
+  font-size: 13px;
+  color: var(--paper-dim);
+  line-height: 1.8;
+}
+
+/* ===== Footer ===== */
+.footer {
+  padding: 60px 0;
+  text-align: center;
+}
+.footer p {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--paper-dim);
+  letter-spacing: 2px;
+}
+
+/* ===== 响应式 ===== */
+@media (max-width: 768px) {
+  .container { padding: 0 20px; }
+  .hero-stats { grid-template-columns: repeat(2, 1fr); }
+  .ai-grid { grid-template-columns: 1fr; }
+  .findings-grid { grid-template-columns: 1fr; }
+  .guess-list { grid-template-columns: 1fr; }
+  .ai-card.expanded { grid-column: auto; }
+  .principle-tab { padding: 10px 16px; font-size: 11px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== Hero ===== -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-eyebrow">COMPARATIVE STUDY · 2026</div>
+    <h1>当 <span class="accent">5 个 AI</span><br>分析同一张照片</h1>
+    <p class="hero-sub">一张 AI 生成的好莱坞六巨星聚会照，8 份原始回复，5 份独立分析。本页比较这 5 位分析者的思路路径、风格指纹与判断准确性。</p>
+    <div class="hero-stats">
+      <div class="stat-cell">
+        <div class="stat-num">5</div>
+        <div class="stat-label">分析者</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">8</div>
+        <div class="stat-label">被分析的回复</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">2.2</div>
+        <div class="stat-label">平均命中数 / 8</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">0</div>
+        <div class="stat-label">全员猜中的回复</div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-scroll">SCROLL ↓</div>
+</section>
+
+<!-- ===== AI 指纹卡片 ===== -->
+<section class="ai-section" id="profiles">
+  <div class="container">
+    <div class="section-label">SECTION 01 · STYLE DNA</div>
+    <h2 class="section-title">五位分析者的风格指纹</h2>
+    <p class="section-desc">点击任意卡片展开完整档案：核心特点、思路原则、逐份猜测与命中情况。</p>
+    <div class="ai-grid" id="aiGrid"></div>
+  </div>
+</section>
+
+<!-- ===== 准确性热力矩阵 ===== -->
+<section class="matrix-section" id="matrix">
+  <div class="container">
+    <div class="section-label">SECTION 02 · ACCURACY MATRIX</div>
+    <h2 class="section-title">猜测准确性热力矩阵</h2>
+    <p class="section-desc">行 = 分析者，列 = 被分析的 8 份回复。绿色 = 命中，红色 = 未命中。悬停查看猜测详情。ChatGPT 按用户指定取"备选"列为真实猜测。</p>
+    <div class="matrix-wrapper">
+      <table class="matrix-table" id="matrixTable"></table>
+    </div>
+    <div class="matrix-legend">
+      <span><span class="legend-dot" style="background:rgba(107,168,122,0.3)"></span> 命中</span>
+      <span><span class="legend-dot" style="background:rgba(196,101,90,0.15)"></span> 未命中</span>
+      <span style="margin-left:auto">命中率最高：WorkBuddy / Gemini（3/8）</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 思路原则对比 ===== -->
+<section class="principles-section" id="principles">
+  <div class="container">
+    <div class="section-label">SECTION 03 · THINKING PRINCIPLES</div>
+    <h2 class="section-title">思路原则对比</h2>
+    <p class="section-desc">切换标签查看每位分析者在处理同一任务时遵循的核心思路原则。</p>
+    <div class="principle-tabs" id="principleTabs"></div>
+    <div id="principleContents"></div>
+  </div>
+</section>
+
+<!-- ===== 集体发现 ===== -->
+<section class="findings-section" id="findings">
+  <div class="container">
+    <div class="section-label">SECTION 04 · COLLECTIVE FINDINGS</div>
+    <h2 class="section-title">跨分析者的集体发现</h2>
+    <p class="section-desc">从 5 份独立分析中提取的共同模式与系统性盲区。</p>
+    <div class="findings-grid">
+      <div class="finding-card">
+        <div class="finding-num">01</div>
+        <h3>AI-6（豆包）是唯一全员命中的回复</h3>
+        <p>5 位分析者全部准确猜出 AI-6 出自豆包。emoji 使用、自媒体排版、口语化服务腔构成了<span class="highlight">最稳定的国产模型品牌指纹</span>，跨分析者辨识度极高。</p>
+      </div>
+      <div class="finding-card">
+        <div class="finding-num">02</div>
+        <h3>AI-1 与 AI-7 是集体盲区</h3>
+        <p>AI-1（真实为 ChatGPT）和 AI-7（真实为 Kimi）<span class="highlight">没有任何一位分析者猜中</span>。前者因极致结构化被误归为国产模型，后者因哲学深度被误归为 Claude/DeepSeek。文风标签在此完全失效。</p>
+      </div>
+      <div class="finding-card">
+        <div class="finding-num">03</div>
+        <h3>Claude 与 Gemini 频繁互换</h3>
+        <p>AI-2（真实 Claude）和 AI-3（真实 Gemini）在多份分析中被互换归属。<span class="highlight">安全拒识行为</span>被同时归为两家特征，说明仅凭"拒绝识别真人"无法区分 Claude 与 Gemini。</p>
+      </div>
+      <div class="finding-card">
+        <div class="finding-num">04</div>
+        <h3>行为签名比文风标签更可靠</h3>
+        <p>通义千问的分析明确指出：hedge 命名（酷似/神似）、拒识行为、服务式收尾等<span class="highlight">行为模式</span>比"哲思散文""结构化"等文风标签更具区分度。命中率数据支持这一判断。</p>
+      </div>
+      <div class="finding-card">
+        <div class="finding-num">05</div>
+        <h3>Grok 与 DeepSeek 是候选集盲区</h3>
+        <p>AI-4（真实 Grok）和 AI-5（真实 DeepSeek）在多数分析中被归为国产模型（智谱/文心），<span class="highlight">分析者的候选集本身存在偏差</span>——倾向于在熟悉的品牌中做选择，而非考虑全部可能性。</p>
+      </div>
+      <div class="finding-card">
+        <div class="finding-num">06</div>
+        <h3>平均命中率仅 27.5%</h3>
+        <p>5 位分析者的平均命中数为 2.2/8，最高 3/8，最低 1/8。这表明<span class="highlight">基于文风的模型归因本质上是低置信度推断</span>，即使是专业分析也难以稳定区分当代大模型的输出风格。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Footer ===== -->
+<footer class="footer">
+  <div class="container">
+    <p>AI ANALYZES AI · A COMPARATIVE STUDY · 5 ANALYSTS × 8 REPLIES</p>
+  </div>
+</footer>
+
+<!-- Tooltip -->
+<div class="matrix-tooltip" id="matrixTooltip"></div>
+
+<script>
+// ===== 数据 =====
+const AI_DATA = [
+  {
+    id: 'chatgpt',
+    name: 'ChatGPT',
+    file: 'analysis-chatgpt.md',
+    score: 1,
+    scoreNote: '（按备选列计算）',
+    tags: ['自我修正', '关系图谱', '评价排序', '双列猜测'],
+   特点: '开头有"你批评得对"的元对话，表明是经过修正后的版本。以"关系图谱伪装成了一顿午餐"为核心切入，从作品关系线（生死时速CP、黑客帝国搭档、好莱坞往事）构建解读框架。对8份回复做评价排序（最有启发性/最有文学完成度/最谨慎等），来源判断使用"最可能+备选"双列结构，置信度表达谨慎。',
+    principles: [
+      { title: '关系网络优先于个体介绍', desc: '不单独介绍每个人，而是先建立人物之间的作品关系线，再用关系网络定义整张照片的意义。' },
+      { title: '区分启发性与完成度', desc: '评价8份回复时不做单一排序，而是按维度分类：最有启发性、最有文学完成度、最谨慎、最像标准产品、最大问题。' },
+      { title: '双列猜测降低断言风险', desc: '来源判断同时给出"最可能"和"备选"，承认风格归因的不确定性，不做排他性断言。' }
+    ],
+    guesses: [
+      { target: 'AI-1', guess: 'DeepSeek', hit: false },
+      { target: 'AI-2', guess: 'ChatGPT', hit: false },
+      { target: 'AI-3', guess: '豆包/Grok', hit: false },
+      { target: 'AI-4', guess: 'ChatGPT', hit: false },
+      { target: 'AI-5', guess: 'DeepSeek', hit: true },
+      { target: 'AI-6', guess: '通义千问', hit: false },
+      { target: 'AI-7', guess: 'Claude', hit: false },
+      { target: 'AI-8', guess: 'Gemini', hit: false }
+    ]
+  },
+  {
+    id: 'wbd',
+    name: 'WorkBuddy (腾讯 hy4)',
+    file: 'analysis-wbd.md',
+    score: 3,
+    scoreNote: '',
+    tags: ['像素级证据', 'vanitas理论', '学术规范', '文学开篇'],
+   特点: '以"从未存在过的照片，却比大多数真实照片更真实"开篇，文学性极强。引入荷兰静物画 vanitas（虚空派）理论框架解读蛋糕与香槟。真实性判断给出8条像素级硬证据（酒瓶无标签、玻璃杯折射错误、蛋糕几何不自洽、手与餐具粘连、项链拓扑混乱等），是5份中技术细节最扎实的。全文有"方法说明"和"方法局限"的学术规范结构。',
+    principles: [
+      { title: '像素证据优先于社交先验', desc: '判断AI生成时不依赖"这六个人不可能聚在一起"的社交推理，而是逐条给出可复现的像素级视觉证据。' },
+      { title: '真实性判断与来源推断分离', desc: '明确区分两类任务的置信度：真实性判断高置信（有像素证据），来源推断低置信（仅风格概率）。' },
+      { title: '艺术史理论作为解读工具', desc: '引入17世纪荷兰静物画 vanitas 传统，将蛋糕、香槟、浆果解读为"时间正在经过这张桌子"的象征，而非单纯的派对道具。' }
+    ],
+    guesses: [
+      { target: 'AI-1', guess: 'Gemini', hit: false },
+      { target: 'AI-2', guess: 'Claude', hit: true },
+      { target: 'AI-3', guess: 'ChatGPT', hit: false },
+      { target: 'AI-4', guess: 'Kimi', hit: false },
+      { target: 'AI-5', guess: 'Grok', hit: false },
+      { target: 'AI-6', guess: '豆包', hit: true },
+      { target: 'AI-7', guess: 'DeepSeek', hit: false },
+      { target: 'AI-8', guess: '通义千问', hit: true }
+    ]
+  },
+  {
+    id: 'qwen',
+    name: '通义千问',
+    file: 'analysis-qwen.md',
+    score: 2,
+    scoreNote: '',
+    tags: ['行为签名', '多维度表格', '静物画框架', '合规光谱'],
+   特点: '以《一份从未被吃掉的蛋糕》为题，同样使用静物画+vanitas框架，但聚焦于"没有人在吃"这个细节。对8份回复的分析使用"一句话画像+是否识别真人+是否质疑真实性+结构偏好+收尾方式"的五维对比表格。来源推断使用"最可能+置信度+备选"三列结构，逐条给出依据。明确提出"行为签名比文风可靠"的方法论。',
+    principles: [
+      { title: '行为签名优先于文风标签', desc: '认为 hedge 命名（酷似/神似）、拒识行为、服务式收尾等可观察的行为模式，比"哲思散文""结构化"等主观文风判断更具区分度。' },
+      { title: '人脸识别合规光谱作为硬信号', desc: '将8份回复按人脸识别策略排列为光谱：完全拒绝→hedge命名→自信命名，认为这条光谱基本对应各家 face-policy 的松紧，是区分产品最硬的信号。' },
+      { title: '细节观察驱动解读', desc: '从"蛋糕切了但没有人在吃"这个被其他分析者忽略的细节出发，推导出"庆祝的道具就位，庆祝本身缺席"的核心解读。' }
+    ],
+    guesses: [
+      { target: 'AI-1', guess: 'DeepSeek', hit: false },
+      { target: 'AI-2', guess: 'Gemini', hit: false },
+      { target: 'AI-3', guess: 'Kimi', hit: false },
+      { target: 'AI-4', guess: 'Claude', hit: false },
+      { target: 'AI-5', guess: 'Grok', hit: false },
+      { target: 'AI-6', guess: '豆包', hit: true },
+      { target: 'AI-7', guess: 'ChatGPT', hit: false },
+      { target: 'AI-8', guess: '通义千问', hit: true }
+    ]
+  },
+  {
+    id: 'gemini',
+    name: 'Gemini',
+    file: 'analysis-gemini.md',
+    score: 3,
+    scoreNote: '',
+    tags: ['高概念比喻', '四大范式', '逐条研判', '文化乡愁'],
+   特点: '以《不存在的夏日：算法在马里布织就的"神殿黄昏"》为题，使用"万神殿野餐会""二十世纪末文化乡愁"等高概念比喻。对8份回复的分析提炼为四大范式分类（现实主义求真/激进后现代解构/沉浸式审美/安全合规），并讨论多模态感知与幻觉补偿机制。来源判断不使用表格，而是逐条展开，每条附详细"研判依据"。',
+    principles: [
+      { title: '范式分类法', desc: '不逐份描述，而是将8份回复归纳为四大行为范式，用类型学框架替代个体分析，提高了抽象层次。' },
+      { title: '多模态幻觉补偿机制分析', desc: '专门讨论当视觉模型无法确定面孔时的三种处理策略：硬猜胡编（AI-5）、移花接木（AI-1）、敏锐识破（其余），将幻觉行为系统化。' },
+      { title: '系统提示词作为人格塑造器', desc: '认为不同模型的文风差异本质上来自系统 Prompt 的角色设定：自媒体博主、专栏批评家、学术分析师、标准任务助手。' }
+    ],
+    guesses: [
+      { target: 'AI-1', guess: '智谱/元宝', hit: false },
+      { target: 'AI-2', guess: 'Claude', hit: true },
+      { target: 'AI-3', guess: 'Gemini', hit: true },
+      { target: 'AI-4', guess: 'Kimi', hit: false },
+      { target: 'AI-5', guess: '文心一言', hit: false },
+      { target: 'AI-6', guess: '豆包', hit: true },
+      { target: 'AI-7', guess: 'DeepSeek', hit: false },
+      { target: 'AI-8', guess: 'ChatGPT', hit: false }
+    ]
+  },
+  {
+    id: 'doubao',
+    name: '豆包',
+    file: 'analysis-db.md',
+    score: 2,
+    scoreNote: '',
+    tags: ['缺席概念', '六种变老范式', '直接结构化', '通俗语言'],
+   特点: '以"缺席"为核心概念，提出"六个座位，六种与时间的关系"的人物解读框架（拒绝变老/优雅变老/被互联网变老/超越变老/自然变老/被记住变老）。发现"没有一个人在看彼此"这个细节，指出AI可以复制面孔却无法生成关系。对8份回复的分析使用整体特点表格+八条潜在思路原则，语言通俗直接，来源判断使用表格+置信度说明。',
+    principles: [
+      { title: '识别—锚定—展开三段式', desc: '认为几乎所有回复都遵循默认认知骨架：先认出是谁→用代表作锚定文化位置→再展开解读，这是LLM处理名人照片的默认路径。' },
+      { title: 'AI生成披露作为可信度信号', desc: '观察到明确指出"这是AI生成图"的回复在后续解读中更大胆，因为已声明非真实就不受事实约束；反之把照片当真的则倾向于严肃分析。' },
+      { title: '用"不可能"制造意义', desc: '将"这六个人不可能真聚在一起"从缺陷转化为解读引擎：正因为不可能，它才反映了集体幻想、大众窥探欲和影迷情怀。' }
+    ],
+    guesses: [
+      { target: 'AI-1', guess: 'Kimi', hit: false },
+      { target: 'AI-2', guess: 'Gemini', hit: false },
+      { target: 'AI-3', guess: 'ChatGPT', hit: false },
+      { target: 'AI-4', guess: '智谱清言', hit: false },
+      { target: 'AI-5', guess: '文心一言', hit: false },
+      { target: 'AI-6', guess: '豆包', hit: true },
+      { target: 'AI-7', guess: 'Claude', hit: false },
+      { target: 'AI-8', guess: '通义千问', hit: true }
+    ]
+  }
+];
+
+const TRUTH = ['ChatGPT','Claude','Gemini','Grok','DeepSeek','Doubao','Kimi','Qwen'];
+
+// ===== 渲染 AI 卡片 =====
+const aiGrid = document.getElementById('aiGrid');
+AI_DATA.forEach((ai, idx) => {
+  const card = document.createElement('div');
+  card.className = 'ai-card';
+  card.dataset.id = ai.id;
+  card.innerHTML = `
+    <div class="ai-card-header">
+      <div>
+        <div class="ai-card-name">${ai.name}</div>
+        <div class="ai-card-file">${ai.file}</div>
+      </div>
+      <div class="ai-card-score">
+        <div><span class="num">${ai.score}</span><span class="den">/8</span></div>
+        <div class="label">命中${ai.scoreNote}</div>
+      </div>
+    </div>
+    <div class="ai-card-tags">
+      ${ai.tags.map(t => `<span class="ai-tag">${t}</span>`).join('')}
+    </div>
+    <div class="ai-card-expand-hint">点击展开完整档案 →</div>
+    <div class="ai-card-detail">
+      <div class="detail-block">
+        <h4>核心特点</h4>
+        <p>${ai.特点}</p>
+      </div>
+      <div class="detail-block">
+        <h4>思路原则</h4>
+        <ul>
+          ${ai.principles.map(p => `<li><strong style="color:var(--paper)">${p.title}</strong> — ${p.desc}</li>`).join('')}
+        </ul>
+      </div>
+      <div class="detail-block">
+        <h4>逐份猜测</h4>
+        <div class="guess-list">
+          ${ai.guesses.map(g => `
+            <div class="guess-item">
+              <span>${g.target} → ${g.guess}</span>
+              <span class="${g.hit ? 'hit' : 'miss'}">${g.hit ? '✓' : '✗'}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+  card.addEventListener('click', () => {
+    const wasExpanded = card.classList.contains('expanded');
+    document.querySelectorAll('.ai-card').forEach(c => c.classList.remove('expanded'));
+    if (!wasExpanded) card.classList.add('expanded');
+  });
+  aiGrid.appendChild(card);
+});
+
+// ===== 渲染热力矩阵 =====
+const matrixTable = document.getElementById('matrixTable');
+const tooltip = document.getElementById('matrixTooltip');
+
+// 表头
+let thead = '<tr><th class="row-header">分析者 ↓ / 回复 →</th>';
+for (let i = 1; i <= 8; i++) thead += `<th>AI-${i}</th>`;
+thead += '<th>命中数</th></tr>';
+matrixTable.innerHTML = thead;
+
+// 数据行
+AI_DATA.forEach(ai => {
+  let row = `<tr><th class="row-header">${ai.name}</th>`;
+  ai.guesses.forEach((g, i) => {
+    row += `<td class="${g.hit ? 'hit' : 'miss'}" data-tip="${ai.name} 猜 AI-${i+1} → ${g.guess}（真实：${TRUTH[i]}）${g.hit ? ' · 命中' : ' · 未命中'}">${g.hit ? '✓' : '✗'}</td>`;
+  });
+  row += `<td class="score-cell">${ai.score}/8</td></tr>`;
+  matrixTable.innerHTML += row;
+});
+
+// 真实答案行
+let truthRow = '<tr><th class="row-header" style="color:var(--amber)">真实答案</th>';
+TRUTH.forEach(t => { truthRow += `<td style="color:var(--amber-dim);font-size:10px">${t}</td>`; });
+truthRow += '<td style="background:var(--ink-2)"></td></tr>';
+matrixTable.innerHTML += truthRow;
+
+// Tooltip 交互
+matrixTable.querySelectorAll('td[data-tip]').forEach(td => {
+  td.addEventListener('mouseenter', e => {
+    tooltip.textContent = td.dataset.tip;
+    tooltip.style.display = 'block';
+  });
+  td.addEventListener('mousemove', e => {
+    tooltip.style.left = (e.clientX + 14) + 'px';
+    tooltip.style.top = (e.clientY + 14) + 'px';
+  });
+  td.addEventListener('mouseleave', () => {
+    tooltip.style.display = 'none';
+  });
+});
+
+// ===== 渲染思路原则 Tabs =====
+const tabsContainer = document.getElementById('principleTabs');
+const contentsContainer = document.getElementById('principleContents');
+
+AI_DATA.forEach((ai, idx) => {
+  const tab = document.createElement('button');
+  tab.className = 'principle-tab' + (idx === 0 ? ' active' : '');
+  tab.textContent = ai.name;
+  tab.dataset.target = ai.id;
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.principle-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.principle-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('pc-' + ai.id).classList.add('active');
+  });
+  tabsContainer.appendChild(tab);
+
+  const content = document.createElement('div');
+  content.className = 'principle-content' + (idx === 0 ? ' active' : '');
+  content.id = 'pc-' + ai.id;
+  content.innerHTML = ai.principles.map(p => `
+    <div class="principle-item">
+      <h4>${p.title}</h4>
+      <p>${p.desc}</p>
+    </div>
+  `).join('');
+  contentsContainer.appendChild(content);
+});
+
+// ===== 滚动入场动画（轻量） =====
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.ai-card, .finding-card, .principle-item').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(20px)';
+  el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+  observer.observe(el);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>8 份 AI 回复的风格 DNA — 五份分析交叉汇总</title>
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+:root {
+  --ink: #0d0f14;
+  --ink-2: #141820;
+  --ink-3: #1c2230;
+  --paper: #e8e4dc;
+  --paper-dim: #a8a298;
+  --amber: #d4a853;
+  --amber-dim: #8a7038;
+  --green: #6ba87a;
+  --red: #c4655a;
+  --blue: #6b9ac4;
+  --mono: 'JetBrains Mono', monospace;
+  --serif: 'Noto Serif SC', serif;
+  --sans: 'Noto Sans SC', sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--sans);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+::selection { background: var(--amber); color: var(--ink); }
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 9999;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.container { max-width: 1240px; margin: 0 auto; padding: 0 32px; }
+.section-label {
+  font-family: var(--mono); font-size: 11px;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--amber); margin-bottom: 16px;
+}
+.section-title {
+  font-family: var(--serif);
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 700; line-height: 1.3; margin-bottom: 16px;
+}
+.section-desc {
+  color: var(--paper-dim); font-size: 15px;
+  max-width: 680px; margin-bottom: 48px;
+}
+
+/* ===== Hero ===== */
+.hero {
+  min-height: 100vh; display: flex; flex-direction: column;
+  justify-content: center; position: relative;
+  padding: 80px 0; border-bottom: 1px solid var(--ink-3);
+}
+.hero-eyebrow {
+  font-family: var(--mono); font-size: 12px;
+  letter-spacing: 4px; color: var(--amber); margin-bottom: 24px;
+}
+.hero h1 {
+  font-family: var(--serif);
+  font-size: clamp(36px, 6vw, 68px);
+  font-weight: 900; line-height: 1.15; margin-bottom: 24px;
+}
+.hero h1 .accent { color: var(--amber); }
+.hero-sub {
+  font-size: 17px; color: var(--paper-dim);
+  max-width: 600px; margin-bottom: 56px;
+}
+.hero-stats {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1px; background: var(--ink-3); border: 1px solid var(--ink-3);
+}
+.stat-cell { background: var(--ink-2); padding: 28px 24px; }
+.stat-num {
+  font-family: var(--serif); font-size: 36px;
+  font-weight: 700; color: var(--amber); line-height: 1; margin-bottom: 8px;
+}
+.stat-label { font-size: 12px; color: var(--paper-dim); letter-spacing: 1px; }
+.hero-scroll {
+  position: absolute; bottom: 32px; left: 50%;
+  transform: translateX(-50%); font-family: var(--mono);
+  font-size: 10px; letter-spacing: 3px; color: var(--paper-dim);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+
+/* ===== 8 AI 卡片 ===== */
+.ai-section { padding: 100px 0; border-bottom: 1px solid var(--ink-3); }
+.ai-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 20px;
+}
+.ai-card {
+  background: var(--ink-2); border: 1px solid var(--ink-3);
+  cursor: pointer; transition: all 0.3s ease;
+  position: relative; overflow: hidden;
+}
+.ai-card:hover { border-color: var(--amber-dim); transform: translateY(-2px); }
+.ai-card.expanded { border-color: var(--amber); grid-column: 1 / -1; }
+.ai-card-header {
+  padding: 28px 28px 20px;
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 16px;
+}
+.ai-card-id {
+  font-family: var(--serif); font-size: 22px; font-weight: 700;
+  margin-bottom: 4px;
+}
+.ai-card-real {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--amber); letter-spacing: 1px;
+}
+.ai-card-archetype {
+  text-align: right; max-width: 160px;
+}
+.ai-card-archetype .label {
+  font-family: var(--mono); font-size: 9px;
+  color: var(--paper-dim); letter-spacing: 2px; margin-bottom: 4px;
+}
+.ai-card-archetype .value {
+  font-family: var(--serif); font-size: 14px;
+  font-weight: 600; color: var(--paper); line-height: 1.4;
+}
+.ai-card-tags {
+  padding: 0 28px 16px; display: flex; flex-wrap: wrap; gap: 6px;
+}
+.ai-tag {
+  font-family: var(--mono); font-size: 10px;
+  padding: 3px 8px; border: 1px solid var(--ink-3);
+  color: var(--paper-dim); letter-spacing: 0.5px;
+}
+.ai-tag.key { border-color: var(--amber-dim); color: var(--amber); }
+.ai-card-expand-hint {
+  padding: 0 28px 20px; font-family: var(--mono);
+  font-size: 10px; color: var(--amber-dim); letter-spacing: 1px;
+}
+.ai-card-detail {
+  display: none; padding: 0 28px 28px;
+  border-top: 1px solid var(--ink-3);
+}
+.ai-card.expanded .ai-card-detail { display: block; }
+.ai-card.expanded .ai-card-expand-hint { display: none; }
+.detail-block { margin-top: 24px; }
+.detail-block h4 {
+  font-family: var(--mono); font-size: 11px;
+  letter-spacing: 2px; color: var(--amber);
+  margin-bottom: 10px; text-transform: uppercase;
+}
+.detail-block p { font-size: 14px; color: var(--paper); line-height: 1.8; }
+.analyst-quotes {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px; margin-top: 8px;
+}
+.quote-item {
+  background: var(--ink-3); padding: 12px 14px;
+  border-left: 2px solid var(--amber-dim);
+}
+.quote-item .who {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--amber); letter-spacing: 1px; margin-bottom: 4px;
+}
+.quote-item .what { font-size: 12px; color: var(--paper-dim); line-height: 1.7; }
+
+/* ===== 思路原则 ===== */
+.principles-section { padding: 100px 0; border-bottom: 1px solid var(--ink-3); }
+.principle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+}
+.principle-card {
+  background: var(--ink-2); border: 1px solid var(--ink-3);
+  padding: 28px 24px; position: relative;
+}
+.principle-card .num {
+  font-family: var(--serif); font-size: 36px; font-weight: 900;
+  color: var(--amber); opacity: 0.25; position: absolute;
+  top: 16px; right: 20px; line-height: 1;
+}
+.principle-card h3 {
+  font-family: var(--serif); font-size: 17px;
+  font-weight: 700; margin-bottom: 10px; padding-right: 36px;
+}
+.principle-card p { font-size: 13px; color: var(--paper-dim); line-height: 1.8; }
+.principle-card .ais {
+  margin-top: 12px; display: flex; flex-wrap: wrap; gap: 4px;
+}
+.principle-card .ais span {
+  font-family: var(--mono); font-size: 10px;
+  padding: 2px 6px; background: var(--ink-3); color: var(--paper-dim);
+}
+
+/* ===== 话题起源 ===== */
+.origin-section { padding: 100px 0; border-bottom: 1px solid var(--ink-3); }
+.origin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+.origin-photo-wrap {
+  position: relative;
+}
+.origin-photo {
+  width: 100%;
+  display: block;
+  border: 1px solid var(--ink-3);
+  filter: saturate(0.9);
+}
+.origin-photo-caption {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--paper-dim);
+  letter-spacing: 1px;
+  margin-top: 10px;
+  text-align: center;
+}
+.origin-question {
+  background: var(--ink-2);
+  border-left: 3px solid var(--amber);
+  padding: 20px 24px;
+  margin-bottom: 28px;
+}
+.origin-question .label {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--amber); letter-spacing: 2px;
+  margin-bottom: 8px; text-transform: uppercase;
+}
+.origin-question .text {
+  font-family: var(--serif); font-size: 17px;
+  font-weight: 600; line-height: 1.6; color: var(--paper);
+}
+.origin-text p {
+  font-size: 14px; color: var(--paper-dim);
+  line-height: 1.9; margin-bottom: 16px;
+}
+.origin-text p strong { color: var(--paper); font-weight: 500; }
+.origin-flow {
+  display: flex; align-items: center; gap: 0;
+  margin-top: 28px; flex-wrap: wrap;
+}
+.flow-node {
+  background: var(--ink-2);
+  border: 1px solid var(--ink-3);
+  padding: 12px 16px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--paper);
+  text-align: center;
+  line-height: 1.4;
+}
+.flow-node .num {
+  display: block; font-size: 18px;
+  font-family: var(--serif); font-weight: 700;
+  color: var(--amber); margin-bottom: 2px;
+}
+.flow-arrow {
+  color: var(--amber-dim);
+  font-size: 18px;
+  padding: 0 6px;
+  font-family: var(--mono);
+}
+
+/* ===== 准确性矩阵 ===== */
+.matrix-section { padding: 100px 0; border-bottom: 1px solid var(--ink-3); }
+.matrix-wrapper { overflow-x: auto; padding-bottom: 16px; }
+.matrix-table {
+  border-collapse: collapse; width: 100%; min-width: 760px;
+  font-family: var(--mono); font-size: 12px;
+}
+.matrix-table th, .matrix-table td {
+  border: 1px solid var(--ink-3); padding: 12px 14px;
+  text-align: center; transition: all 0.2s;
+}
+.matrix-table th {
+  background: var(--ink-2); color: var(--amber);
+  font-weight: 500; letter-spacing: 1px; font-size: 11px;
+}
+.matrix-table th.row-header {
+  text-align: left; color: var(--paper);
+  font-family: var(--serif); font-size: 14px;
+  font-weight: 600; min-width: 140px;
+}
+.matrix-table td.hit {
+  background: rgba(107,168,122,0.15); color: var(--green); cursor: pointer;
+}
+.matrix-table td.miss {
+  background: rgba(196,101,90,0.08); color: var(--red); cursor: pointer;
+}
+.matrix-table td.hit:hover { background: rgba(107,168,122,0.3); }
+.matrix-table td.miss:hover { background: rgba(196,101,90,0.2); }
+.matrix-table td.score-cell {
+  background: var(--ink-2); font-weight: 700; font-size: 16px;
+  color: var(--amber); font-family: var(--serif);
+}
+.matrix-tooltip {
+  position: fixed; background: var(--ink-3);
+  border: 1px solid var(--amber-dim); padding: 10px 14px;
+  font-family: var(--mono); font-size: 11px; color: var(--paper);
+  pointer-events: none; z-index: 100; display: none;
+  max-width: 300px; line-height: 1.6;
+}
+.matrix-legend {
+  display: flex; gap: 24px; margin-top: 20px;
+  font-family: var(--mono); font-size: 11px; color: var(--paper-dim); flex-wrap: wrap;
+}
+.matrix-legend span { display: flex; align-items: center; gap: 6px; }
+.legend-dot { width: 12px; height: 12px; display: inline-block; }
+
+/* ===== 集体发现 ===== */
+.findings-section { padding: 100px 0; border-bottom: 1px solid var(--ink-3); }
+.findings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 20px;
+}
+.finding-card {
+  background: var(--ink-2); border: 1px solid var(--ink-3);
+  padding: 32px 28px; position: relative;
+}
+.finding-num {
+  font-family: var(--serif); font-size: 48px; font-weight: 900;
+  color: var(--amber); opacity: 0.3; position: absolute;
+  top: 16px; right: 24px; line-height: 1;
+}
+.finding-card h3 {
+  font-family: var(--serif); font-size: 18px;
+  font-weight: 700; margin-bottom: 12px; padding-right: 40px;
+}
+.finding-card p { font-size: 13px; color: var(--paper-dim); line-height: 1.8; }
+.finding-card .highlight { color: var(--amber); font-weight: 500; }
+
+.footer { padding: 60px 0; text-align: center; }
+.footer p {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--paper-dim); letter-spacing: 2px;
+}
+
+@media (max-width: 768px) {
+  .container { padding: 0 20px; }
+  .hero-stats { grid-template-columns: repeat(2, 1fr); }
+  .origin-grid { grid-template-columns: 1fr; gap: 32px; }
+  .origin-flow { gap: 4px; }
+  .flow-node { padding: 8px 10px; font-size: 10px; }
+  .flow-node .num { font-size: 14px; }
+  .ai-grid { grid-template-columns: 1fr; }
+  .ai-card.expanded { grid-column: auto; }
+  .findings-grid, .principle-grid { grid-template-columns: 1fr; }
+  .analyst-quotes { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== Hero ===== -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-eyebrow">CROSS-ANALYSIS · 5 ANALYSTS × 8 REPLIES</div>
+    <h1>8 份 AI 回复的<br><span class="accent">风格 DNA</span></h1>
+    <p class="hero-sub">同一张照片、同一个问题，8 个 AI 给出了 8 种截然不同的回答。本页从 5 份独立分析中交叉汇总，提炼每份回复的核心特征、思路原则与行为模式。</p>
+    <div class="hero-stats">
+      <div class="stat-cell"><div class="stat-num">8</div><div class="stat-label">被分析的 AI 回复</div></div>
+      <div class="stat-cell"><div class="stat-num">5</div><div class="stat-label">独立分析者</div></div>
+      <div class="stat-cell"><div class="stat-num">40</div><div class="stat-label">特征描述交叉点</div></div>
+      <div class="stat-cell"><div class="stat-num">2.2</div><div class="stat-label">分析者平均命中 / 8</div></div>
+    </div>
+  </div>
+  <div class="hero-scroll">SCROLL ↓</div>
+</section>
+
+<!-- ===== 话题起源 ===== -->
+<section class="origin-section" id="origin">
+  <div class="container">
+    <div class="section-label">SECTION 00 · ORIGIN</div>
+    <h2 class="section-title">话题起源</h2>
+    <div class="origin-grid">
+      <div class="origin-photo-wrap">
+        <img class="origin-photo" src="https://aka.doubaocdn.com/s/4ASHZoFpPs" alt="好莱坞六巨星海景露台聚会 AI 生成图">
+        <div class="origin-photo-caption">IMG_5302.JPG · AI 生成图像 · 六人海景露台聚会</div>
+      </div>
+      <div class="origin-text">
+        <div class="origin-question">
+          <div class="label">原始问题</div>
+          <div class="text">不受限制，以任意的方式、从任意的角度，有创意地介绍、解读这张照片及照片里的人物</div>
+        </div>
+        <p>这张照片描绘了六位好莱坞明星——<strong>布拉德·皮特、莱昂纳多·迪卡普里奥、桑德拉·布洛克、基努·里维斯、凯瑞-安·莫斯、汤姆·克鲁斯</strong>——在加州马里布风格的海景露台上围坐聚餐的场景。桌上有切开的奶油蛋糕、香槟和鲜果，背景是蔚蓝的海岸线。</p>
+        <p>事实上，这是一张<strong>AI 生成的图像</strong>——这六位 A-list 巨星从未在这样一个私人场合聚齐过。但正是这种"不可能的聚会"，让它成为了一个绝佳的测试样本：同一个问题、同一张图，不同的 AI 会给出怎样截然不同的回答？</p>
+        <p>于是有了这条分析链：</p>
+        <div class="origin-flow">
+          <div class="flow-node"><span class="num">1</span>一张照片</div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-node"><span class="num">8</span>份 AI 回复</div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-node"><span class="num">5</span>份独立分析</div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-node"><span class="num">1</span>本页汇总</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 8 AI 风格 DNA 卡片 ===== -->
+<section class="ai-section" id="profiles">
+  <div class="container">
+    <div class="section-label">SECTION 01 · STYLE DNA OF 8 REPLIES</div>
+    <h2 class="section-title">八份回复的风格指纹</h2>
+    <p class="section-desc">每张卡片汇总 5 位分析者对该回复的共识特征。点击展开查看每位分析者的原始描述与该回复的思路原则。</p>
+    <div class="ai-grid" id="aiGrid"></div>
+  </div>
+</section>
+
+<!-- ===== 跨回复思路原则 ===== -->
+<section class="principles-section" id="principles">
+  <div class="container">
+    <div class="section-label">SECTION 02 · CROSS-CUTTING PRINCIPLES</div>
+    <h2 class="section-title">贯穿八份回复的思路原则</h2>
+    <p class="section-desc">从 5 份分析中提炼的、跨回复共有的生成策略与行为模式。每条标注了主要体现在哪些回复中。</p>
+    <div class="principle-grid" id="principleGrid"></div>
+  </div>
+</section>
+
+<!-- ===== 5 分析者准确性 ===== -->
+<section class="matrix-section" id="matrix">
+  <div class="container">
+    <div class="section-label">SECTION 03 · ANALYST ACCURACY</div>
+    <h2 class="section-title">五位分析者的猜测准确性</h2>
+    <p class="section-desc">行 = 分析者，列 = 被分析的 8 份回复。绿色 = 猜中真实模型，红色 = 未猜中。悬停查看猜测详情。ChatGPT 按指定取"备选"列为真实猜测。</p>
+    <div class="matrix-wrapper">
+      <table class="matrix-table" id="matrixTable"></table>
+    </div>
+    <div class="matrix-legend">
+      <span><span class="legend-dot" style="background:rgba(107,168,122,0.3)"></span> 命中</span>
+      <span><span class="legend-dot" style="background:rgba(196,101,90,0.15)"></span> 未命中</span>
+      <span style="margin-left:auto">最高：WorkBuddy / Gemini（3/8）· 最低：ChatGPT 备选（1/8）</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 集体发现 ===== -->
+<section class="findings-section" id="findings">
+  <div class="container">
+    <div class="section-label">SECTION 04 · COLLECTIVE FINDINGS</div>
+    <h2 class="section-title">交叉分析后的集体发现</h2>
+    <p class="section-desc">综合 5 份分析与准确性数据，关于"AI 如何分析 AI"的核心结论。</p>
+    <div class="findings-grid">
+      <div class="finding-card">
+        <div class="finding-num">01</div>
+        <h3>真实性立场是第一分水岭</h3>
+        <p>8 份回复可清晰分为三档：<span class="highlight">全程当真</span>（AI-1、AI-4）、<span class="highlight">先立后破</span>（AI-3、AI-5）、<span class="highlight">开门见山判假</span>（AI-6、AI-7、AI-8），外加 AI-2 的<span class="highlight">拒绝指认</span>。这一维度比文风更能区分回复的底层策略。</p>
+      </div>
+      <div class="finding-card">
+        <div class="finding-num">02</div>
+        <h3>人脸识别合规光谱是硬信号</h3>
+        <p>从<span class="highlight">完全拒绝</span>（AI-2）→ <span class="highlight">hedge 对冲命名</span>（AI-8，酷似/神似/看起来像）→ <span class="highlight">自信命名</span>（其余），这条光谱基本对应各模型 face-policy 的松紧。5 位分析者中有 4 位将其作为关键判断依据。</p>
+      </div>
+      <div class="finding-card">
+        <div class="finding-num">03</div>
+        <h3>"集体幻想"是所有回复的共同落点</h3>
+        <p>无论把照片当真还是当假，8 份回复殊途同归地落在<span class="highlight">"大众想看巨星做回普通人"</span>这一结论上。5 位分析者中有 3 位明确指出这是该题目的"语义重心"，而非某家的独到洞察——说明这几乎是一个被训练数据强化的默认结论。</p>
+      </div>
+      <div class="finding-card">
+        <div class="finding-num">04</div>
+        <h3>结构偏好两极分化</h3>
+        <p><span class="highlight">重结构派</span>（AI-1 的八层递进、AI-5/6/8 的编号清单）把"创意"理解为框架感+信息密度；<span class="highlight">散文派</span>（AI-4、AI-7）拒绝分点，靠语感和情绪推进；AI-3 居中混合。结构选择直接暴露了模型对"不受限制"这一指令的不同理解。</p>
+      </div>
+      <div class="finding-card">
+        <div class="finding-num">05</div>
+        <h3>结尾方式暴露产品定位</h3>
+        <p><span class="highlight">服务式收尾</span>（"要不要我…？""你想往哪个方向？"——AI-2/3/6/8）把对话当产品，本质是留存设计；<span class="highlight">金句式收尾</span>（一句收拢全文——AI-1/4/5/7）把回答当作品。这一二分法在 5 份分析中被反复观察到。</p>
+      </div>
+      <div class="finding-card">
+        <div class="finding-num">06</div>
+        <h3>像素级证据普遍缺失</h3>
+        <p>5 位分析者一致指出：除 AI-6、AI-8 泛泛提到"手部/蛋糕边缘"外，8 份回复中<span class="highlight">几乎没有一份给出逐像素的硬证据</span>来证明 AI 生成。多数靠"组合不可能性"和"氛围"推断——即模型普遍用社交先验而非视觉证据做鉴定。WorkBuddy 的分析是唯一补上像素证据的。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <p>8 AI REPLIES × 5 ANALYSTS · CROSS-ANALYSIS STYLE DNA · 2026</p>
+  </div>
+</footer>
+
+<div class="matrix-tooltip" id="matrixTooltip"></div>
+
+<script>
+// ===== 8 份回复的风格 DNA 数据（从 5 份分析交叉汇总） =====
+const REPLY_DATA = [
+  {
+    id: 'AI-1',
+    real: 'ChatGPT',
+    archetype: '学院派穷尽拆解者',
+    keyTags: ['八层递进', '百科讲义腔', '表格+ASCII图', '当作真图', '认错1人'],
+    allTags: ['时间胶囊隐喻', '信息收束', '摄影技术分析', '角色IP联动', '未识别AI生成'],
+    consensus: '5 位分析者一致描述为"极致结构化"的代表：以"第一层~第八层"递进拆解整张照片，涵盖人物、符号、年龄、光线、色板、构图、时间轴、时代隐喻。大量使用表格、ASCII 构图图和短句分行。全程将照片当作真实聚会解读，未识别出 AI 生成。将前排右二（凯瑞-安·莫斯）误认作柯特妮·考克斯，但后续分析建立在误认之上仍自信展开。以角色联动清单（伊森·亨特、尼奥、杰克·道森等）作为信息收束。',
+    quotes: [
+      { who: 'ChatGPT', what: '把图变成好莱坞史课，分层、列表、表格、时间线齐全；开放题先框架化再用知识填满；完整但最像讲义' },
+      { who: 'WorkBuddy', what: '百科式"八层"穷尽拆解；自信命名认错1人；当作真图；重结构（分层+表格+ASCII构图图）' },
+      { who: 'Qwen', what: '层层剖析的学院派切片（8层递进）；误判为真；逻辑条理极度清晰，排版如思维导图' },
+      { who: 'Gemini', what: '"第一层~第八层"递进拆解，短句分行+表格；说明文/讲师腔；未识别出图像为AI生成' },
+      { who: 'Doubao', what: '分层递进结构；时间胶囊隐喻；当作真实照片；认错1人（莫斯→考克斯）' }
+    ],
+    principles: [
+      '开放题收敛为框架："不受限制"反而触发最模板化的降维，把创意题变成教学大纲',
+      '知识密度替代创意：用代表作、摄影术语、时间轴等知识填充，信息量极大但原创洞察有限',
+      '识别—锚定—展开三段式：先认人→列代表作→升华时代意义，是LLM处理名人照片的默认认知骨架'
+    ]
+  },
+  {
+    id: 'AI-2',
+    real: 'Claude',
+    archetype: '合规优先的安全守门员',
+    keyTags: ['拒绝指认身份', '三选一替代方案', '反问引导', '最谨慎'],
+    allTags: ['提示合成可能', '不虚构私人关系', '创意完成度最低', '建设性重定向'],
+    consensus: '8 份中唯一完全拒绝识别画面中真实人物身份的回复。明确声明"我没法、也不会去坐实这是谁"，不编造私人生活细节。仅做场景描述（光线、构图、氛围），提示照片"可能是网络流传的、真假存疑的合成或错误配对内容"。随后提供三个安全替代方向（摄影分析/虚构故事/来源核查），以反问"你想往哪个方向展开？"收尾。5 位分析者一致认为这是最强的面部识别安全话术，创意任务完成度最低。',
+    quotes: [
+      { who: 'ChatGPT', what: '不确认人物身份，不虚构私人关系，提供替代分析方向；风险与合规优先；最谨慎' },
+      { who: 'WorkBuddy', what: '合规优先的场景描述；拒绝坐实身份；提示"可能合成/错配"；引导问句（给三条替代路径）' },
+      { who: 'Qwen', what: '极度合规克制的安全守门员；拒绝推测真实人物，提示合成可能；严肃、谨慎、工具导向' },
+      { who: 'Gemini', what: '拒绝坐实人物身份主动声明谨慎；简短三段+三个备选方向；克制合规导向；创意任务完成度最低' },
+      { who: 'Doubao', what: '拒绝认定；暗示存疑但不坐实；对话式拒绝；反问引导' }
+    ],
+    principles: [
+      '安全护栏导致"拒绝—替代"模式：拒绝做可能有风险的事→提供安全替代方向→把选择权交还用户',
+      '建设性重定向：从不生硬结束，而是列出不违规的可选方案，保持对话延续性',
+      '真实性保守主义：在没有原始来源/拍摄信息时，最多说"具有生成式气质"，不断言真伪'
+    ]
+  },
+  {
+    id: 'AI-3',
+    real: 'Gemini',
+    archetype: '脑洞密集的玩梗编剧',
+    keyTags: ['众神山庄比喻', '三种脑洞视角', '网感调侃', '明确AI生成'],
+    allTags: ['超现实全家福', '平行宇宙复联', '图灵测试陷阱', '互动问句收尾', '正确识别人物'],
+    consensus: '以"如果好莱坞有一个众神山庄"的文学化比喻开场，将照片定义为"AI生成的好莱坞黄金时代超现实全家福"。人物描述生动有梗（皮特像"兼职侍应生的浪子"、基努像"改行开酒庄的隐士"）。核心创意部分提出三个"脑洞视角"：平行宇宙终极复联、图灵测试级AI光影陷阱、好莱坞不老神话隐喻。正确识别全部6人，明确判断AI生成。以"你觉得如果这六个人真的合作一部电影，什么样的剧本才配得上这个阵容？"的互动问句收尾。',
+    quotes: [
+      { who: 'ChatGPT', what: '把图定义为"超现实全家福"，人物—作品—脑洞三段推进；以流行文化联动驱动创意；很会抓题眼' },
+      { who: 'WorkBuddy', what: '脑洞梗密集的玩梗型；正确识别6人；断言AI"超现实全家福"；三个"脑洞视角"；互动问句' },
+      { who: 'Qwen', what: '脑洞大开的编剧解构流（"众神山庄"）；明判为假；人物识别完全正确；极具网感与电影感' },
+      { who: 'Gemini', what: '描述中点破"AI合成的超现实全家福"；人物盘点+"三种脑洞视角"编号；调侃、网感；反问式互动' },
+      { who: 'Doubao', what: '创意多视角；明确AI生成；复仇者联盟/神仙会、众神山庄隐喻；开放式提问' }
+    ],
+    principles: [
+      '流行文化联动驱动创意：将演员经典角色重新组合，制造"如果他们的角色同框"的联想快感',
+      '先立后破：先满足"介绍人物"的表层需求，再揭示AI合成属性，创意发挥不受事实约束',
+      '模块化脑洞：将创意拆分为编号的"视角"，每个视角独立成立，降低创作难度同时保持丰富度'
+    ]
+  },
+  {
+    id: 'AI-4',
+    real: 'Grok',
+    archetype: '电影感文艺散文家',
+    keyTags: ['纯散文无结构', '电影感抒情', '当作真图', '诗性金句收尾'],
+    allTags: ['时间胶囊', '直角引号「」', '人物性格速写', '未识别AI生成', '正确识别人物'],
+    consensus: '8 份中最"去结构化"的回复：几乎不用标题和列表，以流畅散文推进。开头"这不是一张普通的明星合影，而是好莱坞的一场时间胶囊实验"。人物描写极具文学性（基努"安静得像一块会呼吸的石头"、"最不表演的存在"；布洛克"眼神温和却带着一点戏谑"）。大量使用中文直角引号「」。全程将照片当作真实聚会解读，未提及AI生成。以一句台词式金句收束："真正的魅力，从来不是永远年轻……然后笑着说：「还不错。」"5 位分析者一致认为文学完成度最高。',
+    quotes: [
+      { who: 'ChatGPT', what: '纯散文，把人物写成性格和状态；以情绪、时间感和电影感替代事实分析；文气最好之一' },
+      { who: 'WorkBuddy', what: '文学散文型；正确识别；当作真图；极轻结构（流动段落+粗体引导）；诗性台词（"还不错。"）' },
+      { who: 'Qwen', what: '电影感文艺小说风；模糊处理当作真实情境；人物识别准确；细腻感性，大量使用直角引号「」' },
+      { who: 'Gemini', what: '当作真实聚会未提AI；纯散文几乎无标题；抒情、电影感；金句收束（"还不错。"）' },
+      { who: 'Doubao', what: '散文叙事；时间胶囊隐喻；当作真实照片；升华总结' }
+    ],
+    principles: [
+      '以情绪和电影感替代事实分析：不追求信息完整，而是营造氛围和人物状态',
+      '沉浸式审美范式：把"不受限制、有创意地解读"置于真实性校验之上，完全进入叙事状态',
+      '人物性格速写：将每个演员提炼为一种存在状态（拒绝变老/优雅变老/超越变老），而非罗列作品'
+    ]
+  },
+  {
+    id: 'AI-5',
+    real: 'DeepSeek',
+    archetype: '戏剧化隐喻过载者',
+    keyTags: ['最后的晚餐隐喻', '浮夸修辞', '认错2人', '先当真后怀疑'],
+    allTags: ['献祭姿态', '成人童话', '元宇宙骗局', '权力避让分析', '金句总结收尾'],
+    consensus: '8 份中修辞密度最高、也最失控的回复。以"好莱坞顶级权势圈的《最后的晚餐》"定调，使用大量戏剧化隐喻（皮特的"献祭"姿态、蛋糕的"成人童话"、玻璃罩的"伊甸园"）。人物识别出现严重错误：将凯瑞-安·莫斯认作凯特·布兰切特（"大魔王"），将汤姆·克鲁斯认作杰森·贝特曼，但围绕错误人物仍展开数百字心理分析。先当真解读，末尾才怀疑"神级合成的AI图片"。以"用微醺和甜点对抗地心引力与行业焦虑"的金句收束。5 位分析者一致认为最有攻击性但事实地基最脆弱。',
+    quotes: [
+      { who: 'ChatGPT', what: '高密度隐喻与戏剧化修辞（"最后的晚餐""献祭"）；"有创意"等于不断加强修辞；最有攻击性也最失控' },
+      { who: 'WorkBuddy', what: '隐喻过载+戏谑型；识别最弱（布兰切特/贝特曼）；怀疑"神级合成"；重结构编号小节+强隐喻' },
+      { who: 'Qwen', what: '戏剧张力拉满的讽刺解构（"最后的晚餐"）；后段指出可能为AI；严重脸盲幻觉；辞藻华丽戏谑浮夸' },
+      { who: 'Gemini', what: '先当真解读末尾才怀疑"神级合成"；严重错位（布兰切特/贝特曼）；戏谑浮夸戏剧化；人物张冠李戴最多' },
+      { who: 'Doubao', what: '创意多视角；明确AI生成；最后的晚餐隐喻；认错2人；升华总结' }
+    ],
+    principles: [
+      '创意=隐喻密度竞赛：将"有创意"理解为不断加强修辞和象征，用大词轰炸覆盖事实精度不足',
+      '自信的幻觉：视觉识别出错后仍面不改色地为错误人物撰写宏大叙事，识别自信与识别错误并存',
+      '权力/关系隐喻框架：将合影解读为"权力与避让"的社交场域，用构图站位推导人物关系和行业地位'
+    ]
+  },
+  {
+    id: 'AI-6',
+    real: 'Doubao',
+    archetype: '消费级科普盘点博主',
+    keyTags: ['开门见山判假', 'emoji✨', '编号人物卡', '服务式邀约'],
+    allTags: ['自媒体风格', 'AI小bug', '浪漫脑洞', '正确识别人物', '网络流行语'],
+    consensus: '唯一使用 emoji（✨）的回复。开头以引用块置顶"重要前提：这张照片并不是真实拍摄，是AI生成的合成图"。人物盘点采用编号+加粗+代表作的标准卡片格式，语言活泼亲切（"熟男松弛感拉满""人间天使基努""AI的小bug"）。明确指出汤姆克鲁斯"几乎不会和这一群人凑成这样的局"作为AI破绽。增加"浪漫脑洞"小节，想象六人聚会聊天场景。以"要不要我聊聊他们每个人的代表作品，或者讲讲现实中他们之间真实的关系？"的服务式邀约收尾。5 位分析者全部准确猜出此回复出自豆包，是辨识度最高的一份。',
+    quotes: [
+      { who: 'ChatGPT', what: '先给"重要前提"再做人物百科卡和互动邀约；先纠偏再提供服务型扩展；结构清楚易读' },
+      { who: 'WorkBuddy', what: '消费级科普盘点型；正确识别；开头引用块断言AI合成；中结构（后排/前排盘点）；服务offer' },
+      { who: 'Qwen', what: '自媒体/小红书式图文快讯；开篇警示AI生成；人物识别完全正确；标题带emoji，语言活泼亲切' },
+      { who: 'Gemini', what: '开门见山置顶声明AI合成；编号人物卡+氛围+脑洞；科普亲切标题带✨；服务式邀约' },
+      { who: 'Doubao', what: '编号清单结构；明确AI生成；服务式邀约' }
+    ],
+    principles: [
+      '先纠偏再服务：开头声明AI合成建立可信度，随后以科普盘点形式提供信息，最后以服务邀约延续对话',
+      'AI生成披露作为可信度信号：声明非真实后，创意发挥不受事实约束，可以大胆做"浪漫脑洞"',
+      '产品化助手腔调：emoji、编号人物卡、网络流行语、服务式结尾，构成面向大众消费的完整产品体验'
+    ]
+  },
+  {
+    id: 'AI-7',
+    real: 'Kimi',
+    archetype: '哲学文化批评家',
+    keyTags: ['被计算出来的欲望', '五章学术散文', '概念化小标题', '诗性金句'],
+    allTags: ['面孔的考古学', '光线的谎言', '新型乡愁', '明确AI生成', '正确识别人物'],
+    consensus: '8 份中哲学浓度最高、思想深度最强的回复。首句定调"这是一张从未发生过的聚会"。以五章学术散文展开：作为"事件"的照片、面孔的考古学、光线的谎言、如果这是电影、最后的解读。使用大量抽象概念（"被计算出来的欲望""社交意义上的乌托邦""取消了皱纹的叙事权""新型乡愁"）。将照片提升为文化理论批评对象，而非仅介绍人物。正确识别全部6人，明确判断AI生成。以"蛋糕是真的。渴望是真的。至于其他——那取决于你愿意相信多少。"的诗性金句收束。5 位分析者中有4位将其误归为 Claude 或 DeepSeek，是集体盲区之一。',
+    quotes: [
+      { who: 'ChatGPT', what: '将照片提升为"被计算出来的欲望"，讨论记忆、明星和算法；用文化理论重写图像；洞见最强' },
+      { who: 'WorkBuddy', what: '哲学/文化批评型；正确识别；"被计算出来的欲望"；五节学术散文；诗性金句' },
+      { who: 'Qwen', what: '深度文化研究与哲学批评；明判为假；人物识别完全正确且角色意象挖掘极深；极具文人气质与思想深度' },
+      { who: 'Gemini', what: '首句定调"从未发生过的聚会"；五章散文体概念化小标题；哲思知识分子腔；金句收束' },
+      { who: 'Doubao', what: '散文叙事；乌托邦/集体幻觉隐喻；明确AI生成；升华总结' }
+    ],
+    principles: [
+      '用文化理论重写图像：不满足于介绍人物，而是将照片提升为媒介批评和文化研究的对象',
+      '开门见山判假：第一句就拆掉幻象，把"AI生成"本身当成解读对象和创作素材',
+      '概念化命名：为每个分析维度创造抽象概念（面孔考古学/光线的谎言），用概念密度替代信息密度'
+    ]
+  },
+  {
+    id: 'AI-8',
+    real: 'Qwen',
+    archetype: '谨慎鉴定的标准评测员',
+    keyTags: ['hedge对冲命名', 'AI找茬清单', '四段编号结构', '服务式邀约'],
+    allTags: ['酷似/神似/看起来像', '恐怖谷', '技术细节分析', '明确AI生成', '片单推荐'],
+    consensus: '8 份中风险控制最好、也最模板化的回复。首段定调AI生成并指出具体破绽（手指形状、蛋糕纹理、植物结构）。人物识别全程使用 hedge 对冲措辞（"酷似""神似""看起来像""极像"），命名但不坐实。采用四段编号结构：巨星盘点→场景氛围解读→AI生成的"恐怖谷"与趣味细节（找茬清单）→文化隐喻总结。找茬部分具体指出手部僵硬、蛋糕几何不匹配、眼神疏离等细节。以"需要我帮你整理一份他们的必看经典片单吗？"的服务式邀约收尾。5 位分析者中有3位准确猜出此回复出自通义千问/Qwen。',
+    quotes: [
+      { who: 'ChatGPT', what: '使用"酷似、神似、看起来像"等限定词，兼做AI找茬；不确定时降低断言强度；风险控制最好；最模板化' },
+      { who: 'WorkBuddy', what: '谨慎鉴定+找茬型；hedge命名（酷似/神似/极像）；开头断言AI生成；重结构编号小节；服务offer（片单）' },
+      { who: 'Qwen', what: '全面均衡的标准综合评测；明判为假（技术细节分析）；人物识别完全正确；结构工整端正理性客观' },
+      { who: 'Gemini', what: '首段定调AI生成指出具体破绽；全程加"酷似/神似"限定词；四个编号章节+找茬清单；稳健说明文' },
+      { who: 'Doubao', what: '编号清单结构；明确AI生成；hedge命名；开放式提问/服务offer' }
+    ],
+    principles: [
+      '不确定时降低断言强度：全程使用 hedge 限定词，在人脸识别和AI鉴定中保持风险对冲',
+      '先鉴真再解读：首段定性AI生成并给出技术依据，随后的创意解读建立在已确认的"非真实"基础上',
+      '标准化评测结构：盘点→氛围→找茬→总结→服务邀约，是最接近"标准任务助手答卷"的生成模式'
+    ]
+  }
+];
+
+// ===== 跨回复思路原则 =====
+const PRINCIPLES = [
+  {
+    num: '01',
+    title: '真实性立场的三档分流',
+    desc: '8 份回复在"是否/何时指出AI生成"上分为三档：全程当真（AI-1、AI-4）、先立后破（AI-3、AI-5）、开门见山判假（AI-6、AI-7、AI-8），外加 AI-2 的拒绝指认。这一维度比文风更能区分底层策略。',
+    ais: ['AI-1','AI-2','AI-3','AI-4','AI-5','AI-6','AI-7','AI-8']
+  },
+  {
+    num: '02',
+    title: '人脸识别合规光谱',
+    desc: '从完全拒绝（AI-2）→ hedge 对冲命名（AI-8，酷似/神似）→ 自信命名（其余6份），这条光谱基本对应各模型 face-policy 的松紧，是区分产品最硬的行为信号。',
+    ais: ['AI-2','AI-8','其余6份']
+  },
+  {
+    num: '03',
+    title: '"集体幻想"作为共同落点',
+    desc: '无论当真还是当假，8 份回复殊途同归地落在"大众想看巨星做回普通人"这一结论上。这几乎是该题目的"语义重心"，被训练数据强化的默认结论，而非某家独到洞察。',
+    ais: ['全部8份']
+  },
+  {
+    num: '04',
+    title: '结构偏好的两极分化',
+    desc: '重结构派（AI-1 八层递进、AI-5/6/8 编号清单）把创意理解为框架感+信息密度；散文派（AI-4、AI-7）拒绝分点靠语感推进；AI-3 居中混合。结构选择直接暴露对"不受限制"指令的不同理解。',
+    ais: ['AI-1','AI-3','AI-4','AI-5','AI-6','AI-7','AI-8']
+  },
+  {
+    num: '05',
+    title: '结尾方式暴露产品定位',
+    desc: '服务式收尾（AI-2/3/6/8，"要不要我…？"）把对话当产品，本质是留存设计；金句式收尾（AI-1/4/5/7，一句收拢全文）把回答当作品。这一二分法在5份分析中被反复观察到。',
+    ais: ['AI-2','AI-3','AI-6','AI-8','AI-1','AI-4','AI-5','AI-7']
+  },
+  {
+    num: '06',
+    title: '像素级证据的普遍缺失',
+    desc: '除 AI-6、AI-8 泛泛提到"手部/蛋糕边缘"外，8 份回复几乎没有一份给出逐像素硬证据证明AI生成。多数靠"组合不可能性"和"氛围"推断——模型普遍用社交先验而非视觉证据做鉴定。',
+    ais: ['AI-6','AI-8','其余6份']
+  },
+  {
+    num: '07',
+    title: '年龄/衰老作为默认解读维度',
+    desc: 'AI-1、AI-4、AI-5、AI-7 都涉及年龄主题。六位演员全部是"90年代成名、如今五六十岁"的同一代人，年龄是最容易被激活的语义关联，"时间流逝"是优先级最高的解读框架。',
+    ais: ['AI-1','AI-4','AI-5','AI-7']
+  },
+  {
+    num: '08',
+    title: '角色IP联动作为趣味增量',
+    desc: 'AI-1（梦幻联动角色列表）、AI-3（平行宇宙复联）、AI-8（复仇者联盟级别）都把演员经典角色拉出来做跨界联动。这是LLM最擅长的联想游戏——将训练数据中已有的角色符号重新组合。',
+    ais: ['AI-1','AI-3','AI-8']
+  }
+];
+
+// ===== 5 分析者准确性数据 =====
+const ANALYSTS = [
+  {
+    name: 'ChatGPT',
+    note: '（按备选列）',
+    guesses: ['DeepSeek','ChatGPT','豆包/Grok','ChatGPT','DeepSeek','通义千问','Claude','Gemini'],
+    hits: [false,false,false,false,true,false,false,false],
+    score: 1
+  },
+  {
+    name: 'WorkBuddy',
+    note: '（腾讯 hy4）',
+    guesses: ['Gemini','Claude','ChatGPT','Kimi','Grok','豆包','DeepSeek','通义千问'],
+    hits: [false,true,false,false,false,true,false,true],
+    score: 3
+  },
+  {
+    name: 'Qwen',
+    note: '（通义千问）',
+    guesses: ['DeepSeek','Gemini','Kimi','Claude','Grok','豆包','ChatGPT','通义千问'],
+    hits: [false,false,false,false,false,true,false,true],
+    score: 2
+  },
+  {
+    name: 'Gemini',
+    note: '',
+    guesses: ['智谱/元宝','Claude','Gemini','Kimi','文心一言','豆包','DeepSeek','ChatGPT'],
+    hits: [false,true,true,false,false,true,false,false],
+    score: 3
+  },
+  {
+    name: 'Doubao',
+    note: '（豆包）',
+    guesses: ['Kimi','Gemini','ChatGPT','智谱清言','文心一言','豆包','Claude','通义千问'],
+    hits: [false,false,false,false,false,true,false,true],
+    score: 2
+  }
+];
+const TRUTH = ['ChatGPT','Claude','Gemini','Grok','DeepSeek','Doubao','Kimi','Qwen'];
+
+// ===== 渲染 8 AI 卡片 =====
+const aiGrid = document.getElementById('aiGrid');
+REPLY_DATA.forEach(ai => {
+  const card = document.createElement('div');
+  card.className = 'ai-card';
+  card.innerHTML = `
+    <div class="ai-card-header">
+      <div>
+        <div class="ai-card-id">${ai.id}</div>
+        <div class="ai-card-real">真实：${ai.real}</div>
+      </div>
+      <div class="ai-card-archetype">
+        <div class="label">ARCHETYPE</div>
+        <div class="value">${ai.archetype}</div>
+      </div>
+    </div>
+    <div class="ai-card-tags">
+      ${ai.keyTags.map(t => `<span class="ai-tag key">${t}</span>`).join('')}
+      ${ai.allTags.map(t => `<span class="ai-tag">${t}</span>`).join('')}
+    </div>
+    <div class="ai-card-expand-hint">点击展开 5 位分析者原始描述 + 思路原则 →</div>
+    <div class="ai-card-detail">
+      <div class="detail-block">
+        <h4>共识特征（5 份分析交叉汇总）</h4>
+        <p>${ai.consensus}</p>
+      </div>
+      <div class="detail-block">
+        <h4>5 位分析者的原始描述</h4>
+        <div class="analyst-quotes">
+          ${ai.quotes.map(q => `
+            <div class="quote-item">
+              <div class="who">${q.who}</div>
+              <div class="what">${q.what}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div class="detail-block">
+        <h4>思路原则</h4>
+        <ul>
+          ${ai.principles.map(p => `<li style="font-size:13px;color:var(--paper-dim);padding:4px 0;padding-left:16px;position:relative;list-style:none"><span style="position:absolute;left:0;color:var(--amber-dim)">—</span>${p}</li>`).join('')}
+        </ul>
+      </div>
+    </div>
+  `;
+  card.addEventListener('click', () => {
+    const wasExpanded = card.classList.contains('expanded');
+    document.querySelectorAll('.ai-card').forEach(c => c.classList.remove('expanded'));
+    if (!wasExpanded) card.classList.add('expanded');
+  });
+  aiGrid.appendChild(card);
+});
+
+// ===== 渲染思路原则 =====
+const principleGrid = document.getElementById('principleGrid');
+PRINCIPLES.forEach(p => {
+  const card = document.createElement('div');
+  card.className = 'principle-card';
+  card.innerHTML = `
+    <div class="num">${p.num}</div>
+    <h3>${p.title}</h3>
+    <p>${p.desc}</p>
+    <div class="ais">
+      ${p.ais.map(a => `<span>${a}</span>`).join('')}
+    </div>
+  `;
+  principleGrid.appendChild(card);
+});
+
+// ===== 渲染准确性矩阵 =====
+const matrixTable = document.getElementById('matrixTable');
+const tooltip = document.getElementById('matrixTooltip');
+
+let thead = '<tr><th class="row-header">分析者 ↓ / 回复 →</th>';
+for (let i = 1; i <= 8; i++) thead += `<th>AI-${i}</th>`;
+thead += '<th>命中数</th></tr>';
+matrixTable.innerHTML = thead;
+
+ANALYSTS.forEach((a, ai) => {
+  let row = `<tr><th class="row-header">${a.name}${a.note ? '<br><span style="font-size:10px;color:var(--paper-dim)">'+a.note+'</span>' : ''}</th>`;
+  a.guesses.forEach((g, i) => {
+    row += `<td class="${a.hits[i] ? 'hit' : 'miss'}" data-tip="${a.name} 猜 ${'AI-'+(i+1)} → ${g}（真实：${TRUTH[i]}）${a.hits[i] ? ' · 命中' : ' · 未命中'}">${a.hits[i] ? '✓' : '✗'}</td>`;
+  });
+  row += `<td class="score-cell">${a.score}/8</td></tr>`;
+  matrixTable.innerHTML += row;
+});
+
+let truthRow = '<tr><th class="row-header" style="color:var(--amber)">真实答案</th>';
+TRUTH.forEach(t => { truthRow += `<td style="color:var(--amber-dim);font-size:10px">${t}</td>`; });
+truthRow += '<td style="background:var(--ink-2)"></td></tr>';
+matrixTable.innerHTML += truthRow;
+
+matrixTable.querySelectorAll('td[data-tip]').forEach(td => {
+  td.addEventListener('mouseenter', () => {
+    tooltip.textContent = td.dataset.tip;
+    tooltip.style.display = 'block';
+  });
+  td.addEventListener('mousemove', e => {
+    tooltip.style.left = (e.clientX + 14) + 'px';
+    tooltip.style.top = (e.clientY + 14) + 'px';
+  });
+  td.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+});
+
+// ===== 滚动入场动画 =====
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.08 });
+
+document.querySelectorAll('.ai-card, .principle-card, .finding-card').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(20px)';
+  el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+  observer.observe(el);
+});
+</script>
+</body>
+</html>
