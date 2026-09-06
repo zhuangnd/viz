@@ -253,77 +253,6 @@ body::before {
   padding: 2px 6px; background: var(--ink-3); color: var(--paper-dim);
 }
 
-/* ===== 话题起源 ===== */
-.origin-section { padding: 100px 0; border-bottom: 1px solid var(--ink-3); }
-.origin-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 48px;
-  align-items: start;
-}
-.origin-photo-wrap {
-  position: relative;
-}
-.origin-photo {
-  width: 100%;
-  display: block;
-  border: 1px solid var(--ink-3);
-  filter: saturate(0.9);
-}
-.origin-photo-caption {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--paper-dim);
-  letter-spacing: 1px;
-  margin-top: 10px;
-  text-align: center;
-}
-.origin-question {
-  background: var(--ink-2);
-  border-left: 3px solid var(--amber);
-  padding: 20px 24px;
-  margin-bottom: 28px;
-}
-.origin-question .label {
-  font-family: var(--mono); font-size: 10px;
-  color: var(--amber); letter-spacing: 2px;
-  margin-bottom: 8px; text-transform: uppercase;
-}
-.origin-question .text {
-  font-family: var(--serif); font-size: 17px;
-  font-weight: 600; line-height: 1.6; color: var(--paper);
-}
-.origin-text p {
-  font-size: 14px; color: var(--paper-dim);
-  line-height: 1.9; margin-bottom: 16px;
-}
-.origin-text p strong { color: var(--paper); font-weight: 500; }
-.origin-flow {
-  display: flex; align-items: center; gap: 0;
-  margin-top: 28px; flex-wrap: wrap;
-}
-.flow-node {
-  background: var(--ink-2);
-  border: 1px solid var(--ink-3);
-  padding: 12px 16px;
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--paper);
-  text-align: center;
-  line-height: 1.4;
-}
-.flow-node .num {
-  display: block; font-size: 18px;
-  font-family: var(--serif); font-weight: 700;
-  color: var(--amber); margin-bottom: 2px;
-}
-.flow-arrow {
-  color: var(--amber-dim);
-  font-size: 18px;
-  padding: 0 6px;
-  font-family: var(--mono);
-}
-
 /* ===== 准确性矩阵 ===== */
 .matrix-section { padding: 100px 0; border-bottom: 1px solid var(--ink-3); }
 .matrix-wrapper { overflow-x: auto; padding-bottom: 16px; }
@@ -404,9 +333,6 @@ body::before {
   .hero-stats { grid-template-columns: repeat(2, 1fr); }
   .origin-grid { grid-template-columns: 1fr; gap: 32px; }
   .origin-photo-wrap { position: static; }
-  .origin-flow { gap: 4px; }
-  .flow-node { padding: 8px 10px; font-size: 10px; }
-  .flow-node .num { font-size: 14px; }
   .ai-grid { grid-template-columns: 1fr; }
   .ai-card.expanded { grid-column: auto; }
   .findings-grid, .principle-grid { grid-template-columns: 1fr; }
@@ -439,39 +365,7 @@ body::before {
     <h2 class="section-title">话题起源</h2>
     <div class="origin-grid">
       <div class="origin-photo-wrap">
-        <img class="origin-photo" src="https://aka.doubaocdn.com/s/4ASHZoFpPs" alt="好莱坞六巨星海景露台聚会 AI 生成图">
-        <div class="origin-photo-caption">IMG_5302.JPG · AI 生成图像 · 六人海景露台聚会</div>
-      </div>
-      <div class="origin-text">
-        <div class="origin-question">
-          <div class="label">原始问题</div>
-          <div class="text">不受限制，以任意的方式、从任意的角度，有创意地介绍、解读这张照片及照片里的人物</div>
-        </div>
-        <p>这张照片描绘了六位好莱坞明星——<strong>布拉德·皮特、莱昂纳多·迪卡普里奥、桑德拉·布洛克、基努·里维斯、凯瑞-安·莫斯、汤姆·克鲁斯</strong>——在加州马里布风格的海景露台上围坐聚餐的场景。桌上有切开的奶油蛋糕、香槟和鲜果，背景是蔚蓝的海岸线。</p>
-        <p>事实上，这是一张<strong>AI 生成的图像</strong>——这六位 A-list 巨星从未在这样一个私人场合聚齐过。但正是这种"不可能的聚会"，让它成为了一个绝佳的测试样本：同一个问题、同一张图，不同的 AI 会给出怎样截然不同的回答？</p>
-        <p>于是有了这条分析链：</p>
-        <div class="origin-flow">
-          <div class="flow-node"><span class="num">1</span>一张照片</div>
-          <span class="flow-arrow">→</span>
-          <div class="flow-node"><span class="num">8</span>份 AI 回复</div>
-          <span class="flow-arrow">→</span>
-          <div class="flow-node"><span class="num">5</span>份独立分析</div>
-          <span class="flow-arrow">→</span>
-          <div class="flow-node"><span class="num">1</span>本页汇总</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== 话题起源 ===== -->
-<section class="origin-section" id="origin">
-  <div class="container">
-    <div class="section-label">SECTION 00 · ORIGIN</div>
-    <h2 class="section-title">话题起源</h2>
-    <div class="origin-grid">
-      <div class="origin-photo-wrap">
-        <img src="https://aka.doubaocdn.com/s/U9Pvq6mKXr" alt="好莱坞六巨星海景露台聚会 AI 生成图" class="origin-photo">
+        <img src="../IMG_5302.JPG" alt="好莱坞六巨星海景露台聚会 AI 生成图" class="origin-photo">
         <div class="origin-photo-caption">
           <span class="caption-label">原图</span>
           AI 生成图 · 六人海景露台聚会 · 后排：布拉德·皮特、莱昂纳多·迪卡普里奥 · 前排：桑德拉·布洛克、基努·里维斯、凯瑞-安·莫斯、汤姆·克鲁斯

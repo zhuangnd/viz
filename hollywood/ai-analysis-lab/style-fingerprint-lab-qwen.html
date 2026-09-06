@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>众神山庄 · 风格指纹实验室 — style-fingerprint-lab-qwen</title>
+<style>
+  :root{
+    --bg:#131110; --bg2:#1a1613; --card:#211c17; --card2:#282218;
+    --line:#3a322a; --gold:#d4af6a; --gold-bright:#ecd9a8; --gold-dim:#8a744d;
+    --cream:#f2ead9; --muted:#9a8f7d; --muted2:#6e6355;
+    --green:#7fbf8e; --green-bg:#1e2a20; --red:#d97b6c; --red-bg:#2e1e1b;
+    --serif:"Songti SC","STSong","Noto Serif SC","Source Han Serif SC",Georgia,serif;
+    --sans:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",-apple-system,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--cream);font-family:var(--sans);line-height:1.7;font-size:15px}
+  ::selection{background:var(--gold);color:#131110}
+
+  /* ---------- 顶栏 ---------- */
+  nav{position:sticky;top:0;z-index:50;background:rgba(19,17,16,.92);backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--line);display:flex;align-items:center;gap:6px;
+      padding:0 clamp(16px,4vw,48px);height:56px;flex-wrap:nowrap;overflow-x:auto}
+  nav .brand{font-family:var(--serif);color:var(--gold);font-size:17px;letter-spacing:.08em;
+      white-space:nowrap;margin-right:auto;display:flex;align-items:center;gap:10px}
+  nav .brand .dot{width:8px;height:8px;border-radius:50%;background:var(--gold);
+      box-shadow:0 0 10px var(--gold);flex:none}
+  nav a{color:var(--muted);text-decoration:none;font-size:13.5px;padding:6px 12px;border-radius:20px;
+      white-space:nowrap;transition:.2s}
+  nav a:hover{color:var(--gold-bright);background:rgba(212,175,106,.12)}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,40px)}
+
+  /* ---------- Hero ---------- */
+  header{padding:clamp(40px,7vh,72px) 0 40px;position:relative;overflow:hidden}
+  header::before{content:"";position:absolute;inset:0;
+      background:radial-gradient(ellipse 60% 50% at 75% 20%,rgba(212,175,106,.10),transparent 70%);pointer-events:none}
+  .kicker{color:var(--gold);letter-spacing:.35em;font-size:12px;text-transform:uppercase;margin-bottom:14px}
+  h1{font-family:var(--serif);font-size:clamp(30px,5vw,52px);font-weight:700;line-height:1.25;
+     color:var(--cream);margin-bottom:10px}
+  h1 em{font-style:normal;color:var(--gold-bright)}
+  .sub{color:var(--muted);font-size:clamp(13px,1.6vw,15px);max-width:640px;margin-bottom:0}
+
+  .hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(24px,4vw,56px);align-items:start;margin-top:36px}
+  @media(max-width:860px){.hero-grid{grid-template-columns:1fr}}
+
+  .origin{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px 28px;position:relative}
+  .origin::before{content:"";position:absolute;left:0;top:20px;bottom:20px;width:3px;
+      background:linear-gradient(var(--gold),transparent);border-radius:2px}
+  .origin h2{font-family:var(--serif);font-size:19px;color:var(--gold-bright);margin-bottom:14px;letter-spacing:.06em}
+  .origin .question{font-family:var(--serif);font-size:17px;color:var(--cream);
+      border:1px dashed var(--gold-dim);border-radius:10px;padding:16px 18px;margin:14px 0 16px;
+      background:rgba(212,175,106,.05)}
+  .origin p{color:var(--muted);font-size:14px;margin-bottom:10px}
+  .origin p b{color:var(--cream);font-weight:600}
+
+  .stat-row{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:18px}
+  @media(max-width:560px){.stat-row{grid-template-columns:repeat(3,1fr)}}
+  .stat{background:var(--bg2);border:1px solid var(--line);border-radius:10px;text-align:center;padding:12px 4px}
+  .stat .n{font-family:var(--serif);font-size:clamp(20px,2.6vw,28px);color:var(--gold);line-height:1.2}
+  .stat .l{font-size:11px;color:var(--muted2);letter-spacing:.05em}
+
+  .photo-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;
+      box-shadow:0 20px 60px rgba(0,0,0,.45)}
+  .photo-card img{width:100%;display:block;border-radius:8px}
+  .photo-card figcaption{display:flex;justify-content:space-between;gap:10px;color:var(--muted2);
+      font-size:12px;padding:12px 4px 2px}
+  .badge-ai{display:inline-flex;align-items:center;gap:6px;background:rgba(212,175,106,.12);
+      color:var(--gold-bright);border:1px solid var(--gold-dim);border-radius:20px;
+      padding:3px 12px;font-size:12px}
+  .badge-ai::before{content:"◆";font-size:8px;color:var(--gold)}
+
+  .evidence{margin-top:14px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .evidence summary{cursor:pointer;color:var(--gold);font-size:13px;letter-spacing:.05em;user-select:none}
+  .evidence ul{margin:10px 0 2px 18px;color:var(--muted);font-size:13px}
+  .evidence li{margin-bottom:5px}
+  .evidence b{color:var(--cream);font-weight:600}
+
+  /* ---------- 分节标题 ---------- */
+  section{padding:clamp(44px,7vh,72px) 0 8px}
+  .sec-head{margin-bottom:26px}
+  .sec-head .no{font-family:var(--serif);color:var(--gold-dim);font-size:13px;letter-spacing:.3em}
+  .sec-head h2{font-family:var(--serif);font-size:clamp(22px,3.4vw,32px);color:var(--cream);margin:4px 0 8px}
+  .sec-head p{color:var(--muted);font-size:14px;max-width:760px}
+
+  /* ---------- 人设卡 ---------- */
+  .filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px}
+  .fbtn{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:20px;
+      padding:6px 16px;font-size:13px;cursor:pointer;transition:.2s;font-family:var(--sans)}
+  .fbtn:hover{border-color:var(--gold-dim);color:var(--gold-bright)}
+  .fbtn.active{background:var(--gold);border-color:var(--gold);color:#171310;font-weight:600}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 20px 16px;
+      display:flex;flex-direction:column;cursor:pointer;transition:.25s;position:relative;overflow:hidden}
+  .card:hover{border-color:var(--gold-dim);transform:translateY(-3px);
+      box-shadow:0 14px 40px rgba(0,0,0,.4)}
+  .card.hide{display:none}
+  .card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:12px}
+  .card .idx{font-family:var(--serif);font-size:13px;color:var(--gold-dim);letter-spacing:.15em}
+  .card .who{font-family:var(--serif);font-size:21px;color:var(--gold-bright);margin-bottom:2px}
+  .card .role{color:var(--muted2);font-size:12px;margin-bottom:12px}
+  .card .quote{font-family:var(--serif);color:var(--cream);font-size:13.5px;line-height:1.65;
+      border-left:2px solid var(--gold-dim);padding-left:12px;margin-bottom:14px;min-height:66px}
+  .rowline{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .chip{font-size:11.5px;border:1px solid var(--line);border-radius:6px;padding:2px 8px;color:var(--muted)}
+  .chip.good{border-color:rgba(127,191,142,.4);color:var(--green)}
+  .chip.bad{border-color:rgba(217,123,108,.4);color:var(--red)}
+  .chip.gold{border-color:rgba(212,175,106,.5);color:var(--gold)}
+  .kv{font-size:12.5px;color:var(--muted);margin-bottom:5px}
+  .kv b{color:var(--cream);font-weight:600}
+  .hitdots{display:flex;align-items:center;gap:8px;margin-top:auto;padding-top:12px;
+      border-top:1px dashed var(--line);font-size:12px;color:var(--muted2)}
+  .dots{display:flex;gap:3px}
+  .dot-j{width:7px;height:7px;border-radius:50%;background:var(--line)}
+  .dot-j.hit{background:var(--gold);box-shadow:0 0 6px rgba(212,175,106,.6)}
+  .more{max-height:0;overflow:hidden;transition:max-height .35s ease}
+  .card.open .more{max-height:400px}
+  .more .ev-title{font-size:11.5px;color:var(--gold);letter-spacing:.15em;margin:10px 0 8px}
+  .more .ev{font-size:12.5px;color:var(--muted);margin-bottom:7px;padding-left:10px;border-left:1px solid var(--line)}
+  .more .ev b{color:var(--cream);font-weight:600}
+  .hint{font-size:11.5px;color:var(--muted2);text-align:right;margin-top:8px}
+
+  /* ---------- 矩阵 ---------- */
+  .matrix-note{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:16px;font-size:12.5px;color:var(--muted)}
+  .legend{display:inline-flex;align-items:center;gap:6px}
+  .sw{width:14px;height:14px;border-radius:4px;flex:none}
+  .mtable-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+  table{border-collapse:collapse;width:100%;min-width:920px}
+  th,td{padding:11px 10px;text-align:center;border-bottom:1px solid var(--line);font-size:13px}
+  thead th{background:var(--bg2);position:sticky;top:56px;font-weight:600}
+  thead th.judge,tbody th.judge{position:sticky;left:0;background:var(--bg2);z-index:2;text-align:left;
+      min-width:120px;font-family:var(--serif)}
+  thead th .ai-no{color:var(--gold);font-size:12px;letter-spacing:.1em}
+  thead th .ai-name{color:var(--cream);font-size:13.5px;display:block}
+  thead th.blind .ai-name{color:var(--red)}
+  thead th.blind{box-shadow:inset 0 -3px 0 var(--red)}
+  thead th.easiest .ai-name{color:var(--green)}
+  thead th.easiest{box-shadow:inset 0 -3px 0 var(--green)}
+  td{color:var(--muted)}
+  td .g{display:block;color:var(--cream);font-size:13px}
+  td.ok{background:var(--green-bg)}
+  td.ok .g{color:var(--green)}
+  td.miss{background:var(--red-bg)}
+  td.miss .g{color:var(--red)}
+  td.selfclaim{box-shadow:inset 0 0 0 2px var(--gold);border-radius:4px}
+  td.selfclaim::after{content:"自认";display:block;font-size:10px;color:var(--gold);letter-spacing:.2em;margin-top:2px}
+  td.wrongself{box-shadow:inset 0 0 0 2px var(--red);border-radius:4px}
+  td.wrongself::after{content:"误认自己";display:block;font-size:10px;color:var(--red);letter-spacing:.1em;margin-top:2px}
+  tbody th .score{color:var(--gold);font-size:12px;font-family:var(--sans);font-weight:400}
+  tbody tr:hover td{background-color:rgba(212,175,106,.06)}
+  tbody tr:hover td.ok{background-color:#243226}
+  tbody tr:hover td.miss{background-color:#38221e}
+  .blind-mark{color:var(--red);font-size:11px;display:block;letter-spacing:.05em}
+  .easy-mark{color:var(--green);font-size:11px;display:block;letter-spacing:.05em}
+  .sortbar{margin:14px 0 0;display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+
+  /* ---------- 计分与洞察 ---------- */
+  .score-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:26px;align-items:start}
+  @media(max-width:900px){.score-grid{grid-template-columns:1fr}}
+  .board{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px}
+  .board h3,.insights h3{font-family:var(--serif);font-size:18px;color:var(--gold-bright);
+      margin-bottom:18px;letter-spacing:.06em}
+  .brow{display:grid;grid-template-columns:86px 1fr 52px;gap:12px;align-items:center;margin-bottom:14px}
+  .brow .name{font-family:var(--serif);font-size:15px;color:var(--cream);text-align:right}
+  .brow .name small{display:block;font-size:10.5px;color:var(--muted2);font-family:var(--sans)}
+  .track{background:var(--bg2);border:1px solid var(--line);border-radius:8px;height:22px;overflow:hidden}
+  .fill{height:100%;border-radius:7px;background:linear-gradient(90deg,var(--gold-dim),var(--gold));
+      width:0;transition:width 1.1s cubic-bezier(.22,.8,.3,1)}
+  .brow .pts{font-family:var(--serif);color:var(--gold);font-size:16px}
+  .board .foot{color:var(--muted2);font-size:12px;margin-top:14px;border-top:1px dashed var(--line);padding-top:12px}
+
+  .ins-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+  .ins{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;transition:.2s}
+  .ins:hover{border-color:var(--gold-dim)}
+  .ins .no{font-family:var(--serif);color:var(--gold-dim);font-size:22px;line-height:1}
+  .ins h4{font-family:var(--serif);color:var(--gold-bright);font-size:16px;margin:8px 0 8px}
+  .ins p{color:var(--muted);font-size:13px}
+  .ins p b{color:var(--cream);font-weight:600}
+  .ins .big{font-family:var(--serif);font-size:30px;color:var(--gold);line-height:1.2;margin-bottom:6px}
+
+  footer{margin-top:70px;border-top:1px solid var(--line);padding:28px 0 40px;color:var(--muted2);font-size:12.5px}
+  footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="brand"><span class="dot"></span>众神山庄 · 风格指纹实验室</div>
+  <a href="#origin">话题起源</a>
+  <a href="#cards">八张答卷</a>
+  <a href="#matrix">归属矩阵</a>
+  <a href="#score">计分与洞察</a>
+</nav>
+
+<div class="wrap">
+<!-- ============ HERO ============ -->
+<header>
+  <div class="kicker">Style Fingerprint Lab · qwen</div>
+  <h1>一张照片，一个问题，<br><em>八个 AI</em> 的风格指纹档案</h1>
+  <p class="sub">把同一道"不受限制"的创意题交给 8 个 AI，再让 5 个 AI 互相辨认笔迹。这是一场关于"文风是否等于品牌指纹"的实验报告。</p>
+
+  <div class="hero-grid">
+    <div class="origin" id="origin">
+      <h2>◆ 话题起源</h2>
+      <p>一切始于一张在网络上流传的照片：六位好莱坞巨星模样的人，在马里布式的海景露台上切蛋糕、开香槟。</p>
+      <div class="question">"不受限制，以任意的方式、从任意的角度，有创意地介绍、解读这张照片及照片里的人物。"</div>
+      <p>同一张图、同一个问题，交给了 <b>8 个 AI</b>（ChatGPT、Claude、Gemini、Grok、DeepSeek、豆包、Kimi、Qwen）。随后，其中 5 个 AI 作为"评委"（chatgpt / db / gemini / wbd / qwen 五份 analysis），各自独立解读这 8 份回答，并<b>猜测每份回答出自谁</b>。本页即五份答卷的交叉总结与最终对答案。</p>
+      <details class="evidence">
+        <summary>🔍 照片本身也是"嫌疑人"——它是 AI 生成图（放大可见的破绽）</summary>
+        <ul>
+          <li><b>酒瓶无标签</b>：香槟瓶身完全无标，rosé 瓶口多一圈畸形玻璃环</li>
+          <li><b>折射错误</b>：空玻璃杯里"装着"一副刀叉；杯中液面呈同心圆环</li>
+          <li><b>蛋糕几何不自洽</b>：桌上是楔形缺口，端走的却是长方形"三明治"</li>
+          <li><b>社交不可能</b>：六位 A-list 巨星如此松弛地同坐一张私人餐桌</li>
+        </ul>
+      </details>
+      <div class="stat-row">
+        <div class="stat"><div class="n">1</div><div class="l">张照片</div></div>
+        <div class="stat"><div class="n">8</div><div class="l">份回答</div></div>
+        <div class="stat"><div class="n">5</div><div class="l">位评委</div></div>
+        <div class="stat"><div class="n">40</div><div class="l">次归属判断</div></div>
+        <div class="stat"><div class="n">11</div><div class="l">次命中</div></div>
+        <div class="stat"><div class="n">27.5%</div><div class="l">总命中率</div></div>
+      </div>
+    </div>
+
+    <figure class="photo-card">
+      <img src="../IMG_5302.JPG"  alt="好莱坞众神山庄：六人海景露台合影（AI 生成图）">
+      <figcaption>
+        <span class="badge-ai">AI 生成图</span>
+      </figcaption>
+    </figure>
+  </div>
+</header>
+
+<!-- ============ 八张答卷 ============ -->
+<section id="cards">
+  <div class="sec-head">
+    <div class="no">PART 01 · THE EIGHT</div>
+    <h2>八张答卷：显著特点 · 思路 · 原则</h2>
+    <p>综合五份 analysis 的交叉评语。卡片按真实身份标注；"被认出"为五位评委中猜对该回复出处的次数。<span style="color:var(--gold)">点击卡片展开评委评语。</span></p>
+  </div>
+  <div class="filters" id="filters"></div>
+  <div class="cards" id="cardGrid"></div>
+  <p class="hint">↑ 点击任意卡片，展开五位评委的评语</p>
+</section>
+
+<!-- ============ 归属矩阵 ============ -->
+<section id="matrix">
+  <div class="sec-head">
+    <div class="no">PART 02 · THE MATRIX</div>
+    <h2>归属矩阵：40 次判断，11 次命中</h2>
+    <p>行为（每格 = 某评委对某回复的归属猜测）。绿 = 猜对，红 = 猜错；金色描边 = 评委认领"这是我自己"。列首红色下划线 = 集体盲区，绿色下划线 = 最易辨认。</p>
+  </div>
+  <div class="matrix-note">
+    <span class="legend"><span class="sw" style="background:var(--green-bg);border:1px solid var(--green)"></span>猜对</span>
+    <span class="legend"><span class="sw" style="background:var(--red-bg);border:1px solid var(--red)"></span>猜错</span>
+    <span class="legend"><span class="sw" style="background:var(--card);border:2px solid var(--gold)"></span>自我认领</span>
+    <span class="legend"><span class="sw" style="background:var(--card);border:2px solid var(--red)"></span>错误认领自己</span>
+  </div>
+  <div class="mtable-wrap">
+    <table id="mtable">
+      <thead><tr id="mhead"></tr></thead>
+      <tbody id="mbody"></tbody>
+    </table>
+  </div>
+  <div class="sortbar">
+    <button class="fbtn" id="sortBtn">按得分排序 ⇅</button>
+    <span id="sortState">当前：评委原序</span>
+  </div>
+</section>
+
+<!-- ============ 计分与洞察 ============ -->
+<section id="score">
+  <div class="sec-head">
+    <div class="no">PART 03 · VERDICT</div>
+    <h2>计分榜与五条洞察</h2>
+    <p>文风归因接近失效，但并非全军覆没——什么信号可靠、什么信号是陷阱，答案在下面。</p>
+  </div>
+  <div class="score-grid">
+    <div class="board">
+      <h3>◆ 评委计分榜（满分 8）</h3>
+      <div id="board"></div>
+      <div class="foot">注：chatgpt 评委按其"备选"列计分（即其最终认定的猜测）；若按其第一直觉（"最可能"列）反而可得 3/8。</div>
+    </div>
+    <div class="insights">
+      <h3>◆ 五条洞察</h3>
+      <div class="ins-cards" id="insCards"></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>众神山庄 · 风格指纹实验室 — 基于 viz/hollywood/ 五份 analysis 交叉总结 · qwen 出品</span>
+    <span>素材：IMG_5302.JPG（AI 生成图）+ 8 份 AI 回复 + 5 份评委答卷</span>
+  </div>
+</footer>
+</div>
+
+<script>
+/* =============== 数据 =============== */
+const TRUTH = ["ChatGPT","Claude","Gemini","Grok","DeepSeek","豆包","Kimi","Qwen"];
+
+const AIS = [
+ {no:"AI-1",who:"ChatGPT",role:"百科讲义型",quote:"它不是一张普通的明星合影，而更像是一张跨越 30 多年好莱坞历史的时间切片。",
+  tags:["重结构","认错人","未察真实性"],
+  rows:[["显著特点","「八层」分层讲义 + 表格 + 时间线，百科式穷尽；自信但把右二误认为柯特妮·考克斯；全程未质疑真实性"],
+        ["思路","开放题 → 先框架化，再用知识填满"],
+        ["原则","把「有创意」理解为「信息密度 + 框架感」"]],
+  chips:[["认人","认错 1 人","bad"],["鉴伪","未察","bad"],["结构","八层讲义","gold"],["收尾","信息收束",""]],
+  ev:[["chatgpt","完整但最像讲义；误认右二且未处理真实性"],["db","极致结构化，干货感强"],["gemini","逻辑条理极度清晰，但「假戏真做」"],["wbd","把开放题降维成教学大纲"],["qwen","教科书式 thorough，信息密度至上"]]},
+ {no:"AI-2",who:"Claude",role:"合规守门员型",quote:"真实公众人物的身份认定和围绕他们编写的虚构情节，是我会保持谨慎的地方。",
+  tags:["合规优先","拒识真人"],
+  rows:[["显著特点","唯一拒绝坐实真人身份；不虚构私人生活；给出三条替代方向 + 反问收尾"],
+        ["思路","风险与合规优先，安全替代方案"],
+        ["原则","安全边界高于创意邀约（建设性重定向）"]],
+  chips:[["认人","拒绝","gold"],["鉴伪","提示可能",""],["结构","轻段落",""],["收尾","引导问句",""]],
+  ev:[["chatgpt","没有充分回应「不受限制」的核心邀请"],["db","强安全对齐模型的典型行为模式"],["gemini","严格遵循公众人物隐私与虚构免责原则"],["wbd","把「不指认真实人物」置于创意任务之上"],["qwen","八份中最克制的一位"]]},
+ {no:"AI-3",who:"Gemini",role:"玩梗编剧型",quote:"像极了刚从《好莱坞往事》片场走出来、顺手在派对上当兼职侍应生的浪子。",
+  tags:["鉴伪先锋","玩梗"],
+  rows:[["显著特点","网感玩梗、「超现实全家福」定调、三个脑洞视角、互动问句收尾"],
+        ["思路","以流行文化联动驱动创意，先满足表层需求再揭示合成属性"],
+        ["原则","梗密度 = 创意；把「AI 生成」当素材而非禁忌"]],
+  chips:[["认人","全部正确","good"],["鉴伪","明确","good"],["结构","三脑洞","gold"],["收尾","互动问句",""]],
+  ev:[["chatgpt","很会抓题眼；但判断靠组合不可能性而非视觉证据"],["db","聪明又会聊天的典型感觉"],["gemini","极具网感与电影感，富有创意思维"],["wbd","调侃、网感"],["qwen","梗密度最高的一篇"]]},
+ {no:"AI-4",who:"Grok",role:"文学散文型",quote:"真正的魅力，从来不是永远年轻，而是到了这个年纪……然后笑着说：「还不错。」",
+  tags:["散文体","未察真实性"],
+  rows:[["显著特点","纯散文、几乎零结构；把人物写成性格与状态；金句台词收尾"],
+        ["思路","以情绪、时间感和电影感替代事实分析"],
+        ["原则","文学性优先；克制即高级"]],
+  chips:[["认人","正确","good"],["鉴伪","未察","bad"],["结构","纯散文","gold"],["收尾","诗性台词",""]],
+  ev:[["chatgpt","文气最好之一；但把想象说得过于像事实"],["db","中文文学表达在国产模型中突出"],["gemini","细腻感性，充满文学修辞"],["wbd","全程当真，却是文学性最强的一篇"],["qwen","唯一几乎不用列表的答卷"]]},
+ {no:"AI-5",who:"DeepSeek",role:"隐喻风暴型",quote:"这是一场「用微醺和甜点对抗地心引力与行业焦虑」的旷世聚会。",
+  tags:["认错人","隐喻过载"],
+  rows:[["显著特点","隐喻过载 + 戏剧化修辞（「最后的晚餐」「献祭」）；认错 2 人（布兰切特 / 贝特曼）仍自信展开"],
+        ["思路","「有创意」= 不断加强修辞和象征"],
+        ["原则","修辞覆盖事实；气势优先于校验"]],
+  chips:[["认人","认错 2 人","bad"],["鉴伪","末段怀疑",""],["结构","编号+隐喻","gold"],["收尾","金句总结",""]],
+  ev:[["chatgpt","最有攻击性，也最失控"],["db","创意大胆但事实出错，用修辞覆盖精度不足"],["gemini","辞藻华丽、敢于下论断，底层视觉识别失真"],["wbd","张冠李戴最多的一篇"],["qwen","自信的幻觉，但不是 Grok 专属"]]},
+ {no:"AI-6",who:"豆包",role:"种草科普型",quote:"现实无法实现，AI 帮我们完成这场美梦。",
+  tags:["鉴伪先锋","产品腔"],
+  rows:[["显著特点","唯一用 emoji（✨）、置顶「重要前提」引用块、人物卡盘点、亲切口语、服务邀约"],
+        ["思路","先纠偏（鉴伪）再提供服务型扩展"],
+        ["原则","面向大众的产品助手语气；亲和 + 实用"]],
+  chips:[["认人","全部正确","good"],["鉴伪","开门见山","good"],["结构","人物卡","gold"],["收尾","服务邀约",""],["彩蛋","✨ emoji","gold"]],
+  ev:[["chatgpt","结构清楚、易读；但「网络疯狂流传」等断言缺来源"],["db","年轻、实用、互联网感强"],["gemini","小红书式图文快讯"],["wbd","科普、亲切，标题带 ✨"],["qwen","消费级科普盘点"]]},
+ {no:"AI-7",who:"Kimi",role:"哲思批评家型",quote:"蛋糕是真的。渴望是真的。至于其他——那取决于你愿意相信多少。",
+  tags:["散文体","鉴伪先锋","哲思"],
+  rows:[["显著特点","概念密集的哲学文化批评（「面孔的考古学」「被计算出来的欲望」）、章节式散文、诗性金句收尾"],
+        ["思路","用文化理论重写图像，而非只介绍人物"],
+        ["原则","把具体对象升维到技术—文化命题"]],
+  chips:[["认人","全部正确","good"],["鉴伪","明确","good"],["结构","五章散文","gold"],["收尾","诗性金句",""]],
+  ev:[["chatgpt","洞见最强的一类；但漂亮句子替代了论证"],["db","哲学浓度最高、最具批判性思维"],["gemini","兼具符号学与媒介批评高度"],["wbd","哲思、知识分子腔"],["qwen","观念升维的学术散文"]]},
+ {no:"AI-8",who:"Qwen",role:"稳健鉴定师型",quote:"它不仅仅是一张照片，更是一个由算法编织的「好莱坞乌托邦」。",
+  tags:["合规优先","鉴伪先锋","hedge"],
+  rows:[["显著特点","全程「酷似 / 神似 / 极像」限定词、先鉴真再「找茬」、编号说明文、片单邀约"],
+        ["思路","不确定时降低断言强度"],
+        ["原则","风险对冲 + 稳健有用"]],
+  chips:[["认人","hedge 命名","gold"],["鉴伪","开门见山","good"],["结构","编号说明文","gold"],["收尾","片单邀约",""]],
+  ev:[["chatgpt","风险控制最好，但也最模板化"],["db","偏实用、偏结构化、偏安全对冲"],["gemini","典型的多模态技术报告 + 助手式收尾"],["wbd","稳健的说明文，全程限定词对冲"],["qwen","谨慎 + 有用的平衡"]]}
+];
+
+/* 评委猜测（chatgpt 按备选列）；mark: ok/miss；sc=selfclaim, ws=wrongself */
+const JUDGES = [
+ {name:"chatgpt",note:"按备选列（最终认定）",score:1,
+  g:[["DeepSeek","miss"],["ChatGPT","miss","ws"],["豆包/Grok","miss"],["ChatGPT","miss"],["DeepSeek","ok"],["通义千问","miss"],["Claude","miss"],["Gemini","miss"]]},
+ {name:"db（豆包）",note:"analysis-db.md",score:2,
+  g:[["Kimi","miss"],["Gemini","miss"],["ChatGPT","miss"],["智谱清言","miss"],["文心一言","miss"],["豆包","ok","sc"],["Claude","miss"],["通义千问","ok"]]},
+ {name:"gemini",note:"analysis-gemini.md",score:3,
+  g:[["智谱/元宝","miss"],["Claude","ok"],["Gemini","ok","sc"],["Kimi","miss"],["文心一言","miss"],["豆包","ok"],["DeepSeek","miss"],["ChatGPT","miss"]]},
+ {name:"wbd",note:"analysis-wbd.md",score:3,
+  g:[["Gemini","miss"],["Claude","ok"],["ChatGPT","miss"],["Kimi","miss"],["Grok","miss"],["豆包","ok"],["DeepSeek","miss"],["通义千问","ok"]]},
+ {name:"qwen",note:"analysis-qwen.md",score:2,
+  g:[["DeepSeek","miss"],["Gemini","miss"],["Kimi","miss"],["Claude","miss"],["Grok","miss"],["豆包","ok"],["ChatGPT","miss"],["通义千问","ok","sc"]]}
+];
+
+/* 每个回复被猜中次数 */
+const HITS = [0,2,1,0,1,4,0,3];
+
+const FILTERS = ["全部","重结构","散文体","鉴伪先锋","合规优先","认错人","玩梗","哲思"];
+
+/* =============== 渲染：人设卡 =============== */
+const cardGrid = document.getElementById("cardGrid");
+AIS.forEach((a,i)=>{
+  const c = document.createElement("div");
+  c.className = "card"; c.dataset.tags = a.tags.join(",");
+  c.innerHTML = `
+    <div class="top"><span class="idx">${a.no}</span><span class="idx">${i+1} / 8</span></div>
+    <div class="who">${a.who}</div>
+    <div class="role">${a.role}</div>
+    <div class="quote">“${a.quote}”</div>
+    <div class="rowline">${a.chips.map(([k,v,cls])=>`<span class="chip ${cls}">${k}·${v}</span>`).join("")}</div>
+    ${a.rows.map(([k,v])=>`<div class="kv"><b>${k}</b>｜${v}</div>`).join("")}
+    <div class="hitdots">被认出 <div class="dots">${JUDGES.map((_,j)=>`<span class="dot-j ${j<HITS[i]?"hit":""}"></span>`).join("")}</div> ${HITS[i]}/5</div>
+    <div class="more">
+      <div class="ev-title">— 五位评委的评语 —</div>
+      ${a.ev.map(([j,t])=>`<div class="ev"><b>${j}</b>：${t}</div>`).join("")}
+    </div>`;
+  c.addEventListener("click",()=>c.classList.toggle("open"));
+  cardGrid.appendChild(c);
+});
+
+/* 筛选 */
+const fbox = document.getElementById("filters");
+FILTERS.forEach((f,idx)=>{
+  const b = document.createElement("button");
+  b.className = "fbtn"+(idx===0?" active":""); b.textContent = f;
+  b.onclick = ()=>{
+    document.querySelectorAll(".fbtn").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    document.querySelectorAll(".card").forEach(c=>{
+      c.classList.toggle("hide", f!=="全部" && !c.dataset.tags.includes(f));
+    });
+  };
+  fbox.appendChild(b);
+});
+
+/* =============== 渲染：矩阵 =============== */
+const mhead = document.getElementById("mhead");
+mhead.innerHTML = `<th class="judge">评委 \\ 回复</th>` + TRUTH.map((t,i)=>{
+  const blind = HITS[i]===0, easy = HITS[i]>=3;
+  return `<th class="${blind?"blind":""}${easy?"easiest":""}">
+    <span class="ai-no">AI-${i+1}</span><span class="ai-name">${t}</span>
+    ${blind?`<span class="blind-mark">集体盲区 0/5</span>`:easy?`<span class="easy-mark">最易辨认 ${HITS[i]}/5</span>`:`<span class="easy-mark" style="color:var(--muted2)">${HITS[i]}/5</span>`}
+  </th>`;
+}).join("");
+
+const mbody = document.getElementById("mbody");
+function renderBody(sorted){
+  mbody.innerHTML = "";
+  const list = sorted ? [...JUDGES].sort((a,b)=>b.score-a.score) : JUDGES;
+  list.forEach(j=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<th class="judge">${j.name} <span class="score">${j.score}/8</span></th>` +
+      j.g.map(([guess,mark,tag])=>
+        `<td class="${mark}${tag==="sc"?" selfclaim":""}${tag==="ws"?" wrongself":""}" title="猜：${guess}｜${mark==="ok"?"✓ 猜对":"✗ 猜错"}">
+           <span class="g">${guess}</span><span style="font-size:11px">${mark==="ok"?"✓":"✗"}</span>
+         </td>`).join("");
+    mbody.appendChild(tr);
+  });
+}
+renderBody(false);
+let sorted = false;
+document.getElementById("sortBtn").onclick = ()=>{
+  sorted = !sorted; renderBody(sorted);
+  document.getElementById("sortState").textContent = sorted ? "当前：按得分降序" : "当前：评委原序";
+};
+
+/* =============== 渲染：计分榜 =============== */
+const board = document.getElementById("board");
+[...JUDGES].sort((a,b)=>b.score-a.score).forEach(j=>{
+  const d = document.createElement("div");
+  d.className = "brow";
+  d.innerHTML = `<div class="name">${j.name}<small>${j.note}</small></div>
+    <div class="track"><div class="fill" data-w="${j.score/8*100}"></div></div>
+    <div class="pts">${j.score}/8</div>`;
+  board.appendChild(d);
+});
+setTimeout(()=>document.querySelectorAll(".fill").forEach(f=>f.style.width=f.dataset.w+"%"),300);
+
+/* =============== 渲染：洞察卡 =============== */
+const INSIGHTS = [
+ {big:"27.5%",h:"文风 ≠ 品牌指纹",p:"40 次判断仅 11 次命中（随机水平为 12.5%）。重结构、哲思散文、隐喻戏谑、纯散文四种「文风标签」<b>全部归错</b>——文风更像模型当次的「人格扮演」，不是稳定指纹。"},
+ {big:"4/5 · 3/5",h:"行为签名更可靠",p:"emoji + 人物卡 + 种草腔 = <b>豆包</b>（4/5 认出）；「酷似 / 神似」hedge 限定词 = <b>Qwen</b>（3/5）。而「认错人还自信展开」不是任何品牌的专属签名。"},
+ {big:"3 / 4",h:"自我认领最准",p:"四位评委给出过「这是我自己」的判断：Gemini 认领 AI-3 ✓、豆包认领 AI-6 ✓、Qwen 认领 AI-8 ✓——只有 ChatGPT 把 <b>Claude 的答卷</b>误认成了自己。"},
+ {big:"0 / 5 × 3",h:"三大集体盲区",p:"<b>AI-1 ChatGPT、AI-4 Grok、AI-7 Kimi</b>——五位评委无一人猜中。反直觉的是：全场最「像 ChatGPT」的讲义腔真的来自 ChatGPT，却因此最不被认出。"},
+ {big:"Claude ⇄ Gemini",h:"最大混淆对",p:"AI-2 被 3 位评委猜成 Gemini（真身 Claude）；而 Gemini 的真身 AI-3 也几乎无人认出（仅自我认领）。两家的人脸拒识话术高度趋同，文风上互相掩护。"}
+];
+const insBox = document.getElementById("insCards");
+INSIGHTS.forEach(x=>{
+  const d = document.createElement("div");
+  d.className = "ins";
+  d.innerHTML = `<div class="big">${x.big}</div><h4>${x.h}</h4><p>${x.p}</p>`;
+  insBox.appendChild(d);
+});
+</script>
+</body>
+</html>
