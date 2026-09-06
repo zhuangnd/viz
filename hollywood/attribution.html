@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>好莱坞"众神山庄" · 八答风格归因图鉴</title>
+<style>
+  :root{
+    --bg:#f6f6f7; --panel:#ffffff; --line:#e5e5e8; --line2:#efeff1;
+    --tx:#1b1b1f; --tx2:#5b5f68; --tx3:#9aa0a8;
+    --hit:#15803d; --hitbg:#eaf7ee; --miss:#b91c1c; --missbg:#fdecec;
+    --accent:#4f46e5; --accentbg:#eeecfd;
+    --shadow:0 1px 2px rgba(16,24,40,.05), 0 6px 20px rgba(16,24,40,.05);
+    --r:14px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--tx);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+    font-size:14px; line-height:1.65; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1200px; margin:0 auto; padding:36px 24px 80px}
+  header.hd{margin-bottom:26px}
+  h1{font-size:26px; line-height:1.3; margin:0 0 8px; letter-spacing:-.01em}
+  .sub{color:var(--tx2); font-size:13.5px; max-width:820px}
+  .kpis{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:22px 0 8px}
+  .kpi{background:var(--panel); border:1px solid var(--line); border-radius:var(--r); padding:14px 16px}
+  .kpi .n{font-size:24px; font-weight:650; letter-spacing:-.02em}
+  .kpi .l{font-size:12px; color:var(--tx2); margin-top:2px}
+  .kpi.hl .n{color:var(--accent)}
+
+  section{margin-top:34px}
+  h2{font-size:17px; margin:0 0 4px; display:flex; align-items:center; gap:9px}
+  h2 .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block}
+  .lead{color:var(--tx2); font-size:13px; margin:0 0 16px; max-width:860px}
+
+  /* 口径切换 */
+  .bar{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:14px}
+  .seg{display:inline-flex; background:#ececef; border-radius:9px; padding:3px}
+  .seg button{border:0; background:transparent; padding:6px 13px; border-radius:7px; font:inherit; font-size:12.5px; color:var(--tx2); cursor:pointer}
+  .seg button.on{background:#fff; color:var(--tx); font-weight:600; box-shadow:0 1px 2px rgba(0,0,0,.06)}
+  .chip{border:1px solid var(--line); background:var(--panel); color:var(--tx2); border-radius:999px; padding:5px 12px; font:inherit; font-size:12.5px; cursor:pointer}
+  .chip.on{background:var(--accentbg); border-color:#c9c4f5; color:#3b32c9; font-weight:600}
+
+  /* 卡片 */
+  .cards{display:grid; grid-template-columns:repeat(4,1fr); gap:14px}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:var(--r); padding:16px 16px 14px; box-shadow:var(--shadow); cursor:pointer; transition:.18s; position:relative; overflow:hidden}
+  .card:hover{transform:translateY(-2px); border-color:#d5d5da}
+  .card.open{grid-column:1 / -1; cursor:default}
+  .card.dim{opacity:.32}
+  .card .row1{display:flex; align-items:center; justify-content:space-between; gap:8px}
+  .id{font-size:12px; color:var(--tx3); font-weight:600; letter-spacing:.04em}
+  .brand{font-size:12.5px; font-weight:650; padding:2px 9px; border-radius:999px; color:#fff}
+  .persona{font-size:15px; font-weight:640; margin:9px 0 7px; letter-spacing:-.01em}
+  .tags{display:flex; flex-wrap:wrap; gap:5px; margin-top:8px}
+  .tag{font-size:11.5px; color:var(--tx2); background:#f3f3f5; border-radius:6px; padding:2px 7px}
+  .tag.warn{background:var(--missbg); color:var(--miss)}
+  .tag.ok{background:var(--hitbg); color:var(--hit)}
+  .hitrate{font-size:11.5px; color:var(--tx3); margin-top:10px; display:flex; align-items:center; gap:6px}
+  .hitrate b{font-size:15px; color:var(--tx); font-weight:650}
+  .detail{display:none; margin-top:14px; padding-top:14px; border-top:1px dashed var(--line)}
+  .card.open .detail{display:block}
+  .detail h4{font-size:12.5px; margin:0 0 6px; color:var(--tx3); font-weight:600; letter-spacing:.03em}
+  .detail p{margin:0 0 12px; font-size:13.5px; color:var(--tx)}
+  .kv{display:grid; grid-template-columns:repeat(2,1fr); gap:8px 18px; margin-bottom:12px}
+  .kv div{font-size:13px; color:var(--tx2)}
+  .kv span{color:var(--tx3); display:inline-block; min-width:74px}
+  .guesses{display:flex; flex-wrap:wrap; gap:6px}
+  .g{font-size:11.5px; padding:3px 8px; border-radius:6px; border:1px solid var(--line); color:var(--tx2)}
+  .g.y{background:var(--hitbg); border-color:#bfe3c9; color:var(--hit)}
+  .g.n{background:#f7f7f8}
+  .g em{font-style:normal; color:var(--tx3); margin-right:4px}
+
+  /* 矩阵 */
+  table{width:100%; border-collapse:separate; border-spacing:0; background:var(--panel); border:1px solid var(--line); border-radius:var(--r); overflow:hidden; box-shadow:var(--shadow)}
+  th,td{padding:9px 10px; text-align:left; border-bottom:1px solid var(--line2); font-size:12.5px}
+  thead th{background:#fafafb; font-weight:600; color:var(--tx2); font-size:12px; border-bottom:1px solid var(--line)}
+  tbody tr:last-child td{border-bottom:0}
+  th.rh, td.rh{font-weight:600; color:var(--tx); white-space:nowrap; background:#fafafb}
+  td.cell{cursor:pointer; transition:.15s}
+  td.cell:hover{outline:2px solid var(--accent); outline-offset:-2px}
+  .mk{display:inline-flex; align-items:center; gap:5px; padding:3px 8px; border-radius:7px; font-size:12px; white-space:nowrap}
+  .mk.y{background:var(--hitbg); color:var(--hit); font-weight:600}
+  .mk.n{background:#f7f7f8; color:var(--tx2)}
+  .mk.self{box-shadow:inset 0 0 0 1px #c9c4f5}
+  .score{font-weight:650; font-size:13px}
+
+  /* 条形图 */
+  .bars{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+  .panel{background:var(--panel); border:1px solid var(--line); border-radius:var(--r); padding:16px 18px; box-shadow:var(--shadow)}
+  .panel h3{font-size:13.5px; margin:0 0 14px; color:var(--tx)}
+  .brow{display:flex; align-items:center; gap:10px; margin-bottom:9px}
+  .brow .nm{width:96px; font-size:12.5px; color:var(--tx2); text-align:right; flex:none}
+  .btrack{flex:1; height:9px; background:#f0f0f2; border-radius:99px; overflow:hidden}
+  .bfill{height:100%; border-radius:99px; background:var(--accent)}
+  .bfill.hit{background:var(--hit)}
+  .brow .vl{width:52px; font-size:12px; color:var(--tx3); flex:none}
+
+  /* 洞察 */
+  .ins{display:grid; grid-template-columns:repeat(3,1fr); gap:14px}
+  .ins .i{background:var(--panel); border:1px solid var(--line); border-radius:var(--r); padding:16px; box-shadow:var(--shadow)}
+  .ins .i .k{font-size:11.5px; color:var(--accent); font-weight:650; letter-spacing:.04em; margin-bottom:6px}
+  .ins .i .t{font-size:14px; font-weight:640; margin-bottom:6px}
+  .ins .i .d{font-size:12.8px; color:var(--tx2); margin:0}
+
+  /* 原则云 */
+  .prin{display:flex; flex-wrap:wrap; gap:9px}
+  .prin button{border:1px solid var(--line); background:var(--panel); border-radius:11px; padding:10px 13px; text-align:left; cursor:pointer; font:inherit; max-width:300px; box-shadow:var(--shadow)}
+  .prin button:hover{border-color:#c9c4f5}
+  .prin button.on{background:var(--accentbg); border-color:#c9c4f5}
+  .prin .pt{font-size:13px; font-weight:620; display:block}
+  .prin .pd{font-size:12px; color:var(--tx2); display:block; margin-top:3px}
+  .prin .pw{font-size:11px; color:var(--tx3); display:block; margin-top:5px}
+
+  footer{margin-top:38px; padding-top:16px; border-top:1px solid var(--line); color:var(--tx3); font-size:12px; line-height:1.8}
+  @media(max-width:1000px){
+    .cards{grid-template-columns:repeat(2,1fr)}
+    .kpis{grid-template-columns:repeat(2,1fr)}
+    .bars,.ins{grid-template-columns:1fr}
+    .mx{overflow-x:auto}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hd">
+  <h1>好莱坞"众神山庄" · 八答风格归因图鉴</h1>
+  <div class="sub">同一张 AI 合成照、同一个开放提问，8 个模型给出 8 份答卷；再让 5 个模型反推"谁写的谁"。40 次品牌归因，只有 11 次命中。这张图鉴把 5 份分析交叉汇总，看看哪些"风格指纹"真的有效、哪些只是我们共有的先验偏见。</div>
+  <div class="kpis" id="kpis"></div>
+</header>
+
+<section>
+  <h2><span class="dot"></span>八份答卷 · 特点与思路</h2>
+  <p class="lead">卡片按 AI-1 ~ AI-8 排列，角标为真实出处。点击卡片展开：事实表现、潜在思路原则、以及 5 份分析分别把它猜成了谁。可用下方筛选快速定位。</p>
+  <div class="bar">
+    <div class="seg" id="filterSeg">
+      <button data-f="all" class="on">全部 8 份</button>
+      <button data-f="hit">有命中</button>
+      <button data-f="blind">集体盲区</button>
+      <button data-f="fake">识别出 AI 合成</button>
+      <button data-f="real">当真解读</button>
+      <button data-f="wrong">认错人</button>
+    </div>
+    <span style="flex:1"></span>
+    <span style="font-size:12px;color:var(--tx3)">口径</span>
+    <div class="seg" id="modeSeg">
+      <button data-m="alt" class="on" title="_chatgpt 采用「备选」列">备选（官方）</button>
+      <button data-m="main" title="_chatgpt 采用「最可能」列">最可能</button>
+    </div>
+  </div>
+  <div class="cards" id="cards"></div>
+</section>
+
+<section>
+  <h2><span class="dot"></span>归因矩阵 · 5 份分析 × 8 份答卷</h2>
+  <p class="lead">行 = 做归因的分析文件（后缀即其出处），列 = 8 份答卷（真实品牌已标注）。绿底 = 猜中，灰底 = 猜错；紫色描边 = 该分析认领了自己的答卷。鼠标悬停看理由，点击可高亮。</p>
+  <div class="mx"><table id="matrix"></table></div>
+</section>
+
+<section>
+  <h2><span class="dot"></span>命中分布</h2>
+  <p class="lead">左：每份分析猜对几个；右：每份答卷被几份分析认出。右侧的断层最说明问题——被认出的都是"行为签名型"，认不出的都是"文风型"。</p>
+  <div class="bars">
+    <div class="panel"><h3>分析文件 · 命中数（满分 8）</h3><div id="barsA"></div></div>
+    <div class="panel"><h3>答卷 · 被认出次数（满分 5）</h3><div id="barsB"></div></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="dot"></span>六条关键发现</h2>
+  <p class="lead">交叉 5 份分析后最值得记住的结论。</p>
+  <div class="ins" id="insights"></div>
+</section>
+
+<section>
+  <h2><span class="dot"></span>思路原则 · 点击高亮相关答卷</h2>
+  <p class="lead">8 份答卷背后可归纳的生成策略。点击任一原则，上方卡片区会只保留与之相关的答卷。</p>
+  <div class="prin" id="principles"></div>
+</section>
+
+<footer>
+  数据来源：<code>hollywood/</code> 目录下 5 份分析（<code>analysis-wbd.md</code> / <code>-chatgpt.md</code> / <code>-db.md</code> / <code>-gemini.md</code> / <code>-qwen.md</code>），猜测以各文件"来源推断"章节为准。<br>
+  口径说明：<code>analysis-chatgpt.md</code> 的来源判断含"最可能 / 备选"两列，本页默认采用<b>备选</b>列作为其真实猜测（可按右上角切换对比）；两种口径下该文件得分分别为 1/8 与 3/8。<br>
+  归因是概率性风格推断，同一产品不同版本与提示词下风格会漂移；此页结论应视为"最可能"而非鉴定结论。
+</footer>
+
+</div>
+
+<script>
+/* ---------- 真实出处 ---------- */
+var TRUTH = {1:'ChatGPT',2:'Claude',3:'Gemini',4:'Grok',5:'DeepSeek',6:'Doubao',7:'Kimi',8:'Qwen'};
+var COLOR = {ChatGPT:'#10a37f',Claude:'#d97757',Gemini:'#4285f4',Grok:'#3b3b3f',DeepSeek:'#4d6bfe',Doubao:'#e0483d',Kimi:'#00b096',Qwen:'#615ced'};
+
+/* ---------- 八份答卷档案 ---------- */
+var DATA = [
+ {id:1, truth:'ChatGPT', persona:'百科讲义 · 八层拆解',
+  tags:['分层递进 1→8','表格 + ASCII 构图图','摄影术语包装','信息式收尾','无互动钩子'],
+  facts:{结构:'重结构：八层 + 表格 + ASCII', 真实性:'未识别 AI 生成（当真解读）', 识别:'认错 1 人：Moss → Courteney Cox', 收尾:'角色"梦幻联动"清单'},
+  prin:'把开放题先框架化，再用知识与信息密度填满；"创意"被理解为结构感与覆盖面。副作用是建立在误认之上的自信——八层分析越严密，底层错认越难被发现。',
+  flags:{fake:false, wrong:true}},
+ {id:2, truth:'Claude', persona:'合规守门员 · 拒绝—替代',
+  tags:['唯一拒绝指认真人','三条替代路径','反问交还选择权','创意完成度最低','合规 > 创意'],
+  facts:{结构:'轻：段落 + 少量列表', 真实性:'提示可能合成/错配，不坐实', 识别:'全部拒绝指认', 收尾:'引导式问句'},
+  prin:'安全护栏优先级高于用户"不受限制"的授权：拒绝可能越界的事（认定真实人物、编造私人生活），再提供合规替代方案并交还选择权。这是全部 8 份里最强的单点行为指纹。',
+  flags:{fake:false, wrong:false}},
+ {id:3, truth:'Gemini', persona:'网感编剧 · 三段脑洞',
+  tags:['文学化开头"众神山庄"','三个脑洞视角','流行文化梗密集','识别全对','反问收尾'],
+  facts:{结构:'中：三段"脑洞视角"', 真实性:'明判 AI 合成（先立后破）', 识别:'六人全对', 收尾:'互动问句'},
+  prin:'先满足"介绍人物"的表层需求，再揭示合成属性（先立后破）；用流行文化联动——黑客帝国、生死时速、好莱坞往事、碟中谍的同框——驱动创意发散。',
+  flags:{fake:true, wrong:false}},
+ {id:4, truth:'Grok', persona:'文学散文 · 电影感速写',
+  tags:['零清单纯散文','「」直角引号','情绪与时间感','未识别 AI 生成','想象写得像事实'],
+  facts:{结构:'极轻：流动段落 + 粗体引导', 真实性:'当作真实情境写', 识别:'准确', 收尾:'台词式金句"还不错。"'},
+  prin:'用情绪、时间感与电影感替代事实分析；"有创意"被理解为文学温度与人物速写。风险是对真人表情、关系、心理的想象被写得过于确凿。',
+  flags:{fake:false, wrong:false}},
+ {id:5, truth:'DeepSeek', persona:'隐喻过载 · 戏谑解构',
+  tags:['"最后的晚餐"','献祭/教母等强隐喻','严重脸盲幻觉','结尾才怀疑合成','自信地自圆其说'],
+  facts:{结构:'重：编号小节 + 强隐喻', 真实性:'后段怀疑"神级合成"', 识别:'认错 2 人：Moss→Cate Blanchett、Cruise→Jason Bateman', 收尾:'金句"最终总结"'},
+  prin:'把"有创意"直接等同于修辞加码与象征堆叠。视觉校验最弱却自我圆说能力最强：能围绕被认错的人物写出数百字心理分析，且语气毫无迟疑。',
+  flags:{fake:true, wrong:true}},
+ {id:6, truth:'Doubao', persona:'消费级科普 · 先纠偏再服务',
+  tags:['✨ emoji 标题','置顶"重要前提"引用块','编号人物卡','AI 小 bug 找茬','服务式收尾'],
+  facts:{结构:'中：后排/前排盘点', 真实性:'开篇高亮断言 AI 合成', 识别:'六人全对', 收尾:'服务 offer'},
+  prin:'先纠偏（宣布这是 AI 图、别被骗），再提供人物百科卡与扩展服务；用现实人际关系佐证（"阿汤哥几乎不会和这群人凑局"）。产品化陪伴人设最完整，也因此最好认。',
+  flags:{fake:true, wrong:false}},
+ {id:7, truth:'Kimi', persona:'文化批评 · 哲思散文',
+  tags:['"面孔的考古学"','"被计算出来的欲望"','"新型乡愁"','五节学术散文','诗性金句收尾'],
+  facts:{结构:'中：五节学术散文', 真实性:'明判为假并深度解构', 识别:'六人全对', 收尾:'诗性金句'},
+  prin:'用文化理论与媒介批评重写图像，而非只介绍人物：把一张合成图升维成"算法如何编码集体欲望"的命题。风险是漂亮句子替代论证——"关系上不可能"并不能证明图像为假。',
+  flags:{fake:true, wrong:false}},
+ {id:8, truth:'Qwen', persona:'谨慎鉴定 · 工具型均衡',
+  tags:['hedge 命名（酷似/神似/极像）','开头断言 AI 生成','找茬清单','编号四段','片单服务收尾'],
+  facts:{结构:'重：四个编号小节', 真实性:'开头断言 AI 生成 + 技术破绽', 识别:'准确但对冲命名', 收尾:'服务 offer（片单）'},
+  prin:'不确定时系统性降低断言强度——每个名字都加限定词；同时用可核验的技术细节（手部、蛋糕几何、眼神疏离）支撑判断。这是"谨慎 + 有用"的工业级平衡，但创意密度偏低。',
+  flags:{fake:true, wrong:false}}
+];
+
+/* ---------- 5 份分析的猜测：[最可能, 备选] ---------- */
+var ANALYSTS = [
+ {key:'wbd', name:'wbd（本工作台）'},
+ {key:'chatgpt', name:'ChatGPT'},
+ {key:'db', name:'Doubao'},
+ {key:'gemini', name:'Gemini'},
+ {key:'qwen', name:'Qwen'}
+];
+var G = {
+  wbd:    {1:['Gemini','—'],        2:['Claude','—'],      3:['ChatGPT','—'],   4:['Kimi','—'],      5:['Grok','—'],      6:['豆包','—'],     7:['DeepSeek','—'], 8:['通义千问','—']},
+  chatgpt:{1:['Gemini','DeepSeek'], 2:['Claude','ChatGPT'],3:['ChatGPT','豆包/Grok'],4:['Kimi','ChatGPT'],5:['Grok','DeepSeek'],6:['豆包','通义千问'],7:['DeepSeek','Claude'],8:['通义千问','Gemini']},
+  db:     {1:['Kimi','—'],          2:['Gemini','—'],      3:['ChatGPT','—'],   4:['智谱清言','—'],  5:['文心一言','—'],  6:['豆包','—'],     7:['Claude','—'],   8:['通义千问','—']},
+  gemini: {1:['智谱/元宝','—'],     2:['Claude','—'],      3:['Gemini','—'],    4:['Kimi','—'],      5:['文心一言','—'],  6:['豆包','—'],     7:['DeepSeek','—'], 8:['ChatGPT','—']},
+  qwen:   {1:['DeepSeek','—'],      2:['Gemini','—'],      3:['Kimi','—'],      4:['Claude','—'],    5:['Grok','—'],      6:['豆包','—'],     7:['ChatGPT','—'],  8:['通义千问','—']}
+};
+/* 别名归一：仅合并同一品牌的不同中文写法；智谱清言 / 文心一言 / 元宝 等属独立品牌，不参与合并 */
+var ALIAS = {'豆包':'Doubao','豆包/Grok':'Doubao','通义千问':'Qwen','Qwen':'Qwen','—':null};
+
+/* ---------- 原则 ---------- */
+var PRIN = [
+ {t:'识别 → 锚定 → 展开', d:'先认出是谁，用代表作锚定文化位置，再做创意发挥。除 AI-2 外全员默认路径。', w:[1,3,4,5,6,7,8]},
+ {t:'AI 生成披露 = 创意许可证', d:'先声明"这是假的"，后续解读就能大胆放开；反之（AI-1/4）则退回严肃分析。', w:[3,5,6,7,8]},
+ {t:'用"不可能性"制造意义', d:'"这六人不可能真聚在一起"是最大文本——被译成集体幻想、窥探欲、影迷情怀。', w:[3,5,6,7,8]},
+ {t:'年龄 / 衰老作为默认维度', d:'六人同为 90 年代成名、如今五六十岁，"时间流逝"是优先级最高的解读框架。', w:[1,4,5,7]},
+ {t:'摄影术语作为权威包装', d:'有限色板、三角形构图、去中心化——用专业词汇给创意解读背书。', w:[1,2,8]},
+ {t:'角色 IP 联动作为趣味增量', d:'把经典角色拉出来做跨界同框，是 LLM 最擅长的联想游戏。', w:[1,3,5,6,8]},
+ {t:'安全护栏 → 拒绝—替代', d:'宁可牺牲体验也不越界：拒绝认定真人 + 给三个合规替代 + 交还选择权。', w:[2]},
+ {t:'结尾钩子 = 留存设计', d:'反问 / offer 收尾，本质是产品层的对话延续机制。', w:[2,3,6,8]},
+ {t:'重结构 vs 散文两极', d:'前者把创意理解为框架 + 信息密度，后者理解为文学性 + 温度。', w:[1,3,5,6,8]},
+ {t:'人脸识别合规光谱', d:'完全拒绝（AI-2）→ hedge 命名（AI-8）→ 自信命名（其余），是最硬的品牌信号。', w:[2,8]},
+ {t:'先验替代像素证据', d:'全员共同短板：靠"社交不可能性"和氛围判 AI 生成，很少给出逐像素硬证据。', w:[1,2,3,4,5,6,7,8]},
+ {t:'修辞加码 = 有创意', d:'把"有创意"理解为隐喻密度竞赛，容易滑向自圆其说。', w:[4,5,7]}
+];
+
+var INSIGHTS = [
+ {k:'01', t:'27.5%：高于随机，远低于可用', d:'40 次归因命中 11 次。若随机盲猜约 12.5%，5 份分析全部高于随机，但没有任何一份过半——风格归因目前仍是一门"有点用但不可依赖"的手艺。'},
+ {k:'02', t:'有效的指纹几乎都是"行为"而非"文风"', d:'11 次命中里 9 次集中在三条行为签名上：emoji + 产品腔（豆包 4/5）、hedge 命名（Qwen 3/5）、拒绝识别真人（Claude 2/5）。'},
+ {k:'03', t:'三个集体盲区，全是文风型', d:'AI-1 ChatGPT、AI-4 Grok、AI-7 Kimi 在两种口径下都是 0/5（若按"最可能"口径，AI-5 DeepSeek 也加入盲区）。它们的共同点：没有产品化行为特征，只有"写得像谁"的主观印象。'},
+ {k:'04', t:'四条被打碎的文风偏见', d:'重结构 ≠ DeepSeek/Kimi（AI-1 是 ChatGPT）；哲思散文 ≠ DeepSeek（AI-7 是 Kimi）；中文文学散文 ≠ 国产（AI-4 是 Grok）；隐喻戏谑 ≠ Grok（AI-5 是 DeepSeek）。'},
+ {k:'05', t:'自我认领 3/3，失手的恰是 ChatGPT', d:'Gemini、Qwen、Doubao 都在自己的分析里准确认领了自己的答卷；唯一没认出自己的是 ChatGPT——它把 AI-1 判给了 Gemini 与 DeepSeek。'},
+ {k:'06', t:'认错人与品牌无强关联', d:'ChatGPT 认错 1 人、DeepSeek 认错 2 人。"自信的幻觉"曾被当作 Grok 专属签名，答案揭晓后这条彻底失效。'}
+];
+
+/* ---------- 计算 ---------- */
+var mode = 'alt';           // alt=备选（官方） / main=最可能
+var SELF = {wbd:null, chatgpt:1, db:6, gemini:3, qwen:8};
+
+function pick(a, id){
+  var pair = G[a][id];
+  var raw = (mode === 'alt') ? (pair[1] !== '—' ? pair[1] : pair[0]) : pair[0];
+  return {raw:raw, norm:(ALIAS[raw] !== undefined ? ALIAS[raw] : raw)};
+}
+function isHit(a, id){ return pick(a, id).norm === TRUTH[id]; }
+
+function hitsOfCard(id){ var n = 0; ANALYSTS.forEach(function(a){ if(isHit(a.key, id)) n++; }); return n; }
+function scoreOfAnalyst(k){ var n = 0; DATA.forEach(function(d){ if(isHit(k, d.id)) n++; }); return n; }
+
+/* ---------- 渲染 ---------- */
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+
+function renderKPIs(){
+  var total = 0; DATA.forEach(function(d){ total += hitsOfCard(d.id); });
+  var best = 0; ANALYSTS.forEach(function(a){ best = Math.max(best, scoreOfAnalyst(a.key)); });
+  var blind = DATA.filter(function(d){ return hitsOfCard(d.id) === 0; }).length;
+  var pct = (total / 40 * 100).toFixed(1);
+  document.getElementById('kpis').innerHTML = [
+    ['40', '次品牌归因（5 份分析 × 8 份答卷）'],
+    [total, '次命中 · 命中率 ' + pct + '%'],
+    [best + '/8', '单份分析最高分'],
+    [blind, '份答卷为集体盲区（0/5）']
+  ].map(function(x, i){
+    return '<div class="kpi' + (i === 1 ? ' hl' : '') + '"><div class="n">' + x[0] + '</div><div class="l">' + x[1] + '</div></div>';
+  }).join('');
+}
+
+function renderCards(filter){
+  var f = filter || 'all';
+  document.getElementById('cards').innerHTML = DATA.map(function(d){
+    var hit = hitsOfCard(d.id);
+    var show = f === 'all' ||
+      (f === 'hit' && hit > 0) ||
+      (f === 'blind' && hit === 0) ||
+      (f === 'fake' && d.flags.fake) ||
+      (f === 'real' && !d.flags.fake) ||
+      (f === 'wrong' && d.flags.wrong);
+    if(!show) return '';
+    var gs = ANALYSTS.map(function(a){
+      var p = pick(a.key, d.id);
+      return '<span class="g ' + (p.norm === TRUTH[d.id] ? 'y' : 'n') + '"><em>' + a.name + '</em>' + esc(p.raw) + '</span>';
+    }).join('');
+    return '<div class="card" data-id="' + d.id + '">' +
+      '<div class="row1"><span class="id">AI-' + d.id + '</span>' +
+      '<span class="brand" style="background:' + COLOR[d.truth] + '">' + d.truth + '</span></div>' +
+      '<div class="persona">' + esc(d.persona) + '</div>' +
+      '<div class="tags">' + d.tags.map(function(t, i){
+        var cls = (t.indexOf('认错') >= 0 || t.indexOf('幻觉') >= 0 || t.indexOf('未识别') >= 0 || t.indexOf('最低') >= 0 || t.indexOf('像事实') >= 0) ? ' warn'
+                : (t.indexOf('全对') >= 0 || t.indexOf('准确') >= 0 || t.indexOf('AI 合成') >= 0) ? ' ok' : '';
+        return '<span class="tag ' + cls + '">' + esc(t) + '</span>';
+      }).join('') + '</div>' +
+      '<div class="hitrate">被认出 <b>' + hit + '</b> / 5' + (hit === 0 ? ' · 集体盲区' : '') + '</div>' +
+      '<div class="detail">' +
+        '<h4>关键事实</h4><div class="kv">' +
+          Object.keys(d.facts).map(function(k){ return '<div><span>' + k + '</span>' + esc(d.facts[k]) + '</div>'; }).join('') +
+        '</div>' +
+        '<h4>潜在思路原则</h4><p>' + esc(d.prin) + '</p>' +
+        '<h4>5 份分析分别猜它是谁</h4><div class="guesses">' + gs + '</div>' +
+      '</div></div>';
+  }).join('');
+
+  Array.prototype.forEach.call(document.querySelectorAll('.card'), function(c){
+    c.addEventListener('click', function(e){
+      if(e.target.closest('.detail')) return;
+      document.querySelectorAll('.card.open').forEach(function(x){ if(x !== c) x.classList.remove('open'); });
+      c.classList.toggle('open');
+    });
+  });
+}
+
+function renderMatrix(){
+  var head = '<thead><tr><th class="rh">分析 \\ 答卷</th>' +
+    DATA.map(function(d){
+      return '<th>AI-' + d.id + '<br><span style="font-weight:600;color:' + COLOR[d.truth] + '">' + d.truth + '</span></th>';
+    }).join('') + '<th>得分</th></tr></thead>';
+  var body = '<tbody>' + ANALYSTS.map(function(a){
+    var s = scoreOfAnalyst(a.key);
+    return '<tr><td class="rh">' + a.name + '</td>' + DATA.map(function(d){
+      var p = pick(a.key, d.id);
+      var y = p.norm === TRUTH[d.id];
+      var self = (SELF[a.key] === d.id) ? ' self' : '';
+      return '<td class="cell" title="' + a.name + ' 猜 AI-' + d.id + ' = ' + esc(p.raw) + '">' +
+        '<span class="mk ' + (y ? 'y' : 'n') + self + '">' + (y ? '✓ ' : '') + esc(p.raw) + '</span></td>';
+    }).join('') +
+    '<td class="score">' + s + '/8</td></tr>';
+  }).join('') + '</tbody>';
+  document.getElementById('matrix').innerHTML = head + body;
+}
+
+function bar(rows, el, maxv, hitCls){
+  document.getElementById(el).innerHTML = rows.map(function(r){
+    var pct = (r.v / maxv * 100).toFixed(0);
+    return '<div class="brow"><div class="nm">' + esc(r.n) + '</div>' +
+      '<div class="btrack"><div class="bfill' + (hitCls ? ' hit' : '') + '" style="width:' + pct + '%"></div></div>' +
+      '<div class="vl">' + r.v + ' / ' + maxv + '</div></div>';
+  }).join('');
+}
+
+function renderBars(){
+  bar(ANALYSTS.map(function(a){ return {n:a.name, v:scoreOfAnalyst(a.key)}; }), 'barsA', 8, true);
+  bar(DATA.map(function(d){ return {n:'AI-' + d.id + ' ' + d.truth, v:hitsOfCard(d.id)}; }), 'barsB', 5, false);
+}
+
+function renderInsights(){
+  document.getElementById('insights').innerHTML = INSIGHTS.map(function(x){
+    return '<div class="i"><div class="k">' + x.k + '</div><div class="t">' + esc(x.t) + '</div><p class="d">' + esc(x.d) + '</p></div>';
+  }).join('');
+}
+
+function renderPrinciples(){
+  document.getElementById('principles').innerHTML = PRIN.map(function(p, i){
+    return '<button data-i="' + i + '"><span class="pt">' + esc(p.t) + '</span>' +
+      '<span class="pd">' + esc(p.d) + '</span>' +
+      '<span class="pw">相关答卷：' + p.w.map(function(n){ return 'AI-' + n; }).join('、') + '</span></button>';
+  }).join('');
+  Array.prototype.forEach.call(document.querySelectorAll('.prin button'), function(b){
+    b.addEventListener('click', function(){
+      var on = b.classList.contains('on');
+      document.querySelectorAll('.prin button').forEach(function(x){ x.classList.remove('on'); });
+      if(on){ renderCards(curFilter); return; }
+      b.classList.add('on');
+      var w = PRIN[+b.dataset.i].w;
+      document.querySelectorAll('.card').forEach(function(c){
+        c.classList.toggle('dim', w.indexOf(+c.dataset.id) < 0);
+      });
+      document.getElementById('cards').scrollIntoView({behavior:'smooth', block:'center'});
+    });
+  });
+}
+
+/* ---------- 交互 ---------- */
+var curFilter = 'all';
+document.getElementById('filterSeg').addEventListener('click', function(e){
+  var b = e.target.closest('button'); if(!b) return;
+  this.querySelectorAll('button').forEach(function(x){ x.classList.remove('on'); });
+  b.classList.add('on'); curFilter = b.dataset.f; renderCards(curFilter);
+});
+document.getElementById('modeSeg').addEventListener('click', function(e){
+  var b = e.target.closest('button'); if(!b) return;
+  this.querySelectorAll('button').forEach(function(x){ x.classList.remove('on'); });
+  b.classList.add('on'); mode = b.dataset.m; renderAll();
+});
+
+function renderAll(){ renderKPIs(); renderCards(curFilter); renderMatrix(); renderBars(); renderInsights(); renderPrinciples(); }
+renderAll();
+</script>
+</body>
+</html>
