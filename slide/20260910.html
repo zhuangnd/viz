@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数据分析和建模培训班</title>
+<style>
+  :root{
+    --bg:#0e1a2b; --card:#1b2a44; --card-hi:#24365a; --edge:#2e4368;
+    --text:#f2f6fc; --muted:#9db2d0; --faint:#7a8fb0;
+    --gold:#f5b841; --ice:#6fa8ff; --arrow:#5b7ba6; --red:#ff6b6b;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    background:var(--bg); color:var(--text); overflow:hidden;
+    font-family:"PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* 顶部进度条 */
+  .progress{position:fixed;top:0;left:0;right:0;height:3px;background:rgba(255,255,255,.06);z-index:60}
+  .progress i{display:block;height:100%;width:25%;background:linear-gradient(90deg,var(--gold),#ffd97a);transition:width .45s ease}
+  /* 幻灯结构 */
+  #deck{position:relative;height:100vh}
+  .slide{
+    position:absolute;inset:0;display:flex;flex-direction:column;
+    padding:44px 56px 92px;opacity:0;visibility:hidden;transform:translateY(10px);
+    transition:opacity .5s ease,transform .5s ease,visibility .5s;
+  }
+  .slide.active{opacity:1;visibility:visible;transform:none}
+  .slide .wrap{flex:1;display:flex;flex-direction:column;min-height:0}
+  /* 入场动画：进入页面时子元素依次浮现 */
+  .reveal{opacity:0}
+  .active .reveal{animation:rise .65s cubic-bezier(.2,.7,.3,1) both;animation-delay:var(--d,0s)}
+  @keyframes rise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+  /* 页首 */
+  .kicker{font-size:13px;font-weight:700;letter-spacing:.35em;color:var(--ice);margin-bottom:10px}
+  h1{font-size:clamp(24px,3.2vw,38px);font-weight:800;letter-spacing:.01em;margin-bottom:6px}
+  h1 .qm{color:var(--gold)}
+  /* 主体 */
+  .stage{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0}
+  /* 金句条 */
+  .punch{
+    flex-shrink:0;background:var(--gold);color:#0e1a2b;border-radius:12px;
+    font-size:clamp(15px,1.6vw,20px);font-weight:800;text-align:center;
+    padding:16px 24px;box-shadow:0 10px 30px rgba(245,184,65,.18);
+  }
+  /* ---------- 流程链（页1 / 页4 共用母题） ---------- */
+  .chain{display:flex;align-items:stretch;justify-content:center;gap:8px}
+  .node{
+    background:var(--card);border:1px solid var(--edge);border-radius:12px;
+    padding:14px 10px 12px;width:152px;cursor:default;text-align:center;
+    transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease,background .25s;
+  }
+  .node:hover{transform:translateY(-5px);border-color:var(--gold);box-shadow:0 12px 28px rgba(0,0,0,.35)}
+  .n-tag{display:block;font-size:12px;font-weight:700;color:var(--ice);letter-spacing:.15em;margin-bottom:6px}
+  .n-main{display:block;font-size:19px;font-weight:800;color:var(--text)}
+  .n-note{display:block;font-size:12.5px;line-height:1.55;color:var(--muted);margin-top:8px;text-align:left;padding:0 4px}
+  .n-arrow{align-self:center;color:var(--arrow);flex-shrink:0;transition:color .3s}
+  .node:hover ~ .n-arrow,.n-arrow.lit{color:var(--gold)}
+  /* ---------- 页2 对比卡 ---------- */
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+  .duo .card{
+    background:var(--card);border:1px solid var(--edge);border-radius:14px;
+    padding:22px 26px;transition:transform .25s ease;
+  }
+  .duo .card:hover{transform:translateY(-4px)}
+  .duo .card.ai{background:var(--card-hi);border:1.5px solid var(--gold);box-shadow:0 14px 36px rgba(245,184,65,.1)}
+  .c-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .c-ico{width:46px;height:46px;border-radius:50%;background:var(--card-hi);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .ai .c-ico{background:var(--card)}
+  .c-ico svg{width:22px;height:22px}
+  .c-name{font-size:16px;font-weight:700;color:var(--muted)}
+  .ai .c-name{color:var(--text)}
+  .c-big{font-size:clamp(24px,2.6vw,32px);font-weight:800;margin-bottom:10px}
+  .tool .c-big{color:var(--ice)} .ai .c-big{color:var(--gold)}
+  .c-body{font-size:14.5px;line-height:1.75;color:var(--muted)}
+  .ai .c-body b{color:var(--gold);font-weight:700}
+  /* 核验案例卡 */
+  .case{
+    margin-top:22px;background:var(--card);border:1px solid var(--edge);border-radius:14px;padding:18px 24px;
+  }
+  .case-label{font-size:12px;font-weight:800;letter-spacing:.25em;color:var(--gold);margin-bottom:8px}
+  .case-flex{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+  .quote{
+    flex:1;min-width:300px;background:rgba(14,26,43,.55);border-left:3px solid var(--arrow);
+    border-radius:8px;padding:12px 18px;font-size:14px;color:var(--text);line-height:1.7;
+  }
+  .quote .file{font-weight:700;margin-bottom:4px}
+  .quote .row{display:flex;justify-content:space-between;gap:14px;transition:color .4s}
+  .quote .row .verdict{color:var(--faint);font-size:12.5px;white-space:nowrap;transition:color .4s}
+  .quote .row.busted{color:var(--faint);text-decoration:line-through;text-decoration-color:var(--red);text-decoration-thickness:2px}
+  .quote .row.busted .verdict{color:var(--red);text-decoration:none;font-weight:700}
+  .btn{
+    border:none;border-radius:10px;background:var(--gold);color:#0e1a2b;font-size:15px;font-weight:800;
+    padding:13px 26px;cursor:pointer;font-family:inherit;transition:transform .2s,box-shadow .2s,background .3s;white-space:nowrap;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(245,184,65,.3)}
+  .btn.ghost{background:transparent;border:1.5px solid var(--gold);color:var(--gold)}
+  .case-verdict{
+    margin-top:12px;font-size:14px;color:var(--red);font-weight:700;opacity:0;transform:translateY(6px);
+    transition:opacity .5s,transform .5s;
+  }
+  .case-verdict.show{opacity:1;transform:none}
+  .case-verdict span{color:var(--muted);font-weight:400}
+  /* ---------- 页3 三卡 ---------- */
+  .trio{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .trio .t-card{
+    background:var(--card);border:1px solid var(--edge);border-radius:14px;padding:26px 20px 22px;text-align:center;
+    transition:transform .25s ease,border-color .25s;
+  }
+  .trio .t-card:hover{transform:translateY(-6px);border-color:var(--gold)}
+  .t-ico{width:60px;height:60px;border-radius:50%;background:var(--card-hi);margin:0 auto 14px;display:flex;align-items:center;justify-content:center}
+  .t-ico svg{width:30px;height:30px}
+  .t-name{font-size:18px;font-weight:800;margin-bottom:6px}
+  .t-pos{font-size:17px;font-weight:800;color:var(--gold);margin-bottom:12px}
+  .t-body{font-size:13.5px;line-height:1.75;color:var(--muted)}
+  .formula{
+    margin-top:22px;background:var(--card-hi);border:1px solid var(--edge);border-radius:12px;
+    text-align:center;font-size:clamp(15px,1.7vw,20px);font-weight:800;padding:16px 20px;
+  }
+  .formula em{font-style:normal;color:var(--gold)}
+  /* ---------- 页4 ---------- */
+  .anti{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .anti .a-card{background:var(--card);border:1px solid var(--edge);border-radius:12px;padding:14px 20px}
+  .a-t{font-size:15px;font-weight:700;color:var(--muted);margin-bottom:4px}
+  .a-d{font-size:13px;color:var(--faint);line-height:1.6}
+  .lead{display:flex;align-items:center;gap:10px;margin:24px 0 18px;font-size:15.5px;font-weight:800;color:var(--gold)}
+  .lead svg{flex-shrink:0}
+  /* 可点击的链节点 */
+  .chain.clickable .node{cursor:pointer}
+  .chain.clickable .node.sel{
+    background:var(--card-hi);border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),0 10px 26px rgba(245,184,65,.15);
+  }
+  .chain.clickable .node.sel .n-main{color:var(--gold)}
+  .step-detail{
+    margin-top:20px;background:var(--card);border:1px solid var(--edge);border-radius:12px;
+    padding:18px 24px;display:flex;align-items:center;gap:26px;min-height:118px;
+  }
+  .sd-left{flex:1}
+  .sd-head{font-size:17px;font-weight:800;margin-bottom:8px}
+  .sd-head .sd-step{color:var(--ice);font-size:13px;letter-spacing:.2em;margin-right:10px}
+  .sd-body{font-size:14.5px;line-height:1.8;color:var(--muted)}
+  .sd-tip{
+    flex-shrink:0;max-width:240px;border-left:3px solid var(--gold);padding:4px 0 4px 16px;
+    font-size:14px;font-weight:800;color:var(--gold);line-height:1.65;align-self:center;
+  }
+  .sd-anim{animation:sdIn .4s ease both}
+  @keyframes sdIn{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+  /* ---------- 导航 ---------- */
+  .nav-dots{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);display:flex;gap:12px;z-index:60}
+  .dot{width:11px;height:11px;border-radius:50%;background:rgba(255,255,255,.18);cursor:pointer;transition:all .3s;border:none;padding:0}
+  .dot.on{background:var(--gold);transform:scale(1.25);box-shadow:0 0 12px rgba(245,184,65,.5)}
+  .nav-btn{
+    position:fixed;top:50%;transform:translateY(-50%);z-index:60;width:44px;height:44px;border-radius:50%;
+    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:var(--muted);
+    font-size:19px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s;
+  }
+  .nav-btn:hover{background:var(--card-hi);color:var(--gold);border-color:var(--gold)}
+  #prevBtn{left:18px} #nextBtn{right:18px}
+  .pageno{position:fixed;right:24px;bottom:24px;font-size:13px;color:var(--faint);z-index:60;letter-spacing:.1em}
+  .hint{
+    position:fixed;left:24px;bottom:24px;font-size:12.5px;color:var(--faint);z-index:60;opacity:.75;
+  }
+  .hint b{color:var(--muted)}
+  /* ---------- 响应式 ---------- */
+  @media (max-width:960px){
+    .slide{padding:30px 26px 88px}
+    .chain{flex-wrap:wrap;gap:10px}
+    .node{width:calc(33% - 10px)}
+    .n-arrow{display:none}
+    .duo,.trio,.anti{grid-template-columns:1fr}
+    .step-detail{flex-direction:column;align-items:flex-start;gap:12px}
+    .sd-tip{max-width:none;border-left:none;border-top:2px solid var(--gold);padding:10px 0 0}
+    .case-flex{flex-direction:column;align-items:stretch}
+    .nav-btn{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="progress"><i id="bar"></i></div>
+
+<main id="deck">
+
+  <!-- ============ 页 1 · 五懂一具备 ============ -->
+  <section class="slide" id="s1">
+    <div class="wrap">
+      <header>
+        <div class="kicker reveal" style="--d:.05s">PART 01 ｜ 老标尺</div>
+        <h1 class="reveal" style="--d:.12s">一把量了很多年的尺子：<span class="qm">"五懂一具备"</span></h1>
+      </header>
+      <div class="stage">
+        <div class="chain">
+          <div class="node reveal" style="--d:.25s"><span class="n-tag">懂业务</span><span class="n-main">业务出题</span><span class="n-note">什么业务、流程怎么操作、风险藏在哪</span></div>
+          <svg class="n-arrow reveal" style="--d:.33s" viewBox="0 0 26 12" width="26" height="12"><path d="M0 6h19m0 0-5-4m5 4-5 4" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+          <div class="node reveal" style="--d:.37s"><span class="n-tag">懂系统</span><span class="n-main">系统找数</span><span class="n-note">数据躺在哪、怎么流转、谁录入</span></div>
+          <svg class="n-arrow reveal" style="--d:.45s" viewBox="0 0 26 12" width="26" height="12"><path d="M0 6h19m0 0-5-4m5 4-5 4" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+          <div class="node reveal" style="--d:.49s"><span class="n-tag">懂技术</span><span class="n-main">技术取数</span><span class="n-note">取得出、洗得净、摆得齐</span></div>
+          <svg class="n-arrow reveal" style="--d:.57s" viewBox="0 0 26 12" width="26" height="12"><path d="M0 6h19m0 0-5-4m5 4-5 4" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+          <div class="node reveal" style="--d:.61s"><span class="n-tag">懂数据</span><span class="n-main">数据验数</span><span class="n-note">口径、质量、坑在哪儿</span></div>
+          <svg class="n-arrow reveal" style="--d:.69s" viewBox="0 0 26 12" width="26" height="12"><path d="M0 6h19m0 0-5-4m5 4-5 4" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+          <div class="node reveal" style="--d:.73s"><span class="n-tag">懂分析</span><span class="n-main">分析答题</span><span class="n-note">数据变证据，证据变判断</span></div>
+          <svg class="n-arrow reveal" style="--d:.81s" viewBox="0 0 26 12" width="26" height="12"><path d="M0 6h19m0 0-5-4m5 4-5 4" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+          <div class="node reveal" style="--d:.85s"><span class="n-tag">沟通协调</span><span class="n-main">沟通交卷</span><span class="n-note">讲明白、推得动、有人用</span></div>
+        </div>
+      </div>
+      <div class="punch reveal" style="--d:1.05s">这把尺子量了很多年，量得很准 —— 但放到今天，它还差一格</div>
+    </div>
+  </section>
+
+  <!-- ============ 页 2 · 补上懂 AI ============ -->
+  <section class="slide" id="s2">
+    <div class="wrap">
+      <header>
+        <div class="kicker reveal" style="--d:.05s">PART 02 ｜ 第六懂</div>
+        <h1 class="reveal" style="--d:.12s">为什么<span class="qm">"懂 AI"</span>要单独算一懂？</h1>
+      </header>
+      <div class="stage">
+        <div class="duo">
+          <div class="card tool reveal" style="--d:.25s">
+            <div class="c-head">
+              <div class="c-ico"><svg viewBox="0 0 24 24" fill="none" stroke="#9db2d0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4.5 4.5 0 0 0-6 6L3 18l3 3 5.7-5.7a4.5 4.5 0 0 0 6-6L14 13l-3-3 3.7-3.7z"/></svg></div>
+              <span class="c-name">普通工具</span>
+            </div>
+            <div class="c-big">听话的</div>
+            <div class="c-body">靠<b>手艺</b> —— 手艺决定干活快不快；<br>使坏了，顶多返工。</div>
+          </div>
+          <div class="card ai reveal" style="--d:.45s">
+            <div class="c-head">
+              <div class="c-ico"><svg viewBox="0 0 24 24" fill="none" stroke="#f5b841" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4M8 4h8M9 14h.01M15 14h.01"/></svg></div>
+              <span class="c-name">AI</span>
+            </div>
+            <div class="c-big">能干的</div>
+            <div class="c-body">靠<b>判断</b> —— 判断决定会不会掉坑。有主意、会发挥，<br>甚至<b>一本正经地胡说八道</b>，还带着你一路狂奔。</div>
+          </div>
+        </div>
+
+        <!-- 交互：点击"回头一核"，亲眼看看 AI 怎么编 -->
+        <div class="case reveal" style="--d:.68s">
+          <div class="case-label">亲测案例 · 点一点"回头一核"</div>
+          <div class="case-flex">
+            <div class="quote">
+              <div class="file">《关于加强专项经费管理的通知》—— AI 给出的引用</div>
+              <div class="row" id="r1"><span>文号：某发〔2025〕17 号</span><span class="verdict" id="v1">待核</span></div>
+              <div class="row" id="r2"><span>印发日期：2025 年 3 月 12 日</span><span class="verdict" id="v2">待核</span></div>
+              <div class="row" id="r3"><span>原文摘录："……确有必要的，应当从其规定。"</span><span class="verdict" id="v3">待核</span></div>
+            </div>
+            <button class="btn" id="verifyBtn">回头一核</button>
+          </div>
+          <div class="case-verdict" id="caseVerdict">整段是它现场编的，语气还特别诚恳。<span>　—— 所以：用 AI，靠的是判断。</span></div>
+        </div>
+      </div>
+      <div class="punch reveal" style="--d:.95s">"五懂一具备"是过去的满分答案 —— 放到今天，只是及格线</div>
+    </div>
+  </section>
+
+  <!-- ============ 页 3 · 三角关系 ============ -->
+  <section class="slide" id="s3">
+    <div class="wrap">
+      <header>
+        <div class="kicker reveal" style="--d:.05s">PART 03 ｜ 三角关系</div>
+        <h1 class="reveal" style="--d:.12s">业务、数据分析、AI：<span class="qm">靶心、准星、马力</span></h1>
+      </header>
+      <div class="stage">
+        <div class="trio">
+          <div class="t-card reveal" style="--d:.25s">
+            <div class="t-ico"><svg viewBox="0 0 24 24" fill="none" stroke="#f5b841" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5.5"/><circle cx="12" cy="12" r="2" fill="#f5b841" stroke="none"/></svg></div>
+            <div class="t-name">业务</div>
+            <div class="t-pos">定方向 · 靶心</div>
+            <div class="t-body">没有业务问题，分析是空转，AI 是玩具；选题选错，后面全白干。</div>
+          </div>
+          <div class="t-card reveal" style="--d:.45s">
+            <div class="t-ico"><svg viewBox="0 0 24 24" fill="none" stroke="#f5b841" stroke-width="1.6"><circle cx="12" cy="12" r="7.5"/><path d="M12 1.5v4M12 18.5v4M1.5 12h4M18.5 12h4" stroke-linecap="round"/><circle cx="12" cy="12" r="1.6" fill="#f5b841" stroke="none"/></svg></div>
+            <div class="t-name">数据分析</div>
+            <div class="t-pos">保准头 · 准星</div>
+            <div class="t-body">口径、样本、结论步步站稳 —— AI 放大的不只是能力，还有错误。</div>
+          </div>
+          <div class="t-card reveal" style="--d:.65s">
+            <div class="t-ico"><svg viewBox="0 0 24 24" fill="none" stroke="#f5b841" stroke-width="1.6" stroke-linecap="round"><path d="M4 17a8.5 8.5 0 1 1 16 0"/><path d="M12 17l4-5"/><path d="M2.5 17h2M19.5 17h2" stroke-width="2"/></svg></div>
+            <div class="t-name">AI</div>
+            <div class="t-pos">给马力 · 引擎</div>
+            <div class="t-body">取数、清洗、初筛、写码、画图，原来吃掉八成时间，AI 都能打下手。</div>
+          </div>
+        </div>
+        <div class="formula reveal" style="--d:.85s">业务出题 · 分析解题 · AI 提速 —— <em>署名的，永远是你</em></div>
+      </div>
+      <div class="punch reveal" style="--d:1.0s">它敢说 —— 你敢签吗？</div>
+    </div>
+  </section>
+
+  <!-- ============ 页 4 · 培训重点：问题导向建模 ============ -->
+  <section class="slide" id="s4">
+    <div class="wrap">
+      <header>
+        <div class="kicker reveal" style="--d:.05s">PART 04 ｜ 培训重点</div>
+        <h1 class="reveal" style="--d:.12s">以<span class="qm">问题导向</span>进行数据分析建模</h1>
+      </header>
+      <div class="stage">
+        <div class="anti">
+          <div class="a-card reveal" style="--d:.22s">
+            <div class="a-t">✗ 拿着锤子找钉子</div>
+            <div class="a-d">学了新工具，满世界找地方用 —— 模型很炫，业务摇头</div>
+          </div>
+          <div class="a-card reveal" style="--d:.34s">
+            <div class="a-t">✗ 守着数据找亮点</div>
+            <div class="a-d">先看手里有什么，再反推说明什么 —— 图表很满，问题没解</div>
+          </div>
+        </div>
+
+        <div class="lead reveal" style="--d:.5s">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2z"/></svg>
+          问题导向 = 从问题出发配手段 —— 五步翻译链，点一步看一步
+        </div>
+
+        <div class="chain clickable" id="stepChain">
+          <div class="node reveal sel" data-i="0" style="--d:.62s"><span class="n-tag">出题</span><span class="n-main">业务问题</span></div>
+          <svg class="n-arrow reveal" style="--d:.68s" viewBox="0 0 26 12" width="26" height="12"><path d="M0 6h19m0 0-5-4m5 4-5 4" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+          <div class="node reveal" data-i="1" style="--d:.71s"><span class="n-tag">掰清</span><span class="n-main">分析问题</span></div>
+          <svg class="n-arrow reveal" style="--d:.77s" viewBox="0 0 26 12" width="26" height="12"><path d="M0 6h19m0 0-5-4m5 4-5 4" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+          <div class="node reveal" data-i="2" style="--d:.80s"><span class="n-tag">找数</span><span class="n-main">数据问题</span></div>
+          <svg class="n-arrow reveal" style="--d:.86s" viewBox="0 0 26 12" width="26" height="12"><path d="M0 6h19m0 0-5-4m5 4-5 4" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+          <div class="node reveal" data-i="3" style="--d:.89s"><span class="n-tag">建模</span><span class="n-main">模型</span></div>
+          <svg class="n-arrow reveal" style="--d:.95s" viewBox="0 0 26 12" width="26" height="12"><path d="M0 6h19m0 0-5-4m5 4-5 4" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+          <div class="node reveal" data-i="4" style="--d:.98s"><span class="n-tag">核验</span><span class="n-main">验证</span></div>
+          <svg class="n-arrow reveal" style="--d:1.04s" viewBox="0 0 26 12" width="26" height="12"><path d="M0 6h19m0 0-5-4m5 4-5 4" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+          <div class="node reveal" data-i="5" style="--d:1.07s"><span class="n-tag">交卷</span><span class="n-main">应用</span></div>
+        </div>
+
+        <div class="step-detail reveal" style="--d:1.2s" id="stepDetail">
+          <div class="sd-left">
+            <div class="sd-head"><span class="sd-step" id="sdStep">STEP 1 · 出题</span><span id="sdName">业务问题</span></div>
+            <div class="sd-body" id="sdBody"></div>
+          </div>
+          <div class="sd-tip" id="sdTip"></div>
+        </div>
+      </div>
+      <div class="punch reveal" style="--d:1.35s">工具会过时，方法不会；模型会迭代，问题导向不会</div>
+    </div>
+  </section>
+
+</main>
+
+<button class="nav-btn" id="prevBtn" aria-label="上一页">‹</button>
+<button class="nav-btn" id="nextBtn" aria-label="下一页">›</button>
+<div class="nav-dots" id="dots"></div>
+<div class="pageno" id="pageno">1 / 4</div>
+<div class="hint"><b>← →</b> 翻页 · <b>F</b> 全屏</div>
+
+<script>
+(function(){
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var dots=document.getElementById('dots'),bar=document.getElementById('bar'),pageno=document.getElementById('pageno');
+  var cur=0,locked=false;
+
+  slides.forEach(function(_,i){
+    var d=document.createElement('button');
+    d.className='dot'+(i===0?' on':'');d.setAttribute('aria-label','第'+(i+1)+'页');
+    d.onclick=function(){go(i)};
+    dots.appendChild(d);
+  });
+  var dotEls=[].slice.call(dots.children);
+
+  function go(i){
+    if(i<0||i>=slides.length||i===cur)return;
+    slides[cur].classList.remove('active');
+    cur=i;
+    // 重新触发入场动画：先移除动画类，强制 reflow 后再加回
+    var rel=slides[cur].querySelectorAll('.reveal');
+    slides[cur].classList.add('active');
+    // dot / 进度 / 页码
+    dotEls.forEach(function(d,k){d.classList.toggle('on',k===cur)});
+    bar.style.width=((cur+1)/slides.length*100)+'%';
+    pageno.textContent=(cur+1)+' / '+slides.length;
+  }
+  document.getElementById('prevBtn').onclick=function(){go(cur-1)};
+  document.getElementById('nextBtn').onclick=function(){go(cur+1)};
+
+  document.addEventListener('keydown',function(e){
+    if(['ArrowRight','ArrowDown','PageDown',' '].indexOf(e.key)>=0){e.preventDefault();go(cur+1)}
+    else if(['ArrowLeft','ArrowUp','PageUp'].indexOf(e.key)>=0){e.preventDefault();go(cur-1)}
+    else if(e.key==='Home'){go(0)}
+    else if(e.key==='End'){go(slides.length-1)}
+    else if(e.key==='f'||e.key==='F'){
+      if(document.fullscreenElement){document.exitFullscreen()}
+      else{document.documentElement.requestFullscreen()}
+    }
+  });
+
+  // 触屏滑动
+  var tx=null,ty=null;
+  document.addEventListener('touchstart',function(e){tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+  document.addEventListener('touchend',function(e){
+    if(tx===null)return;
+    var dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;
+    if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)){go(cur+(dx<0?1:-1))}
+    tx=ty=null;
+  },{passive:true});
+
+  /* ---------- 页2：回头一核 ---------- */
+  var vBtn=document.getElementById('verifyBtn'),vDone=false;
+  var rows=[['r1','v1','文号不存在'],['r2','v2','日期对不上'],['r3','v3','整段现场编造']];
+  vBtn.onclick=function(){
+    if(vDone){ // 重置
+      rows.forEach(function(r){document.getElementById(r[0]).classList.remove('busted');document.getElementById(r[1]).textContent='待核'});
+      document.getElementById('caseVerdict').classList.remove('show');
+      vBtn.textContent='回头一核';vBtn.classList.remove('ghost');vDone=false;return;
+    }
+    vDone=true;vBtn.disabled=true;
+    rows.forEach(function(r,k){
+      setTimeout(function(){
+        var el=document.getElementById(r[0]);el.classList.add('busted');
+        document.getElementById(r[1]).textContent='✗ '+r[2];
+        if(k===rows.length-1){
+          setTimeout(function(){
+            document.getElementById('caseVerdict').classList.add('show');
+            vBtn.disabled=false;vBtn.textContent='再核一次';vBtn.classList.add('ghost');
+          },420);
+        }
+      },450+k*650);
+    });
+  };
+
+  /* ---------- 页4：五步翻译链 ---------- */
+  var steps=[
+    {step:'STEP 1 · 出题',name:'业务问题',
+     body:'业务的原话往往是"这个月费用怎么这么高"——含糊、还带情绪。先问一句：这个问题，业务真的关心吗？',
+     tip:'好问题，比好模型值钱'},
+    {step:'STEP 2 · 掰清',name:'分析问题',
+     body:'把含糊的疑问掰明确：高，是跟谁比高？高在哪个科目、哪个单位、哪段时间？',
+     tip:'翻译到位，分析就成了一半'},
+    {step:'STEP 3 · 找数',name:'数据问题',
+     body:'回答它需要什么数据？系统里有没有？口径一不一致？缺的能不能补？数据对不上，后面全是沙上建塔。',
+     tip:'数据对不上，全是沙上建塔'},
+    {step:'STEP 4 · 建模',name:'模型',
+     body:'选方法：比大小、看趋势、找关联、还是筛异常？方法服务于问题，不是越复杂越高级。',
+     tip:'能一条 SQL 说清的，别上机器学习'},
+    {step:'STEP 5 · 核验',name:'验证',
+     body:'模型出的数，先别激动。抽样回现场核一核，找业务的人问一问。',
+     tip:'模型说有疑点、业务说没有，通常不是业务错了'},
+    {step:'STEP 6 · 交卷',name:'应用',
+     body:'结论要能一句话讲清、能落地、能闭环。用一段、修一次，迭代着往前走。',
+     tip:'问题是活的，模型也得是活的'}
+  ];
+  var chainNodes=[].slice.call(document.querySelectorAll('#stepChain .node'));
+  var sdStep=document.getElementById('sdStep'),sdName=document.getElementById('sdName'),
+      sdBody=document.getElementById('sdBody'),sdTip=document.getElementById('sdTip'),
+      detail=document.getElementById('stepDetail');
+  function renderStep(i){
+    var st=steps[i];
+    sdStep.textContent=st.step;sdName.textContent=st.name;
+    sdBody.textContent=st.body;sdTip.textContent=st.tip;
+    detail.classList.remove('sd-anim');void detail.offsetWidth;detail.classList.add('sd-anim');
+  }
+  chainNodes.forEach(function(n){
+    n.addEventListener('click',function(){
+      chainNodes.forEach(function(m){m.classList.remove('sel')});
+      n.classList.add('sel');
+      renderStep(+n.getAttribute('data-i'));
+    });
+  });
+  renderStep(0);
+
+  // 初始化
+  slides[0].classList.add('active');
+})();
+</script>
+</body>
+</html>

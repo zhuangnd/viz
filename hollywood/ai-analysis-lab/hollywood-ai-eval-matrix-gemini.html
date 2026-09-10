@@ -20,22 +20,30 @@
   <!-- 顶部导航栏 -->
   <header class="sticky top-0 z-50 glass border-b border-slate-200/80 shadow-xs">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center text-white font-black text-lg shadow-sm">
+      <div class="flex items-center space-x-3 truncate mr-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center text-white font-black text-lg shadow-sm shrink-0">
           Ω
         </div>
-        <div>
-          <h1 class="font-bold text-slate-900 text-base sm:text-lg leading-tight">好莱坞“众神山庄”AI盲测多维矩阵</h1>
-          <p class="text-xs text-slate-500 font-medium">8大模型图文解构 · 5份分析准确度推演 · <span class="text-indigo-600 font-semibold">Gemini 综合评测版</span></p>
+        <div class="truncate">
+          <h1 class="font-bold text-slate-900 text-sm sm:text-base lg:text-lg leading-tight truncate">好莱坞“众神山庄”AI盲测多维矩阵</h1>
+          <p class="text-xs text-slate-500 font-medium truncate">8大模型图文解构 · 5份分析准确度推演 · <span class="text-indigo-600 font-semibold">Gemini 评测版</span></p>
         </div>
       </div>
-      <!-- 快捷标签切换 -->
-      <nav class="hidden md:flex items-center space-x-1 bg-slate-100/80 p-1 rounded-xl border border-slate-200/60 text-sm font-medium">
-        <button onclick="switchTab('origin')" id="btn-origin" class="nav-btn px-3.5 py-1.5 rounded-lg text-indigo-700 bg-white shadow-xs transition-all">话题起源与原图</button>
-        <button onclick="switchTab('ais')" id="btn-ais" class="nav-btn px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">8大AI解构画廊</button>
-        <button onclick="switchTab('accuracy')" id="btn-accuracy" class="nav-btn px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">5份分析准确率大比拼</button>
-        <button onclick="switchTab('matrix')" id="btn-matrix" class="nav-btn px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">盲测洞察与复盘</button>
+      <!-- 快捷标签切换 (中大屏) -->
+      <nav class="hidden md:flex items-center space-x-1 bg-slate-100/80 p-1 rounded-xl border border-slate-200/60 text-sm font-medium shrink-0">
+        <button onclick="switchTab('origin')" data-tab="origin" class="nav-btn px-3.5 py-1.5 rounded-lg text-indigo-700 bg-white shadow-xs transition-all">话题起源与原图</button>
+        <button onclick="switchTab('ais')" data-tab="ais" class="nav-btn px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">8大AI解构画廊</button>
+        <button onclick="switchTab('accuracy')" data-tab="accuracy" class="nav-btn px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">5份分析准确率大比拼</button>
+        <button onclick="switchTab('matrix')" data-tab="matrix" class="nav-btn px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">盲测洞察与复盘</button>
       </nav>
+    </div>
+
+    <!-- 窄屏 / 移动端横向滑动导航栏 (保证在手机或侧边栏窄屏下无缝可见并可流畅切换) -->
+    <div class="md:hidden border-t border-slate-200/70 bg-slate-100/80 backdrop-blur-md px-3 py-1.5 overflow-x-auto flex items-center space-x-1.5 text-xs font-semibold scrollbar-none">
+      <button onclick="switchTab('origin')" data-tab="origin" class="nav-btn whitespace-nowrap px-3 py-1.5 rounded-lg text-indigo-700 bg-white shadow-xs transition-all shrink-0">话题起源与原图</button>
+      <button onclick="switchTab('ais')" data-tab="ais" class="nav-btn whitespace-nowrap px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all shrink-0">8大AI解构画廊</button>
+      <button onclick="switchTab('accuracy')" data-tab="accuracy" class="nav-btn whitespace-nowrap px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all shrink-0">5份分析准确率</button>
+      <button onclick="switchTab('matrix')" data-tab="matrix" class="nav-btn whitespace-nowrap px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all shrink-0">盲测洞察复盘</button>
     </div>
   </header>
 
@@ -789,17 +797,19 @@
     function switchTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('text-indigo-700', 'bg-white', 'shadow-xs');
-        btn.classList.add('text-slate-600');
+        if (btn.getAttribute('data-tab') === tabId) {
+          btn.classList.remove('text-slate-600', 'bg-transparent');
+          btn.classList.add('text-indigo-700', 'bg-white', 'shadow-xs');
+          // 窄屏下如果在水平滚动条中，自动滚动居中可见
+          btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        } else {
+          btn.classList.remove('text-indigo-700', 'bg-white', 'shadow-xs');
+          btn.classList.add('text-slate-600');
+        }
       });
 
       const targetContent = document.getElementById('tab-' + tabId);
-      const targetBtn = document.getElementById('btn-' + tabId);
       if (targetContent) targetContent.classList.remove('hidden');
-      if (targetBtn) {
-        targetBtn.classList.remove('text-slate-600');
-        targetBtn.classList.add('text-indigo-700', 'bg-white', 'shadow-xs');
-      }
     }
 
     function filterAIs(category) {
