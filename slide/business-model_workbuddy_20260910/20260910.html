@@ -1,14 +1,32 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>数据分析和建模培训班</title>
+<title>数据分析和建模培训班 · 开班动员</title>
 <style>
-  :root{
-    --bg:#0e1a2b; --card:#1b2a44; --card-hi:#24365a; --edge:#2e4368;
-    --text:#f2f6fc; --muted:#9db2d0; --faint:#7a8fb0;
-    --gold:#f5b841; --ice:#6fa8ff; --arrow:#5b7ba6; --red:#ff6b6b;
+  /* ============ 主题变量 ============ */
+  :root,html[data-theme="dark"]{
+    --bg:#0b1626; --glow:rgba(111,168,255,.08); --grid:rgba(148,178,224,.05);
+    --card:#16263f; --card-hi:#20345a; --edge:#2c4269; --edge-strong:#3d587f;
+    --text:#f3f7fd; --muted:#a4b9d6; --faint:#7d92b3;
+    --gold:#f5b841; --gold-bar:#f5b841; --gold-bar2:#ffd97a; --punch-ink:#132039;
+    --gold-glow:rgba(245,184,65,.22);
+    --ice:#7cb0ff; --arrow:#5d7cab; --red:#ff7a7a;
+    --inset:rgba(8,16,30,.5); --overlay:rgba(255,255,255,.07); --dot:rgba(255,255,255,.22);
+    --shadow-card:0 16px 36px rgba(2,8,20,.45);
+    --shadow-gold:0 12px 32px var(--gold-glow);
+  }
+  html[data-theme="light"]{
+    --bg:#f4f6fb; --glow:rgba(47,111,178,.07); --grid:rgba(47,111,178,.07);
+    --card:#ffffff; --card-hi:#edf3fb; --edge:#d9e2ef; --edge-strong:#bfd0e6;
+    --text:#1a2740; --muted:#485972; --faint:#7f8fa7;
+    --gold:#a1660a; --gold-bar:#f0b429; --gold-bar2:#ffd043; --punch-ink:#42300a;
+    --gold-glow:rgba(202,138,22,.28);
+    --ice:#2f6fb2; --arrow:#93a7c5; --red:#c0392b;
+    --inset:rgba(234,240,250,.9); --overlay:rgba(26,39,64,.08); --dot:rgba(26,39,64,.22);
+    --shadow-card:0 14px 30px rgba(30,52,92,.12);
+    --shadow-gold:0 12px 28px var(--gold-glow);
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{height:100%}
@@ -16,59 +34,146 @@
     background:var(--bg); color:var(--text); overflow:hidden;
     font-family:"PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif;
     -webkit-font-smoothing:antialiased;
+    transition:background .4s ease,color .4s ease;
   }
-  /* 顶部进度条 */
-  .progress{position:fixed;top:0;left:0;right:0;height:3px;background:rgba(255,255,255,.06);z-index:60}
-  .progress i{display:block;height:100%;width:25%;background:linear-gradient(90deg,var(--gold),#ffd97a);transition:width .45s ease}
-  /* 幻灯结构 */
-  #deck{position:relative;height:100vh}
+  /* 背景质感：顶部光晕 + 细网格 */
+  body::before{
+    content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:radial-gradient(900px 480px at 50% -140px,var(--glow),transparent 70%);
+  }
+  body::after{
+    content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),
+                     linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:46px 46px;
+    -webkit-mask-image:linear-gradient(#000 55%,transparent 92%);
+            mask-image:linear-gradient(#000 55%,transparent 92%);
+  }
+  ::selection{background:var(--gold);color:var(--punch-ink)}
+  :focus-visible{outline:2px solid var(--ice);outline-offset:2px;border-radius:4px}
+
+  /* ============ 顶部：进度条 + 逻辑主线 ============ */
+  .progress{position:fixed;top:0;left:0;right:0;height:3px;background:var(--overlay);z-index:70}
+  .progress i{display:block;height:100%;width:20%;background:linear-gradient(90deg,var(--gold),var(--gold-bar2));transition:width .45s ease}
+  .topbar{
+    position:fixed;top:9px;left:0;right:0;z-index:65;
+    display:flex;justify-content:center;align-items:flex-start;gap:40px;
+    padding:0 84px;pointer-events:none;
+  }
+  .seg{
+    pointer-events:auto;cursor:pointer;background:none;border:none;font-family:inherit;
+    display:flex;align-items:center;gap:8px;position:relative;
+    color:var(--faint);font-size:12.5px;font-weight:700;letter-spacing:.06em;
+    padding:5px 2px 9px;transition:color .3s ease;
+  }
+  .seg b{
+    font-size:11px;font-weight:800;border:1px solid var(--edge-strong);border-radius:6px;
+    padding:1px 7px;transition:all .3s ease;letter-spacing:.05em;
+  }
+  .seg::after{
+    content:'';position:absolute;left:0;right:0;bottom:0;height:2px;border-radius:2px;
+    background:var(--edge);transition:background .3s ease,opacity .3s ease;
+  }
+  .seg:hover{color:var(--muted)}
+  .seg.pass{color:var(--muted)}
+  .seg.pass::after{background:var(--gold);opacity:.4}
+  .seg.on{color:var(--gold)}
+  .seg.on b{border-color:var(--gold);background:var(--gold);color:var(--punch-ink)}
+  .seg.on::after{background:var(--gold);opacity:1}
+  /* 主题切换按钮 */
+  .theme-btn{
+    position:fixed;top:12px;right:18px;z-index:75;width:38px;height:38px;border-radius:50%;
+    background:var(--card);border:1px solid var(--edge);color:var(--muted);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;transition:all .25s ease;
+  }
+  .theme-btn:hover{color:var(--gold);border-color:var(--gold);transform:rotate(15deg)}
+  .theme-btn svg{width:18px;height:18px;display:none}
+  html[data-theme="dark"] .theme-btn .ico-sun{display:block}
+  html[data-theme="light"] .theme-btn .ico-moon{display:block}
+
+  /* ============ 幻灯结构 ============ */
+  #deck{position:relative;height:100vh;z-index:1}
   .slide{
     position:absolute;inset:0;display:flex;flex-direction:column;
-    padding:44px 56px 92px;opacity:0;visibility:hidden;transform:translateY(10px);
+    padding:66px 56px 92px;opacity:0;visibility:hidden;transform:translateY(10px);
     transition:opacity .5s ease,transform .5s ease,visibility .5s;
   }
   .slide.active{opacity:1;visibility:visible;transform:none}
   .slide .wrap{flex:1;display:flex;flex-direction:column;min-height:0}
-  /* 入场动画：进入页面时子元素依次浮现 */
+  /* 入场动画 */
   .reveal{opacity:0}
   .active .reveal{animation:rise .65s cubic-bezier(.2,.7,.3,1) both;animation-delay:var(--d,0s)}
   @keyframes rise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){
+    .reveal,.active .reveal{animation:none;opacity:1}
+    .slide{transition:none}
+  }
   /* 页首 */
-  .kicker{font-size:13px;font-weight:700;letter-spacing:.35em;color:var(--ice);margin-bottom:10px}
-  h1{font-size:clamp(24px,3.2vw,38px);font-weight:800;letter-spacing:.01em;margin-bottom:6px}
+  .kicker{
+    font-size:13px;font-weight:700;letter-spacing:.35em;color:var(--ice);margin-bottom:10px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .kicker::before{content:'';width:24px;height:2px;background:var(--gold);border-radius:2px;flex-shrink:0}
+  .slide header{border-bottom:1px solid var(--edge);padding-bottom:16px;flex-shrink:0}
+  h1{font-size:clamp(24px,3.2vw,38px);font-weight:800;letter-spacing:.01em;margin-bottom:2px}
   h1 .qm{color:var(--gold)}
   /* 主体 */
   .stage{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0}
   /* 金句条 */
   .punch{
-    flex-shrink:0;background:var(--gold);color:#0e1a2b;border-radius:12px;
-    font-size:clamp(15px,1.6vw,20px);font-weight:800;text-align:center;
-    padding:16px 24px;box-shadow:0 10px 30px rgba(245,184,65,.18);
+    flex-shrink:0;background:linear-gradient(92deg,var(--gold-bar),var(--gold-bar2));color:var(--punch-ink);
+    border-radius:14px;font-size:clamp(15px,1.6vw,20px);font-weight:800;text-align:center;
+    padding:16px 24px;box-shadow:var(--shadow-gold),inset 0 1px 0 rgba(255,255,255,.35);
+    letter-spacing:.02em;
   }
-  /* ---------- 流程链（页1 / 页4 共用母题） ---------- */
+
+  /* ============ 流程链（封面 / 页1 / 页4 共用母题） ============ */
   .chain{display:flex;align-items:stretch;justify-content:center;gap:8px}
   .node{
     background:var(--card);border:1px solid var(--edge);border-radius:12px;
     padding:14px 10px 12px;width:152px;cursor:default;text-align:center;
     transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease,background .25s;
   }
-  .node:hover{transform:translateY(-5px);border-color:var(--gold);box-shadow:0 12px 28px rgba(0,0,0,.35)}
+  .node:hover{transform:translateY(-5px);border-color:var(--gold);box-shadow:var(--shadow-card)}
   .n-tag{display:block;font-size:12px;font-weight:700;color:var(--ice);letter-spacing:.15em;margin-bottom:6px}
   .n-main{display:block;font-size:19px;font-weight:800;color:var(--text)}
   .n-note{display:block;font-size:12.5px;line-height:1.55;color:var(--muted);margin-top:8px;text-align:left;padding:0 4px}
   .n-arrow{align-self:center;color:var(--arrow);flex-shrink:0;transition:color .3s}
   .node:hover ~ .n-arrow,.n-arrow.lit{color:var(--gold)}
-  /* ---------- 页2 对比卡 ---------- */
+
+  /* ============ 封面总览页 ============ */
+  #s0{padding-top:80px}
+  #s0 h1{font-size:clamp(32px,4.6vw,56px);letter-spacing:.02em}
+  #s0 .head-block{text-align:center;padding-bottom:26px;border-bottom:1px solid var(--edge)}
+  #s0 .kicker{justify-content:center}
+  #s0 .kicker::after{content:'';width:24px;height:2px;background:var(--gold);border-radius:2px}
+  #s0 .sub{
+    margin-top:14px;font-size:clamp(15px,1.7vw,20px);color:var(--muted);font-weight:600;letter-spacing:.04em;
+  }
+  #s0 .sub b{color:var(--gold);font-weight:800}
+  #s0 .chain{gap:10px}
+  #s0 .node{width:186px;padding-top:16px}
+  #s0 .node .n-main{font-size:20px}
+  #s0 .n-tag .no{
+    display:inline-block;font-size:10.5px;font-weight:800;border:1px solid var(--edge-strong);
+    border-radius:5px;padding:0 5px;margin-right:6px;color:var(--muted);letter-spacing:.05em;
+    transition:all .3s ease;
+  }
+  #s0 .node:hover .n-tag .no{border-color:var(--gold);color:var(--gold)}
+  .cover-note{
+    margin-top:8px;text-align:center;font-size:13px;color:var(--faint);letter-spacing:.12em;font-weight:600;
+  }
+  /* ============ 页2 对比卡 ============ */
   .duo{display:grid;grid-template-columns:1fr 1fr;gap:24px}
   .duo .card{
     background:var(--card);border:1px solid var(--edge);border-radius:14px;
-    padding:22px 26px;transition:transform .25s ease;
+    padding:22px 26px;transition:transform .25s ease,box-shadow .25s ease;
   }
-  .duo .card:hover{transform:translateY(-4px)}
-  .duo .card.ai{background:var(--card-hi);border:1.5px solid var(--gold);box-shadow:0 14px 36px rgba(245,184,65,.1)}
+  .duo .card:hover{transform:translateY(-4px);box-shadow:var(--shadow-card)}
+  .duo .card.ai{background:var(--card-hi);border:1.5px solid var(--gold);box-shadow:var(--shadow-gold)}
   .c-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-  .c-ico{width:46px;height:46px;border-radius:50%;background:var(--card-hi);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-  .ai .c-ico{background:var(--card)}
+  .c-ico{width:46px;height:46px;border-radius:50%;background:var(--card-hi);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--ice)}
+  .ai .c-ico{background:var(--card);color:var(--gold)}
   .c-ico svg{width:22px;height:22px}
   .c-name{font-size:16px;font-weight:700;color:var(--muted)}
   .ai .c-name{color:var(--text)}
@@ -77,13 +182,11 @@
   .c-body{font-size:14.5px;line-height:1.75;color:var(--muted)}
   .ai .c-body b{color:var(--gold);font-weight:700}
   /* 核验案例卡 */
-  .case{
-    margin-top:22px;background:var(--card);border:1px solid var(--edge);border-radius:14px;padding:18px 24px;
-  }
+  .case{margin-top:22px;background:var(--card);border:1px solid var(--edge);border-radius:14px;padding:18px 24px}
   .case-label{font-size:12px;font-weight:800;letter-spacing:.25em;color:var(--gold);margin-bottom:8px}
   .case-flex{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
   .quote{
-    flex:1;min-width:300px;background:rgba(14,26,43,.55);border-left:3px solid var(--arrow);
+    flex:1;min-width:300px;background:var(--inset);border-left:3px solid var(--arrow);
     border-radius:8px;padding:12px 18px;font-size:14px;color:var(--text);line-height:1.7;
   }
   .quote .file{font-weight:700;margin-bottom:4px}
@@ -92,25 +195,25 @@
   .quote .row.busted{color:var(--faint);text-decoration:line-through;text-decoration-color:var(--red);text-decoration-thickness:2px}
   .quote .row.busted .verdict{color:var(--red);text-decoration:none;font-weight:700}
   .btn{
-    border:none;border-radius:10px;background:var(--gold);color:#0e1a2b;font-size:15px;font-weight:800;
+    border:none;border-radius:10px;background:var(--gold-bar);color:var(--punch-ink);font-size:15px;font-weight:800;
     padding:13px 26px;cursor:pointer;font-family:inherit;transition:transform .2s,box-shadow .2s,background .3s;white-space:nowrap;
   }
-  .btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(245,184,65,.3)}
-  .btn.ghost{background:transparent;border:1.5px solid var(--gold);color:var(--gold)}
+  .btn:hover{transform:translateY(-2px);box-shadow:var(--shadow-gold)}
+  .btn.ghost{background:transparent;border:1.5px solid var(--gold);color:var(--gold);box-shadow:none}
   .case-verdict{
     margin-top:12px;font-size:14px;color:var(--red);font-weight:700;opacity:0;transform:translateY(6px);
     transition:opacity .5s,transform .5s;
   }
   .case-verdict.show{opacity:1;transform:none}
   .case-verdict span{color:var(--muted);font-weight:400}
-  /* ---------- 页3 三卡 ---------- */
+  /* ============ 页3 三卡 ============ */
   .trio{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
   .trio .t-card{
     background:var(--card);border:1px solid var(--edge);border-radius:14px;padding:26px 20px 22px;text-align:center;
-    transition:transform .25s ease,border-color .25s;
+    transition:transform .25s ease,border-color .25s,box-shadow .25s;
   }
-  .trio .t-card:hover{transform:translateY(-6px);border-color:var(--gold)}
-  .t-ico{width:60px;height:60px;border-radius:50%;background:var(--card-hi);margin:0 auto 14px;display:flex;align-items:center;justify-content:center}
+  .trio .t-card:hover{transform:translateY(-6px);border-color:var(--gold);box-shadow:var(--shadow-card)}
+  .t-ico{width:60px;height:60px;border-radius:50%;background:var(--card-hi);margin:0 auto 14px;display:flex;align-items:center;justify-content:center;color:var(--gold)}
   .t-ico svg{width:30px;height:30px}
   .t-name{font-size:18px;font-weight:800;margin-bottom:6px}
   .t-pos{font-size:17px;font-weight:800;color:var(--gold);margin-bottom:12px}
@@ -120,17 +223,16 @@
     text-align:center;font-size:clamp(15px,1.7vw,20px);font-weight:800;padding:16px 20px;
   }
   .formula em{font-style:normal;color:var(--gold)}
-  /* ---------- 页4 ---------- */
+  /* ============ 页4 ============ */
   .anti{display:grid;grid-template-columns:1fr 1fr;gap:20px}
   .anti .a-card{background:var(--card);border:1px solid var(--edge);border-radius:12px;padding:14px 20px}
   .a-t{font-size:15px;font-weight:700;color:var(--muted);margin-bottom:4px}
   .a-d{font-size:13px;color:var(--faint);line-height:1.6}
   .lead{display:flex;align-items:center;gap:10px;margin:24px 0 18px;font-size:15.5px;font-weight:800;color:var(--gold)}
   .lead svg{flex-shrink:0}
-  /* 可点击的链节点 */
   .chain.clickable .node{cursor:pointer}
   .chain.clickable .node.sel{
-    background:var(--card-hi);border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),0 10px 26px rgba(245,184,65,.15);
+    background:var(--card-hi);border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),var(--shadow-gold);
   }
   .chain.clickable .node.sel .n-main{color:var(--gold)}
   .step-detail{
@@ -147,27 +249,32 @@
   }
   .sd-anim{animation:sdIn .4s ease both}
   @keyframes sdIn{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
-  /* ---------- 导航 ---------- */
+
+  /* ============ 底部导航 ============ */
   .nav-dots{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);display:flex;gap:12px;z-index:60}
-  .dot{width:11px;height:11px;border-radius:50%;background:rgba(255,255,255,.18);cursor:pointer;transition:all .3s;border:none;padding:0}
-  .dot.on{background:var(--gold);transform:scale(1.25);box-shadow:0 0 12px rgba(245,184,65,.5)}
+  .dot{width:11px;height:11px;border-radius:50%;background:var(--dot);cursor:pointer;transition:all .3s;border:none;padding:0}
+  .dot.on{background:var(--gold);transform:scale(1.25);box-shadow:0 0 12px var(--gold-glow)}
   .nav-btn{
     position:fixed;top:50%;transform:translateY(-50%);z-index:60;width:44px;height:44px;border-radius:50%;
-    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:var(--muted);
-    font-size:19px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s;
+    background:var(--overlay);border:1px solid var(--edge);color:var(--muted);
+    cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s;
   }
+  .nav-btn svg{width:18px;height:18px}
   .nav-btn:hover{background:var(--card-hi);color:var(--gold);border-color:var(--gold)}
   #prevBtn{left:18px} #nextBtn{right:18px}
-  .pageno{position:fixed;right:24px;bottom:24px;font-size:13px;color:var(--faint);z-index:60;letter-spacing:.1em}
-  .hint{
-    position:fixed;left:24px;bottom:24px;font-size:12.5px;color:var(--faint);z-index:60;opacity:.75;
-  }
+  .pageno{position:fixed;right:24px;bottom:24px;font-size:13px;color:var(--faint);z-index:60;letter-spacing:.1em;text-align:right}
+  .pageno b{color:var(--muted);font-weight:700}
+  .hint{position:fixed;left:24px;bottom:24px;font-size:12.5px;color:var(--faint);z-index:60;opacity:.75}
   .hint b{color:var(--muted)}
-  /* ---------- 响应式 ---------- */
+
+  /* ============ 响应式 ============ */
   @media (max-width:960px){
-    .slide{padding:30px 26px 88px}
+    .slide{padding:74px 26px 88px}
+    .topbar{gap:14px;padding:0 64px}
+    .seg span{display:none}
     .chain{flex-wrap:wrap;gap:10px}
     .node{width:calc(33% - 10px)}
+    #s0 .node{width:calc(46% - 10px)}
     .n-arrow{display:none}
     .duo,.trio,.anti{grid-template-columns:1fr}
     .step-detail{flex-direction:column;align-items:flex-start;gap:12px}
@@ -180,7 +287,44 @@
 <body>
 <div class="progress"><i id="bar"></i></div>
 
+<!-- 顶部逻辑主线：全程可见的论证骨架，点击直达 -->
+<nav class="topbar" id="topbar" aria-label="逻辑主线">
+  <button class="seg" data-go="1"><b>01</b><span>老标尺 · 五懂一具备</span></button>
+  <button class="seg" data-go="2"><b>02</b><span>补上"懂 AI"</span></button>
+  <button class="seg" data-go="3"><b>03</b><span>靶心 · 准星 · 马力</span></button>
+  <button class="seg" data-go="4"><b>04</b><span>问题导向建模</span></button>
+</nav>
+<button class="theme-btn" id="themeBtn" aria-label="切换深浅主题（快捷键 T）" title="切换深浅主题（T）">
+  <svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"/></svg>
+  <svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
+</button>
+
 <main id="deck">
+
+  <!-- ============ 页 0 · 封面总览：一页看清论证链 ============ -->
+  <section class="slide" id="s0">
+    <div class="wrap">
+      <div class="stage">
+        <div class="head-block">
+          <div class="kicker reveal" style="--d:.05s">数据分析和建模培训</div>
+          <h1 class="reveal" style="--d:.15s">从<span class="qm">"五懂一具备"</span>到<span class="qm">"六懂一具备"</span></h1>
+          <div class="sub reveal" style="--d:.3s">讲清两件事：<b>该懂什么</b> —— <b>怎么干</b></div>
+        </div>
+        <div class="stage" style="margin:34px 0 6px">
+          <div class="chain clickable" id="coverChain">
+            <div class="node reveal" data-go="1" style="--d:.45s"><span class="n-tag"><span class="no">01</span>老标尺</span><span class="n-main">五懂一具备</span><span class="n-note">一条完整的路：业务出题，沟通交卷</span></div>
+            <svg class="n-arrow reveal" style="--d:.53s" viewBox="0 0 26 12" width="26" height="12"><path d="M0 6h19m0 0-5-4m5 4-5 4" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+            <div class="node reveal" data-go="2" style="--d:.58s"><span class="n-tag"><span class="no">02</span>还差一格</span><span class="n-main">补上"懂 AI"</span><span class="n-note">用工具靠手艺，用 AI 靠判断</span></div>
+            <svg class="n-arrow reveal" style="--d:.66s" viewBox="0 0 26 12" width="26" height="12"><path d="M0 6h19m0 0-5-4m5 4-5 4" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+            <div class="node reveal" data-go="3" style="--d:.71s"><span class="n-tag"><span class="no">03</span>三角关系</span><span class="n-main">靶心 · 准星 · 马力</span><span class="n-note">业务定方向，分析保准头，AI 给马力</span></div>
+            <svg class="n-arrow reveal" style="--d:.79s" viewBox="0 0 26 12" width="26" height="12"><path d="M0 6h19m0 0-5-4m5 4-5 4" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+            <div class="node reveal" data-go="4" style="--d:.84s"><span class="n-tag"><span class="no">04</span>培训重点</span><span class="n-main">问题导向建模</span><span class="n-note">五步翻译链：好问题比好模型值钱</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="punch reveal" style="--d:1.2s">这把尺子量了很多年，量得很准 —— 今天，给它补上一格</div>
+    </div>
+  </section>
 
   <!-- ============ 页 1 · 五懂一具备 ============ -->
   <section class="slide" id="s1">
@@ -219,7 +363,7 @@
         <div class="duo">
           <div class="card tool reveal" style="--d:.25s">
             <div class="c-head">
-              <div class="c-ico"><svg viewBox="0 0 24 24" fill="none" stroke="#9db2d0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4.5 4.5 0 0 0-6 6L3 18l3 3 5.7-5.7a4.5 4.5 0 0 0 6-6L14 13l-3-3 3.7-3.7z"/></svg></div>
+              <div class="c-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4.5 4.5 0 0 0-6 6L3 18l3 3 5.7-5.7a4.5 4.5 0 0 0 6-6L14 13l-3-3 3.7-3.7z"/></svg></div>
               <span class="c-name">普通工具</span>
             </div>
             <div class="c-big">听话的</div>
@@ -227,7 +371,7 @@
           </div>
           <div class="card ai reveal" style="--d:.45s">
             <div class="c-head">
-              <div class="c-ico"><svg viewBox="0 0 24 24" fill="none" stroke="#f5b841" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4M8 4h8M9 14h.01M15 14h.01"/></svg></div>
+              <div class="c-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4M8 4h8M9 14h.01M15 14h.01"/></svg></div>
               <span class="c-name">AI</span>
             </div>
             <div class="c-big">能干的</div>
@@ -264,19 +408,19 @@
       <div class="stage">
         <div class="trio">
           <div class="t-card reveal" style="--d:.25s">
-            <div class="t-ico"><svg viewBox="0 0 24 24" fill="none" stroke="#f5b841" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5.5"/><circle cx="12" cy="12" r="2" fill="#f5b841" stroke="none"/></svg></div>
+            <div class="t-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5.5"/><circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/></svg></div>
             <div class="t-name">业务</div>
             <div class="t-pos">定方向 · 靶心</div>
             <div class="t-body">没有业务问题，分析是空转，AI 是玩具；选题选错，后面全白干。</div>
           </div>
           <div class="t-card reveal" style="--d:.45s">
-            <div class="t-ico"><svg viewBox="0 0 24 24" fill="none" stroke="#f5b841" stroke-width="1.6"><circle cx="12" cy="12" r="7.5"/><path d="M12 1.5v4M12 18.5v4M1.5 12h4M18.5 12h4" stroke-linecap="round"/><circle cx="12" cy="12" r="1.6" fill="#f5b841" stroke="none"/></svg></div>
+            <div class="t-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="7.5"/><path d="M12 1.5v4M12 18.5v4M1.5 12h4M18.5 12h4" stroke-linecap="round"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg></div>
             <div class="t-name">数据分析</div>
             <div class="t-pos">保准头 · 准星</div>
             <div class="t-body">口径、样本、结论步步站稳 —— AI 放大的不只是能力，还有错误。</div>
           </div>
           <div class="t-card reveal" style="--d:.65s">
-            <div class="t-ico"><svg viewBox="0 0 24 24" fill="none" stroke="#f5b841" stroke-width="1.6" stroke-linecap="round"><path d="M4 17a8.5 8.5 0 1 1 16 0"/><path d="M12 17l4-5"/><path d="M2.5 17h2M19.5 17h2" stroke-width="2"/></svg></div>
+            <div class="t-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 17a8.5 8.5 0 1 1 16 0"/><path d="M12 17l4-5"/><path d="M2.5 17h2M19.5 17h2" stroke-width="2"/></svg></div>
             <div class="t-name">AI</div>
             <div class="t-pos">给马力 · 引擎</div>
             <div class="t-body">取数、清洗、初筛、写码、画图，原来吃掉八成时间，AI 都能打下手。</div>
@@ -309,7 +453,7 @@
 
         <div class="lead reveal" style="--d:.5s">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2z"/></svg>
-          问题导向 = 从问题出发配手段 —— 五步翻译链，点一步看一步
+          问题导向 = 从问题出发配手段 —— 六步翻译链，点一步看一步
         </div>
 
         <div class="chain clickable" id="stepChain">
@@ -340,18 +484,53 @@
 
 </main>
 
-<button class="nav-btn" id="prevBtn" aria-label="上一页">‹</button>
-<button class="nav-btn" id="nextBtn" aria-label="下一页">›</button>
+<button class="nav-btn" id="prevBtn" aria-label="上一页"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 5.5 8 12l6.5 6.5"/></svg></button>
+<button class="nav-btn" id="nextBtn" aria-label="下一页"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 5.5 16 12l-6.5 6.5"/></svg></button>
 <div class="nav-dots" id="dots"></div>
-<div class="pageno" id="pageno">1 / 4</div>
-<div class="hint"><b>← →</b> 翻页 · <b>F</b> 全屏</div>
+<div class="pageno" id="pageno">1 / 5</div>
+<div class="hint"><b>← →</b> 翻页 · <b>F</b> 全屏 · <b>T</b> 换主题</div>
 
 <script>
 (function(){
+  'use strict';
   var slides=[].slice.call(document.querySelectorAll('.slide'));
   var dots=document.getElementById('dots'),bar=document.getElementById('bar'),pageno=document.getElementById('pageno');
-  var cur=0,locked=false;
+  var segEls=[].slice.call(document.querySelectorAll('#topbar .seg'));
+  var partNames=['总览','PART 01 · 老标尺','PART 02 · 懂 AI','PART 03 · 三角关系','PART 04 · 问题导向'];
+  var cur=0;
 
+  /* ---------- 主题：?theme= 优先，其次记忆，再次跟随系统 ---------- */
+  var root=document.documentElement;
+  function applyTheme(t){
+    root.setAttribute('data-theme',t);
+    try{window.localStorage.setItem('slide-theme',t)}catch(e){}
+  }
+  (function initTheme(){
+    var t=null;
+    try{t=new URLSearchParams(window.location.search).get('theme')}catch(e){}
+    if(t!=='light'&&t!=='dark'){
+      try{t=window.localStorage.getItem('slide-theme')}catch(e){}
+    }
+    if(t!=='light'&&t!=='dark'){
+      t=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)?'light':'dark';
+    }
+    root.setAttribute('data-theme',t);
+  })();
+  function toggleTheme(){
+    applyTheme(root.getAttribute('data-theme')==='dark'?'light':'dark');
+  }
+  document.getElementById('themeBtn').addEventListener('click',toggleTheme);
+  // 无手动记录时跟随系统变化
+  if(window.matchMedia){
+    try{
+      window.matchMedia('(prefers-color-scheme: light)').addEventListener('change',function(e){
+        var saved=null;try{saved=window.localStorage.getItem('slide-theme')}catch(err){}
+        if(!saved)root.setAttribute('data-theme',e.matches?'light':'dark');
+      });
+    }catch(e){}
+  }
+
+  /* ---------- 翻页 ---------- */
   slides.forEach(function(_,i){
     var d=document.createElement('button');
     d.className='dot'+(i===0?' on':'');d.setAttribute('aria-label','第'+(i+1)+'页');
@@ -364,16 +543,41 @@
     if(i<0||i>=slides.length||i===cur)return;
     slides[cur].classList.remove('active');
     cur=i;
-    // 重新触发入场动画：先移除动画类，强制 reflow 后再加回
-    var rel=slides[cur].querySelectorAll('.reveal');
     slides[cur].classList.add('active');
-    // dot / 进度 / 页码
+    sync();
+  }
+  function sync(){
     dotEls.forEach(function(d,k){d.classList.toggle('on',k===cur)});
     bar.style.width=((cur+1)/slides.length*100)+'%';
-    pageno.textContent=(cur+1)+' / '+slides.length;
+    pageno.innerHTML='<b>'+(cur+1)+' / '+slides.length+'</b>'+(cur>0?'<br>'+partNames[cur]:'');
+    // 逻辑主线：封面时全部待启；进入某部分后，左侧为已走完、当前为高亮
+    segEls.forEach(function(s,k){
+      s.classList.toggle('on',k===cur-1);
+      s.classList.toggle('pass',k<cur-1);
+    });
+    try{history.replaceState(null,'','#p'+(cur+1))}catch(e){}
   }
   document.getElementById('prevBtn').onclick=function(){go(cur-1)};
   document.getElementById('nextBtn').onclick=function(){go(cur+1)};
+  segEls.forEach(function(s){
+    s.addEventListener('click',function(){go(+s.getAttribute('data-go'))});
+  });
+  // 封面总览节点直达
+  [].slice.call(document.querySelectorAll('[data-go]')).forEach(function(n){
+    if(n.closest('#topbar'))return;
+    n.addEventListener('click',function(){go(+n.getAttribute('data-go'))});
+  });
+
+  // 深链：#p1~#p5 直达（亦便于截图验证）
+  (function fromHash(){
+    var m=(location.hash||'').match(/^#p([1-9])$/);
+    var idx=m?Math.min(+(m[1])-1,slides.length-1):0;
+    if(idx>0){cur=idx;slides[0].classList.remove('active');slides[cur].classList.add('active')}
+  })();
+  window.addEventListener('hashchange',function(){
+    var m=(location.hash||'').match(/^#p([1-9])$/);
+    if(m)go(Math.min(+(m[1])-1,slides.length-1));
+  });
 
   document.addEventListener('keydown',function(e){
     if(['ArrowRight','ArrowDown','PageDown',' '].indexOf(e.key)>=0){e.preventDefault();go(cur+1)}
@@ -384,6 +588,7 @@
       if(document.fullscreenElement){document.exitFullscreen()}
       else{document.documentElement.requestFullscreen()}
     }
+    else if(e.key==='t'||e.key==='T'){toggleTheme()}
   });
 
   // 触屏滑动
@@ -420,7 +625,7 @@
     });
   };
 
-  /* ---------- 页4：五步翻译链 ---------- */
+  /* ---------- 页4：六步翻译链 ---------- */
   var steps=[
     {step:'STEP 1 · 出题',name:'业务问题',
      body:'业务的原话往往是"这个月费用怎么这么高"——含糊、还带情绪。先问一句：这个问题，业务真的关心吗？',
@@ -460,8 +665,9 @@
   });
   renderStep(0);
 
-  // 初始化
-  slides[0].classList.add('active');
+  // 初始化（深链时 cur 已指向目标页，勿无条件激活第 0 页）
+  slides[cur].classList.add('active');
+  sync();
 })();
 </script>
 </body>
