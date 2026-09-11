@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>业务 → 拖拽式 SQL 模型：零基础的 6 步法</title>
+<style>
+/* ============ 主题变量（与 20260910.html 家族一致） ============ */
+:root,html[data-theme="dark"]{
+  --bg:#0b1626; --glow:rgba(111,168,255,.08); --grid:rgba(148,178,224,.05);
+  --card:#16263f; --card-hi:#20345a; --edge:#2c4269; --edge-strong:#3d587f;
+  --text:#f3f7fd; --muted:#a4b9d6; --faint:#7d92b3;
+  --gold:#f5b841; --gold-bar2:#ffd97a; --punch-ink:#132039;
+  --gold-glow:rgba(245,184,65,.22);
+  --ice:#7cb0ff; --arrow:#5d7cab; --red:#ff7a7a;
+  --inset:rgba(8,16,30,.5);
+  --shadow-card:0 16px 36px rgba(2,8,20,.45);
+  --shadow-gold:0 12px 32px var(--gold-glow);
+  --glass:rgba(22,38,63,.72);
+  --glass-edge:rgba(124,176,255,.22);
+  --think-structured:#7cb0ff;
+  --think-engineering:#f5b841;
+}
+html[data-theme="light"]{
+  --bg:#f4f6fb; --glow:rgba(47,111,178,.07); --grid:rgba(47,111,178,.07);
+  --card:#ffffff; --card-hi:#edf3fb; --edge:#d9e2ef; --edge-strong:#bfd0e6;
+  --text:#1a2740; --muted:#485972; --faint:#7f8fa7;
+  --gold:#a1660a; --gold-bar:#f0b429; --gold-bar2:#ffd043; --punch-ink:#42300a;
+  --gold-glow:rgba(202,138,22,.28);
+  --ice:#2f6fb2; --arrow:#93a7c5; --red:#c0392b;
+  --inset:rgba(234,240,250,.9);
+  --shadow-card:0 14px 30px rgba(30,52,92,.12);
+  --shadow-gold:0 12px 28px var(--gold-glow);
+  --glass:rgba(255,255,255,.72);
+  --glass-edge:rgba(47,111,178,.22);
+  --think-structured:#2f6fb2;
+  --think-engineering:#a1660a;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  background:var(--bg); color:var(--text); overflow-x:hidden;
+  font-family:"PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif;
+  -webkit-font-smoothing:antialiased;
+  transition:background .4s ease,color .4s ease;
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(900px 480px at 50% -140px,var(--glow),transparent 70%);
+}
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),
+                   linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:46px 46px;
+  -webkit-mask-image:linear-gradient(#000 55%,transparent 92%);
+          mask-image:linear-gradient(#000 55%,transparent 92%);
+}
+::selection{background:var(--gold);color:var(--punch-ink)}
+:focus-visible{outline:2px solid var(--ice);outline-offset:2px;border-radius:4px}
+
+/* ============ 顶部：进度条 + 导航 ============ */
+.progress{position:fixed;top:0;left:0;right:0;height:3px;background:var(--inset);z-index:80}
+.progress i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--gold),var(--gold-bar2));transition:width .35s ease}
+.topbar{
+  position:fixed;top:9px;left:0;right:0;z-index:75;
+  display:flex;justify-content:center;align-items:center;gap:24px;flex-wrap:wrap;
+  padding:6px 18px;pointer-events:none;
+}
+.topbar a,.topbar .seg{
+  pointer-events:auto;cursor:pointer;background:none;border:none;font-family:inherit;
+  display:inline-flex;align-items:center;gap:6px;
+  color:var(--faint);font-size:12.5px;font-weight:700;letter-spacing:.06em;
+  padding:5px 2px 9px;transition:color .3s ease;text-decoration:none;
+  position:relative;
+}
+.topbar a::after,.topbar .seg::after{
+  content:'';position:absolute;left:0;right:0;bottom:0;height:2px;border-radius:2px;
+  background:var(--edge);transition:background .3s ease,opacity .3s ease;
+}
+.topbar a:hover{color:var(--muted)}
+.topbar a.on{color:var(--gold)}
+.topbar a.on::after{background:var(--gold);opacity:1}
+.theme-btn{
+  position:fixed;top:12px;right:18px;z-index:85;width:38px;height:38px;border-radius:50%;
+  background:var(--card);border:1px solid var(--edge);color:var(--muted);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .25s ease;
+}
+.theme-btn:hover{color:var(--gold);border-color:var(--gold);transform:rotate(15deg)}
+.theme-btn svg{width:18px;height:18px;display:none}
+html[data-theme="dark"] .theme-btn .ico-sun{display:block}
+html[data-theme="light"] .theme-btn .ico-moon{display:block}
+
+/* ============ 主体：单页可滚动 ============ */
+main{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:80px 28px 80px}
+section{margin-top:88px;scroll-margin-top:80px}
+section:first-of-type{margin-top:60px}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:12px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--gold);padding:5px 12px;border:1px solid var(--gold);
+  border-radius:999px;background:var(--gold-glow);
+}
+h1.title{
+  font-size:clamp(28px,4vw,42px);line-height:1.25;font-weight:800;letter-spacing:.01em;
+  margin:18px 0 14px;max-width:920px;
+}
+h1.title em{font-style:normal;color:var(--gold)}
+.subtitle{color:var(--muted);font-size:16px;line-height:1.7;max-width:760px}
+h2.sec-title{
+  font-size:clamp(22px,2.4vw,28px);font-weight:800;letter-spacing:.01em;
+  margin-bottom:6px;
+}
+h2.sec-title .num{
+  display:inline-block;color:var(--gold);font-family:Georgia,serif;
+  margin-right:12px;font-weight:400;letter-spacing:0;
+}
+.sec-sub{color:var(--muted);font-size:14px;margin-bottom:28px}
+
+/* ============ 卡片基础 ============ */
+.card{
+  background:var(--card);border:1px solid var(--edge);border-radius:16px;
+  padding:22px;cursor:pointer;position:relative;overflow:hidden;
+  transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;
+  box-shadow:var(--shadow-card);
+}
+.card:hover{
+  transform:translateY(-4px);border-color:var(--edge-strong);
+  box-shadow:0 18px 38px rgba(2,8,20,.5);
+}
+.card::after{
+  content:'';position:absolute;left:0;right:0;bottom:0;height:3px;
+  background:linear-gradient(90deg,var(--gold),var(--gold-bar2));
+  transform:scaleX(0);transform-origin:left;transition:transform .3s ease;
+}
+.card:hover::after{transform:scaleX(1)}
+.card .hint{
+  position:absolute;right:14px;top:14px;font-size:11px;color:var(--faint);
+  opacity:0;transition:opacity .25s ease;
+}
+.card:hover .hint{opacity:.9}
+
+/* 思维色条 */
+.thinking-bar{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:11px;font-weight:700;letter-spacing:.05em;
+  padding:3px 10px;border-radius:999px;
+}
+.thinking-bar.s{background:rgba(124,176,255,.15);color:var(--think-structured);border:1px solid rgba(124,176,255,.4)}
+.thinking-bar.e{background:rgba(245,184,65,.15);color:var(--think-engineering);border:1px solid rgba(245,184,65,.4)}
+.thinking-bar.m{
+  background:linear-gradient(90deg,rgba(124,176,255,.18),rgba(245,184,65,.18));
+  color:var(--text);border:1px solid var(--edge-strong);
+}
+
+/* ============ 封面 ============ */
+.cover{padding:48px 32px;border-radius:20px;background:linear-gradient(135deg,var(--card),var(--card-hi));
+  border:1px solid var(--edge-strong);text-align:left;position:relative;overflow:hidden}
+.cover::before{
+  content:'';position:absolute;right:-80px;top:-80px;width:280px;height:280px;border-radius:50%;
+  background:radial-gradient(circle,var(--gold-glow),transparent 70%);
+}
+.cover h1.title{position:relative;z-index:1}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px;position:relative;z-index:1}
+.tag{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:12px;font-weight:600;padding:6px 12px;border-radius:8px;
+  background:var(--inset);border:1px solid var(--edge);color:var(--muted);
+}
+
+/* ============ 工具箱 4 卡 ============ */
+.toolbox-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:18px;margin-top:8px;
+}
+.toolbox-card{padding:24px 22px;display:flex;flex-direction:column;gap:12px;min-height:180px}
+.toolbox-card .icon{
+  width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font-size:20px;font-weight:800;background:var(--card-hi);color:var(--gold);
+  border:1px solid var(--edge-strong);
+}
+.toolbox-card.s .icon{color:var(--think-structured);border-color:rgba(124,176,255,.4);background:rgba(124,176,255,.08)}
+.toolbox-card.e .icon{color:var(--think-engineering);border-color:rgba(245,184,65,.4);background:rgba(245,184,65,.08)}
+.toolbox-card h3{font-size:18px;font-weight:800;letter-spacing:.02em}
+.toolbox-card p{font-size:13.5px;line-height:1.65;color:var(--muted);margin:0}
+.toolbox-card .where{font-size:11px;color:var(--faint);margin-top:auto;letter-spacing:.04em}
+
+/* ============ 6 步主区 ============ */
+.steps-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:18px;
+}
+.step-card{
+  padding:22px 20px;min-height:200px;display:flex;flex-direction:column;gap:10px;
+  position:relative;
+}
+.step-card .num{
+  font-family:Georgia,serif;font-size:38px;line-height:1;font-weight:400;
+  color:var(--gold);letter-spacing:0;
+}
+.step-card h3{font-size:18px;font-weight:800}
+.step-card p{font-size:13.5px;line-height:1.6;color:var(--muted);margin:0}
+.step-card .thinking-bar{align-self:flex-start;margin-top:auto}
+
+/* ============ 6 节点链路 ============ */
+.chain-wrap{
+  background:var(--card);border:1px solid var(--edge);border-radius:18px;
+  padding:30px 24px;box-shadow:var(--shadow-card);
+}
+.chain{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  flex-wrap:nowrap;overflow-x:auto;padding:8px 4px;
+}
+.node{
+  flex:1 1 0;min-width:96px;max-width:160px;
+  background:var(--card-hi);border:1px solid var(--edge-strong);border-radius:12px;
+  padding:14px 8px;text-align:center;cursor:pointer;
+  transition:all .25s ease;position:relative;
+}
+.node:hover{
+  transform:translateY(-3px);border-color:var(--gold);
+  box-shadow:0 10px 24px rgba(245,184,65,.15);
+}
+.node .ni{font-family:Georgia,serif;font-size:18px;color:var(--gold);font-weight:400}
+.node .nl{font-size:13px;font-weight:700;margin-top:4px;letter-spacing:.04em}
+.node .nt{font-size:11px;color:var(--faint);margin-top:2px;line-height:1.4}
+.arrow{
+  flex:0 0 18px;color:var(--arrow);font-size:18px;text-align:center;line-height:1;
+  user-select:none;
+}
+.chain-tip{font-size:12px;color:var(--faint);text-align:center;margin-top:14px;letter-spacing:.04em}
+
+/* ============ 汇报三步法 ============ */
+.report-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+.report-card{padding:24px;min-height:170px;display:flex;flex-direction:column;gap:10px}
+.report-card .stage{font-size:11px;font-weight:800;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.report-card h3{font-size:18px;font-weight:800}
+.report-card .example{font-size:13.5px;line-height:1.65;color:var(--muted);font-style:italic;border-left:2px solid var(--edge);padding-left:12px;margin-top:auto}
+
+/* ============ 5 大常见坑 ============ */
+.pitfalls-list{display:flex;flex-direction:column;gap:12px}
+.pitfall-card{
+  padding:18px 22px;display:flex;align-items:center;gap:16px;
+  min-height:64px;
+}
+.pitfall-card .pi{
+  flex:0 0 36px;width:36px;height:36px;border-radius:10px;
+  background:rgba(255,122,122,.12);color:var(--red);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-family:Georgia,serif;font-size:18px;
+  border:1px solid rgba(255,122,122,.3);
+}
+.pitfall-card h4{font-size:15px;font-weight:700;line-height:1.4;margin:0}
+.pitfall-card .phint{margin-left:auto;font-size:12px;color:var(--faint);white-space:nowrap}
+
+/* ============ 金句自检 ============ */
+.golden-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;
+}
+.golden-card{
+  padding:28px 24px;min-height:180px;display:flex;align-items:center;
+  font-size:16px;line-height:1.65;font-weight:600;letter-spacing:.01em;
+  text-align:left;
+}
+.golden-card::before{
+  content:'"';font-family:Georgia,serif;font-size:48px;color:var(--gold);
+  line-height:0.6;margin-right:10px;align-self:flex-start;margin-top:8px;
+}
+.check-card{
+  background:linear-gradient(135deg,var(--card-hi),var(--card));
+  border:1px solid var(--gold);border-radius:16px;padding:28px;margin-top:18px;
+  box-shadow:var(--shadow-gold);
+}
+.check-card h3{font-size:18px;font-weight:800;color:var(--gold);margin-bottom:14px}
+.check-list{display:flex;flex-direction:column;gap:10px;list-style:none}
+.check-list li{
+  display:flex;gap:12px;align-items:flex-start;
+  font-size:14px;line-height:1.65;color:var(--text);
+}
+.check-list li b{
+  flex:0 0 28px;height:28px;border-radius:8px;background:var(--gold);color:var(--punch-ink);
+  display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;
+}
+
+/* ============ 附录 chips ============ */
+.appendix-grid{display:flex;flex-wrap:wrap;gap:12px}
+.chip{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--card);border:1px solid var(--edge);border-radius:10px;
+  padding:12px 16px;color:var(--muted);text-decoration:none;font-size:13.5px;
+  transition:all .25s ease;cursor:pointer;
+}
+.chip:hover{color:var(--gold);border-color:var(--gold);transform:translateY(-2px)}
+.chip b{color:var(--text);font-weight:700}
+
+/* ============ 详情：右抽屉（6 步用）============ */
+.drawer-mask{
+  position:fixed;inset:0;background:rgba(8,16,30,.5);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  z-index:90;opacity:0;visibility:hidden;transition:all .3s ease;
+}
+.drawer-mask.on{opacity:1;visibility:visible}
+.drawer{
+  position:fixed;top:0;right:0;bottom:0;width:min(46vw,560px);
+  background:var(--glass);backdrop-filter:blur(24px) saturate(140%);
+  -webkit-backdrop-filter:blur(24px) saturate(140%);
+  border-left:1px solid var(--glass-edge);
+  box-shadow:-20px 0 60px rgba(2,8,20,.5);
+  z-index:95;transform:translateX(100%);transition:transform .4s cubic-bezier(.2,.7,.2,1);
+  display:flex;flex-direction:column;
+}
+.drawer.on{transform:translateX(0)}
+.drawer-head{
+  padding:20px 24px 14px;border-bottom:1px solid var(--edge);
+  display:flex;align-items:center;gap:14px;flex-shrink:0;
+}
+.drawer-head .num{
+  font-family:Georgia,serif;font-size:32px;color:var(--gold);font-weight:400;line-height:1;
+}
+.drawer-head h2{font-size:20px;font-weight:800;line-height:1.3;margin:0}
+.drawer-head .close{
+  margin-left:auto;width:34px;height:34px;border-radius:8px;
+  background:var(--inset);border:1px solid var(--edge);color:var(--muted);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;
+  transition:all .2s ease;
+}
+.drawer-head .close:hover{color:var(--red);border-color:var(--red)}
+.drawer-body{
+  padding:22px 26px 36px;overflow-y:auto;flex:1;
+  font-size:14px;line-height:1.75;color:var(--text);
+}
+.drawer-body h4{
+  font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--gold);margin:18px 0 8px;
+}
+.drawer-body h4:first-child{margin-top:0}
+.drawer-body p{margin-bottom:10px}
+.drawer-body ul,.drawer-body ol{padding-left:22px;margin-bottom:12px}
+.drawer-body li{margin-bottom:6px}
+.drawer-body table{
+  width:100%;border-collapse:collapse;margin:8px 0 14px;font-size:13px;
+}
+.drawer-body th,.drawer-body td{
+  border:1px solid var(--edge);padding:8px 10px;text-align:left;vertical-align:top;
+}
+.drawer-body th{background:var(--card-hi);font-weight:700;color:var(--text)}
+.drawer-body code{
+  font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;
+  background:var(--inset);padding:1px 6px;border-radius:4px;color:var(--ice);
+}
+.drawer-body pre{
+  background:var(--inset);border:1px solid var(--edge);border-radius:8px;
+  padding:12px 14px;overflow-x:auto;margin:8px 0 14px;
+  font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.65;
+  color:var(--text);
+}
+.drawer-body .thinking-tag{
+  display:inline-flex;align-items:center;gap:6px;font-size:12px;
+  padding:4px 10px;border-radius:6px;background:var(--card-hi);
+  border:1px solid var(--edge-strong);color:var(--muted);margin-bottom:8px;
+}
+
+/* ============ 详情：居中模态（工具箱/汇报/金句用）============ */
+.modal{
+  position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;
+  padding:24px;pointer-events:none;opacity:0;transition:opacity .3s ease;
+}
+.modal.on{opacity:1;pointer-events:auto}
+.modal-card{
+  width:min(640px,92vw);max-height:88vh;overflow-y:auto;
+  background:var(--glass);backdrop-filter:blur(24px) saturate(140%);
+  -webkit-backdrop-filter:blur(24px) saturate(140%);
+  border:1px solid var(--glass-edge);border-radius:20px;
+  box-shadow:0 30px 80px rgba(2,8,20,.5);
+  padding:32px 32px 28px;position:relative;
+  transform:scale(.95) translateY(8px);transition:transform .3s ease;
+}
+.modal.on .modal-card{transform:scale(1) translateY(0)}
+.modal-card .close{
+  position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:8px;
+  background:var(--inset);border:1px solid var(--edge);color:var(--muted);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;
+}
+.modal-card .close:hover{color:var(--red);border-color:var(--red)}
+.modal-card h3{font-size:22px;font-weight:800;margin-bottom:6px;padding-right:40px}
+.modal-card .label{font-size:11px;font-weight:800;letter-spacing:.18em;color:var(--gold);text-transform:uppercase;margin-bottom:8px}
+.modal-card p{font-size:14px;line-height:1.75;color:var(--text);margin-bottom:10px}
+.modal-card .quote{
+  border-left:3px solid var(--gold);padding:10px 14px;background:var(--inset);
+  border-radius:0 8px 8px 0;margin:12px 0;font-style:italic;color:var(--muted);
+}
+.modal-card table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px}
+.modal-card th,.modal-card td{border:1px solid var(--edge);padding:8px 10px;text-align:left;vertical-align:top}
+.modal-card th{background:var(--card-hi);font-weight:700}
+.modal-card ul,.modal-card ol{padding-left:22px;margin-bottom:10px}
+.modal-card li{margin-bottom:6px}
+.modal-card .actions{
+  margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;
+}
+.modal-card .pill{
+  display:inline-flex;align-items:center;gap:6px;font-size:12px;
+  padding:4px 10px;border-radius:6px;background:var(--card-hi);
+  border:1px solid var(--edge);color:var(--muted);
+}
+
+/* ============ 详情：底部抽屉（6 节点 SQL 用）============ */
+.bdrawer{
+  position:fixed;left:0;right:0;bottom:0;height:42vh;min-height:280px;max-height:480px;
+  background:var(--glass);backdrop-filter:blur(24px) saturate(140%);
+  -webkit-backdrop-filter:blur(24px) saturate(140%);
+  border-top:1px solid var(--glass-edge);
+  box-shadow:0 -20px 60px rgba(2,8,20,.5);
+  z-index:95;transform:translateY(100%);transition:transform .4s cubic-bezier(.2,.7,.2,1);
+  display:flex;flex-direction:column;
+}
+.bdrawer.on{transform:translateY(0)}
+.bdrawer-head{
+  padding:16px 24px;border-bottom:1px solid var(--edge);
+  display:flex;align-items:center;gap:12px;flex-shrink:0;
+}
+.bdrawer-head .ni{font-family:Georgia,serif;font-size:22px;color:var(--gold);font-weight:400}
+.bdrawer-head h3{font-size:17px;font-weight:800;margin:0}
+.bdrawer-head .close{
+  margin-left:auto;width:32px;height:32px;border-radius:8px;
+  background:var(--inset);border:1px solid var(--edge);color:var(--muted);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;
+}
+.bdrawer-head .close:hover{color:var(--red);border-color:var(--red)}
+.bdrawer-body{padding:18px 24px 28px;overflow-y:auto;flex:1}
+.bdrawer-body pre{
+  background:var(--inset);border:1px solid var(--edge);border-radius:10px;
+  padding:14px 16px;font-family:ui-monospace,Menlo,Consolas,monospace;
+  font-size:12.5px;line-height:1.7;color:var(--text);white-space:pre;overflow-x:auto;
+}
+.bdrawer-body p{font-size:13.5px;line-height:1.7;color:var(--muted);margin-top:10px}
+
+/* ============ 入场动画 ============ */
+.fade-up{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease}
+.fade-up.in{opacity:1;transform:translateY(0)}
+
+/* ============ 响应式 ============ */
+@media (max-width:720px){
+  main{padding:72px 16px 60px}
+  .topbar{gap:12px;font-size:11px}
+  .topbar a{font-size:11px}
+  .chain{flex-wrap:wrap;justify-content:center}
+  .node{min-width:80px}
+  .arrow{display:none}
+  .drawer{width:100vw}
+  .bdrawer{height:60vh}
+}
+</style>
+</head>
+<body>
+<div class="progress"><i id="progressBar"></i></div>
+
+<nav class="topbar" id="topbar">
+  <a href="#cover" data-nav>封面</a>
+  <a href="#toolbox" data-nav>工具箱</a>
+  <a href="#steps" data-nav>6 步</a>
+  <a href="#chain" data-nav>节点链</a>
+  <a href="#report" data-nav>汇报</a>
+  <a href="#pitfalls" data-nav>常见坑</a>
+  <a href="#check" data-nav>自检</a>
+  <a href="#appendix" data-nav>附录</a>
+</nav>
+
+<button class="theme-btn" id="themeBtn" aria-label="切换主题">
+  <svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+  <svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+</button>
+
+<main>
+  <!-- ① 封面 -->
+  <section id="cover" class="cover fade-up">
+    <span class="eyebrow">数据分析和建模培训班 · 零基础版</span>
+    <h1 class="title">业务 → 拖拽式 SQL 模型：<em>零基础的 6 步法</em></h1>
+    <p class="subtitle">用结构化思维 + 工程化思维两条主线，把一句业务话，<strong>一步一步</strong> 拖成一个能跑出数来的可视化 SQL 模型。贯穿示例：海关业务 —— "今年出口贸易增长乏力，怎么看？"</p>
+    <div class="tags">
+      <span class="tag">👥 零基础学员</span>
+      <span class="tag">🧭 海关场景</span>
+      <span class="tag">🧩 拖拽式 SQL</span>
+      <span class="tag">💡 6 步闭环</span>
+      <span class="tag">🌓 双主题</span>
+    </div>
+  </section>
+
+  <!-- ② 工具箱 -->
+  <section id="toolbox">
+    <span class="eyebrow">② 工具箱</span>
+    <h2 class="sec-title"><span class="num">01</span>本文用到的 3 个核心概念</h2>
+    <p class="sec-sub">先看这一页，后文出现的概念都汇总在这里 · 记不住就翻回这里查</p>
+    <div class="toolbox-grid" id="toolboxGrid"></div>
+  </section>
+
+  <!-- ③ 6 步主区 -->
+  <section id="steps">
+    <span class="eyebrow">③ 6 步主区</span>
+    <h2 class="sec-title"><span class="num">02</span>一句业务话 → 一份可视化 SQL</h2>
+    <p class="sec-sub">每张卡 1 句人话 · 点击右侧抽屉看完整动作 / 节点链 / 海关例 / 易错点</p>
+    <div class="steps-grid" id="stepsGrid"></div>
+  </section>
+
+  <!-- ④ 6 节点链路 -->
+  <section id="chain">
+    <span class="eyebrow">④ 6 节点链路</span>
+    <h2 class="sec-title"><span class="num">03</span>步骤 3 拆解：拖拽式 SQL 6 节点</h2>
+    <p class="sec-sub">每个节点 = 一段 SQL 代码 · 点击任意节点看对应代码段</p>
+    <div class="chain-wrap">
+      <div class="chain" id="chainBar"></div>
+      <p class="chain-tip">← 悬停浮起 · 点击弹出对应 SQL 段（底部抽屉）→</p>
+    </div>
+  </section>
+
+  <!-- ⑤ 汇报三步法 -->
+  <section id="report">
+    <span class="eyebrow">⑤ 汇报三步法</span>
+    <h2 class="sec-title"><span class="num">04</span>把分析结果讲明白</h2>
+    <p class="sec-sub">《总结摘要》"经典汇报三步法"原话：拆解 → 模型 → 方案 · 点击看完整话术</p>
+    <div class="report-grid" id="reportGrid"></div>
+  </section>
+
+  <!-- ⑥ 5 大常见坑 -->
+  <section id="pitfalls">
+    <span class="eyebrow">⑥ 5 大常见坑</span>
+    <h2 class="sec-title"><span class="num">05</span>零基础最容易犯的 5 个错</h2>
+    <p class="sec-sub">点击任意坑看 ❌ 错例 vs ✅ 对例 + 一句话避坑</p>
+    <div class="pitfalls-list" id="pitfallsList"></div>
+  </section>
+
+  <!-- ⑦ 金句自检 -->
+  <section id="check">
+    <span class="eyebrow">⑦ 金句自检</span>
+    <h2 class="sec-title"><span class="num">06</span>记住四句话 · 回答三问题</h2>
+    <p class="sec-sub">点击金句看出处和应用场景 · 自检三问用来检验是否真"会了"</p>
+    <div class="golden-grid" id="goldenGrid"></div>
+    <div class="check-card">
+      <h3>回译自检 3 问</h3>
+      <ol class="check-list">
+        <li><b>1</b><span>能不能用一句业务话讲清 6 步分别是做什么的？（"拆问题→找数据→拖节点→验数→分析→讲明白"）</span></li>
+        <li><b>2</b><span>能不能把任何一句业务话拆成一个公式？（套步骤 1：跟谁比 / 在哪乏力 / 为什么乏力）</span></li>
+        <li><b>3</b><span>能不能在白板上画出一份"汇报一页纸"？（套步骤 6 的拆解→模型→方案）</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ⑧ 附录 -->
+  <section id="appendix">
+    <span class="eyebrow">⑧ 附录</span>
+    <h2 class="sec-title"><span class="num">07</span>与 slide/ 下其它资料互引</h2>
+    <p class="sec-sub">讲稿 · 演示页 · 思维科普版 · 总结摘要 · 配套培训讲义</p>
+    <div class="appendix-grid" id="appendixGrid"></div>
+  </section>
+</main>
+
+<!-- 详情容器：右抽屉（6 步用） -->
+<div class="drawer-mask" id="drawerMask"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-hidden="true">
+  <div class="drawer-head">
+    <span class="num" id="drawerNum">1</span>
+    <h2 id="drawerTitle">步骤标题</h2>
+    <button class="close" id="drawerClose" aria-label="关闭">×</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+</aside>
+
+<!-- 详情容器：居中模态（工具箱/汇报/金句/附录用） -->
+<div class="modal" id="modal" role="dialog" aria-hidden="true">
+  <div class="modal-card" id="modalCard">
+    <button class="close" id="modalClose" aria-label="关闭">×</button>
+    <div class="label" id="modalLabel">概念</div>
+    <h3 id="modalTitle">标题</h3>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<!-- 详情容器：底部抽屉（6 节点 SQL 用） -->
+<aside class="bdrawer" id="bdrawer" role="dialog" aria-hidden="true">
+  <div class="bdrawer-head">
+    <span class="ni" id="bdrawerNi">①</span>
+    <h3 id="bdrawerTitle">节点</h3>
+    <button class="close" id="bdrawerClose" aria-label="关闭">×</button>
+  </div>
+  <div class="bdrawer-body" id="bdrawerBody"></div>
+</aside>
+
+<script>
+/* ============ 数据 ============ */
+const toolbox = [
+  {
+    id:'s', cls:'s', icon:'S', name:'结构化思维',
+    tagline:'把含糊的问题拆清楚、说清楚',
+    body:`
+      <p><strong>一句话</strong>：把含糊的问题 <em>拆清楚、说清楚</em>。</p>
+      <p><strong>干什么用</strong>：解决"如何 <em>看清</em> 问题"。</p>
+      <h4 style="font-size:13px;font-weight:800;color:var(--gold);margin:14px 0 6px;letter-spacing:.1em;text-transform:uppercase">4 个动作</h4>
+      <ol>
+        <li>分解（拆成小块）</li>
+        <li>分类（互不重叠）</li>
+        <li>构建逻辑关系（因果 / 层级）</li>
+        <li>可表达（能画成图 / 写成公式）</li>
+      </ol>
+      <div class="actions">
+        <span class="pill">📍 出现在：步骤 1、2、6</span>
+      </div>
+    `
+  },
+  {
+    id:'e', cls:'e', icon:'E', name:'工程化思维',
+    tagline:'把问题变成能落地、能验证、能迭代的系统',
+    body:`
+      <p><strong>一句话</strong>：把问题变成 <em>能落地、能验证、能迭代</em> 的系统。</p>
+      <p><strong>干什么用</strong>：解决"如何 <em>改变</em> 现实"。</p>
+      <h4 style="font-size:13px;font-weight:800;color:var(--gold);margin:14px 0 6px;letter-spacing:.1em;text-transform:uppercase">4 个特征</h4>
+      <ol>
+        <li>问题可定义（输入 / 输出 / 约束）</li>
+        <li>系统设计（模块化）</li>
+        <li>可验证（指标 / 测试）</li>
+        <li>迭代（闭环改进）</li>
+      </ol>
+      <div class="actions">
+        <span class="pill">📍 出现在：步骤 2 → 3 → 4 → 5</span>
+      </div>
+    `
+  },
+  {
+    id:'m', cls:'e', icon:'M', name:'模型（3 种）',
+    tagline:'问题模型=公式 / 信息模型=表格 / 数学模型=SQL',
+    body:`
+      <p><strong>一句话</strong>：模型 = 一个用来理解复杂问题的简单框架或公式。</p>
+      <table>
+        <thead><tr><th>模型</th><th>人话</th><th>对应步骤</th></tr></thead>
+        <tbody>
+          <tr><td><b>问题模型</b></td><td>解释问题的逻辑结构（公式）</td><td>步骤 1：贸易额 = Σ HS × 单价 × 数量</td></tr>
+          <tr><td><b>信息模型</b></td><td>组织数据的结构（表/字段）</td><td>步骤 2：报关单 + 4 张维表</td></tr>
+          <tr><td><b>数学模型</b></td><td>用于预测/计算的数学公式</td><td>步骤 3：6 节点可视化 SQL 链</td></tr>
+        </tbody>
+      </table>
+      <div class="actions">
+        <span class="pill">⚡ 速记</span>
+        <span class="pill">问题模型=公式</span>
+        <span class="pill">信息模型=表格</span>
+        <span class="pill">数学模型=SQL</span>
+      </div>
+    `
+  },
+  {
+    id:'r', cls:'s', icon:'R', name:'两种思维的关系',
+    tagline:'工程化思维 包含 结构化思维',
+    body:`
+      <div class="quote">工程化思维 <em>包含</em> 结构化思维。一般路径：<br>
+        <b>结构化思维</b>（看清问题）→ 建出问题模型 → <b>工程化思维</b>（设计系统）→ 产出信息模型 + 数学模型 → 解决现实问题。
+      </div>
+      <p>6 步法里：</p>
+      <ul>
+        <li><b style="color:var(--think-structured)">1、2、6</b> 偏结构化（拆、找、讲）</li>
+        <li><b style="color:var(--think-engineering)">3、4、5</b> 偏工程化（建、验、用）</li>
+      </ul>
+      <p style="color:var(--muted);font-size:13px;margin-top:8px">两思维交替出现，缺一不可。</p>
+    `
+  }
+];
+
+const steps = [
+  {
+    num:1, name:'拆解', thinking:'s', thinkingLabel:'结构化',
+    tagline:'把含糊的业务话拆成互不重叠的几块，再拼成公式',
+    body:`
+      <span class="thinking-tag">🧭 主要思维：<b style="color:var(--think-structured)">结构化思维</b></span>
+      <h4>这一阶段不进工具</h4>
+      <p>拿白纸或 Word 写就行。业务原话 "今年出口贸易增长乏力，得查查怎么回事"——同款含糊：带情绪、有方向、没动作。</p>
+      <h4>三问</h4>
+      <table>
+        <thead><tr><th>问什么</th><th>海关例</th><th>为什么重要</th></tr></thead>
+        <tbody>
+          <tr><td>跟谁比？</td><td>去年同期 / 全国均值 / 兄弟关</td><td>无基准，"乏力"二字站不住</td></tr>
+          <tr><td>乏力在哪？</td><td>国家、HS 大类、企业、贸易方式</td><td>不拆维度，永远原地打转</td></tr>
+          <tr><td>为什么乏力？</td><td>量？价？结构变了？</td><td>拆因才能拆方案</td></tr>
+        </tbody>
+      </table>
+      <h4>拼成公式（问题模型）</h4>
+      <pre>出口贸易额 = Σ 各 HS 编码 × 单价 × 数量
+同比增长率 = (本期 − 同期) ÷ 同期
+乏力归因  = 量贡献 + 价贡献 + 结构贡献</pre>
+      <p style="color:var(--muted);font-size:13px">此刻一个数字都没有。问题被"拆开、说清"——这就是《总结摘要》说的"问题模型"。</p>
+      <h4>零基础自检：拆到什么时候停？</h4>
+      <p>拆到 <b>"能落到一张表的一个字段"</b> 为止。想到了，就停笔，进步骤 2。</p>
+    `
+  },
+  {
+    num:2, name:'找数', thinking:'m', thinkingLabel:'结构化→工程化',
+    tagline:'把公式里的每个变量，对应到具体的数据源和字段',
+    body:`
+      <span class="thinking-tag">🧭 思维过渡：<b style="color:var(--think-structured)">结构化</b> → <b style="color:var(--think-engineering)">工程化</b></span>
+      <h4>公式里的变量，翻译成"数据在哪儿"</h4>
+      <table>
+        <thead><tr><th>变量</th><th>数据落在哪</th><th>零基础要问的口径坑</th></tr></thead>
+        <tbody>
+          <tr><td>贸易额</td><td>报关单 × 总价（统计美元价）</td><td>用 <code>美元</code> 还是 <code>人民币</code>？含运保费？</td></tr>
+          <tr><td>数量</td><td>报关单 × 数量 + 法定单位</td><td>散货 / 整柜 / 第二计量单位怎么折？</td></tr>
+          <tr><td>HS 编码</td><td>报关单 × 商品编码</td><td>拆到 4 位 / 6 位 / 8 位？</td></tr>
+          <tr><td>出口主体</td><td>报关单 × 经营单位代码</td><td>含不含跨境电商、海外仓？</td></tr>
+          <tr><td>同期数据</td><td>历史归档表</td><td>行政区划调整过没？编码版本换过没？</td></tr>
+        </tbody>
+      </table>
+      <h4>在工具里做什么</h4>
+      <p>拖一个 <code>数据源</code> 节点，配置成：</p>
+      <pre>[数据源：报关单]
+   ├── 关联：商品归类表（按 HS 编码）
+   ├── 关联：企业备案表（按经营单位代码）
+   ├── 关联：国别代码表（按目的国）
+   └── 关联：历史归档表（按月份）</pre>
+      <h4>零基础最常犯的错</h4>
+      <p><b style="color:var(--red)">❌</b> 上来就拖【过滤】【聚合】节点，数据从哪来都没搞清楚。<br>
+      <b style="color:var(--gold)">✅</b> 先把 5 张表的关系画清楚，再用工程化的态度进工具。</p>
+    `
+  },
+  {
+    num:3, name:'建模（拖拽式 SQL）', thinking:'e', thinkingLabel:'工程化',
+    tagline:'在工具里拖节点、连节点，拼出可视化 SQL',
+    body:`
+      <span class="thinking-tag">🧭 主要思维：<b style="color:var(--think-engineering)">工程化思维</b></span>
+      <h4>一句话理解"拖拽式 SQL"</h4>
+      <p>每个节点 = 一段 SQL 代码，工具自动拼成 <code>SELECT-WHERE-GROUP BY</code>。你只是 <em>没看见</em> 它。</p>
+      <h4>海关版 6 节点完整链路</h4>
+      <pre>① [数据源：报关单]   ← 步骤 2 配好的主表 + 4 张维表
+        ↓
+② [过滤]             ← ie_flag='出口' AND 时间窗 IN (2025,2026)
+        ↓
+③ [聚合]             ← 按 hs4, dest_country, decl_company 分组
+                       SUM(总价美元) AS v, COUNT(*) AS cnt
+        ↓
+④ [计算列]           ← yoy_pct, price_contrib, qty_contrib
+        ↓
+⑤ [过滤]             ← 只保留 v_2025 > 100万 美元（去掉噪点小户）
+        ↓
+⑥ [排序 + 行数限制]  ← 按 yoy_pct 升序，前 50 行
+        ↓
+                  [输出：明细表 / 柱图 / 折线图]</pre>
+      <h4>每个节点对应一段 SQL</h4>
+      <p>详见下方"6 节点链路"区，<b>点击每个圆点</b>可看对应 SQL 代码段。</p>
+      <h4>关键点</h4>
+      <p>拖出来的 <em>不是一张漂亮的图，是一份能跑、能改、能复用的 SQL 脚本</em>。这正是拖拽式 SQL 和"画图工具"的本质区别。</p>
+    `
+  },
+  {
+    num:4, name:'验证', thinking:'e', thinkingLabel:'工程化',
+    tagline:'跑一遍对账：行数、空值、极值、回抽样',
+    body:`
+      <span class="thinking-tag">🧭 主要思维：<b style="color:var(--think-engineering)">工程化思维 · 可验证</b></span>
+      <h4>在工具里加 4 类"验证节点"</h4>
+      <pre>[原 SQL 链路]  ── 旁路挂载  ──  [验证节点组]
+                                    ↓
+                  ┌── [行数核对]     本期 vs 同期 vs 业务部门手工合计
+                  ├── [空值检查]     HS 编码 / 经营单位 / 金额是否齐全
+                  ├── [极值检查]     单笔最大、最小、是否为离群点
+                  └── [抽样回溯]     随机抽 100 条回原系统比对</pre>
+      <h4>海关版 4 个动作</h4>
+      <table>
+        <thead><tr><th>节点</th><th>动作</th><th>验什么</th></tr></thead>
+        <tbody>
+          <tr><td>行数核对</td><td>跟总署下发的贸易统计月报对总数</td><td>工具数 = 月报数？</td></tr>
+          <tr><td>空值检查</td><td>查 HS 编码为空的报关单占比</td><td>&lt; 0.5% 才放心</td></tr>
+          <tr><td>极值检查</td><td>单笔 &gt; 1 亿美元 / &lt; 100 美元的报关单列出来</td><td>看看是不是录错</td></tr>
+          <tr><td>抽样回溯</td><td>抽 100 条回 H2010 报关单回执系统比对</td><td>字段、金额、HS 三件套一致</td></tr>
+        </tbody>
+      </table>
+      <h4>零基础最常犯的错</h4>
+      <p><b style="color:var(--red)">❌</b> "SQL 跑出来了，同比增长 -3.6%，报告。"<br>
+      <b style="color:var(--gold)">✅</b> "先验行数、空值、极值、抽样都对得上，<em>才能</em> 用 -3.6% 这个数。"</p>
+    `
+  },
+  {
+    num:5, name:'分析', thinking:'m', thinkingLabel:'工程化→结构化',
+    tagline:'在已验证的 SQL 上加分组、TOP N、同比节点',
+    body:`
+      <span class="thinking-tag">🧭 思维过渡：<b style="color:var(--think-engineering)">工程化</b> → <b style="color:var(--think-structured)">结构化</b></span>
+      <h4>在已验证的 SQL 上"加挂"分析节点</h4>
+      <pre>[已验证的 6 节点链路]
+        ↓
+   [分组汇总节点]    ←  按 HS 大类 × 国别 × 企业 三维度分别出表
+        ↓
+   [TOP N 节点]      ←  每维度取下滑 TOP 20
+        ↓
+   [同比 / 环比节点]  ←  与上年同期 / 上月对比
+        ↓
+   [占比 / 贡献度节点] ←  算每个 HS 的下滑占总下滑的份额
+        ↓
+   [图表节点]         ←  柱图看量、折线看趋势、桑基图看结构
+        ↓
+   [输出：表 + 图 + 三句话]</pre>
+      <h4>海关版"三句话"怎么来？</h4>
+      <table>
+        <thead><tr><th>拆</th><th>例</th></tr></thead>
+        <tbody>
+          <tr><td>空间拆</td><td>"下滑 60% 集中在机电产品，前 3 个 HS 大类就贡献了 8 成。"</td></tr>
+          <tr><td>因果拆</td><td>"量贡献 -2.1pp、价贡献 -1.5pp、结构贡献 +0.4pp——量价齐跌是主因，结构升级是亮点。"</td></tr>
+          <tr><td>主体拆</td><td>"中小企业下滑 -15%，头部企业 +6%，集中度在上升。"</td></tr>
+        </tbody>
+      </table>
+      <h4>零基础自检：分析做完要交付什么？</h4>
+      <p>一个固定的 <b>三件套</b>：一张表 + 一张图 + 三句话。</p>
+    `
+  },
+  {
+    num:6, name:'报告', thinking:'s', thinkingLabel:'结构化',
+    tagline:'用汇报三步法讲：拆解 → 模型 → 方案',
+    body:`
+      <span class="thinking-tag">🧭 主要思维：<b style="color:var(--think-structured)">结构化思维 · 沟通</b></span>
+      <h4>《总结摘要》"经典汇报三步法"原话</h4>
+      <div class="quote">"我们先把问题拆开来看（拆解）→ 从结构上可以用一个简单模型理解（公式）→ 因此解决路径主要分为三步（方案/工程化）。"</div>
+      <h4>海关版完整一页纸</h4>
+      <p><b>① 拆解</b>：增长乏力，拆开看，主要来自三个维度——按 HS 大类，机电产品同比 -4.2%；按国别，对东盟 +12%、对欧美 -8%；按企业，中小企业 -15%、头部 +6%。</p>
+      <p><b>② 模型</b>：用 "贸易额 = 量 × 价 × 结构" 一拆——量贡献 -2.1pp、价贡献 -1.5pp、结构贡献 +0.4pp。翻译成业务话：<em>量价齐跌是主因，结构升级是亮点</em>。</p>
+      <p><b>③ 方案</b>：下一步分三条线核实——查机电产品前 10 大 HS 的量价明细；拉头部企业新增客户清单；抽样 5 家中小出口企业了解资金 / 汇率 / 关税压力。</p>
+      <h4>报告里不要出现这些词</h4>
+      <table>
+        <thead><tr><th>不要说</th><th>为什么</th><th>应该替换为</th></tr></thead>
+        <tbody>
+          <tr><td>我用了结构化思维</td><td>方法论名词</td><td>"我们把问题拆成三块来看"</td></tr>
+          <tr><td>我用 SQL 跑了一下</td><td>技术词</td><td>"我们拉了一下数据"</td></tr>
+          <tr><td>yoy_pct 是 -3.6%</td><td>直接念 SQL 输出</td><td>"今年前八月同比下滑 3.6%"</td></tr>
+          <tr><td>JOIN 了 6 张表</td><td>暴露工程细节</td><td>"把企业、HS、国别几方面都纳入了分析"</td></tr>
+        </tbody>
+      </table>
+      <p style="color:var(--muted);font-size:13px;margin-top:10px">业务点头了，6 步才算闭环。反过来，只会念节点、念 SQL 输出，翻译链就是断的。</p>
+    `
+  }
+];
+
+const chain = [
+  {
+    n:'①', name:'数据源', sub:'报关单 + 4 维表',
+    title:'① 数据源节点',
+    desc:'步骤 2 配好的主表 + 4 张维表（商品归类 / 企业备案 / 国别代码 / 历史归档）。所有可能用到的表，先都摆上桌。',
+    sql:`-- 等价 SQL
+SELECT *
+FROM   customs_declaration        -- 报关单主表
+LEFT JOIN dim_hs         ON customs_declaration.hs_code  = dim_hs.hs_code
+LEFT JOIN dim_company    ON customs_declaration.decl_company = dim_company.company_code
+LEFT JOIN dim_country   ON customs_declaration.dest_country = dim_country.country_code
+LEFT JOIN fact_history  ON customs_declaration.decl_date    = fact_history.decl_date;`
+  },
+  {
+    n:'②', name:'过滤', sub:'ie_flag + 时间窗',
+    title:'② 过滤节点',
+    desc:'把不符合口径的一刀切掉——口径错了后面全错。常见过滤：进出口标志、时间窗、删单状态、担保标志。',
+    sql:`-- 等价 SQL
+SELECT *
+FROM   <① 数据源>
+WHERE  ie_flag = 'E'                              -- 出口
+  AND  decl_date BETWEEN '2025-01-01' AND '2026-08-31'
+  AND  status <> '已删单'                          -- 剔除异常
+  AND  guarantee_flag = 'N';                       -- 非担保`
+  },
+  {
+    n:'③', name:'聚合', sub:'按 HS × 国别 × 企业',
+    title:'③ 聚合节点',
+    desc:'把明细压缩成口径一致的合计。分组键决定后续可拆维度。',
+    sql:`-- 等价 SQL
+SELECT
+  hs4,
+  dest_country,
+  decl_company,
+  SUM(total_price_usd) AS v,
+  COUNT(*)            AS cnt
+FROM   <② 过滤>
+GROUP  BY hs4, dest_country, decl_company;`
+  },
+  {
+    n:'④', name:'计算列', sub:'yoy_pct + 贡献度',
+    title:'④ 计算列节点',
+    desc:'把业务关心的派生指标算出来：同比、量价贡献度、结构贡献。',
+    sql:`-- 等价 SQL
+SELECT
+  *,
+  ROUND((v_2026 - v_2025) / NULLIF(v_2025,0) * 100, 2) AS yoy_pct,
+  ROUND(SUM((qty_c - qty_y) * avg_price_y) / y_total * 100, 2) AS qty_contrib,
+  ROUND(SUM(avg_price_c - avg_price_y * qty_c) / y_total * 100, 2) AS price_contrib
+FROM   <③ 聚合>;
+-- 结构贡献已通过加权分摊到上两列`
+  },
+  {
+    n:'⑤', name:'过滤', sub:'剔除噪点小户',
+    title:'⑤ 过滤节点（第二道）',
+    desc:'把噪点剔掉，让结论站得住。常用阈值：绝对额下限、yoy 极值、连续月份为空等。',
+    sql:`-- 等价 SQL
+SELECT *
+FROM   <④ 计算列>
+WHERE  v_2025 > 1000000          -- 筛掉噪点小户（< 100 万美元）
+  AND  ABS(yoy_pct) < 500;        -- 剔除录入错误（同比超 500%）`
+  },
+  {
+    n:'⑥', name:'排序 + 限制', sub:'TOP 50',
+    title:'⑥ 排序 + 行数限制',
+    desc:'把答案按业务可读的方式排出来。出口找下滑最大（升序）、找新增（降序）。',
+    sql:`-- 等价 SQL
+SELECT *
+FROM   <⑤ 过滤>
+ORDER  BY yoy_pct ASC            -- 下滑最猛的在前
+LIMIT  50;`
+  }
+];
+
+const report = [
+  {
+    stage:'STAGE · 01', name:'拆解结构',
+    example:'"这个问题主要由三个因素/部分组成"',
+    body:`
+      <h4 style="font-size:13px;font-weight:800;color:var(--gold);margin:14px 0 6px;letter-spacing:.1em;text-transform:uppercase">海关例 · 拆三维度</h4>
+      <div class="quote">"增长乏力，拆开看，主要来自 <b>三个维度</b>：
+        <br>· 按 HS 大类分，机电产品占出口 60%，今年前八月同比 <b>-4.2%</b>，是主力拖累；
+        <br>· 按国别分，对东盟 <b>+12%</b>，对欧美 <b>-8%</b>，<em>结构在悄悄切换</em>；
+        <br>· 按企业分，中小企业下滑 <b>-15%</b>，头部企业反而 <b>+6%</b>，<em>集中度在上升</em>。"</div>
+      <h4 style="font-size:13px;font-weight:800;color:var(--gold);margin:14px 0 6px;letter-spacing:.1em;text-transform:uppercase">对应《总结摘要》模板</h4>
+      <p>"这个问题主要由三个因素/部分组成。" —— <b>拆解结构</b></p>
+    `
+  },
+  {
+    stage:'STAGE · 02', name:'公式/模型结构',
+    example:'"这个业务可以用一个简单公式/框架来理解"',
+    body:`
+      <h4 style="font-size:13px;font-weight:800;color:var(--gold);margin:14px 0 6px;letter-spacing:.1em;text-transform:uppercase">海关例 · 量×价×结构</h4>
+      <div class="quote">"用 <b>贸易额 = 量 × 价 × 结构</b> 一拆：
+        <br>量贡献 <b>-2.1 个百分点</b>、价贡献 <b>-1.5 个百分点</b>、结构贡献 <b>+0.4 个百分点</b>。
+        <br>翻译成业务话——<em>量价齐跌是主因，结构升级是亮点</em>。"</div>
+      <h4 style="font-size:13px;font-weight:800;color:var(--gold);margin:14px 0 6px;letter-spacing:.1em;text-transform:uppercase">对应《总结摘要》模板</h4>
+      <p>"这个业务可以用一个简单公式/框架来理解。" —— <b>公式/模型结构</b></p>
+    `
+  },
+  {
+    stage:'STAGE · 03', name:'方案结构',
+    example:'"针对这个问题，我们有三个解决方向"',
+    body:`
+      <h4 style="font-size:13px;font-weight:800;color:var(--gold);margin:14px 0 6px;letter-spacing:.1em;text-transform:uppercase">海关例 · 三条线核实</h4>
+      <div class="quote">"建议下一步分 <b>三条线</b>核实：
+        <br>① 查机电产品前十大 HS 编码的量价明细，看是订单转移还是价格战；
+        <br>② 拉头部企业新增客户清单，看集中度上升是产业升级还是订单聚集；
+        <br>③ 抽样 5 家中小出口企业，了解是资金压力还是汇率/关税问题。"</div>
+      <h4 style="font-size:13px;font-weight:800;color:var(--gold);margin:14px 0 6px;letter-spacing:.1em;text-transform:uppercase">对应《总结摘要》模板</h4>
+      <p>"针对这个问题，我们有三个解决方向。" —— <b>方案结构</b></p>
+    `
+  }
+];
+
+const pitfalls = [
+  {
+    n:1, name:'跳过拆解，直接进工具拖节点',
+    body:`
+      <p><b style="color:var(--red)">❌ 错</b>：拿到"出口增长乏力"立刻打开工具，开始拖【过滤】【聚合】。</p>
+      <p><b style="color:var(--gold)">✅ 对</b>：先用 5 分钟白纸写公式，写不出来就别进工具。</p>
+      <h4 style="font-size:13px;font-weight:800;color:var(--gold);margin:14px 0 6px;letter-spacing:.1em;text-transform:uppercase">为什么这条最致命</h4>
+      <p>没有公式就没有"验收标准"——后面跑出来什么都对、什么都不对。</p>
+    `
+  },
+  {
+    n:2, name:'跳过找数，口径没对齐就开始聚合',
+    body:`
+      <p><b style="color:var(--red)">❌ 错</b>：在工具里只拖了"报关单"主表就开始 SUM。</p>
+      <p><b style="color:var(--gold)">✅ 对</b>：先拖"数据源"节点，确认字段名 / 字段含义 / 单位 / 是否含运保费 / 编码版本，再 join 维表。</p>
+      <h4 style="font-size:13px;font-weight:800;color:var(--gold);margin:14px 0 6px;letter-spacing:.1em;text-transform:uppercase">典型代价</h4>
+      <p>HS 编码拆到几位没说清 = 同比基线错 = 整条分析结论作废。</p>
+    `
+  },
+  {
+    n:3, name:'跳过验证，SQL 跑出来就当结论',
+    body:`
+      <p><b style="color:var(--red)">❌ 错</b>："SQL 跑出来了，同比增长 -3.6%，报告。"</p>
+      <p><b style="color:var(--gold)">✅ 对</b>：把"行数核对 / 空值检查 / 极值检查 / 抽样回溯"四节点 <em>强制挂上</em>。</p>
+      <h4 style="font-size:13px;font-weight:800;color:var(--gold);margin:14px 0 6px;letter-spacing:.1em;text-transform:uppercase">讲稿原话</h4>
+      <p>"模型说有疑点，业务说没有，通常不是业务错了。"</p>
+    `
+  },
+  {
+    n:4, name:'把"分析"当"出图"，图漂亮，结论说不清',
+    body:`
+      <p><b style="color:var(--red)">❌ 错</b>：出了一张精美的桑基图，配一句"详见附件"。</p>
+      <p><b style="color:var(--gold)">✅ 对</b>：每张图强制配 3 句话——空间拆 / 因果拆 / 主体拆。</p>
+      <h4 style="font-size:13px;font-weight:800;color:var(--gold);margin:14px 0 6px;letter-spacing:.1em;text-transform:uppercase">交付三件套</h4>
+      <p>1 张表 + 1 张图 + 3 句话 = 一个完整的分析产出。</p>
+    `
+  },
+  {
+    n:5, name:'报告里堆 SQL 词、念节点名',
+    body:`
+      <p><b style="color:var(--red)">❌ 错</b>："我用 <code>SELECT-WHERE-GROUP BY-JOIN</code> 跑了 6 个节点……"</p>
+      <p><b style="color:var(--gold)">✅ 对</b>："今年前八月同比下滑 3.6%，主要是机电产品拖累。"</p>
+      <h4 style="font-size:13px;font-weight:800;color:var(--gold);margin:14px 0 6px;letter-spacing:.1em;text-transform:uppercase">自查清单</h4>
+      <p>报告里 <em>不许出现</em> <code>SELECT</code> / <code>WHERE</code> / <code>JOIN</code> / <code>GROUP BY</code> / "节点" 这类词。</p>
+    `
+  }
+];
+
+const golden = [
+  {
+    text:'拖拽式 SQL 不是"画图工具"，是"不写代码的 SQL 编辑器"——你拖的是计算过程。',
+    body:`
+      <p><b>出处</b>：本文件 〇 节"两句话定调"+ 步骤 3 详细解释。</p>
+      <h4 style="font-size:13px;font-weight:800;color:var(--gold);margin:14px 0 6px;letter-spacing:.1em;text-transform:uppercase">应用场景</h4>
+      <p>学员问"这工具是不是只能画图"时，直接引用这一句。</p>
+    `
+  },
+  {
+    text:'两种思维是骨架，6 步是关节，拖拽是肌肉——三者缺一，模型就瘫。',
+    body:`
+      <p><b>出处</b>：本文件 十二节"记住四句话"+ 工具箱·四"两种思维的关系"。</p>
+      <h4 style="font-size:13px;font-weight:800;color:var(--gold);margin:14px 0 6px;letter-spacing:.1em;text-transform:uppercase">应用场景</h4>
+      <p>学员只学拖拽不学思维时，用来点醒"光会拖不够"。</p>
+    `
+  },
+  {
+    text:'能拖不代表会分析——会拖是手艺，会拆问题是判断；手艺决定快不快，判断决定会不会掉坑。',
+    body:`
+      <p><b>出处</b>：本文件 十二节"记住四句话"+ 步骤 1 拆解的强调。</p>
+      <h4 style="font-size:13px;font-weight:800;color:var(--gold);margin:14px 0 6px;letter-spacing:.1em;text-transform:uppercase">应用场景</h4>
+      <p>和 20260910.md 讲稿"五懂 vs 懂 AI"的论证一致——手艺 vs 判断。</p>
+    `
+  },
+  {
+    text:'6 步闭环的标志是"回译"——业务能听懂、能点头、能拍板，6 步才算完。',
+    body:`
+      <p><b>出处</b>：本文件 十节"回译检验"+ 总结摘要 §三"经典汇报三步法"。</p>
+      <h4 style="font-size:13px;font-weight:800;color:var(--gold);margin:14px 0 6px;letter-spacing:.1em;text-transform:uppercase">应用场景</h4>
+      <p>培训收尾时让学员回答"回译自检 3 问"，全答出才算结业。</p>
+    `
+  }
+];
+
+const appendix = [
+  { name:'《结构化思维与工程化思维》总结摘要', sub:'原始概念出处（腾讯文档）', href:'https://workbuddy-bga-1258344699.cos.ap-beijing.myqcloud.com/attachments/1838ff88-8f72-45f6-80c3-9354b2d00e38/1789037449_88981f54/%E5%88%86%E6%9E%90%E7%BB%93%E6%9E%84%E5%8C%96%E6%80%9D%E7%BB%B4%E5%92%8C%E5%B7%A5%E7%A8%8B%E5%8C%96%E6%80%9D%E7%BB%B4%E7%9A%84%E5%AE%9A%E4%B9%89%E3%80%81%E5%BC%82%E5%90%8C%E5%92%8C%E5%85%B7%E4%BD%93%E5%9C%BA%E6%99%AF_%E6%80%BB%E7%BB%93%E6%91%98%E8%A6%81.md?q-sign-algorithm=sha1&q-ak=AKID6A1d7VrU8gw1tYzKapy22sb7RZUQAfut&q-sign-time=1789037449%3B1796813449&q-key-time=1789037449%3B1796813449&q-header-list=host&q-url-param-list=&q-signature=8f6eee34d6482d20a3386142e4e1412a8b5322b8', target:'_blank' },
+  { name:'slide/20260910.md', sub:'开班动员讲稿', href:'20260910.md', target:'_blank' },
+  { name:'slide/20260910.html', sub:'开班动员演示页', href:'20260910.html', target:'_blank' },
+  { name:'slide/业务到数据分析模型的转化_通俗解释.md', sub:'思维科普版（海关版）', href:'业务到数据分析模型的转化_通俗解释.md', target:'_blank' },
+  { name:'slide/业务到拖拽式SQL模型的6步法_零基础培训版.md', sub:'本演示页对应的 md 培训讲义', href:'业务到拖拽式SQL模型的6步法_零基础培训版.md', target:'_blank' }
+];
+
+/* ============ 渲染：工具箱 ============ */
+const tbox = document.getElementById('toolboxGrid');
+toolbox.forEach(t=>{
+  const el=document.createElement('div');
+  el.className=`card toolbox-card ${t.cls}`;
+  el.dataset.kind='toolbox'; el.dataset.id=t.id;
+  el.innerHTML=`
+    <div class="icon">${t.icon}</div>
+    <h3>${t.name}</h3>
+    <p>${t.tagline}</p>
+    <div class="where">点击查看详情</div>
+    <div class="hint">→</div>
+  `;
+  tbox.appendChild(el);
+});
+
+/* ============ 渲染：6 步主区 ============ */
+const sgrid = document.getElementById('stepsGrid');
+steps.forEach(s=>{
+  const el=document.createElement('div');
+  el.className='card step-card';
+  el.dataset.kind='step'; el.dataset.num=s.num;
+  el.innerHTML=`
+    <span class="num">${s.num}</span>
+    <h3>${s.name}</h3>
+    <p>${s.tagline}</p>
+    <span class="thinking-bar ${s.thinking}">${s.thinking==='s'?'🧭 结构化':s.thinking==='e'?'⚙ 工程化':'🧭→⚙ 混合'}</span>
+    <div class="hint">→ 详情</div>
+  `;
+  sgrid.appendChild(el);
+});
+
+/* ============ 渲染：6 节点链路 ============ */
+const cbar = document.getElementById('chainBar');
+chain.forEach((c,i)=>{
+  if(i>0){
+    const a=document.createElement('div');
+    a.className='arrow'; a.textContent='→';
+    cbar.appendChild(a);
+  }
+  const el=document.createElement('div');
+  el.className='node'; el.dataset.kind='chain'; el.dataset.idx=i;
+  el.innerHTML=`<div class="ni">${c.n}</div><div class="nl">${c.name}</div><div class="nt">${c.sub}</div>`;
+  cbar.appendChild(el);
+});
+
+/* ============ 渲染：汇报三步法 ============ */
+const rgrid = document.getElementById('reportGrid');
+report.forEach(r=>{
+  const el=document.createElement('div');
+  el.className='card report-card';
+  el.dataset.kind='report'; el.dataset.id=r.stage;
+  el.innerHTML=`
+    <span class="stage">${r.stage}</span>
+    <h3>${r.name}</h3>
+    <p class="example">"${r.example}"</p>
+    <div class="hint">→ 完整话术</div>
+  `;
+  rgrid.appendChild(el);
+});
+
+/* ============ 渲染：5 大常见坑 ============ */
+const plist = document.getElementById('pitfallsList');
+pitfalls.forEach(p=>{
+  const el=document.createElement('div');
+  el.className='card pitfall-card';
+  el.dataset.kind='pitfall'; el.dataset.n=p.n;
+  el.innerHTML=`
+    <div class="pi">${p.n}</div>
+    <h4>${p.name}</h4>
+    <div class="phint">点击查看 ❌ vs ✅</div>
+  `;
+  plist.appendChild(el);
+});
+
+/* ============ 渲染：金句 ============ */
+const ggrid = document.getElementById('goldenGrid');
+golden.forEach(g=>{
+  const el=document.createElement('div');
+  el.className='card golden-card';
+  el.dataset.kind='golden'; el.dataset.idx=golden.indexOf(g);
+  el.innerHTML=`<div>${g.text}</div>`;
+  ggrid.appendChild(el);
+});
+
+/* ============ 渲染：附录 ============ */
+const agrid = document.getElementById('appendixGrid');
+appendix.forEach(a=>{
+  const el=document.createElement('a');
+  el.className='chip';
+  el.href=a.href; el.target=a.target||'_self'; el.rel='noopener';
+  el.innerHTML=`<b>${a.name}</b><span>${a.sub}</span>`;
+  agrid.appendChild(el);
+});
+
+/* ============ 详情：右抽屉（6 步用）============ */
+const drawer=document.getElementById('drawer');
+const drawerMask=document.getElementById('drawerMask');
+const drawerBody=document.getElementById('drawerBody');
+const drawerNum=document.getElementById('drawerNum');
+const drawerTitle=document.getElementById('drawerTitle');
+function openDrawer(s){
+  drawerNum.textContent=s.num;
+  drawerTitle.textContent=s.name;
+  drawerBody.innerHTML=s.body;
+  drawer.classList.add('on'); drawerMask.classList.add('on');
+  drawer.setAttribute('aria-hidden','false');
+}
+function closeDrawer(){
+  drawer.classList.remove('on'); drawerMask.classList.remove('on');
+  drawer.setAttribute('aria-hidden','true');
+}
+document.getElementById('drawerClose').onclick=closeDrawer;
+drawerMask.onclick=closeDrawer;
+
+/* ============ 详情：居中模态 ============ */
+const modal=document.getElementById('modal');
+const modalBody=document.getElementById('modalBody');
+const modalLabel=document.getElementById('modalLabel');
+const modalTitle=document.getElementById('modalTitle');
+function openModal(o){
+  modalLabel.textContent=o.label||'详情';
+  modalTitle.textContent=o.title||'';
+  modalBody.innerHTML=o.body;
+  modal.classList.add('on');
+  modal.setAttribute('aria-hidden','false');
+}
+function closeModal(){
+  modal.classList.remove('on');
+  modal.setAttribute('aria-hidden','true');
+}
+document.getElementById('modalClose').onclick=closeModal;
+modal.onclick=e=>{if(e.target===modal)closeModal()};
+
+/* ============ 详情：底部抽屉（6 节点用）============ */
+const bdrawer=document.getElementById('bdrawer');
+const bdrawerBody=document.getElementById('bdrawerBody');
+const bdrawerNi=document.getElementById('bdrawerNi');
+const bdrawerTitle=document.getElementById('bdrawerTitle');
+function openBdrawer(c){
+  bdrawerNi.textContent=c.n;
+  bdrawerTitle.textContent=c.title;
+  bdrawerBody.innerHTML=`<pre>${c.sql}</pre><p>${c.desc}</p>`;
+  bdrawer.classList.add('on');
+  bdrawer.setAttribute('aria-hidden','false');
+}
+function closeBdrawer(){
+  bdrawer.classList.remove('on');
+  bdrawer.setAttribute('aria-hidden','true');
+}
+document.getElementById('bdrawerClose').onclick=closeBdrawer;
+
+/* ============ 全局点击分发 ============ */
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-kind]');
+  if(!t)return;
+  const k=t.dataset.kind;
+  if(k==='step'){
+    const s=steps.find(x=>x.num===+t.dataset.num);
+    if(s)openDrawer(s);
+  }else if(k==='toolbox'){
+    const tb=toolbox.find(x=>x.id===t.dataset.id);
+    if(tb)openModal({label:'工具箱 · 核心概念',title:tb.name,body:tb.body});
+  }else if(k==='chain'){
+    openBdrawer(chain[+t.dataset.idx]);
+  }else if(k==='report'){
+    const r=report.find(x=>x.stage===t.dataset.id);
+    if(r)openModal({label:'汇报三步法',title:r.name,body:r.body});
+  }else if(k==='pitfall'){
+    const p=pitfalls.find(x=>x.n===+t.dataset.n);
+    if(p)openModal({label:'5 大常见坑',title:'坑 '+p.n+' · '+p.name,body:p.body});
+  }else if(k==='golden'){
+    const g=golden[+t.dataset.idx];
+    if(g)openModal({label:'金句',title:'记住这一句',body:g.body});
+  }
+});
+
+/* ============ 主题切换 ============ */
+const themeBtn=document.getElementById('themeBtn');
+const saved=localStorage.getItem('theme_6steps');
+if(saved)document.documentElement.setAttribute('data-theme',saved);
+themeBtn.onclick=()=>{
+  const cur=document.documentElement.getAttribute('data-theme');
+  const next=cur==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',next);
+  localStorage.setItem('theme_6steps',next);
+};
+
+/* ============ 顶部导航高亮 + 进度条 ============ */
+const sections=document.querySelectorAll('main section');
+const navLinks=document.querySelectorAll('[data-nav]');
+const progressBar=document.getElementById('progressBar');
+function onScroll(){
+  const y=window.scrollY;
+  const h=document.documentElement.scrollHeight-window.innerHeight;
+  progressBar.style.width=(h>0?(y/h)*100:0)+'%';
+  let cur='';
+  sections.forEach(s=>{
+    const r=s.getBoundingClientRect();
+    if(r.top<=120&&r.bottom>120)cur=s.id;
+  });
+  navLinks.forEach(a=>{
+    a.classList.toggle('on',a.getAttribute('href')==='#'+cur);
+  });
+}
+window.addEventListener('scroll',onScroll,{passive:true});
+onScroll();
+
+/* ============ 锚点平滑滚动 ============ */
+navLinks.forEach(a=>{
+  a.onclick=e=>{
+    e.preventDefault();
+    const id=a.getAttribute('href').slice(1);
+    const el=document.getElementById(id);
+    if(el)window.scrollTo({top:el.offsetTop-70,behavior:'smooth'});
+  };
+});
+
+/* ============ 入场动画 ============ */
+const io=new IntersectionObserver(entries=>{
+  entries.forEach(en=>{
+    if(en.isIntersecting){
+      en.target.classList.add('in');
+      io.unobserve(en.target);
+    }
+  });
+},{threshold:.12});
+document.querySelectorAll('.fade-up,section').forEach(el=>io.observe(el));
+
+/* ============ 键盘 ESC 关闭 ============ */
+window.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    closeDrawer(); closeModal(); closeBdrawer();
+  }
+});
+</script>
+</body>
+</html>
