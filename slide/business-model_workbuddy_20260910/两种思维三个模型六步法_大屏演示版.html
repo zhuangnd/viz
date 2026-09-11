@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-style="notebook" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>两种思维 · 三个模型 · 六步走通（大屏演示版）</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Noto+Serif+SC:wght@700;900&family=Roboto+Condensed:wght@400;700;900&family=Inter:wght@400;600;700;800&family=Noto+Sans+SC:wght@400;500;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans SC', 'sans-serif'],
+                        serif: ['Playfair Display', 'Noto Serif SC', 'serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                        blueprint: ['Roboto Condensed', 'Noto Sans SC', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html[data-style="notebook"][data-theme="light"] {
+            --bg-color: #FAF8F5;
+            --surface-color: #FFFFFF;
+            --surface-subtle: #F4EFEA;
+            --border-color: #E2DBD2;
+            --text-main: #1A1F26;
+            --text-secondary: #576574;
+            --brand-primary: #C05621;
+            --brand-secondary: #2C5282;
+            --accent-highlight: #DD6B20;
+            --font-family-body: 'Inter', 'Noto Sans SC', sans-serif;
+            --font-family-heading: 'Playfair Display', 'Noto Serif SC', serif;
+            --card-shadow: 0 15px 35px -5px rgba(192, 86, 33, 0.08), 0 10px 15px -5px rgba(0, 0, 0, 0.04);
+            --blueprint-display: none;
+            --mesh-opacity: 0.05;
+        }
+        html[data-style="notebook"][data-theme="dark"] {
+            --bg-color: #0F1217;
+            --surface-color: #181D24;
+            --surface-subtle: #222933;
+            --border-color: #2E3846;
+            --text-main: #F3F6FA;
+            --text-secondary: #A0ABC0;
+            --brand-primary: #F6AD55;
+            --brand-secondary: #63B3ED;
+            --accent-highlight: #ED8936;
+            --font-family-body: 'Inter', 'Noto Sans SC', sans-serif;
+            --font-family-heading: 'Playfair Display', 'Noto Serif SC', serif;
+            --card-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
+            --blueprint-display: none;
+            --mesh-opacity: 0.08;
+        }
+        html[data-style="architectural"][data-theme="light"] {
+            --bg-color: #F4F6F9;
+            --surface-color: rgba(255, 255, 255, 0.98);
+            --surface-subtle: #E9EEF4;
+            --border-color: #2C3E50;
+            --text-main: #111A24;
+            --text-secondary: #4A5B6D;
+            --brand-primary: #E67E22;
+            --brand-secondary: #2980B9;
+            --accent-highlight: #D35400;
+            --font-family-body: 'Roboto Condensed', 'Noto Sans SC', sans-serif;
+            --font-family-heading: 'Roboto Condensed', 'Noto Sans SC', sans-serif;
+            --card-shadow: 10px 10px 0px rgba(44, 62, 80, 0.15);
+            --blueprint-display: block;
+            --mesh-opacity: 0;
+        }
+        html[data-style="architectural"][data-theme="dark"] {
+            --bg-color: #081420;
+            --surface-color: rgba(11, 25, 40, 0.92);
+            --surface-subtle: #11263B;
+            --border-color: #4DD0E1;
+            --text-main: #E0F7FA;
+            --text-secondary: #80DEEA;
+            --brand-primary: #FF7043;
+            --brand-secondary: #26C6DA;
+            --accent-highlight: #FFAB91;
+            --font-family-body: 'Roboto Condensed', 'Noto Sans SC', sans-serif;
+            --font-family-heading: 'Roboto Condensed', 'Noto Sans SC', sans-serif;
+            --card-shadow: 10px 10px 0px rgba(0, 0, 0, 0.7);
+            --blueprint-display: block;
+            --mesh-opacity: 0;
+        }
+
+        * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+        body {
+            margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden;
+            background-color: var(--bg-color); color: var(--text-main);
+            font-family: var(--font-family-body);
+            transition: background-color 0.35s ease, color 0.35s ease;
+            position: relative;
+        }
+
+        h1, h2, h3, h4 { font-family: var(--font-family-heading); color: var(--text-main); letter-spacing: -0.02em; }
+
+        .blueprint-grid-overlay {
+            display: var(--blueprint-display); position: absolute; inset: 0; pointer-events: none; z-index: 1;
+            background-image: 
+                linear-gradient(var(--border-color) 1.5px, transparent 1.5px),
+                linear-gradient(90deg, var(--border-color) 1.5px, transparent 1.5px),
+                linear-gradient(rgba(120, 150, 180, 0.15) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(120, 150, 180, 0.15) 1px, transparent 1px);
+            background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
+            opacity: 0.22;
+        }
+        .blueprint-frame {
+            display: var(--blueprint-display); position: absolute; inset: 1.5rem;
+            border: 1.5px solid var(--border-color); pointer-events: none; z-index: 40; opacity: 0.45;
+        }
+        .marker {
+            display: var(--blueprint-display); position: absolute; width: 20px; height: 20px; z-index: 45; pointer-events: none;
+        }
+        .marker::before, .marker::after { content: ''; position: absolute; background: var(--brand-primary); }
+        .marker::before { width: 100%; height: 2.5px; top: 9px; left: 0; }
+        .marker::after { width: 2.5px; height: 100%; left: 9px; top: 0; }
+        .marker-tl { top: 1.25rem; left: 1.25rem; }
+        .marker-tr { top: 1.25rem; right: 1.25rem; }
+        .marker-bl { bottom: 1.25rem; left: 1.25rem; }
+        .marker-br { bottom: 1.25rem; right: 1.25rem; }
+
+        .notebook-mesh-overlay {
+            position: absolute; top: 0; right: 0; width: 55%; height: 100%;
+            pointer-events: none; z-index: 1;
+            background-image: url("data:image/svg+xml,%3Csvg width='600' height='600' viewBox='0 0 600 600' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 600C225 600 375 450 450 225C525 0 600 0 600 0V600H0Z' fill='%23C05621' fill-opacity='0.1'/%3E%3Cpath d='M600 0C375 0 225 150 150 375C75 600 0 600 0 600V0H600Z' fill='%232C5282' fill-opacity='0.1'/%3E%3C/svg%3E");
+            background-size: cover; opacity: var(--mesh-opacity); transition: opacity 0.4s ease;
+        }
+
+        .slide {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            padding: 4.5rem 6.5rem 4.5rem 6.5rem;
+            opacity: 0; visibility: hidden; pointer-events: none;
+            transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: scale(0.985);
+            display: flex; flex-direction: column; justify-content: space-between;
+            z-index: 10;
+        }
+        .slide.active { opacity: 1; visibility: visible; pointer-events: auto; transform: scale(1); z-index: 20; }
+
+        .big-card {
+            background-color: var(--surface-color); border: 1.5px solid var(--border-color);
+            border-radius: 0.75rem; padding: 2rem 2.25rem; box-shadow: var(--card-shadow);
+            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease; position: relative;
+        }
+        html[data-style="architectural"] .big-card { border-radius: 0px; }
+        .big-card:hover { border-color: var(--brand-primary); transform: translateY(-3px); }
+
+        .big-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.35rem 0.95rem; border-radius: 9999px;
+            font-size: 0.875rem; font-weight: 700;
+            background-color: var(--surface-subtle); color: var(--brand-primary);
+            border: 1.5px solid var(--border-color); letter-spacing: 0.03em;
+        }
+        html[data-style="architectural"] .big-badge { border-radius: 0px; text-transform: uppercase; }
+
+        .control-pill {
+            background-color: var(--surface-color); border: 1.5px solid var(--border-color);
+            box-shadow: var(--card-shadow); backdrop-filter: blur(10px);
+        }
+        .icon-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 2.5rem; height: 2.5rem; border-radius: 0.5rem;
+            color: var(--text-main); transition: all 0.2s ease; cursor: pointer;
+        }
+        .icon-btn:hover { background-color: var(--surface-subtle); color: var(--brand-primary); }
+
+        /* Pipeline node styles for step slides */
+        .pipe-node {
+            display: flex; align-items: center; justify-content: center;
+            width: 2.75rem; height: 2.75rem; border-radius: 50%;
+            font-size: 1rem; font-weight: 700;
+            background: var(--surface-subtle); color: var(--text-secondary);
+            border: 2px solid var(--border-color); transition: all 0.2s;
+        }
+        .pipe-node.active { background: var(--brand-primary); color: var(--surface-color); border-color: var(--brand-primary); }
+        .pipe-node.s-thinking { border-color: #818cf8; color: #818cf8; }
+        .pipe-node.e-thinking { border-color: #34d399; color: #34d399; }
+        .pipe-arrow { color: var(--text-secondary); opacity: 0.4; font-size: 0.875rem; }
+
+        @media print {
+            body { overflow: visible !important; height: auto !important; background: white !important; color: black !important; }
+            .no-print, .blueprint-frame, .marker, .notebook-mesh-overlay, .blueprint-grid-overlay { display: none !important; }
+            .slide {
+                display: flex !important; position: relative !important; opacity: 1 !important;
+                visibility: visible !important; transform: none !important;
+                page-break-after: always !important; height: 100vh !important; padding: 3rem !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="blueprint-grid-overlay"></div>
+    <div class="notebook-mesh-overlay"></div>
+    <div class="blueprint-frame"></div>
+    <div class="marker marker-tl"></div>
+    <div class="marker marker-tr"></div>
+    <div class="marker marker-bl"></div>
+    <div class="marker marker-br"></div>
+
+    <header class="no-print fixed top-6 left-12 right-12 flex items-center justify-between z-50 pointer-events-none">
+        <div class="flex items-center gap-3 pointer-events-auto">
+            <span class="big-badge font-mono">
+                <i class="fas fa-desktop"></i> 大屏幕演示版
+            </span>
+            <span class="text-sm font-semibold opacity-80 hidden md:inline">
+                两种思维 · 三个模型 · 六步走通
+            </span>
+        </div>
+        <div class="control-pill pointer-events-auto px-4 py-2 rounded-full flex items-center gap-3">
+            <button id="styleToggleBtn" onclick="togglePresentationStyle()" class="px-3 py-1 text-xs font-bold rounded flex items-center gap-2 transition-colors" title="切换设计风格 (S)">
+                <i class="fas fa-palette text-amber-500"></i>
+                <span id="styleNameLabel">NotebookLM 雅致风</span>
+            </button>
+            <div class="w-px h-4 bg-gray-300 dark:bg-gray-700"></div>
+            <button onclick="toggleTheme()" class="icon-btn !w-8 !h-8 text-sm" title="切换深浅主题 (T)">
+                <i id="themeIcon" class="fas fa-moon"></i>
+            </button>
+            <div class="w-px h-4 bg-gray-300 dark:bg-gray-700"></div>
+            <button onclick="toggleFullScreen()" class="icon-btn !w-8 !h-8 text-sm" title="全屏演示 (F)">
+                <i class="fas fa-expand"></i>
+            </button>
+            <button onclick="window.print()" class="icon-btn !w-8 !h-8 text-sm" title="导出 PDF">
+                <i class="fas fa-print"></i>
+            </button>
+        </div>
+    </header>
+
+    <main id="presentation-stage" class="relative w-full h-full">
+
+        <!-- ==================== Slide 01: 封面 ==================== -->
+        <section class="slide active" data-index="0">
+            <div class="flex-1 flex flex-col justify-center max-w-6xl mx-auto w-full pt-8">
+                <div class="mb-6">
+                    <span class="big-badge text-sm font-mono">
+                        <i class="fas fa-compass"></i> 零基础 SQL 学员培训
+                    </span>
+                </div>
+                
+                <h1 class="text-6xl lg:text-8xl font-black tracking-tight leading-[1.1] mb-8">
+                    SQL 不是最难的<br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-orange-500 to-sky-600">
+                        想清楚才是。
+                    </span>
+                </h1>
+
+                <p class="text-2xl lg:text-3xl text-secondary font-light max-w-4xl mb-12 leading-relaxed">
+                    <strong class="font-bold text-primary">两种思维</strong> · <strong class="font-bold text-primary">三个模型</strong> · <strong class="font-bold text-primary">六步走通</strong>
+                </p>
+
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-5 mb-8">
+                    <div class="big-card !p-5 text-center">
+                        <div class="text-lg font-black text-primary">懂业务</div>
+                    </div>
+                    <div class="big-card !p-5 text-center">
+                        <div class="text-lg font-black text-primary">懂系统</div>
+                    </div>
+                    <div class="big-card !p-5 text-center">
+                        <div class="text-lg font-black text-primary">懂技术</div>
+                    </div>
+                    <div class="big-card !p-5 text-center">
+                        <div class="text-lg font-black text-primary">懂数据</div>
+                    </div>
+                    <div class="big-card !p-5 text-center">
+                        <div class="text-lg font-black text-primary">懂分析</div>
+                    </div>
+                    <div class="big-card !p-5 text-center">
+                        <div class="text-lg font-black text-primary">沟通协调</div>
+                    </div>
+                </div>
+
+                <div class="big-card !p-5 bg-surface-subtle text-center text-xl font-bold">
+                    五懂越硬，AI 越是利器；五懂越虚，AI 越是隐患。
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-border flex justify-between items-center text-sm text-secondary font-mono">
+                <span>PROJECT: 两种思维 · 三个模型 · 六步走通</span>
+                <span>快捷键: [← / →] 翻页，[T] 换主题，[S] 换风格</span>
+            </div>
+        </section>
+
+        <!-- ==================== Slide 02: 思维工具箱 ==================== -->
+        <section class="slide" data-index="1">
+            <div class="mb-4">
+                <div class="big-badge mb-2"><i class="fas fa-toolbox"></i> 模块一 · 思维工具箱</div>
+                <h2 class="text-5xl font-black">两种思维 + 三个模型</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 flex-1 items-center">
+                <div class="big-card h-full flex flex-col justify-between border-t-8 border-t-indigo-400 !p-8">
+                    <div>
+                        <h3 class="text-4xl font-black mb-3">结构化思维</h3>
+                        <p class="text-xl font-bold text-primary mb-6">把含糊的问题拆开看、说清楚</p>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-surface-subtle rounded-lg flex items-center gap-4">
+                                <i class="fas fa-sitemap text-indigo-400 text-xl"></i>
+                                <div class="text-base">解决：如何<strong>看清</strong>问题</div>
+                            </div>
+                            <div class="p-3 bg-surface-subtle rounded-lg flex items-center gap-4">
+                                <i class="fas fa-layer-group text-indigo-400 text-xl"></i>
+                                <div class="text-base">分解 · 分类 · 构建逻辑关系</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pt-4 border-t border-border text-base font-bold">产出：看懂题</div>
+                </div>
+
+                <div class="big-card h-full flex flex-col justify-between border-t-8 border-t-emerald-400 !p-8">
+                    <div>
+                        <h3 class="text-4xl font-black mb-3">工程化思维</h3>
+                        <p class="text-xl font-bold text-primary mb-6">把想法变成能落地、能验证的步骤</p>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-surface-subtle rounded-lg flex items-center gap-4">
+                                <i class="fas fa-bullseye text-emerald-400 text-xl"></i>
+                                <div class="text-base">解决：如何<strong>改变</strong>现实</div>
+                            </div>
+                            <div class="p-3 bg-surface-subtle rounded-lg flex items-center gap-4">
+                                <i class="fas fa-shield-check text-emerald-400 text-xl"></i>
+                                <div class="text-base">可定义 · 模块化 · 可验证 · 迭代</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pt-4 border-t border-border text-base font-bold">产出：做对题</div>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-border flex justify-between text-sm text-secondary font-mono">
+                <span>DUAL MINDSETS: STRUCTURED & ENGINEERING</span>
+                <span>02 / 14</span>
+            </div>
+        </section>
+
+        <!-- ==================== Slide 03: 三个模型 ==================== -->
+        <section class="slide" data-index="2">
+            <div class="mb-4">
+                <div class="big-badge mb-2"><i class="fas fa-stairs"></i> 模块一 · 翻译阶梯</div>
+                <h2 class="text-5xl font-black">三个模型 · 接力</h2>
+            </div>
+
+            <div class="flex-1 flex flex-col justify-center max-w-6xl mx-auto w-full">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                    <div class="big-card !p-8 flex flex-col justify-between border-t-4 border-t-indigo-400">
+                        <div>
+                            <span class="big-badge text-indigo-600 mb-4">问题模型</span>
+                            <h3 class="text-3xl font-black mb-3">一个理解问题的简单公式</h3>
+                            <p class="text-lg text-secondary leading-relaxed">把含糊的业务话拆成可以计算的变量。</p>
+                        </div>
+                        <div class="pt-4 border-t border-border font-bold text-lg text-primary">拆清楚</div>
+                    </div>
+
+                    <div class="big-card !p-8 flex flex-col justify-between border-t-4 border-t-blue-400">
+                        <div>
+                            <span class="big-badge text-blue-600 mb-4">信息模型</span>
+                            <h3 class="text-3xl font-black mb-3">数据在哪张表、什么口径</h3>
+                            <p class="text-lg text-secondary leading-relaxed">公式里的每个变量，对应到哪张表哪个字段。</p>
+                        </div>
+                        <div class="pt-4 border-t border-border font-bold text-lg text-primary">找到数</div>
+                    </div>
+
+                    <div class="big-card !p-8 flex flex-col justify-between border-t-4 border-t-emerald-400">
+                        <div>
+                            <span class="big-badge text-emerald-600 mb-4">数学模型</span>
+                            <h3 class="text-3xl font-black mb-3">把答案算出来的方法</h3>
+                            <p class="text-lg text-secondary leading-relaxed">一条能跑的 SQL，或一组拖拽节点。</p>
+                        </div>
+                        <div class="pt-4 border-t border-border font-bold text-lg text-primary">算出来</div>
+                    </div>
+                </div>
+
+                <div class="big-card !p-5 bg-surface-subtle text-center text-xl font-bold">
+                    先拆清楚，再找到数，最后算出来。<span class="text-primary">跳过任何一个，后面都站不住。</span>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-border flex justify-between text-sm text-secondary font-mono">
+                <span>MODELS: PROBLEM → INFORMATION → MATH</span>
+                <span>03 / 14</span>
+            </div>
+        </section>
+
+        <!-- ==================== Slide 04: 六步法全图 ==================== -->
+        <section class="slide" data-index="3">
+            <div class="mb-4">
+                <div class="big-badge mb-2"><i class="fas fa-map"></i> 模块二 · 六步法全图</div>
+                <h2 class="text-5xl font-black">先看终点再走路</h2>
+            </div>
+
+            <div class="flex-1 flex flex-col justify-center max-w-6xl mx-auto w-full">
+                <!-- Pipeline -->
+                <div class="flex items-center justify-center gap-3 mb-10">
+                    <div class="pipe-node s-thinking">①</div><span class="pipe-arrow">→</span>
+                    <div class="pipe-node s-thinking">②</div><span class="pipe-arrow">→</span>
+                    <div class="pipe-node e-thinking">③</div><span class="pipe-arrow">→</span>
+                    <div class="pipe-node e-thinking">④</div><span class="pipe-arrow">→</span>
+                    <div class="pipe-node e-thinking">⑤</div><span class="pipe-arrow">→</span>
+                    <div class="pipe-node s-thinking">⑥</div>
+                </div>
+
+                <div class="flex justify-center gap-8 mb-8 text-base">
+                    <span><span class="inline-block w-3 h-3 rounded-full bg-indigo-400 mr-2"></span>结构化</span>
+                    <span><span class="inline-block w-3 h-3 rounded-full bg-emerald-400 mr-2"></span>工程化</span>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-5 mb-8">
+                    <div class="big-card !p-5 border-t-4 border-t-indigo-400">
+                        <div class="text-lg font-black mb-1">① 拆解</div>
+                        <div class="text-sm text-secondary">把含糊的业务话拆成公式</div>
+                        <div class="text-xs font-mono text-primary mt-2">→ 问题模型</div>
+                    </div>
+                    <div class="big-card !p-5 border-t-4 border-t-indigo-400">
+                        <div class="text-lg font-black mb-1">② 找数</div>
+                        <div class="text-sm text-secondary">变量对应到表和字段</div>
+                        <div class="text-xs font-mono text-primary mt-2">→ 信息模型</div>
+                    </div>
+                    <div class="big-card !p-5 border-t-4 border-t-emerald-400">
+                        <div class="text-lg font-black mb-1">③ 建模</div>
+                        <div class="text-sm text-secondary">拖节点，拼出查询</div>
+                        <div class="text-xs font-mono text-primary mt-2">→ SQL</div>
+                    </div>
+                    <div class="big-card !p-5 border-t-4 border-t-emerald-400">
+                        <div class="text-lg font-black mb-1">④ 验证</div>
+                        <div class="text-sm text-secondary">行数、空值、极值、抽样</div>
+                        <div class="text-xs font-mono text-primary mt-2">→ 验证清单</div>
+                    </div>
+                    <div class="big-card !p-5 border-t-4 border-t-emerald-400">
+                        <div class="text-lg font-black mb-1">⑤ 分析</div>
+                        <div class="text-sm text-secondary">分组、排序、算贡献</div>
+                        <div class="text-xs font-mono text-primary mt-2">→ 表 + 图 + 三句话</div>
+                    </div>
+                    <div class="big-card !p-5 border-t-4 border-t-indigo-400">
+                        <div class="text-lg font-black mb-1">⑥ 报告</div>
+                        <div class="text-sm text-secondary">翻译回业务话</div>
+                        <div class="text-xs font-mono text-primary mt-2">→ 一页纸结论</div>
+                    </div>
+                </div>
+
+                <div class="big-card !p-4 bg-surface-subtle text-center text-lg font-bold">
+                    新手不是不会分析，是不会写 SQL。<span class="text-primary">拖拽式 SQL = 把代码变成乐高积木。</span>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-border flex justify-between text-sm text-secondary font-mono">
+                <span>SIX STEPS OVERVIEW</span>
+                <span>04 / 14</span>
+            </div>
+        </section>
+
+        <!-- ==================== Slide 05: Step 1 拆解 ==================== -->
+        <section class="slide" data-index="4">
+            <div class="mb-4">
+                <div class="flex items-center gap-4 mb-3">
+                    <div class="big-badge"><i class="fas fa-filter"></i> 步骤 1</div>
+                    <span class="big-badge text-indigo-600 bg-indigo-500/10">结构化思维</span>
+                    <span class="big-badge text-amber-600 bg-amber-500/10">→ 问题模型</span>
+                </div>
+                <h2 class="text-5xl font-black">拆解：把含糊的业务话拆成公式</h2>
+            </div>
+
+            <div class="flex-1 flex flex-col justify-center max-w-6xl mx-auto w-full">
+                <div class="big-card bg-amber-500/5 border-l-4 border-l-amber-600 mb-8 !p-6">
+                    <span class="text-xs font-mono font-bold text-amber-600 uppercase">业务原话</span>
+                    <h3 class="text-2xl font-black mt-2">"今年出口贸易增长乏力，得查查怎么回事。"</h3>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="big-card !p-6 border-t-4 border-t-indigo-400">
+                        <h4 class="text-2xl font-black mb-3 text-indigo-500">跟谁比？</h4>
+                        <p class="text-base text-secondary leading-relaxed">去年同期 / 全国均值 / 兄弟关</p>
+                    </div>
+                    <div class="big-card !p-6 border-t-4 border-t-indigo-400">
+                        <h4 class="text-2xl font-black mb-3 text-indigo-500">乏力在哪？</h4>
+                        <p class="text-base text-secondary leading-relaxed">国家、HS 大类、企业、贸易方式</p>
+                    </div>
+                    <div class="big-card !p-6 border-t-4 border-t-indigo-400">
+                        <h4 class="text-2xl font-black mb-3 text-indigo-500">为什么乏力？</h4>
+                        <p class="text-base text-secondary leading-relaxed">量？价？结构变了？</p>
+                    </div>
+                </div>
+
+                <div class="big-card !p-6 bg-surface-subtle font-mono text-lg leading-relaxed">
+                    <span class="text-primary font-bold">出口贸易额</span> = Σ 各 HS 编码 × 单价 × 数量<br>
+                    <span class="text-primary font-bold">同比增长率</span> = (本期 − 同期) ÷ 同期<br>
+                    <span class="text-primary font-bold">乏力归因</span> &nbsp;&nbsp; = 量贡献 + 价贡献 + 结构贡献
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-border flex justify-between text-sm text-secondary font-mono">
+                <span>STEP 1: DECOMPOSE</span>
+                <span>05 / 14</span>
+            </div>
+        </section>
+
+        <!-- ==================== Slide 06: Step 2 找数 ==================== -->
+        <section class="slide" data-index="5">
+            <div class="mb-4">
+                <div class="flex items-center gap-4 mb-3">
+                    <div class="big-badge"><i class="fas fa-database"></i> 步骤 2</div>
+                    <span class="big-badge text-indigo-600 bg-indigo-500/10">结构化 → 工程化</span>
+                    <span class="big-badge text-amber-600 bg-amber-500/10">→ 信息模型</span>
+                </div>
+                <h2 class="text-5xl font-black">找数：把公式变量翻译成"数据在哪儿"</h2>
+            </div>
+
+            <div class="flex-1 flex flex-col justify-center max-w-6xl mx-auto w-full">
+                <div class="big-card !p-8 font-mono text-xl leading-relaxed mb-8 bg-surface-subtle border border-indigo-400/20">
+                    <span class="text-indigo-500 font-bold">[报关单主表]</span>──┬──[商品归类表]<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├──[企业备案表]<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├──[国别代码表]<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└──[历史归档表]
+                </div>
+
+                <div class="big-card !p-6 bg-surface-subtle text-center text-xl font-bold">
+                    上来就拖节点 = 数据从哪来都没搞清楚。<br>
+                    <span class="text-primary">先只拖"数据源"节点，确认字段名、含义、单位。</span>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-border flex justify-between text-sm text-secondary font-mono">
+                <span>STEP 2: LOCATE DATA</span>
+                <span>06 / 14</span>
+            </div>
+        </section>
+
+        <!-- ==================== Slide 07: Step 3 建模 ==================== -->
+        <section class="slide" data-index="6">
+            <div class="mb-4">
+                <div class="flex items-center gap-4 mb-3">
+                    <div class="big-badge"><i class="fas fa-cubes-stacked"></i> 步骤 3</div>
+                    <span class="big-badge text-emerald-600 bg-emerald-500/10">工程化思维</span>
+                    <span class="big-badge text-amber-600 bg-amber-500/10">→ 数学模型 = SQL</span>
+                </div>
+                <h2 class="text-5xl font-black">建模：把 SQL 拆成乐高积木</h2>
+            </div>
+
+            <div class="flex-1 flex flex-col justify-center max-w-6xl mx-auto w-full">
+                <div class="flex items-center justify-center gap-4 mb-10 flex-wrap">
+                    <div class="big-card !p-4 !px-6 text-center border-2 border-emerald-400/30">
+                        <div class="text-lg font-black">① 数据源</div>
+                    </div>
+                    <span class="text-2xl text-amber-500 font-bold">→</span>
+                    <div class="big-card !p-4 !px-6 text-center border-2 border-emerald-400/30">
+                        <div class="text-lg font-black">② 过滤</div>
+                    </div>
+                    <span class="text-2xl text-amber-500 font-bold">→</span>
+                    <div class="big-card !p-4 !px-6 text-center border-2 border-emerald-400/30">
+                        <div class="text-lg font-black">③ 聚合</div>
+                    </div>
+                    <span class="text-2xl text-amber-500 font-bold">→</span>
+                    <div class="big-card !p-4 !px-6 text-center border-2 border-emerald-400/30">
+                        <div class="text-lg font-black">④ 计算列</div>
+                    </div>
+                    <span class="text-2xl text-amber-500 font-bold">→</span>
+                    <div class="big-card !p-4 !px-6 text-center border-2 border-emerald-400/30">
+                        <div class="text-lg font-black">⑤ 过滤</div>
+                    </div>
+                    <span class="text-2xl text-amber-500 font-bold">→</span>
+                    <div class="big-card !p-4 !px-6 text-center border-2 border-emerald-400/30">
+                        <div class="text-lg font-black">⑥ 排序</div>
+                    </div>
+                </div>
+
+                <div class="big-card !p-8 bg-surface-subtle text-center">
+                    <h4 class="text-2xl font-black mb-4 text-primary">每个节点 = 一段 SQL 代码，你只是没看见它</h4>
+                    <p class="text-xl text-secondary leading-relaxed">
+                        拖出来的不是漂亮的图，是<strong>能跑、能改、能复用</strong>的 SQL。
+                    </p>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-border flex justify-between text-sm text-secondary font-mono">
+                <span>STEP 3: BUILD MODEL</span>
+                <span>07 / 14</span>
+            </div>
+        </section>
+
+        <!-- ==================== Slide 08: Step 4 验证 ==================== -->
+        <section class="slide" data-index="7">
+            <div class="mb-4">
+                <div class="flex items-center gap-4 mb-3">
+                    <div class="big-badge"><i class="fas fa-shield-halved"></i> 步骤 4</div>
+                    <span class="big-badge text-emerald-600 bg-emerald-500/10">工程化思维 · 可验证</span>
+                </div>
+                <h2 class="text-5xl font-black">验证：先验，再解读</h2>
+            </div>
+
+            <div class="flex-1 flex flex-col justify-center max-w-6xl mx-auto w-full">
+                <div class="big-card bg-red-500/5 border-l-4 border-l-red-500 mb-8 !p-6">
+                    <div class="text-2xl font-black text-red-600">不要先激动。先验，再解读。</div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+                    <div class="big-card !p-6 text-center">
+                        <div class="w-14 h-14 mx-auto rounded-full bg-blue-500/20 text-blue-600 flex items-center justify-center font-black text-2xl mb-4">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <h4 class="text-xl font-bold mb-2">行数核对</h4>
+                        <p class="text-sm text-secondary">工具数 = 月报数</p>
+                    </div>
+                    <div class="big-card !p-6 text-center">
+                        <div class="w-14 h-14 mx-auto rounded-full bg-amber-500/20 text-amber-600 flex items-center justify-center font-black text-2xl mb-4">
+                            <i class="fas fa-magnifying-glass"></i>
+                        </div>
+                        <h4 class="text-xl font-bold mb-2">空值检查</h4>
+                        <p class="text-sm text-secondary">关键空值占比 ＜ 0.5%</p>
+                    </div>
+                    <div class="big-card !p-6 text-center">
+                        <div class="w-14 h-14 mx-auto rounded-full bg-purple-500/20 text-purple-600 flex items-center justify-center font-black text-2xl mb-4">
+                            <i class="fas fa-arrows-left-right"></i>
+                        </div>
+                        <h4 class="text-xl font-bold mb-2">极值检查</h4>
+                        <p class="text-sm text-secondary">确认不是录错</p>
+                    </div>
+                    <div class="big-card !p-6 text-center border-2 border-primary/40">
+                        <div class="w-14 h-14 mx-auto rounded-full bg-emerald-500/20 text-emerald-600 flex items-center justify-center font-black text-2xl mb-4">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+                        <h4 class="text-xl font-bold mb-2">抽样回溯</h4>
+                        <p class="text-sm text-secondary">随机抽样回原系统比对</p>
+                    </div>
+                </div>
+
+                <div class="big-card !p-5 bg-surface-subtle text-center text-lg font-bold">
+                    "模型说有疑点，业务说没有，通常不是业务错了。"<br>
+                    <span class="text-primary">可验证</span> 是最容易被忽略、但最值钱的一格。
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-border flex justify-between text-sm text-secondary font-mono">
+                <span>STEP 4: VERIFY</span>
+                <span>08 / 14</span>
+            </div>
+        </section>
+
+        <!-- ==================== Slide 09: Step 5 分析 ==================== -->
+        <section class="slide" data-index="8">
+            <div class="mb-4">
+                <div class="flex items-center gap-4 mb-3">
+                    <div class="big-badge"><i class="fas fa-chart-bar"></i> 步骤 5</div>
+                    <span class="big-badge text-indigo-600 bg-indigo-500/10">工程化 → 结构化</span>
+                    <span class="big-badge text-amber-600 bg-amber-500/10">→ 表 + 图 + 三句话</span>
+                </div>
+                <h2 class="text-5xl font-black">分析：产出三件套</h2>
+            </div>
+
+            <div class="flex-1 flex flex-col justify-center max-w-6xl mx-auto w-full">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                    <div class="big-card !p-8 border-l-4 border-l-indigo-400">
+                        <span class="big-badge text-indigo-600 mb-4">空间拆</span>
+                        <p class="text-lg text-secondary leading-relaxed mt-4">
+                            "下滑 60% 集中在机电产品，<br>前 3 个 HS 大类贡献了 8 成。"
+                        </p>
+                    </div>
+                    <div class="big-card !p-8 border-l-4 border-l-amber-400">
+                        <span class="big-badge text-amber-600 mb-4">因果拆</span>
+                        <p class="text-lg text-secondary leading-relaxed mt-4">
+                            "量贡献 -2.1pp、价贡献 -1.5pp——<br><strong class="text-primary">量价齐跌是主因</strong>。"
+                        </p>
+                    </div>
+                    <div class="big-card !p-8 border-l-4 border-l-emerald-400">
+                        <span class="big-badge text-emerald-600 mb-4">主体拆</span>
+                        <p class="text-lg text-secondary leading-relaxed mt-4">
+                            "中小企业 -15%，头部 +6%，<br><strong class="text-primary">集中度在上升</strong>。"
+                        </p>
+                    </div>
+                </div>
+
+                <div class="big-card !p-5 bg-surface-subtle text-center text-xl font-bold">
+                    SQL 跑得动是工程化，能<span class="text-primary">讲清楚</span>为什么下滑则是结构化思维。
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-border flex justify-between text-sm text-secondary font-mono">
+                <span>STEP 5: ANALYZE</span>
+                <span>09 / 14</span>
+            </div>
+        </section>
+
+        <!-- ==================== Slide 10: Step 6 报告 ==================== -->
+        <section class="slide" data-index="9">
+            <div class="mb-4">
+                <div class="flex items-center gap-4 mb-3">
+                    <div class="big-badge"><i class="fas fa-file-lines"></i> 步骤 6</div>
+                    <span class="big-badge text-indigo-600 bg-indigo-500/10">结构化思维 · 回译闭环</span>
+                </div>
+                <h2 class="text-5xl font-black">报告：汇报三步法</h2>
+            </div>
+
+            <div class="flex-1 flex flex-col justify-center max-w-6xl mx-auto w-full">
+                <div class="space-y-6 mb-8">
+                    <div class="big-card !p-8 border-l-8 border-l-rose-500">
+                        <div class="text-sm font-mono font-bold text-rose-500 mb-2">第一步 · 拆解</div>
+                        <div class="text-xl leading-relaxed">
+                            "增长乏力，拆开看，主要来自<strong>三个维度</strong>——<br>
+                            HS 大类、国别、企业。"
+                        </div>
+                    </div>
+                    <div class="big-card !p-8 border-l-8 border-l-amber-500">
+                        <div class="text-sm font-mono font-bold text-amber-500 mb-2">第二步 · 模型</div>
+                        <div class="text-xl leading-relaxed">
+                            "量贡献 -2.1pp、价贡献 -1.5pp、结构 +0.4pp——<br>
+                            <strong class="text-primary">量价齐跌是主因，结构升级是亮点</strong>。"
+                        </div>
+                    </div>
+                    <div class="big-card !p-8 border-l-8 border-l-emerald-500">
+                        <div class="text-sm font-mono font-bold text-emerald-500 mb-2">第三步 · 方案</div>
+                        <div class="text-xl leading-relaxed">
+                            "建议下一步分<strong>三条线</strong>核实。"
+                        </div>
+                    </div>
+                </div>
+
+                <div class="big-card !p-5 bg-surface-subtle text-center text-xl font-bold text-primary">
+                    业务点头了，6 步才算闭环。只会念节点名，翻译链就是断的。
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-border flex justify-between text-sm text-secondary font-mono">
+                <span>STEP 6: REPORT</span>
+                <span>10 / 14</span>
+            </div>
+        </section>
+
+        <!-- ==================== Slide 11: 学员练习 ==================== -->
+        <section class="slide" data-index="10">
+            <div class="mb-4">
+                <div class="big-badge mb-2"><i class="fas fa-pen-to-square"></i> 模块四 · 学员练习</div>
+                <h2 class="text-5xl font-black">现在轮到你了</h2>
+            </div>
+
+            <div class="flex-1 flex flex-col justify-center max-w-6xl mx-auto w-full">
+                <div class="big-card bg-amber-500/5 border-l-4 border-l-amber-600 mb-8 !p-8">
+                    <h3 class="text-3xl font-black mb-3">"昨天通关数据好像有点异常，看看发生了什么。"</h3>
+                    <p class="text-xl text-secondary">用六步法，快速走一遍。</p>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-5 mb-8">
+                    <div class="big-card !p-5">
+                        <div class="w-10 h-10 rounded-full bg-amber-500/20 text-amber-600 flex items-center justify-center font-black text-lg mb-3">①</div>
+                        <div class="text-lg font-bold">拆解</div>
+                        <div class="text-sm text-secondary">在白纸上拼出公式</div>
+                    </div>
+                    <div class="big-card !p-5">
+                        <div class="w-10 h-10 rounded-full bg-amber-500/20 text-amber-600 flex items-center justify-center font-black text-lg mb-3">②</div>
+                        <div class="text-lg font-bold">找数</div>
+                        <div class="text-sm text-secondary">画出表关系</div>
+                    </div>
+                    <div class="big-card !p-5">
+                        <div class="w-10 h-10 rounded-full bg-amber-500/20 text-amber-600 flex items-center justify-center font-black text-lg mb-3">③</div>
+                        <div class="text-lg font-bold">建模</div>
+                        <div class="text-sm text-secondary">拖出节点链</div>
+                    </div>
+                    <div class="big-card !p-5">
+                        <div class="w-10 h-10 rounded-full bg-amber-500/20 text-amber-600 flex items-center justify-center font-black text-lg mb-3">④</div>
+                        <div class="text-lg font-bold">验证</div>
+                        <div class="text-sm text-secondary">行数、空值、极值</div>
+                    </div>
+                    <div class="big-card !p-5">
+                        <div class="w-10 h-10 rounded-full bg-amber-500/20 text-amber-600 flex items-center justify-center font-black text-lg mb-3">⑤</div>
+                        <div class="text-lg font-bold">分析</div>
+                        <div class="text-sm text-secondary">写三句话</div>
+                    </div>
+                    <div class="big-card !p-5">
+                        <div class="w-10 h-10 rounded-full bg-amber-500/20 text-amber-600 flex items-center justify-center font-black text-lg mb-3">⑥</div>
+                        <div class="text-lg font-bold">报告</div>
+                        <div class="text-sm text-secondary">用汇报三步法讲出来</div>
+                    </div>
+                </div>
+
+                <div class="big-card !p-5 bg-surface-subtle flex items-center gap-4">
+                    <span class="text-3xl"><i class="fas fa-clock text-amber-500"></i></span>
+                    <div class="text-xl font-bold text-primary">建议用时：20 分钟</div>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-border flex justify-between text-sm text-secondary font-mono">
+                <span>EXERCISE: YOUR TURN</span>
+                <span>11 / 14</span>
+            </div>
+        </section>
+
+        <!-- ==================== Slide 12: 避坑清单 ==================== -->
+        <section class="slide" data-index="11">
+            <div class="mb-4">
+                <div class="big-badge mb-2"><i class="fas fa-triangle-exclamation"></i> 模块五 · 避坑清单</div>
+                <h2 class="text-5xl font-black">五大陷阱与回译检验</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-8 flex-1 items-center">
+                <div class="md:col-span-8 big-card !p-8">
+                    <h3 class="text-2xl font-black mb-6 text-red-600 flex items-center gap-3">
+                        <i class="fas fa-skull-crossbones"></i> 避坑清单
+                    </h3>
+                    <div class="space-y-3 text-base">
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-surface-subtle">
+                            <span class="font-bold text-red-500">❌ 跳过拆解，直接拖节点</span>
+                            <strong class="text-emerald-500">✅ 白纸写不出公式就别碰工具</strong>
+                        </div>
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-surface-subtle">
+                            <span class="font-bold text-red-500">❌ 口径没对齐就聚合</span>
+                            <strong class="text-emerald-500">✅ 先确认字段含义</strong>
+                        </div>
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-surface-subtle">
+                            <span class="font-bold text-red-500">❌ 跳过验证直接给结论</span>
+                            <strong class="text-emerald-500">✅ 强制挂上四个验证节点</strong>
+                        </div>
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-surface-subtle">
+                            <span class="font-bold text-red-500">❌ 图很漂亮但结论说不清</span>
+                            <strong class="text-emerald-500">✅ 每张图强制配三句话</strong>
+                        </div>
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-surface-subtle">
+                            <span class="font-bold text-red-500">❌ 报告里堆 SQL 术语</span>
+                            <strong class="text-emerald-500">✅ 不许出现 SELECT / WHERE / JOIN</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="md:col-span-4 big-card bg-surface-subtle !p-8 space-y-6">
+                    <h3 class="text-2xl font-black text-primary flex items-center gap-3">
+                        <i class="fas fa-clipboard-check"></i> 回译三问
+                    </h3>
+                    <div class="space-y-4 text-base">
+                        <div class="p-4 bg-surface rounded-lg border border-border text-center">
+                            <div class="text-3xl font-black text-amber-500 mb-2">❶</div>
+                            <p>能用业务话讲清六步做什么？</p>
+                        </div>
+                        <div class="p-4 bg-surface rounded-lg border border-border text-center">
+                            <div class="text-3xl font-black text-amber-500 mb-2">❷</div>
+                            <p>能把任何业务话拆成公式？</p>
+                        </div>
+                        <div class="p-4 bg-surface rounded-lg border border-border text-center">
+                            <div class="text-3xl font-black text-amber-500 mb-2">❸</div>
+                            <p>能画出汇报一页纸？</p>
+                        </div>
+                    </div>
+                    <div class="pt-4 border-t border-border text-base font-bold text-primary text-center">
+                        三个都能 → 你就不是零基础了。
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-border flex justify-between text-sm text-secondary font-mono">
+                <span>PITFALLS & 3 SELF-CHECK QUESTIONS</span>
+                <span>12 / 14</span>
+            </div>
+        </section>
+
+        <!-- ==================== Slide 13: 四句话带走 ==================== -->
+        <section class="slide" data-index="12">
+            <div class="flex-1 flex flex-col justify-center items-center text-center max-w-5xl mx-auto w-full">
+                <div class="big-badge mb-6"><i class="fas fa-flag-checkered"></i> 收尾 · 四句话带走</div>
+
+                <h2 class="text-5xl lg:text-6xl font-black mb-10">
+                    带着这四句话离开
+                </h2>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full text-left mb-8">
+                    <div class="big-card !p-6">
+                        <div class="text-3xl font-black text-amber-500 mb-3">❶</div>
+                        <p class="text-lg text-secondary leading-relaxed">
+                            拖拽式 SQL 不是画图工具，<br>是<strong class="text-primary">不写代码的 SQL 编辑器</strong>。
+                        </p>
+                    </div>
+                    <div class="big-card !p-6">
+                        <div class="text-3xl font-black text-indigo-400 mb-3">❷</div>
+                        <p class="text-lg text-secondary leading-relaxed">
+                            <strong class="text-indigo-400">两种思维</strong>是骨架，<strong class="text-amber-500">六步</strong>是关节，<strong class="text-emerald-400">拖拽</strong>是肌肉。
+                        </p>
+                    </div>
+                    <div class="big-card !p-6">
+                        <div class="text-3xl font-black text-amber-500 mb-3">❸</div>
+                        <p class="text-lg text-secondary leading-relaxed">
+                            会拖是手艺，会拆问题是判断。<br>手艺决定<strong>快不快</strong>，判断决定<strong>掉不掉坑</strong>。
+                        </p>
+                    </div>
+                    <div class="big-card !p-6">
+                        <div class="text-3xl font-black text-emerald-400 mb-3">❹</div>
+                        <p class="text-lg text-secondary leading-relaxed">
+                            六步闭环的标志是<strong class="text-amber-500">回译</strong>——<br>业务能听懂、能点头、能拍板，才算完。
+                        </p>
+                    </div>
+                </div>
+
+                <div class="text-xl font-bold text-secondary">
+                    ── 预祝大家学有所成 ──
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-border flex justify-between text-sm text-secondary font-mono w-full">
+                <span>CLOSING: 4 TAKEAWAYS</span>
+                <span>13 / 14</span>
+            </div>
+        </section>
+
+        <!-- ==================== Slide 14: 能力链总结 ==================== -->
+        <section class="slide" data-index="13">
+            <div class="flex-1 flex flex-col justify-center items-center text-center max-w-5xl mx-auto w-full">
+                <div class="big-badge mb-8"><i class="fas fa-graduation-cap"></i> 结课</div>
+
+                <h2 class="text-5xl lg:text-7xl font-black mb-10 leading-tight">
+                    业务出题，分析解题<br>
+                    <span class="text-primary">工具提速，闭环交卷</span>
+                </h2>
+
+                <div class="flex items-center justify-center gap-4 flex-wrap mb-10 text-2xl">
+                    <span class="big-card !px-6 !py-3 font-bold">业务出题</span>
+                    <span class="text-secondary">→</span>
+                    <span class="big-card !px-6 !py-3 font-bold">系统找数</span>
+                    <span class="text-secondary">→</span>
+                    <span class="big-card !px-6 !py-3 font-bold">技术取数</span>
+                    <span class="text-secondary">→</span>
+                    <span class="big-card !px-6 !py-3 font-bold">数据验数</span>
+                    <span class="text-secondary">→</span>
+                    <span class="big-card !px-6 !py-3 font-bold">分析答题</span>
+                    <span class="text-secondary">→</span>
+                    <span class="big-card !px-6 !py-3 font-bold text-primary">沟通交卷</span>
+                </div>
+
+                <div class="big-card !p-6 bg-surface-subtle text-xl font-bold max-w-3xl">
+                    五懂越硬，AI 越是利器；五懂越虚，AI 越是隐患。<br>
+                    <span class="text-primary">这个班，练的就是翻译能力。</span>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-border flex justify-between text-sm text-secondary font-mono w-full">
+                <span>CONGRATULATIONS: COURSE COMPLETED</span>
+                <span>14 / 14</span>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="no-print fixed bottom-6 left-12 right-12 flex items-center justify-between z-50 pointer-events-none">
+        <div class="control-pill pointer-events-auto px-5 py-2 rounded-full text-sm font-mono font-bold flex items-center gap-2">
+            <span id="pageInfoCurrent">01</span>
+            <span class="opacity-40">/</span>
+            <span id="pageInfoTotal" class="opacity-70">14</span>
+            <span class="text-xs opacity-50 ml-3 hidden sm:inline">[← / → / Space]</span>
+        </div>
+        <div class="control-pill pointer-events-auto p-1.5 rounded-full flex items-center gap-2">
+            <button onclick="prevSlide()" class="icon-btn" title="上一页 (←)">
+                <i class="fas fa-chevron-left text-sm"></i>
+            </button>
+            <button onclick="nextSlide()" class="icon-btn" title="下一页 (→ / Space)">
+                <i class="fas fa-chevron-right text-sm"></i>
+            </button>
+        </div>
+    </footer>
+
+    <div class="no-print fixed bottom-0 left-0 w-full h-1.5 bg-black/5 dark:bg-white/5 z-50">
+        <div id="slideProgressBar" class="h-full bg-primary transition-all duration-300 w-0"></div>
+    </div>
+
+    <script>
+        let currentSlideIndex = 0;
+        let slides = [];
+
+        function initPresentation() {
+            slides = Array.from(document.querySelectorAll('#presentation-stage > section'));
+            document.getElementById('pageInfoTotal').innerText = String(slides.length).padStart(2, '0');
+            
+            const savedTheme = localStorage.getItem('user-theme') || 'light';
+            const savedStyle = localStorage.getItem('user-style') || 'notebook';
+            
+            applyTheme(savedTheme);
+            applyStyle(savedStyle);
+            
+            showSlide(0);
+        }
+
+        function showSlide(index) {
+            if (index < 0 || index >= slides.length) return;
+
+            slides.forEach((slide, idx) => {
+                if (idx === index) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+
+            currentSlideIndex = index;
+            document.getElementById('pageInfoCurrent').innerText = String(currentSlideIndex + 1).padStart(2, '0');
+            
+            const progress = ((currentSlideIndex + 1) / slides.length) * 100;
+            document.getElementById('slideProgressBar').style.width = `${progress}%`;
+        }
+
+        function nextSlide() {
+            if (currentSlideIndex < slides.length - 1) showSlide(currentSlideIndex + 1);
+        }
+
+        function prevSlide() {
+            if (currentSlideIndex > 0) showSlide(currentSlideIndex - 1);
+        }
+
+        function togglePresentationStyle() {
+            const currentStyle = document.documentElement.getAttribute('data-style') || 'notebook';
+            const nextStyle = currentStyle === 'notebook' ? 'architectural' : 'notebook';
+            applyStyle(nextStyle);
+            localStorage.setItem('user-style', nextStyle);
+        }
+
+        function applyStyle(style) {
+            document.documentElement.setAttribute('data-style', style);
+            const styleLabel = document.getElementById('styleNameLabel');
+            styleLabel.innerText = style === 'notebook' ? 'NotebookLM 雅致风' : '工程蓝图风';
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            const nextTheme = currentTheme === 'light' ? 'dark' : 'light';
+            applyTheme(nextTheme);
+            localStorage.setItem('user-theme', nextTheme);
+        }
+
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            const icon = document.getElementById('themeIcon');
+            icon.className = theme === 'dark' ? 'fas fa-sun text-amber-400' : 'fas fa-moon text-slate-600';
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => console.log(err));
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') nextSlide();
+            else if (e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
+            else if (e.key === 't' || e.key === 'T') toggleTheme();
+            else if (e.key === 's' || e.key === 'S') togglePresentationStyle();
+            else if (e.key === 'f' || e.key === 'F') toggleFullScreen();
+            else if (e.key === 'Home') showSlide(0);
+            else if (e.key === 'End') showSlide(slides.length - 1);
+        });
+
+        let touchStartX = 0;
+        let touchEndX = 0;
+        document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            if (touchStartX - touchEndX > 50) nextSlide();
+            if (touchEndX - touchStartX > 50) prevSlide();
+        }, { passive: true });
+
+        window.addEventListener('DOMContentLoaded', initPresentation);
+    </script>
+</body>
+</html>

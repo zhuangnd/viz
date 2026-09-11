@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>两种思维 · 三个模型 · 六步走通 —— 大屏演示版</title>
+<style>
+:root{
+  --bg:#0f0f11; --bg2:#16161a; --bg3:#1e1e2e;
+  --tx:#e0e0e4; --tx2:#8b8b96; --tx3:#55555f;
+  --amber:#f59e0b; --amber-dim:rgba(245,158,11,.12);
+  --purple:#818cf8; --purple-dim:rgba(129,140,248,.12);
+  --green:#34d399; --green-dim:rgba(52,211,153,.12);
+  --red:#f87171; --red-dim:rgba(248,113,113,.10);
+  --line:rgba(255,255,255,.06);
+  --r:16px;
+}
+*{box-sizing:border-box; margin:0; padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg); color:var(--tx);
+  font-family:"Inter","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  font-size:20px; line-height:1.7; -webkit-font-smoothing:antialiased;
+}
+::selection{background:rgba(245,158,11,.3)}
+
+.wrap{max-width:1400px; margin:0 auto; padding:0 60px}
+section{
+  min-height:100vh; padding:100px 0;
+  display:flex; flex-direction:column; justify-content:center;
+  position:relative;
+}
+section:nth-child(even){background:var(--bg2)}
+section+section::before{
+  content:''; position:absolute; top:0; left:10%; right:10%; height:1px;
+  background:linear-gradient(90deg,transparent,var(--tx3),transparent);
+}
+
+h1{
+  font-size:clamp(40px,5.5vw,72px); font-weight:800; line-height:1.2;
+  letter-spacing:-.02em; margin-bottom:20px;
+}
+h1 .accent{color:var(--amber)}
+h2{
+  font-size:clamp(28px,3.5vw,44px); font-weight:700; line-height:1.3;
+  margin-bottom:12px; letter-spacing:-.01em;
+}
+h3{font-size:24px; font-weight:650; margin-bottom:16px; color:var(--tx)}
+.sub{color:var(--tx2); font-size:20px; margin-bottom:40px; max-width:900px}
+.step-num{
+  font-size:clamp(64px,8vw,96px); font-weight:800; color:var(--amber);
+  line-height:1; margin-bottom:8px; letter-spacing:-.03em;
+}
+.step-label{font-size:16px; color:var(--tx2); font-weight:600; letter-spacing:.06em; text-transform:uppercase; margin-bottom:32px}
+
+.quote{
+  border-left:4px solid var(--amber); padding:20px 28px; margin:32px 0;
+  font-size:22px; color:var(--amber); background:var(--amber-dim);
+  border-radius:0 var(--r) var(--r) 0; line-height:1.6;
+}
+.quote-sm{
+  border-left:3px solid var(--tx3); padding:16px 24px; margin:28px 0;
+  font-size:20px; color:var(--tx2); font-style:italic;
+}
+
+.pill{
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:16px; font-weight:650; padding:5px 16px; border-radius:999px;
+}
+.pill-s{background:var(--purple-dim); color:var(--purple)}
+.pill-e{background:var(--green-dim); color:var(--green)}
+.pill-se{
+  background:linear-gradient(90deg,var(--purple-dim),var(--green-dim));
+  color:var(--purple);
+}
+.pill-amber{background:var(--amber-dim); color:var(--amber)}
+
+.grid{display:grid; gap:24px; margin:32px 0}
+.grid-2{grid-template-columns:repeat(2,1fr)}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.grid-6{grid-template-columns:repeat(6,1fr)}
+@media(max-width:1024px){
+  .grid-3,.grid-6{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:640px){
+  .grid-2,.grid-3,.grid-6{grid-template-columns:1fr}
+}
+
+.card{
+  background:rgba(255,255,255,.03); border:1px solid var(--line);
+  border-radius:var(--r); padding:28px 32px; transition:border-color .2s;
+}
+.card:hover{border-color:rgba(255,255,255,.12)}
+.card h4{font-size:20px; font-weight:650; margin-bottom:10px}
+.card p{font-size:18px; color:var(--tx2); line-height:1.6; margin:0}
+
+.think-compare{display:grid; grid-template-columns:1fr 1fr; gap:28px; margin:36px 0}
+@media(max-width:800px){.think-compare{grid-template-columns:1fr}}
+.think-box{
+  border-radius:var(--r); padding:36px; position:relative; overflow:hidden;
+}
+.think-box.s{background:var(--purple-dim); border:1px solid rgba(129,140,248,.2)}
+.think-box.e{background:var(--green-dim); border:1px solid rgba(52,211,153,.2)}
+.think-box .think-title{font-size:28px; font-weight:700; margin-bottom:8px}
+.think-box.s .think-title{color:var(--purple)}
+.think-box.e .think-title{color:var(--green)}
+.think-box .think-sub{font-size:18px; color:var(--tx2); margin-bottom:18px}
+.think-box .think-actions{font-size:20px; color:var(--tx); line-height:1.8}
+
+.pipeline{display:flex; align-items:center; justify-content:center; gap:10px; margin:40px 0; flex-wrap:wrap}
+.pipeline .node{
+  display:flex; align-items:center; justify-content:center;
+  width:60px; height:60px; border-radius:50%; font-size:22px; font-weight:700;
+  background:rgba(255,255,255,.05); color:var(--tx2); transition:.2s;
+}
+.pipeline .node.active{background:var(--amber); color:var(--bg)}
+.pipeline .node.s{border:3px solid var(--purple); color:var(--purple)}
+.pipeline .node.e{border:3px solid var(--green); color:var(--green)}
+.pipeline .arrow{color:var(--tx3); font-size:20px}
+
+.node-chain{
+  display:flex; align-items:flex-start; justify-content:center; gap:0;
+  margin:40px 0; overflow-x:auto; padding:16px 0;
+}
+.node-chain .nc-item{
+  display:flex; flex-direction:column; align-items:center; min-width:140px; text-align:center;
+}
+.node-chain .nc-box{
+  background:var(--green-dim); border:2px solid rgba(52,211,153,.25);
+  border-radius:14px; padding:16px 22px; font-size:20px; font-weight:650;
+  color:var(--green); white-space:nowrap;
+}
+.node-chain .nc-sql{
+  font-family:"JetBrains Mono",monospace; font-size:14px; color:var(--tx3);
+  margin-top:12px; max-width:140px; line-height:1.5;
+}
+.node-chain .nc-arrow{
+  color:var(--amber); font-size:28px; margin:18px 8px 0; animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+
+.checklist{list-style:none; margin:28px 0}
+.checklist li{
+  display:flex; align-items:flex-start; gap:16px; padding:16px 0;
+  border-bottom:1px solid var(--line); font-size:20px;
+}
+.checklist .check{
+  width:32px; height:32px; border-radius:8px; display:flex; align-items:center;
+  justify-content:center; font-size:16px; flex:none; margin-top:4px;
+  background:var(--green-dim); color:var(--green);
+}
+
+.pit{margin:20px 0; padding:24px 28px; border-radius:var(--r); background:var(--red-dim); border:1px solid rgba(248,113,113,.15)}
+.pit .pit-bad{color:var(--red); font-weight:650; font-size:20px; margin-bottom:8px}
+.pit .pit-good{color:var(--green); font-size:18px}
+
+.report-step{
+  margin:20px 0; padding:28px 32px; border-radius:var(--r);
+  background:rgba(255,255,255,.02); border:1px solid var(--line);
+}
+.report-step .rs-num{font-size:16px; font-weight:700; color:var(--amber); margin-bottom:10px}
+.report-step .rs-content{font-size:20px; color:var(--tx); line-height:1.7}
+
+.final-item{
+  margin:36px 0; padding-left:32px; border-left:3px solid var(--amber);
+}
+.final-item .final-num{font-size:36px; font-weight:800; color:var(--amber); margin-bottom:8px}
+.final-item .final-text{font-size:22px; color:var(--tx); line-height:1.6}
+
+.exercise{background:var(--bg2); border:1px solid rgba(255,255,255,.08); border-radius:20px; padding:48px; margin:36px 0}
+.exercise h3{color:var(--amber); font-size:28px}
+.task-list{list-style:none; margin:28px 0}
+.task-list li{
+  display:flex; align-items:flex-start; gap:16px; padding:16px 0;
+  border-bottom:1px solid var(--line); font-size:20px;
+}
+.task-list .task-num{
+  width:40px; height:40px; border-radius:50%; display:flex; align-items:center;
+  justify-content:center; font-size:18px; font-weight:700; flex:none;
+  background:rgba(255,255,255,.05); color:var(--amber);
+}
+
+.code{
+  background:var(--bg3); border-radius:var(--r); padding:24px 32px;
+  font-family:"JetBrains Mono","Fira Code","SF Mono",monospace;
+  font-size:18px; line-height:1.8; color:#cdd6f4; overflow-x:auto;
+  margin:28px 0; border:1px solid rgba(255,255,255,.04);
+}
+
+table{width:100%; border-collapse:collapse; font-size:18px; margin:28px 0}
+th{
+  text-align:left; padding:14px 20px; font-weight:650; color:var(--amber);
+  background:rgba(255,255,255,.03); border-bottom:1px solid var(--line);
+}
+td{padding:14px 20px; border-bottom:1px solid var(--line); color:var(--tx); vertical-align:top}
+tr:hover td{background:rgba(255,255,255,.015)}
+
+.fade-in{opacity:0; transform:translateY(24px); transition:opacity .6s ease, transform .6s ease}
+.fade-in.visible{opacity:1; transform:translateY(0)}
+
+@media(max-width:1024px){
+  section{padding:60px 0; min-height:auto}
+  .wrap{padding:0 36px}
+  .node-chain{flex-wrap:wrap; gap:12px}
+  .node-chain .nc-arrow{display:none}
+  .think-compare{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ==================== COVER ==================== -->
+<section>
+<div class="wrap fade-in">
+  <div class="step-label">零基础 SQL 学员培训</div>
+  <h1>SQL 不是最难的<span class="accent">，</span><br>想清楚才是<span class="accent">。</span></h1>
+  <p class="sub">两种思维 · 三个模型 · 六步走通</p>
+
+  <h3 style="margin-bottom:24px">能力标尺：五懂一具备</h3>
+  <div class="grid grid-6" style="margin-bottom:16px">
+    <div class="card" style="text-align:center; padding:20px 12px">
+      <div style="font-size:18px; font-weight:650; color:var(--amber)">懂业务</div>
+    </div>
+    <div class="card" style="text-align:center; padding:20px 12px">
+      <div style="font-size:18px; font-weight:650; color:var(--amber)">懂系统</div>
+    </div>
+    <div class="card" style="text-align:center; padding:20px 12px">
+      <div style="font-size:18px; font-weight:650; color:var(--amber)">懂技术</div>
+    </div>
+    <div class="card" style="text-align:center; padding:20px 12px">
+      <div style="font-size:18px; font-weight:650; color:var(--amber)">懂数据</div>
+    </div>
+    <div class="card" style="text-align:center; padding:20px 12px">
+      <div style="font-size:18px; font-weight:650; color:var(--amber)">懂分析</div>
+    </div>
+    <div class="card" style="text-align:center; padding:20px 12px">
+      <div style="font-size:18px; font-weight:650; color:var(--amber)">沟通协调</div>
+    </div>
+  </div>
+
+  <div style="display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap; margin:28px 0 40px; font-size:20px; color:var(--tx2)">
+    <span style="color:var(--tx); font-weight:600">业务出题</span>
+    <span style="color:var(--tx3)">→</span>
+    <span>系统找数</span>
+    <span style="color:var(--tx3)">→</span>
+    <span>技术取数</span>
+    <span style="color:var(--tx3)">→</span>
+    <span>数据验数</span>
+    <span style="color:var(--tx3)">→</span>
+    <span>分析答题</span>
+    <span style="color:var(--tx3)">→</span>
+    <span style="color:var(--tx); font-weight:600">沟通交卷</span>
+  </div>
+
+  <div class="quote">
+    五懂越硬，AI 越是利器；五懂越虚，AI 越是隐患。
+  </div>
+</div>
+</section>
+
+<!-- ==================== TOOLBOX ==================== -->
+<section>
+<div class="wrap fade-in">
+  <div class="step-label">模块 1 · 思维工具箱</div>
+  <h2>两种思维 + 三个模型</h2>
+
+  <div class="think-compare">
+    <div class="think-box s">
+      <div class="think-title">结构化思维</div>
+      <div class="think-sub">把含糊的问题拆开看、说清楚</div>
+      <div class="think-actions">
+        解决：如何<strong>看清</strong>问题<br>
+        分解 · 分类 · 构建逻辑关系
+      </div>
+    </div>
+    <div class="think-box e">
+      <div class="think-title">工程化思维</div>
+      <div class="think-sub">把想法变成能落地、能验证的步骤</div>
+      <div class="think-actions">
+        解决：如何<strong>改变</strong>现实<br>
+        可定义 · 模块化 · 可验证 · 迭代
+      </div>
+    </div>
+  </div>
+
+  <div class="quote-sm">
+    <strong style="color:var(--tx)">一句话：</strong>结构化思维让你"看懂题"，工程化思维让你"做对题"。
+  </div>
+
+  <h3 style="margin:48px 0 20px">三个模型 · 接力</h3>
+  <div class="grid grid-3">
+    <div class="card" style="border-top:4px solid var(--purple)">
+      <span class="pill pill-s" style="margin-bottom:14px">问题模型</span>
+      <h4>一个理解问题的简单公式</h4>
+      <p style="margin-top:12px; font-size:20px; color:var(--tx)">拆清楚</p>
+    </div>
+    <div class="card" style="border-top:4px solid var(--purple)">
+      <span class="pill pill-s" style="margin-bottom:14px">信息模型</span>
+      <h4>数据在哪张表、什么口径</h4>
+      <p style="margin-top:12px; font-size:20px; color:var(--tx)">找到数</p>
+    </div>
+    <div class="card" style="border-top:4px solid var(--green)">
+      <span class="pill pill-e" style="margin-bottom:14px">数学模型</span>
+      <h4>把答案算出来的方法</h4>
+      <p style="margin-top:12px; font-size:20px; color:var(--tx)">算出来</p>
+    </div>
+  </div>
+
+  <div class="quote">
+    先拆清楚，再找到数，最后算出来。<br>
+    <strong>跳过任何一个，后面都站不住。</strong>
+  </div>
+</div>
+</section>
+
+<!-- ==================== SIX STEPS OVERVIEW ==================== -->
+<section>
+<div class="wrap fade-in">
+  <div class="step-label">模块 2</div>
+  <h2>六步法全图</h2>
+  <p class="sub">先看终点再走路。</p>
+
+  <div class="pipeline" style="margin:48px 0">
+    <div class="node s">①</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node s">②</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node e">③</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node e">④</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node e">⑤</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node s">⑥</div>
+  </div>
+
+  <div style="display:flex; justify-content:center; gap:32px; margin-bottom:40px; font-size:18px; color:var(--tx2)">
+    <span><span style="color:var(--purple)">●</span> 结构化</span>
+    <span><span style="color:var(--green)">●</span> 工程化</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>步骤</th><th>做什么</th><th>产出</th></tr>
+    </thead>
+    <tbody>
+      <tr><td style="color:var(--purple); font-weight:700; font-size:20px">① 拆解</td><td>把含糊的业务话拆成公式</td><td>问题模型</td></tr>
+      <tr><td style="color:var(--purple); font-weight:700; font-size:20px">② 找数</td><td>变量对应到表和字段</td><td>信息模型</td></tr>
+      <tr><td style="color:var(--green); font-weight:700; font-size:20px">③ 建模</td><td>拖节点，拼出查询</td><td>SQL</td></tr>
+      <tr><td style="color:var(--green); font-weight:700; font-size:20px">④ 验证</td><td>行数、空值、极值、抽样</td><td>验证清单</td></tr>
+      <tr><td style="color:var(--green); font-weight:700; font-size:20px">⑤ 分析</td><td>分组、排序、算贡献</td><td>表 + 图 + 三句话</td></tr>
+      <tr><td style="color:var(--purple); font-weight:700; font-size:20px">⑥ 报告</td><td>翻译回业务话</td><td>一页纸结论</td></tr>
+    </tbody>
+  </table>
+
+  <div class="quote" style="margin-top:40px">
+    新手不是不会分析，是不会写 SQL。<br>
+    拖拽式 SQL = 把代码变成乐高积木。<br>
+    <strong>你拖的不是可视化，是 SQL 代码本身。</strong>
+  </div>
+</div>
+</section>
+
+<!-- ==================== STEP 1: 拆解 ==================== -->
+<section>
+<div class="wrap fade-in">
+  <div class="pipeline" style="margin-bottom:48px">
+    <div class="node active">①</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node s">②</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node e">③</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node e">④</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node e">⑤</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node s">⑥</div>
+  </div>
+
+  <div class="step-num">①</div>
+  <div class="step-label">拆解</div>
+  <div style="display:flex; gap:10px; margin-bottom:32px">
+    <span class="pill pill-s">结构化思维</span>
+    <span class="pill pill-amber">→ 问题模型</span>
+  </div>
+
+  <div class="quote-sm" style="border-left-color:var(--amber); font-style:normal">
+    <strong style="color:var(--amber)">业务原话：</strong><br>
+    "今年出口贸易增长乏力，得查查怎么回事。"
+  </div>
+
+  <h3 style="margin:36px 0 20px">三个拆解动作</h3>
+  <div class="grid grid-3">
+    <div class="card" style="border-top:3px solid var(--purple)">
+      <h4 style="color:var(--purple)">跟谁比？</h4>
+      <p>去年同期 / 全国均值 / 兄弟关</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--purple)">
+      <h4 style="color:var(--purple)">乏力在哪？</h4>
+      <p>国家、HS 大类、企业、贸易方式</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--purple)">
+      <h4 style="color:var(--purple)">为什么乏力？</h4>
+      <p>量？价？结构变了？</p>
+    </div>
+  </div>
+
+  <h3 style="margin:36px 0 16px">拼成公式</h3>
+  <div class="code" style="border:1px solid rgba(245,158,11,.2); background:rgba(245,158,11,.03)">
+<span style="color:var(--amber)">出口贸易额</span> = Σ 各 HS 编码 × 单价 × 数量
+<span style="color:var(--amber)">同比增长率</span> = (本期 − 同期) ÷ 同期
+<span style="color:var(--amber)">乏力归因</span>   = 量贡献 + 价贡献 + 结构贡献
+  </div>
+</div>
+</section>
+
+<!-- ==================== STEP 2: 找数 ==================== -->
+<section>
+<div class="wrap fade-in">
+  <div class="pipeline" style="margin-bottom:48px">
+    <div class="node s">①</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node active">②</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node e">③</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node e">④</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node e">⑤</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node s">⑥</div>
+  </div>
+
+  <div class="step-num">②</div>
+  <div class="step-label">找数</div>
+  <div style="display:flex; gap:10px; margin-bottom:32px">
+    <span class="pill pill-se">结构化 → 工程化</span>
+    <span class="pill pill-amber">→ 信息模型</span>
+  </div>
+
+  <h3>把公式变量翻译成"数据在哪儿"</h3>
+
+  <div class="code" style="border:1px solid rgba(129,140,248,.2); background:rgba(129,140,248,.03); font-size:20px">
+<span style="color:var(--purple)">[报关单主表]</span>──┬──[商品归类表]
+              ├──[企业备案表]
+              ├──[国别代码表]
+              └──[历史归档表]
+  </div>
+
+  <div class="quote" style="margin-top:36px">
+    上来就拖节点 = 数据从哪来都没搞清楚。<br>
+    <strong>先只拖"数据源"节点，确认字段名、含义、单位。</strong>
+  </div>
+</div>
+</section>
+
+<!-- ==================== STEP 3: 建模 ==================== -->
+<section>
+<div class="wrap fade-in">
+  <div class="pipeline" style="margin-bottom:48px">
+    <div class="node s">①</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node s">②</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node active">③</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node e">④</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node e">⑤</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node s">⑥</div>
+  </div>
+
+  <div class="step-num">③</div>
+  <div class="step-label">建模</div>
+  <div style="display:flex; gap:10px; margin-bottom:32px">
+    <span class="pill pill-e">工程化思维</span>
+    <span class="pill pill-amber">→ 数学模型 = SQL</span>
+  </div>
+
+  <div class="node-chain">
+    <div class="nc-item">
+      <div class="nc-box">① 数据源</div>
+    </div>
+    <div class="nc-arrow">→</div>
+    <div class="nc-item">
+      <div class="nc-box">② 过滤</div>
+    </div>
+    <div class="nc-arrow">→</div>
+    <div class="nc-item">
+      <div class="nc-box">③ 聚合</div>
+    </div>
+    <div class="nc-arrow">→</div>
+    <div class="nc-item">
+      <div class="nc-box">④ 计算列</div>
+    </div>
+    <div class="nc-arrow">→</div>
+    <div class="nc-item">
+      <div class="nc-box">⑤ 过滤</div>
+    </div>
+    <div class="nc-arrow">→</div>
+    <div class="nc-item">
+      <div class="nc-box">⑥ 排序</div>
+    </div>
+  </div>
+
+  <div class="quote">
+    <strong>每个节点 = 一段 SQL 代码，你只是没看见它。</strong><br>
+    拖出来的不是漂亮的图，是能跑、能改、能复用的 SQL。
+  </div>
+</div>
+</section>
+
+<!-- ==================== STEP 4: 验证 ==================== -->
+<section>
+<div class="wrap fade-in">
+  <div class="pipeline" style="margin-bottom:48px">
+    <div class="node s">①</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node s">②</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node e">③</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node active">④</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node e">⑤</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node s">⑥</div>
+  </div>
+
+  <div class="step-num">④</div>
+  <div class="step-label">验证</div>
+  <div style="display:flex; gap:10px; margin-bottom:32px">
+    <span class="pill pill-e">工程化思维 · 可验证</span>
+  </div>
+
+  <div class="quote-sm" style="border-left-color:var(--red); font-style:normal; font-size:24px">
+    <strong style="color:var(--red)">不要先激动。</strong>先验，再解读。
+  </div>
+
+  <ul class="checklist">
+    <li>
+      <span class="check">✓</span>
+      <div><strong>行数核对</strong> — 工具数 = 月报数</div>
+    </li>
+    <li>
+      <span class="check">✓</span>
+      <div><strong>空值检查</strong> — 关键空值占比 ＜ 0.5%</div>
+    </li>
+    <li>
+      <span class="check">✓</span>
+      <div><strong>极值检查</strong> — 确认不是录错</div>
+    </li>
+    <li>
+      <span class="check">✓</span>
+      <div><strong>抽样回溯</strong> — 随机抽样回原系统比对</div>
+    </li>
+  </ul>
+
+  <div class="quote">
+    "模型说有疑点，业务说没有，通常不是业务错了。"<br>
+    <strong>可验证</strong>是最容易被忽略、但最值钱的一格。
+  </div>
+</div>
+</section>
+
+<!-- ==================== STEP 5: 分析 ==================== -->
+<section>
+<div class="wrap fade-in">
+  <div class="pipeline" style="margin-bottom:48px">
+    <div class="node s">①</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node s">②</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node e">③</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node e">④</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node active">⑤</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node s">⑥</div>
+  </div>
+
+  <div class="step-num">⑤</div>
+  <div class="step-label">分析</div>
+  <div style="display:flex; gap:10px; margin-bottom:32px">
+    <span class="pill pill-se">工程化 → 结构化</span>
+    <span class="pill pill-amber">→ 表 + 图 + 三句话</span>
+  </div>
+
+  <h3>产出三件套</h3>
+  <div class="grid grid-3">
+    <div class="card" style="border-left:4px solid var(--purple)">
+      <span class="pill pill-s" style="margin-bottom:12px">空间拆</span>
+      <p style="margin-top:12px">"下滑 60% 集中在机电产品，<br>前 3 个 HS 大类贡献了 8 成。"</p>
+    </div>
+    <div class="card" style="border-left:4px solid var(--amber)">
+      <span class="pill pill-amber" style="margin-bottom:12px">因果拆</span>
+      <p style="margin-top:12px">"量贡献 -2.1pp、价贡献 -1.5pp——<br><strong>量价齐跌是主因</strong>。"</p>
+    </div>
+    <div class="card" style="border-left:4px solid var(--green)">
+      <span class="pill pill-e" style="margin-bottom:12px">主体拆</span>
+      <p style="margin-top:12px">"中小企业 -15%，头部 +6%，<br><strong>集中度在上升</strong>。"</p>
+    </div>
+  </div>
+
+  <div class="quote-sm" style="font-size:22px">
+    SQL 跑得动是工程化，能<strong>讲清楚</strong>为什么下滑则是结构化思维。
+  </div>
+</div>
+</section>
+
+<!-- ==================== STEP 6: 报告 ==================== -->
+<section>
+<div class="wrap fade-in">
+  <div class="pipeline" style="margin-bottom:48px">
+    <div class="node s">①</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node s">②</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node e">③</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node e">④</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node e">⑤</div><span class="arrow" style="color:var(--tx3)">→</span>
+    <div class="node active">⑥</div>
+  </div>
+
+  <div class="step-num">⑥</div>
+  <div class="step-label">报告</div>
+  <div style="display:flex; gap:10px; margin-bottom:32px">
+    <span class="pill pill-s">结构化思维 · 回译闭环</span>
+  </div>
+
+  <h3>汇报三步法</h3>
+
+  <div class="report-step">
+    <div class="rs-num">第一步 · 拆解</div>
+    <div class="rs-content">
+      "增长乏力，拆开看，主要来自<strong>三个维度</strong>——<br>
+      HS 大类、国别、企业。"
+    </div>
+  </div>
+
+  <div class="report-step">
+    <div class="rs-num">第二步 · 模型</div>
+    <div class="rs-content">
+      "量贡献 -2.1pp、价贡献 -1.5pp、结构 +0.4pp——<br>
+      <strong style="color:var(--amber)">量价齐跌是主因，结构升级是亮点</strong>。"
+    </div>
+  </div>
+
+  <div class="report-step">
+    <div class="rs-num">第三步 · 方案</div>
+    <div class="rs-content">
+      "建议下一步分<strong>三条线</strong>核实。"
+    </div>
+  </div>
+
+  <div class="quote">
+    <strong>业务点头了，6 步才算闭环。</strong><br>
+    只会念节点名，翻译链就是断的。
+  </div>
+</div>
+</section>
+
+<!-- ==================== EXERCISE ==================== -->
+<section>
+<div class="wrap fade-in">
+  <div class="step-label">模块 4 · 学员练习</div>
+  <h2>现在轮到你了</h2>
+
+  <div class="exercise">
+    <h3>"昨天通关数据好像有点异常，看看发生了什么。"</h3>
+    <p style="color:var(--tx2); margin:16px 0 28px; font-size:20px">用六步法，快速走一遍。</p>
+
+    <ul class="task-list">
+      <li>
+        <span class="task-num">①</span>
+        <div><strong>拆解</strong> — 在白纸上拼出公式</div>
+      </li>
+      <li>
+        <span class="task-num">②</span>
+        <div><strong>找数</strong> — 画出表关系</div>
+      </li>
+      <li>
+        <span class="task-num">③</span>
+        <div><strong>建模</strong> — 拖出节点链</div>
+      </li>
+      <li>
+        <span class="task-num">④</span>
+        <div><strong>验证</strong> — 行数、空值、极值</div>
+      </li>
+      <li>
+        <span class="task-num">⑤</span>
+        <div><strong>分析</strong> — 写三句话</div>
+      </li>
+      <li>
+        <span class="task-num">⑥</span>
+        <div><strong>报告</strong> — 用汇报三步法讲出来</div>
+      </li>
+    </ul>
+
+    <div style="display:flex; align-items:center; gap:16px; margin-top:28px; padding:16px 24px; background:var(--amber-dim); border-radius:12px">
+      <span style="font-size:32px">⏱</span>
+      <div>
+        <div style="font-size:20px; font-weight:650; color:var(--amber)">建议用时：20 分钟</div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ==================== PITFALLS ==================== -->
+<section>
+<div class="wrap fade-in">
+  <div class="step-label">模块 5</div>
+  <h2>避坑清单</h2>
+
+  <div class="pit">
+    <div class="pit-bad">❌ 跳过拆解，直接进工具拖节点</div>
+    <div class="pit-good">✅ 白纸写不出公式就别碰工具</div>
+  </div>
+  <div class="pit">
+    <div class="pit-bad">❌ 口径没对齐就开始聚合</div>
+    <div class="pit-good">✅ 先确认字段含义</div>
+  </div>
+  <div class="pit">
+    <div class="pit-bad">❌ 跳过验证直接给结论</div>
+    <div class="pit-good">✅ 强制挂上四个验证节点</div>
+  </div>
+  <div class="pit">
+    <div class="pit-bad">❌ 图很漂亮但结论说不清</div>
+    <div class="pit-good">✅ 每张图强制配三句话</div>
+  </div>
+  <div class="pit">
+    <div class="pit-bad">❌ 报告里堆 SQL 术语</div>
+    <div class="pit-good">✅ 不许出现 SELECT / WHERE / JOIN</div>
+  </div>
+
+  <h3 style="margin:48px 0 20px">回译检验三问</h3>
+  <div class="grid grid-3">
+    <div class="card" style="text-align:center; border-top:3px solid var(--amber)">
+      <div style="font-size:44px; font-weight:800; color:var(--amber); margin-bottom:12px">❶</div>
+      <p style="font-size:18px">能用业务话讲清六步做什么？</p>
+    </div>
+    <div class="card" style="text-align:center; border-top:3px solid var(--amber)">
+      <div style="font-size:44px; font-weight:800; color:var(--amber); margin-bottom:12px">❷</div>
+      <p style="font-size:18px">能把任何业务话拆成公式？</p>
+    </div>
+    <div class="card" style="text-align:center; border-top:3px solid var(--amber)">
+      <div style="font-size:44px; font-weight:800; color:var(--amber); margin-bottom:12px">❸</div>
+      <p style="font-size:18px">能画出汇报一页纸？</p>
+    </div>
+  </div>
+
+  <div class="quote" style="margin-top:32px">
+    三个都能 → <strong>你就不是零基础了。</strong>
+  </div>
+</div>
+</section>
+
+<!-- ==================== CLOSING ==================== -->
+<section>
+<div class="wrap fade-in">
+  <div class="step-label">收尾</div>
+  <h2>四句话带走</h2>
+
+  <div style="margin-top:56px">
+    <div class="final-item">
+      <div class="final-num">❶</div>
+      <div class="final-text">拖拽式 SQL 不是画图工具，<br>是<strong style="color:var(--amber)">不写代码的 SQL 编辑器</strong>。</div>
+    </div>
+
+    <div class="final-item">
+      <div class="final-num">❷</div>
+      <div class="final-text"><strong style="color:var(--purple)">两种思维</strong>是骨架，<strong style="color:var(--amber)">六步</strong>是关节，<strong style="color:var(--green)">拖拽</strong>是肌肉。</div>
+    </div>
+
+    <div class="final-item">
+      <div class="final-num">❸</div>
+      <div class="final-text">会拖是手艺，会拆问题是判断。<br>手艺决定<strong>快不快</strong>，判断决定<strong>掉不掉坑</strong>。</div>
+    </div>
+
+    <div class="final-item">
+      <div class="final-num">❹</div>
+      <div class="final-text">六步闭环的标志是<strong style="color:var(--amber)">回译</strong>——<br>业务能听懂、能点头、能拍板，才算完。</div>
+    </div>
+  </div>
+
+  <div style="margin-top:80px; text-align:center; color:var(--tx3); font-size:20px">
+    ── 预祝大家学有所成 ──
+  </div>
+</div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+});
+</script>
+
+</body>
+</html>

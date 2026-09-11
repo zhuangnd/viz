@@ -1,0 +1,1672 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-style="notebook" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>业务到数据模型：零基础 SQL 学员的破局之道</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Noto+Serif+SC:wght@600;800;900&family=Roboto+Condensed:wght@300;400;700&family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans SC', 'sans-serif'],
+                        serif: ['Playfair Display', 'Noto Serif SC', 'serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                        blueprint: ['Roboto Condensed', 'Noto Sans SC', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* =========================================================
+           1. 样式变量定义 (NotebookLM 雅致风 与 蓝图工程风 双模式矩阵)
+           ========================================================= */
+        
+        /* 默认：NotebookLM 雅致风 · 浅色模式 (Light) */
+        html[data-style="notebook"][data-theme="light"] {
+            --bg-color: #FAF8F5;
+            --surface-color: #FFFFFF;
+            --surface-subtle: #F3EFEA;
+            --border-color: #E2DBD2;
+            --text-main: #23272E;
+            --text-secondary: #64748B;
+            --brand-primary: #C05621;   /* Terracotta 陶土橙 */
+            --brand-secondary: #2C5282; /* 雅致海军蓝 */
+            --accent-highlight: #DD6B20;
+            --font-family-body: 'Inter', 'Noto Sans SC', sans-serif;
+            --font-family-heading: 'Playfair Display', 'Noto Serif SC', serif;
+            --card-shadow: 0 10px 25px -5px rgba(192, 86, 33, 0.06), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+            --blueprint-display: none;
+            --mesh-opacity: 0.04;
+        }
+
+        /* NotebookLM 雅致风 · 深色模式 (Dark) */
+        html[data-style="notebook"][data-theme="dark"] {
+            --bg-color: #12151A;
+            --surface-color: #1C2128;
+            --surface-subtle: #242B35;
+            --border-color: #323B47;
+            --text-main: #F0F3F6;
+            --text-secondary: #94A3B8;
+            --brand-primary: #F6AD55;   /* 暖金琥珀 */
+            --brand-secondary: #63B3ED; /* 雅致亮蓝 */
+            --accent-highlight: #ED8936;
+            --font-family-body: 'Inter', 'Noto Sans SC', sans-serif;
+            --font-family-heading: 'Playfair Display', 'Noto Serif SC', serif;
+            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+            --blueprint-display: none;
+            --mesh-opacity: 0.07;
+        }
+
+        /* 切换：工程/蓝图/结构主义风 · 浅色模式 (Light) */
+        html[data-style="architectural"][data-theme="light"] {
+            --bg-color: #F5F7FA;
+            --surface-color: rgba(255, 255, 255, 0.95);
+            --surface-subtle: #EDF2F7;
+            --border-color: #2C3E50;
+            --text-main: #1A252F;
+            --text-secondary: #5D6D7E;
+            --brand-primary: #E67E22;   /* 机械橙标 */
+            --brand-secondary: #2980B9; /* 蓝图基准蓝 */
+            --accent-highlight: #D35400;
+            --font-family-body: 'Roboto Condensed', 'Noto Sans SC', sans-serif;
+            --font-family-heading: 'Roboto Condensed', 'Noto Sans SC', sans-serif;
+            --card-shadow: 8px 8px 0px rgba(44, 62, 80, 0.12);
+            --blueprint-display: block;
+            --mesh-opacity: 0;
+        }
+
+        /* 工程/蓝图/结构主义风 · 深色模式 (Dark Blueprint) */
+        html[data-style="architectural"][data-theme="dark"] {
+            --bg-color: #0A1926;
+            --surface-color: rgba(13, 27, 42, 0.85);
+            --surface-subtle: #12283D;
+            --border-color: #4DD0E1;   /* 蓝图青荧光色 */
+            --text-main: #E0F7FA;
+            --text-secondary: #80DEEA;
+            --brand-primary: #FF7043;   /* 荧光安全橙 */
+            --brand-secondary: #26C6DA; /* 电路青 */
+            --accent-highlight: #FFAB91;
+            --font-family-body: 'Roboto Condensed', 'Noto Sans SC', sans-serif;
+            --font-family-heading: 'Roboto Condensed', 'Noto Sans SC', sans-serif;
+            --card-shadow: 8px 8px 0px rgba(0, 0, 0, 0.6);
+            --blueprint-display: block;
+            --mesh-opacity: 0;
+        }
+
+        /* 全局基础设置 */
+        * {
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-family-body);
+            transition: background-color 0.4s ease, color 0.4s ease;
+            position: relative;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: var(--font-family-heading);
+            color: var(--text-main);
+        }
+
+        /* 蓝图背景网格 (仅在 architectural 模式下显现) */
+        .blueprint-grid-overlay {
+            display: var(--blueprint-display);
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+            background-image: 
+                linear-gradient(var(--border-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border-color) 1px, transparent 1px),
+                linear-gradient(rgba(120, 150, 180, 0.15) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(120, 150, 180, 0.15) 1px, transparent 1px);
+            background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+            opacity: 0.18;
+        }
+
+        /* 蓝图十字准星与工业边框 */
+        .blueprint-frame {
+            display: var(--blueprint-display);
+            position: absolute;
+            inset: 1.25rem;
+            border: 1px solid var(--border-color);
+            pointer-events: none;
+            z-index: 40;
+            opacity: 0.4;
+        }
+
+        .marker {
+            display: var(--blueprint-display);
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            z-index: 45;
+            pointer-events: none;
+        }
+        .marker::before, .marker::after {
+            content: '';
+            position: absolute;
+            background: var(--brand-primary);
+        }
+        .marker::before { width: 100%; height: 2px; top: 7px; left: 0; }
+        .marker::after { width: 2px; height: 100%; left: 7px; top: 0; }
+        .marker-tl { top: 1rem; left: 1rem; }
+        .marker-tr { top: 1rem; right: 1rem; }
+        .marker-bl { bottom: 1rem; left: 1rem; }
+        .marker-br { bottom: 1rem; right: 1rem; }
+
+        /* NotebookLM 优雅网状水印背景 */
+        .notebook-mesh-overlay {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 50%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            background-image: url("data:image/svg+xml,%3Csvg width='600' height='600' viewBox='0 0 600 600' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 600C225 600 375 450 450 225C525 0 600 0 600 0V600H0Z' fill='%23C05621' fill-opacity='0.08'/%3E%3Cpath d='M600 0C375 0 225 150 150 375C75 600 0 600 0 600V0H600Z' fill='%232C5282' fill-opacity='0.08'/%3E%3C/svg%3E");
+            background-size: cover;
+            opacity: var(--mesh-opacity);
+            transition: opacity 0.4s ease;
+        }
+
+        /* 幻灯片单页容器 */
+        .slide {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            padding: 3.5rem 5rem;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.45s ease;
+            transform: scale(0.985);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 10;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transform: scale(1);
+            z-index: 20;
+        }
+
+        /* 卡片通用设计 */
+        .custom-card {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+            position: relative;
+        }
+
+        html[data-style="architectural"] .custom-card {
+            border-radius: 0px;
+        }
+
+        .custom-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--brand-primary);
+        }
+
+        /* 徽章 Badge */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.25rem 0.65rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background-color: var(--surface-subtle);
+            color: var(--brand-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        html[data-style="architectural"] .badge {
+            border-radius: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* 悬浮控制中心 (Top & Bottom Controls) */
+        .control-pill {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+        }
+
+        .icon-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 0.375rem;
+            color: var(--text-main);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .icon-btn:hover {
+            background-color: var(--surface-subtle);
+            color: var(--brand-primary);
+        }
+
+        /* 打印样式支持 (另存为 PDF 时单页展示) */
+        @media print {
+            body {
+                overflow: visible !important;
+                height: auto !important;
+                background: white !important;
+                color: black !important;
+            }
+            .no-print, .blueprint-frame, .marker, .notebook-mesh-overlay, .blueprint-grid-overlay {
+                display: none !important;
+            }
+            .slide {
+                display: flex !important;
+                position: relative !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+                transform: none !important;
+                page-break-after: always !important;
+                height: 100vh !important;
+                padding: 2.5rem !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 蓝图与网格装饰背景 (双模式自适应) -->
+    <div class="blueprint-grid-overlay"></div>
+    <div class="notebook-mesh-overlay"></div>
+    <div class="blueprint-frame"></div>
+    <div class="marker marker-tl"></div>
+    <div class="marker marker-tr"></div>
+    <div class="marker marker-bl"></div>
+    <div class="marker marker-br"></div>
+
+    <!-- 顶部常驻状态与模式切换栏 -->
+    <header class="no-print fixed top-5 left-10 right-10 flex items-center justify-between z-50 pointer-events-none">
+        <div class="flex items-center gap-3 pointer-events-auto">
+            <span class="badge font-mono">
+                <i class="fas fa-layer-group"></i> 业务建模 · SQL 实战通识
+            </span>
+            <span class="text-xs text-secondary hidden md:inline font-sans opacity-70">
+                面向零基础学员：2思维 + 3模型 + 六步法
+            </span>
+        </div>
+
+        <!-- 模式切换与操作胶囊 -->
+        <div class="control-pill pointer-events-auto px-3 py-1.5 rounded-full flex items-center gap-2">
+            <!-- 风格切换：NotebookLM 雅致风 vs 工程蓝图风 -->
+            <button id="styleToggleBtn" onclick="togglePresentationStyle()" class="px-2.5 py-1 text-xs font-semibold rounded flex items-center gap-1.5 transition-colors" title="切换设计风格 (快捷键 S)">
+                <i class="fas fa-palette text-amber-600"></i>
+                <span id="styleNameLabel" class="hidden sm:inline">NotebookLM 雅致风</span>
+            </button>
+            <div class="w-px h-3.5 bg-gray-300 dark:bg-gray-700"></div>
+
+            <!-- 深浅主题切换：Light vs Dark -->
+            <button onclick="toggleTheme()" class="icon-btn !w-7 !h-7 text-xs" title="切换深/浅色模式 (快捷键 T)">
+                <i id="themeIcon" class="fas fa-moon"></i>
+            </button>
+            <div class="w-px h-3.5 bg-gray-300 dark:bg-gray-700"></div>
+
+            <!-- 全屏与打印支持 -->
+            <button onclick="toggleFullScreen()" class="icon-btn !w-7 !h-7 text-xs" title="全屏演示 (F)">
+                <i class="fas fa-expand"></i>
+            </button>
+            <button onclick="window.print()" class="icon-btn !w-7 !h-7 text-xs" title="打印 / 导出 PDF">
+                <i class="fas fa-print"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- 幻灯片主体容器 (15页精心编排) -->
+    <main id="presentation-stage" class="relative w-full h-full">
+
+        <!-- ==================== Slide 01: 封面页 ==================== -->
+        <section class="slide active" data-index="0">
+            <div class="flex-1 flex flex-col justify-center max-w-5xl mx-auto w-full pt-10">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="badge text-sm px-3 py-1 font-mono">
+                        <i class="fas fa-compass"></i> 数据分析通识培训
+                    </span>
+                    <span class="text-xs uppercase tracking-widest opacity-60 font-mono">Zero-Code to Model</span>
+                </div>
+                
+                <h1 class="text-5xl lg:text-6xl font-black tracking-tight leading-tight mb-6">
+                    业务到数据模型：<br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-orange-500 to-sky-700">
+                        零基础学员的破局之道
+                    </span>
+                </h1>
+
+                <p class="text-xl lg:text-2xl text-secondary font-light max-w-3xl mb-10 leading-relaxed">
+                    以 <span class="font-semibold text-primary">2个思维 + 3个模型工具</span> 为内功心法，以 <span class="font-semibold text-primary">业务-建模六步法</span> 为实战罗盘，用数据真正改变现实。
+                </p>
+
+                <!-- 四大要素胶囊卡片 -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-4xl">
+                    <div class="custom-card !p-4 border-l-4 border-l-amber-600">
+                        <div class="text-xs text-secondary mb-1">能力基石</div>
+                        <div class="text-base font-bold">五懂一具备</div>
+                        <div class="text-xs opacity-70 mt-1">业务·系统·技术·数据·分析</div>
+                    </div>
+                    <div class="custom-card !p-4 border-l-4 border-l-blue-600">
+                        <div class="text-xs text-secondary mb-1">底层心法</div>
+                        <div class="text-base font-bold">2 个核心思维</div>
+                        <div class="text-xs opacity-70 mt-1">结构化思维 + 工程化思维</div>
+                    </div>
+                    <div class="custom-card !p-4 border-l-4 border-l-emerald-600">
+                        <div class="text-xs text-secondary mb-1">翻译梯子</div>
+                        <div class="text-base font-bold">3 个模型工具</div>
+                        <div class="text-xs opacity-70 mt-1">问题模型 → 信息模型 → SQL</div>
+                    </div>
+                    <div class="custom-card !p-4 border-l-4 border-l-purple-600">
+                        <div class="text-xs text-secondary mb-1">贯穿案例</div>
+                        <div class="text-base font-bold">微观 + 宏观</div>
+                        <div class="text-xs opacity-70 mt-1">昨天信息 + 出口增长乏力</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-border flex justify-between items-center text-xs text-secondary">
+                <div>主讲：数据分析与数字化转型工作组</div>
+                <div>快捷键提示：[← / → / 空格] 翻页，[T] 换深浅，[S] 换风格</div>
+            </div>
+        </section>
+
+        <!-- ==================== Slide 02: 课程大纲目录 ==================== -->
+        <section class="slide" data-index="1">
+            <div class="mb-6">
+                <div class="badge mb-2"><i class="fas fa-list-check"></i> AGENDA</div>
+                <h2 class="text-4xl font-extrabold">课程导航：从日常问句到宏观决策闭环</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 flex-1 items-center">
+                <!-- 模块 1 -->
+                <div class="custom-card h-full flex flex-col justify-between">
+                    <div>
+                        <div class="w-10 h-10 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold text-lg mb-4">01</div>
+                        <h3 class="text-lg font-bold mb-2">认知底座</h3>
+                        <p class="text-xs text-secondary leading-relaxed">破除语法迷信，剖析“五懂一具备”与业务、分析、工具的靶心准星马力关系。</p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-border text-[11px] text-primary font-semibold">
+                        好问题比好模型值钱 →
+                    </div>
+                </div>
+
+                <!-- 模块 2 -->
+                <div class="custom-card h-full flex flex-col justify-between">
+                    <div>
+                        <div class="w-10 h-10 rounded-full bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold text-lg mb-4">02</div>
+                        <h3 class="text-lg font-bold mb-2">底层心法</h3>
+                        <p class="text-xs text-secondary leading-relaxed">2个思维（结构化看清 vs 工程化落地）与3个模型工具（公式、表格、SQL）梯级转化。</p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-border text-[11px] text-primary font-semibold">
+                        两思维三模型 →
+                    </div>
+                </div>
+
+                <!-- 模块 3 -->
+                <div class="custom-card h-full flex flex-col justify-between">
+                    <div>
+                        <div class="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold text-lg mb-4">03</div>
+                        <h3 class="text-lg font-bold mb-2">破冰实验</h3>
+                        <p class="text-xs text-secondary leading-relaxed">领导问“昨天有什么重要信息？”3分钟体验人脑思维与SELECT-WHERE六步最小闭环。</p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-border text-[11px] text-primary font-semibold">
+                        消除代码恐惧 →
+                    </div>
+                </div>
+
+                <!-- 模块 4 -->
+                <div class="custom-card h-full flex flex-col justify-between border-2 border-primary/30">
+                    <div>
+                        <div class="w-10 h-10 rounded-full bg-orange-500/10 text-orange-600 flex items-center justify-center font-bold text-lg mb-4">04</div>
+                        <h3 class="text-lg font-bold mb-2">实战攻坚</h3>
+                        <p class="text-xs text-secondary leading-relaxed">“出口增长乏力归因”深度拆解：公式拆解、报关单排坑、积木SQL、四道验证与汇报。</p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-border text-[11px] text-primary font-semibold">
+                        实操六步法硬仗 →
+                    </div>
+                </div>
+
+                <!-- 模块 5 -->
+                <div class="custom-card h-full flex flex-col justify-between">
+                    <div>
+                        <div class="w-10 h-10 rounded-full bg-purple-500/10 text-purple-600 flex items-center justify-center font-bold text-lg mb-4">05</div>
+                        <h3 class="text-lg font-bold mb-2">避坑与自检</h3>
+                        <p class="text-xs text-secondary leading-relaxed">零基础常犯的5大陷阱剖析，掌握“回译检验三问”，让每一次分析产出都有生命力。</p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-border text-[11px] text-primary font-semibold">
+                        回译验收标准 →
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-border text-xs text-secondary flex justify-between">
+                <span>STAGE: COURSE OVERVIEW</span>
+                <span>02 / 15</span>
+            </div>
+        </section>
+
+        <!-- ==================== Slide 03: 认知底座 ==================== -->
+        <section class="slide" data-index="2">
+            <div class="mb-4">
+                <div class="badge mb-2"><i class="fas fa-brain"></i> 模块一 · 认知底座</div>
+                <h2 class="text-3xl lg:text-4xl font-extrabold">破除技术迷信：好问题比好模型值钱</h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 items-center">
+                <!-- 左侧：痛点与两大反例 -->
+                <div class="lg:col-span-5 space-y-4">
+                    <div class="custom-card bg-red-500/5 border-red-500/20">
+                        <div class="flex items-center gap-2 text-red-600 font-bold text-sm mb-2">
+                            <i class="fas fa-triangle-exclamation"></i> 传统学习最大的误区：死记语法
+                        </div>
+                        <p class="text-xs text-secondary leading-relaxed">
+                            新手不是不会分析，而是卡在英文命令与标点符号上。写了 100 行没有业务灵魂的 SQL，只会产出一堆没人看的垃圾报表。
+                        </p>
+                    </div>
+
+                    <div class="custom-card">
+                        <div class="font-bold text-sm mb-1 text-primary">反例 A：拿着锤子找钉子</div>
+                        <p class="text-xs text-secondary">学了复杂的关联查询和高级算法，满世界找数据硬套，模型看起来炫酷，业务领导直摇头。</p>
+                    </div>
+
+                    <div class="custom-card">
+                        <div class="font-bold text-sm mb-1 text-primary">反例 B：守着数据找亮点</div>
+                        <p class="text-xs text-secondary">先看手里有什么表、能画什么花哨图表，再反推“这说明什么”，图表很满，真实问题一个没解。</p>
+                    </div>
+                </div>
+
+                <!-- 右侧：五懂一具备阶梯 -->
+                <div class="lg:col-span-7 custom-card">
+                    <h3 class="text-base font-bold mb-4 flex items-center justify-between">
+                        <span>复合能力标尺：“五懂一具备”</span>
+                        <span class="text-xs font-normal text-secondary">业务出题，沟通交卷</span>
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex items-start gap-3 p-2.5 rounded bg-surface-subtle">
+                            <span class="w-6 h-6 rounded bg-amber-500/20 text-amber-700 dark:text-amber-300 flex items-center justify-center font-bold text-xs shrink-0">1</span>
+                            <div>
+                                <strong class="text-xs">懂业务</strong>：知道钱从哪来、事怎么办、风险藏在哪。业务不懂，分析就是隔靴搔痒。
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 p-2.5 rounded bg-surface-subtle">
+                            <span class="w-6 h-6 rounded bg-blue-500/20 text-blue-700 dark:text-blue-300 flex items-center justify-center font-bold text-xs shrink-0">2</span>
+                            <div>
+                                <strong class="text-xs">懂系统</strong>：知道数据躺在哪个系统、谁录入的、怎么流转。系统不懂，取数就是盲人摸象。
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 p-2.5 rounded bg-surface-subtle">
+                            <span class="w-6 h-6 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-center font-bold text-xs shrink-0">3</span>
+                            <div>
+                                <strong class="text-xs">懂技术</strong>：能把数据弄出来、洗干净、摆整齐（SQL 与拖拽算子）。
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 p-2.5 rounded bg-surface-subtle">
+                            <span class="w-6 h-6 rounded bg-purple-500/20 text-purple-700 dark:text-purple-300 flex items-center justify-center font-bold text-xs shrink-0">4</span>
+                            <div>
+                                <strong class="text-xs">懂数据</strong>：深知字段口径与陷阱。两个系统都叫“金额”，含义可能天差地别。
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 p-2.5 rounded bg-surface-subtle">
+                            <span class="w-6 h-6 rounded bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 flex items-center justify-center font-bold text-xs shrink-0">5</span>
+                            <div>
+                                <strong class="text-xs">懂分析</strong>：把数字变成证据，把证据变成推论，完成从“数字”到“结论”的惊险一跃。
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 p-2.5 rounded bg-primary/10 border border-primary/20">
+                            <span class="w-6 h-6 rounded bg-primary text-white flex items-center justify-center font-bold text-xs shrink-0">★</span>
+                            <div>
+                                <strong class="text-xs text-primary">沟通协调能力</strong>：做得再好，讲不明白、推不动、业务不用，一切等于零。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-border text-xs text-secondary flex justify-between">
+                <span>FOUNDATION: FIVE UNDERSTANDINGS</span>
+                <span>03 / 15</span>
+            </div>
+        </section>
+
+        <!-- ==================== Slide 04: 核心三角关系 ==================== -->
+        <section class="slide" data-index="3">
+            <div class="mb-4">
+                <div class="badge mb-2"><i class="fas fa-crosshairs"></i> 模块一 · 认知深化</div>
+                <h2 class="text-3xl lg:text-4xl font-extrabold">核心三角定位：业务 · 分析 · AI/工具</h2>
+            </div>
+
+            <div class="flex-1 flex flex-col justify-center max-w-5xl mx-auto w-full">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <!-- 业务：靶心 -->
+                    <div class="custom-card text-center !p-6 border-t-4 border-t-red-500">
+                        <div class="w-14 h-14 mx-auto rounded-full bg-red-500/10 text-red-500 flex items-center justify-center text-2xl mb-4">
+                            <i class="fas fa-bullseye"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2">业务是靶心</h3>
+                        <p class="text-xs text-primary font-mono mb-3">【业务定方向】</p>
+                        <p class="text-xs text-secondary leading-relaxed">
+                            一切从业务真实痛点出发。没有业务问题，分析是空转，SQL/AI 是玩具。选题一旦选错，后面技术再好全是白干。
+                        </p>
+                    </div>
+
+                    <!-- 分析：准星 -->
+                    <div class="custom-card text-center !p-6 border-t-4 border-t-amber-500">
+                        <div class="w-14 h-14 mx-auto rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center text-2xl mb-4">
+                            <i class="fas fa-crosshairs"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2">分析是准星</h3>
+                        <p class="text-xs text-primary font-mono mb-3">【分析保准头】</p>
+                        <p class="text-xs text-secondary leading-relaxed">
+                            口径对不对、样本偏不偏、结论过没过头。工具放大的不只是效率，更是错误！准星只要歪一度，马力越大，跑偏得越惨。
+                        </p>
+                    </div>
+
+                    <!-- AI/工具：马力 -->
+                    <div class="custom-card text-center !p-6 border-t-4 border-t-blue-500">
+                        <div class="w-14 h-14 mx-auto rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center text-2xl mb-4">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2">SQL/AI 是马力</h3>
+                        <p class="text-xs text-primary font-mono mb-3">【工具给马力】</p>
+                        <p class="text-xs text-secondary leading-relaxed">
+                            取数、清洗、初筛、拼代码、画图表——吃掉我们 80% 时间的繁杂环节都可以交给工具。但别忘了：马力越大，越需要瞄准！
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 灵魂警钟框 -->
+                <div class="custom-card bg-amber-500/10 border border-amber-500/30 !p-6 flex items-center gap-6">
+                    <div class="text-3xl text-amber-600 shrink-0">
+                        <i class="fas fa-signature"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-base font-bold text-amber-700 dark:text-amber-300 mb-1">
+                            “业务出题，分析解题，工具提速 —— 但署名的，永远是你自己！”
+                        </h4>
+                        <p class="text-xs text-secondary leading-relaxed">
+                            AI 和代码跑出的数字，它们自己绝不承担责任；出了偏差，业务问责的永远是你。<strong>用普通工具靠手艺，驾驭智能工具靠判断；它敢跑，你敢签吗？</strong>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-border text-xs text-secondary flex justify-between">
+                <span>CORE CONCEPT: TARGET & HORSEPOWER</span>
+                <span>04 / 15</span>
+            </div>
+        </section>
+
+        <!-- ==================== Slide 05: 2 个思维 ==================== -->
+        <section class="slide" data-index="4">
+            <div class="mb-4">
+                <div class="badge mb-2"><i class="fas fa-lightbulb"></i> 模块二 · 底层心法</div>
+                <h2 class="text-3xl lg:text-4xl font-extrabold">2 个思维：看清问题与改变现实</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 flex-1 items-center">
+                <!-- 思维 1：结构化思维 -->
+                <div class="custom-card h-full flex flex-col justify-between border-t-4 border-t-amber-600">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="badge text-amber-700 bg-amber-500/10 border-amber-500/20">认知组织方式</span>
+                            <span class="text-xs font-mono opacity-60">Structured Thinking</span>
+                        </div>
+                        <h3 class="text-2xl font-black mb-3">结构化思维：看清问题</h3>
+                        <p class="text-xs text-secondary mb-5">
+                            将混乱复杂的信息按照严密的逻辑拆解、分类和层级化，使问题<strong>“可理解、可讨论、可表达”</strong>。
+                        </p>
+
+                        <div class="space-y-3 text-xs">
+                            <div class="p-3 bg-surface-subtle rounded flex items-start gap-3">
+                                <i class="fas fa-sitemap text-amber-600 mt-0.5"></i>
+                                <div><strong>① 分解（Decomposition）</strong>：将复杂的大问题拆成独立小块（如：增长 = 数量 × 价格）。</div>
+                            </div>
+                            <div class="p-3 bg-surface-subtle rounded flex items-start gap-3">
+                                <i class="fas fa-table-cells-large text-amber-600 mt-0.5"></i>
+                                <div><strong>② 分类（MECE）</strong>：相互独立、完全穷尽。不重叠、不遗漏。</div>
+                            </div>
+                            <div class="p-3 bg-surface-subtle rounded flex items-start gap-3">
+                                <i class="fas fa-diagram-project text-amber-600 mt-0.5"></i>
+                                <div><strong>③ 逻辑关系</strong>：梳理时间先后、因果推导、层级从属与空间对照。</div>
+                            </div>
+                            <div class="p-3 bg-surface-subtle rounded flex items-start gap-3">
+                                <i class="fas fa-pen-nib text-amber-600 mt-0.5"></i>
+                                <div><strong>④ 可表达性</strong>：能用金字塔结构、逻辑树或简单公式白纸黑字呈现。</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-border text-xs text-amber-700 dark:text-amber-400 font-semibold">
+                        解决核心：如何真正“看清与说清”问题
+                    </div>
+                </div>
+
+                <!-- 思维 2：工程化思维 -->
+                <div class="custom-card h-full flex flex-col justify-between border-t-4 border-t-sky-600">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="badge text-sky-700 bg-sky-500/10 border-sky-500/20">系统落地方式</span>
+                            <span class="text-xs font-mono opacity-60">Engineering Thinking</span>
+                        </div>
+                        <h3 class="text-2xl font-black mb-3">工程化思维：改变现实</h3>
+                        <p class="text-xs text-secondary mb-5">
+                            以<strong>可定义、可实现、可验证、可迭代</strong>为准绳，把思考转变成能自动运转的系统解决方案。
+                        </p>
+
+                        <div class="space-y-3 text-xs">
+                            <div class="p-3 bg-surface-subtle rounded flex items-start gap-3">
+                                <i class="fas fa-bullseye text-sky-600 mt-0.5"></i>
+                                <div><strong>① 问题可定义</strong>：明确输入、输出与边界约束（输入什么表，过滤什么条件）。</div>
+                            </div>
+                            <div class="p-3 bg-surface-subtle rounded flex items-start gap-3">
+                                <i class="fas fa-cubes text-sky-600 mt-0.5"></i>
+                                <div><strong>② 系统模块化</strong>：将取数、过滤、聚合、计算像积木一样解耦设计。</div>
+                            </div>
+                            <div class="p-3 bg-surface-subtle rounded flex items-start gap-3 border border-sky-500/30">
+                                <i class="fas fa-shield-check text-sky-600 mt-0.5"></i>
+                                <div><strong>③ 可验证（核心）</strong>：设计对账、极值、空值检查，不经验证的数绝不交付。</div>
+                            </div>
+                            <div class="p-3 bg-surface-subtle rounded flex items-start gap-3">
+                                <i class="fas fa-arrows-rotate text-sky-600 mt-0.5"></i>
+                                <div><strong>④ 持续闭环迭代</strong>：在业务反馈中持续微调口径，模型是活的系统。</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-border text-xs text-sky-700 dark:text-sky-400 font-semibold">
+                        解决核心：如何真正“改变现实并交付结果”
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-border text-xs text-secondary flex justify-between">
+                <span>DUAL MINDSETS: STRUCTURED & ENGINEERING</span>
+                <span>05 / 15</span>
+            </div>
+        </section>
+
+        <!-- ==================== Slide 06: 3 个模型工具 ==================== -->
+        <section class="slide" data-index="5">
+            <div class="mb-4">
+                <div class="badge mb-2"><i class="fas fa-toolbox"></i> 模块二 · 模型工具</div>
+                <h2 class="text-3xl lg:text-4xl font-extrabold">3 个模型工具：业务到计算机的翻译阶梯</h2>
+            </div>
+
+            <div class="flex-1 flex flex-col justify-center max-w-5xl mx-auto w-full">
+                <p class="text-sm text-secondary mb-6 text-center max-w-2xl mx-auto">
+                    零基础学员不需要一开始钻进代码细节，而是踩着这 3 个台阶，一步步把含糊的业务话翻译给计算机：
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <!-- 台阶 1：问题模型 -->
+                    <div class="custom-card relative !p-6 flex flex-col justify-between">
+                        <div>
+                            <div class="text-xs font-mono text-amber-600 font-bold mb-2">STEP 01 · 业务层</div>
+                            <h3 class="text-xl font-bold mb-3 flex items-center gap-2">
+                                <i class="fas fa-calculator text-amber-600"></i> 问题模型
+                            </h3>
+                            <div class="p-3 bg-surface-subtle rounded font-mono text-xs text-primary mb-3">
+                                贸易额 = Σ 数量 × 单价<br>
+                                同比 = (本期 - 上期) / 上期
+                            </div>
+                            <p class="text-xs text-secondary leading-relaxed">
+                                <strong>通俗解释：一个公式。</strong><br>
+                                用结构化思维把业务痛点提炼为一个简单解释因果关系的数学框架，此时系统里连一个数字都还没有。
+                            </p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-border text-[11px] text-amber-600 font-semibold">
+                            产出：白纸上的计算逻辑公式
+                        </div>
+                    </div>
+
+                    <!-- 台阶 2：信息模型 -->
+                    <div class="custom-card relative !p-6 flex flex-col justify-between">
+                        <div>
+                            <div class="text-xs font-mono text-blue-600 font-bold mb-2">STEP 02 · 数据层</div>
+                            <h3 class="text-xl font-bold mb-3 flex items-center gap-2">
+                                <i class="fas fa-table text-blue-600"></i> 信息模型
+                            </h3>
+                            <div class="p-3 bg-surface-subtle rounded font-mono text-xs text-secondary mb-3">
+                                报关单表 (head)<br>
+                                ├── 商品明细 (list)<br>
+                                └── 企业/国别维表 (dim)
+                            </div>
+                            <p class="text-xs text-secondary leading-relaxed">
+                                <strong>通俗解释：一张张表格。</strong><br>
+                                用工程化思维把公式里的抽象变量，精确锁定到现实数据库里的表名、字段名，并定死统计口径与边界约束。
+                            </p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-border text-[11px] text-blue-600 font-semibold">
+                            产出：表关联关系图与字段口径表
+                        </div>
+                    </div>
+
+                    <!-- 台阶 3：数学模型 -->
+                    <div class="custom-card relative !p-6 flex flex-col justify-between border-2 border-primary/30">
+                        <div>
+                            <div class="text-xs font-mono text-emerald-600 font-bold mb-2">STEP 03 · 算力层</div>
+                            <h3 class="text-xl font-bold mb-3 flex items-center gap-2">
+                                <i class="fas fa-code text-emerald-600"></i> 数学模型 (SQL)
+                            </h3>
+                            <div class="p-3 bg-surface-subtle rounded font-mono text-xs text-emerald-700 dark:text-emerald-300 mb-3">
+                                SELECT hs4, SUM(val)<br>
+                                FROM customs_dec<br>
+                                WHERE date = '...' GROUP BY ...
+                            </div>
+                            <p class="text-xs text-secondary leading-relaxed">
+                                <strong>通俗解释：一段能跑的指令。</strong><br>
+                                能一条 SQL 讲清的，绝不上机器学习。在零基础这里，所谓的数学模型就是<strong>一组拖拽算子或一段标准 SQL 语句</strong>。
+                            </p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-border text-[11px] text-emerald-600 font-semibold">
+                            产出：可跑、可验、可复用的查询脚本
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 总结条 -->
+                <div class="p-3.5 bg-surface-subtle rounded-lg text-center text-xs font-medium border border-border">
+                    💡 <strong>记忆速记口诀</strong>：问题模型是公式，信息模型是表格，数学模型是 SQL。
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-border text-xs text-secondary flex justify-between">
+                <span>THREE MODELS: FORMULA, TABLE & SQL</span>
+                <span>06 / 15</span>
+            </div>
+        </section>
+
+        <!-- ==================== Slide 07: 破冰实验 ==================== -->
+        <section class="slide" data-index="6">
+            <div class="mb-4">
+                <div class="badge mb-2"><i class="fas fa-stopwatch"></i> 模块三 · 破冰热身</div>
+                <h2 class="text-3xl lg:text-4xl font-extrabold">3分钟极简体验：领导问“昨天有什么重要信息？”</h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1 items-center">
+                <!-- 左侧：日常办公场景还原 -->
+                <div class="lg:col-span-5 space-y-4">
+                    <div class="custom-card bg-amber-500/5 border-l-4 border-l-amber-600">
+                        <span class="text-xs text-amber-700 dark:text-amber-300 font-bold uppercase tracking-wider">业务场景出题</span>
+                        <h3 class="text-xl font-bold mt-1 mb-2">“小张，昨天有什么重要信息吗？”</h3>
+                        <p class="text-xs text-secondary leading-relaxed">
+                            领导早上一进办公室随口问了一句。零基础的你，大脑其实在 3 秒钟内已经全自动运行了一遍<strong>业务建模与取数</strong>！
+                        </p>
+                    </div>
+
+                    <div class="custom-card space-y-2.5 text-xs">
+                        <div class="font-bold text-sm text-primary mb-2">大脑直觉检索的三问：</div>
+                        <div class="flex items-center justify-between p-2 rounded bg-surface-subtle">
+                            <span>1. 这些信息平时存在哪？</span>
+                            <span class="font-mono text-primary">→ 局域网门户公告页面</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 rounded bg-surface-subtle">
+                            <span>2. 领导要看哪一天的、哪种？</span>
+                            <span class="font-mono text-primary">→ 日期=昨天 AND 类别=重要</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 rounded bg-surface-subtle">
+                            <span>3. 挑哪几项内容汇报给他？</span>
+                            <span class="font-mono text-primary">→ 标题、内容摘要、发布部门</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右侧：自然语言到 SQL 的秒级映射 -->
+                <div class="lg:col-span-7 custom-card">
+                    <h3 class="text-base font-bold mb-3 flex items-center justify-between">
+                        <span>大脑思考过程与标准 SQL 的 1:1 对照</span>
+                        <span class="badge text-[11px]">零代码门槛突破</span>
+                    </h3>
+
+                    <div class="space-y-4 font-mono text-xs">
+                        <!-- SELECT 映射 -->
+                        <div class="p-3 rounded bg-surface-subtle border border-border">
+                            <div class="text-secondary text-[11px] mb-1 font-sans">【挑什么看】 标题、摘要、发布部门</div>
+                            <div class="text-blue-600 dark:text-blue-400 font-bold text-sm">SELECT 信息标题, 内容摘要, 发布部门</div>
+                        </div>
+
+                        <!-- FROM 映射 -->
+                        <div class="p-3 rounded bg-surface-subtle border border-border">
+                            <div class="text-secondary text-[11px] mb-1 font-sans">【去哪里找】 门户网站信息表</div>
+                            <div class="text-amber-600 dark:text-amber-400 font-bold text-sm">FROM 门户网站_信息表</div>
+                        </div>
+
+                        <!-- WHERE 映射 -->
+                        <div class="p-3 rounded bg-surface-subtle border border-border">
+                            <div class="text-secondary text-[11px] mb-1 font-sans">【过滤条件】 只要昨天的 并且 属于重要信息</div>
+                            <div class="text-emerald-600 dark:text-emerald-400 font-bold text-sm">WHERE 发布日期 = '昨天' AND 信息类别 = '重要信息';</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-primary/10 rounded border border-primary/20 text-xs leading-relaxed">
+                        🎉 <strong>顿悟时刻</strong>：看到没有？你根本不需要是程序员！SQL 不过是把你每天大脑里的查找逻辑，换成英文单词写下来而已。
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-border text-xs text-secondary flex justify-between">
+                <span>BREAKTHROUGH: EVERYONE RUNS SQL</span>
+                <span>07 / 15</span>
+            </div>
+        </section>
+
+        <!-- ==================== Slide 08: 破冰总结 ==================== -->
+        <section class="slide" data-index="7">
+            <div class="mb-4">
+                <div class="badge mb-2"><i class="fas fa-rotate"></i> 模块三 · 实验闭环</div>
+                <h2 class="text-3xl lg:text-4xl font-extrabold">极简案例里的“业务建模六步法”全貌</h2>
+            </div>
+
+            <div class="flex-1 flex flex-col justify-center max-w-5xl mx-auto w-full">
+                <p class="text-sm text-secondary mb-6 text-center">
+                    “五懂一具备”串起来的这六步，绝不是大而空的口号，哪怕最简单的办公需求，也是一条闭环链条：
+                </p>
+
+                <div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6 text-center">
+                    <!-- Step 1 -->
+                    <div class="custom-card !p-3">
+                        <div class="w-7 h-7 mx-auto rounded-full bg-amber-500/20 text-amber-600 flex items-center justify-center font-bold text-xs mb-2">1</div>
+                        <div class="font-bold text-xs mb-1">业务出题</div>
+                        <p class="text-[11px] text-secondary">领导问“昨天有什么重要信息”</p>
+                    </div>
+                    <!-- Step 2 -->
+                    <div class="custom-card !p-3">
+                        <div class="w-7 h-7 mx-auto rounded-full bg-blue-500/20 text-blue-600 flex items-center justify-center font-bold text-xs mb-2">2</div>
+                        <div class="font-bold text-xs mb-1">系统找数</div>
+                        <p class="text-[11px] text-secondary">定位门户公告表与字段</p>
+                    </div>
+                    <!-- Step 3 -->
+                    <div class="custom-card !p-3 border-2 border-primary/40">
+                        <div class="w-7 h-7 mx-auto rounded-full bg-emerald-500/20 text-emerald-600 flex items-center justify-center font-bold text-xs mb-2">3</div>
+                        <div class="font-bold text-xs mb-1">技术建模</div>
+                        <p class="text-[11px] text-secondary">拼出 SELECT-WHERE 查询</p>
+                    </div>
+                    <!-- Step 4 -->
+                    <div class="custom-card !p-3">
+                        <div class="w-7 h-7 mx-auto rounded-full bg-purple-500/20 text-purple-600 flex items-center justify-center font-bold text-xs mb-2">4</div>
+                        <div class="font-bold text-xs mb-1">数据验证</div>
+                        <p class="text-[11px] text-secondary">排查有没有漏单或未发布草稿</p>
+                    </div>
+                    <!-- Step 5 -->
+                    <div class="custom-card !p-3">
+                        <div class="w-7 h-7 mx-auto rounded-full bg-cyan-500/20 text-cyan-600 flex items-center justify-center font-bold text-xs mb-2">5</div>
+                        <div class="font-bold text-xs mb-1">业务分析</div>
+                        <p class="text-[11px] text-secondary">提炼其中2条与本部门强相关</p>
+                    </div>
+                    <!-- Step 6 -->
+                    <div class="custom-card !p-3">
+                        <div class="w-7 h-7 mx-auto rounded-full bg-rose-500/20 text-rose-600 flex items-center justify-center font-bold text-xs mb-2">6</div>
+                        <div class="font-bold text-xs mb-1">沟通交卷</div>
+                        <p class="text-[11px] text-secondary">向领导口头精炼汇报决策</p>
+                    </div>
+                </div>
+
+                <!-- 核心对比卡片 -->
+                <div class="custom-card !p-5 bg-surface-subtle">
+                    <h4 class="font-bold text-sm mb-2 flex items-center gap-2">
+                        <i class="fas fa-arrow-right-arrow-left text-primary"></i> 为什么验证和分析这一步不能省？
+                    </h4>
+                    <p class="text-xs text-secondary leading-relaxed mb-2">
+                        如果你只懂执行 SQL，查出来 5 条就直接念给领导，其中万一有 1 条是测试员录的假数据、或者还有 1 条昨晚 8 点发的急件因为缓存没查出来，汇报就会当场翻车！
+                    </p>
+                    <p class="text-xs text-primary font-semibold">
+                        这就是为什么必须有“数据验证”和“业务分析”。工具帮你挑出来，但对结果把关的永远是你自己。
+                    </p>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-border text-xs text-secondary flex justify-between">
+                <span>MINIMAL VIABLE LOOP: 6-STEP WORKFLOW</span>
+                <span>08 / 15</span>
+            </div>
+        </section>
+
+        <!-- ==================== Slide 09: 实战大仗 ==================== -->
+        <section class="slide" data-index="8">
+            <div class="mb-4">
+                <div class="badge mb-2"><i class="fas fa-ship"></i> 模块四 · 实战攻坚</div>
+                <h2 class="text-3xl lg:text-4xl font-extrabold">复杂硬仗：“出口增长乏力，到底乏力在哪？”</h2>
+            </div>
+
+            <div class="flex-1 flex flex-col justify-center max-w-5xl mx-auto w-full">
+                <!-- 真实业务痛点框 -->
+                <div class="custom-card bg-amber-500/5 border-l-4 border-l-amber-600 mb-6 !p-6">
+                    <div class="text-xs text-amber-700 dark:text-amber-400 font-bold uppercase tracking-wider mb-1">关区/企业真实业务出题</div>
+                    <h3 class="text-2xl font-black mb-3">“今年出口贸易增长乏力，到底乏力在哪？怎么让数据开口说话？”</h3>
+                    <p class="text-xs text-secondary leading-relaxed max-w-3xl">
+                        这是一句最典型的业务大白话：<strong>带情绪、有方向、但没动作、没口径</strong>。如果直接进系统搜，面对几千万条报关单，你将无从下手。
+                    </p>
+                </div>
+
+                <!-- 六步大图拆解 -->
+                <div class="custom-card">
+                    <h4 class="text-sm font-bold mb-4 flex items-center justify-between">
+                        <span>六步法破局作战蓝图</span>
+                        <span class="text-xs text-secondary font-mono">从含糊口号到精确闭环</span>
+                    </h4>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                        <div class="p-3 bg-surface-subtle rounded space-y-1">
+                            <div class="font-bold text-amber-600 flex items-center gap-1.5">
+                                <i class="fas fa-magnifying-glass-chart"></i> 1. 业务拆解 (结构化)
+                            </div>
+                            <p class="text-secondary leading-normal">拆基准、拆维度、拆因果，产出贸易额与量价归因公式。</p>
+                        </div>
+
+                        <div class="p-3 bg-surface-subtle rounded space-y-1">
+                            <div class="font-bold text-blue-600 flex items-center gap-1.5">
+                                <i class="fas fa-database"></i> 2. 系统找数 (工程化)
+                            </div>
+                            <p class="text-secondary leading-normal">锁定报关单表体、商品与企业维表，白纸黑字避开统计口径陷阱。</p>
+                        </div>
+
+                        <div class="p-3 bg-surface-subtle rounded space-y-1">
+                            <div class="font-bold text-emerald-600 flex items-center gap-1.5">
+                                <i class="fas fa-puzzle-piece"></i> 3. 技术建模 (乐高积木)
+                            </div>
+                            <p class="text-secondary leading-normal">数据源 → 过滤 → 聚合 → 计算列 → 排序，积木拼成计算模型。</p>
+                        </div>
+
+                        <div class="p-3 bg-surface-subtle rounded space-y-1">
+                            <div class="font-bold text-purple-600 flex items-center gap-1.5">
+                                <i class="fas fa-shield-halved"></i> 4. 数据验证 (生命线)
+                            </div>
+                            <p class="text-secondary leading-normal">总量对账、空值排查、离群极值扫描、抽取50票原始单据对质。</p>
+                        </div>
+
+                        <div class="p-3 bg-surface-subtle rounded space-y-1">
+                            <div class="font-bold text-cyan-600 flex items-center gap-1.5">
+                                <i class="fas fa-chart-pie"></i> 5. 业务分析 (归因提炼)
+                            </div>
+                            <p class="text-secondary leading-normal">一张表 + 一张图 + 三句话（空间拆、因果拆、微观主体拆）。</p>
+                        </div>
+
+                        <div class="p-3 bg-surface-subtle rounded space-y-1">
+                            <div class="font-bold text-rose-600 flex items-center gap-1.5">
+                                <i class="fas fa-handshake"></i> 6. 沟通交卷 (落地闭环)
+                            </div>
+                            <p class="text-secondary leading-normal">汇报三步法：拆解 → 模型 → 方案，严禁堆砌 SQL 语法黑话。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-border text-xs text-secondary flex justify-between">
+                <span>CASE STUDY: EXPORT SLOWDOWN DEEP DIVE</span>
+                <span>09 / 15</span>
+            </div>
+        </section>
+
+        <!-- ==================== Slide 10: Step 1 & 2 ==================== -->
+        <section class="slide" data-index="9">
+            <div class="mb-4">
+                <div class="badge mb-2"><i class="fas fa-filter"></i> 模块四 · 步骤 1 & 2</div>
+                <h2 class="text-3xl lg:text-4xl font-extrabold">拆解与找数：从公式到报关单信息模型</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1 items-center">
+                <!-- Step 1：业务拆解 (问题模型) -->
+                <div class="custom-card h-full flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="badge text-amber-700 bg-amber-500/10">Step 1 · 结构化拆解</span>
+                            <span class="font-mono text-xs opacity-60">Problem Model</span>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">构建问题模型：三问拆解</h3>
+
+                        <div class="space-y-2.5 text-xs">
+                            <div class="p-2.5 bg-surface-subtle rounded">
+                                <strong class="text-primary">1. 跟谁比？（确定基准）</strong><br>
+                                确定基准为“同比”：今年 1–8 月 vs 去年同期 1–8 月。
+                            </div>
+                            <div class="p-2.5 bg-surface-subtle rounded">
+                                <strong class="text-primary">2. 乏力在哪？（MECE 分解维度）</strong><br>
+                                必须拆细：国家地区、HS 商品大类、企业规模属性、贸易方式。
+                            </div>
+                            <div class="p-2.5 bg-surface-subtle rounded">
+                                <strong class="text-primary">3. 为什么乏力？（因果深挖）</strong><br>
+                                是“量跌了”（卖不出），还是“价跌了”（卖贱了），还是“产品结构淘汰换代”？
+                            </div>
+                        </div>
+
+                        <div class="mt-4 p-3 rounded bg-amber-500/10 border border-amber-500/20 font-mono text-xs">
+                            出口贸易额 = Σ (数量 × 平均单价)<br>
+                            乏力归因 = 数量贡献 + 价格贡献 + 结构升级贡献
+                        </div>
+                    </div>
+                    <div class="pt-3 border-t border-border text-[11px] text-secondary">
+                        拆到什么程度停笔？——拆到能映射到数据库字段为止！
+                    </div>
+                </div>
+
+                <!-- Step 2：系统找数 (信息模型) -->
+                <div class="custom-card h-full flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="badge text-blue-700 bg-blue-500/10">Step 2 · 工程化映射</span>
+                            <span class="font-mono text-xs opacity-60">Information Model</span>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">构建信息模型：排查口径坑</h3>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead>
+                                    <tr class="border-b border-border text-secondary">
+                                        <th class="py-1.5">公式变量</th>
+                                        <th class="py-1.5">对应系统字段</th>
+                                        <th class="py-1.5">必查的“口径坑”</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-border/50">
+                                    <tr>
+                                        <td class="py-2 font-semibold">贸易额</td>
+                                        <td class="font-mono text-primary">total_price_usd</td>
+                                        <td class="text-secondary">用美元还是人民币？含不含运保费？</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-2 font-semibold">出口数量</td>
+                                        <td class="font-mono text-primary">qty_1, unit_code</td>
+                                        <td class="text-secondary">不同商品计量单位不同，不能盲目加总！</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-2 font-semibold">商品归类</td>
+                                        <td class="font-mono text-primary">hs_code (前4位)</td>
+                                        <td class="text-secondary">按大类分析，避免 10 位编码过于分散</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-2 font-semibold">申报日期</td>
+                                        <td class="font-mono text-primary">decl_date</td>
+                                        <td class="text-secondary">按申报算还是放行算？已撤销单据必须剔除</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="mt-4 p-2.5 rounded bg-surface-subtle font-mono text-[11px] text-secondary">
+                            [报关单主表] ── 关联 [商品明细表] ── 关联 [HS归类维表/国别维表]
+                        </div>
+                    </div>
+                    <div class="pt-3 border-t border-border text-[11px] text-secondary">
+                        工程化第一法则：在动手前把字段边界、过滤规则白纸黑字定死。
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-border text-xs text-secondary flex justify-between">
+                <span>WORKFLOW: STEPS 1 & 2 - MAPPING DATA</span>
+                <span>10 / 15</span>
+            </div>
+        </section>
+
+        <!-- ==================== Slide 11: Step 3 建模 ==================== -->
+        <section class="slide" data-index="10">
+            <div class="mb-4">
+                <div class="badge mb-2"><i class="fas fa-cubes-stacked"></i> 模块四 · 步骤 3</div>
+                <h2 class="text-3xl lg:text-4xl font-extrabold">技术建模：把 SQL 拆成 5 块乐高积木</h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 items-center">
+                <!-- 左侧：5 块积木流程 -->
+                <div class="lg:col-span-5 space-y-2 text-xs">
+                    <div class="p-2.5 custom-card border-l-4 border-l-blue-500 !p-3">
+                        <div class="font-bold text-primary flex items-center justify-between">
+                            <span>① 数据源积木 (FROM / JOIN)</span>
+                            <span class="text-[10px] font-mono">摆表上桌</span>
+                        </div>
+                        <p class="text-secondary mt-0.5">将报关单主表与商品明细、国别维表连线关联。</p>
+                    </div>
+
+                    <div class="p-2.5 custom-card border-l-4 border-l-amber-500 !p-3">
+                        <div class="font-bold text-primary flex items-center justify-between">
+                            <span>② 过滤积木 (WHERE)</span>
+                            <span class="text-[10px] font-mono">切掉噪点</span>
+                        </div>
+                        <p class="text-secondary mt-0.5">限制 `出口标志 = 'E'`，时间跨度锁定在 2025 与 2026 前8月。</p>
+                    </div>
+
+                    <div class="p-2.5 custom-card border-l-4 border-l-emerald-500 !p-3">
+                        <div class="font-bold text-primary flex items-center justify-between">
+                            <span>③ 聚合积木 (GROUP BY)</span>
+                            <span class="text-[10px] font-mono">化繁为简</span>
+                        </div>
+                        <p class="text-secondary mt-0.5">按 `HS大类, 目的国` 分组，计算累计总额与总单数。</p>
+                    </div>
+
+                    <div class="p-2.5 custom-card border-l-4 border-l-purple-500 !p-3">
+                        <div class="font-bold text-primary flex items-center justify-between">
+                            <span>④ 计算列积木 (SELECT CALC)</span>
+                            <span class="text-[10px] font-mono">指标生成</span>
+                        </div>
+                        <p class="text-secondary mt-0.5">自动衍生出同比增长率：`yoy_pct = (今年 - 去年) / 去年`。</p>
+                    </div>
+
+                    <div class="p-2.5 custom-card border-l-4 border-l-rose-500 !p-3">
+                        <div class="font-bold text-primary flex items-center justify-between">
+                            <span>⑤ 排序截取积木 (ORDER BY / LIMIT)</span>
+                            <span class="text-[10px] font-mono">聚焦矛盾</span>
+                        </div>
+                        <p class="text-secondary mt-0.5">按跌幅降序排列，只看下滑最严重的前 20 项品类。</p>
+                    </div>
+                </div>
+
+                <!-- 右侧：积木对应的真实 SQL 代码 (零基础阅读无压力) -->
+                <div class="lg:col-span-7 custom-card !p-4 bg-surface-subtle font-mono text-xs">
+                    <div class="flex items-center justify-between pb-2 mb-3 border-b border-border">
+                        <span class="text-secondary text-[11px] font-sans">
+                            <i class="fas fa-terminal"></i> 积木拼成的标准 SQL（自动翻译）
+                        </span>
+                        <span class="badge text-[10px]">自动生成 / 零记忆负担</span>
+                    </div>
+
+                    <pre class="overflow-x-auto text-[11px] leading-relaxed text-main">
+<span class="text-purple-600 font-bold">WITH</span> base_data <span class="text-purple-600 font-bold">AS</span> (
+    <span class="text-blue-600 font-bold">SELECT</span> 
+        l.hs4 <span class="text-purple-600 font-bold">AS</span> 商品大类,
+        h.dest_country <span class="text-purple-600 font-bold">AS</span> 目的国,
+        <span class="text-emerald-600">SUM</span>(<span class="text-blue-600 font-bold">CASE WHEN</span> h.decl_date <span class="text-blue-600 font-bold">BETWEEN</span> <span class="text-amber-600">'2025-01-01'</span> <span class="text-blue-600 font-bold">AND</span> <span class="text-amber-600">'2025-08-31'</span> 
+                 <span class="text-blue-600 font-bold">THEN</span> l.total_usd <span class="text-blue-600 font-bold">ELSE</span> 0 <span class="text-blue-600 font-bold">END</span>) <span class="text-purple-600 font-bold">AS</span> val_2025,
+        <span class="text-emerald-600">SUM</span>(<span class="text-blue-600 font-bold">CASE WHEN</span> h.decl_date <span class="text-blue-600 font-bold">BETWEEN</span> <span class="text-amber-600">'2026-01-01'</span> <span class="text-blue-600 font-bold">AND</span> <span class="text-amber-600">'2026-08-31'</span> 
+                 <span class="text-blue-600 font-bold">THEN</span> l.total_usd <span class="text-blue-600 font-bold">ELSE</span> 0 <span class="text-blue-600 font-bold">END</span>) <span class="text-purple-600 font-bold">AS</span> val_2026
+    <span class="text-blue-600 font-bold">FROM</span> customs_head h
+    <span class="text-blue-600 font-bold">JOIN</span> customs_list l <span class="text-blue-600 font-bold">ON</span> h.decl_id = l.decl_id
+    <span class="text-blue-600 font-bold">WHERE</span> h.trade_mode = <span class="text-amber-600">'E'</span> <span class="text-blue-600 font-bold">AND</span> h.status = <span class="text-amber-600">'RELEASED'</span>
+    <span class="text-blue-600 font-bold">GROUP BY</span> l.hs4, h.dest_country
+)
+<span class="text-blue-600 font-bold">SELECT</span> 
+    商品大类, 目的国, val_2025, val_2026,
+    <span class="text-emerald-600">ROUND</span>((val_2026 - val_2025) / <span class="text-emerald-600">NULLIF</span>(val_2025, 0) * 100, 2) <span class="text-purple-600 font-bold">AS</span> 同比增幅_PCT
+<span class="text-blue-600 font-bold">FROM</span> base_data
+<span class="text-blue-600 font-bold">WHERE</span> val_2025 > 100 <span class="text-gray-400">-- 过滤小微碎单</span>
+<span class="text-blue-600 font-bold">ORDER BY</span> 同比增幅_PCT <span class="text-blue-600 font-bold">ASC</span>
+<span class="text-blue-600 font-bold">LIMIT</span> 20;</pre>
+
+                    <div class="mt-3 pt-2 border-t border-border text-secondary text-[11px] font-sans">
+                        💡 <strong>你拖的不是花哨图标，你拖的是 SQL 代码本身。</strong> 逻辑清楚了，代码由系统自动拼装！
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-border text-xs text-secondary flex justify-between">
+                <span>MODELING: 5 LEGO OPERATORS TO SQL</span>
+                <span>11 / 15</span>
+            </div>
+        </section>
+
+        <!-- ==================== Slide 12: Step 4 验证 ==================== -->
+        <section class="slide" data-index="11">
+            <div class="mb-4">
+                <div class="badge mb-2"><i class="fas fa-shield-halved"></i> 模块四 · 步骤 4</div>
+                <h2 class="text-3xl lg:text-4xl font-extrabold">数据验证：工程化的生命线（可验证）</h2>
+            </div>
+
+            <div class="flex-1 flex flex-col justify-center max-w-5xl mx-auto w-full">
+                <!-- 警告框 -->
+                <div class="custom-card bg-red-500/10 border-l-4 border-l-red-500 mb-6 !p-4 flex items-center gap-4">
+                    <div class="text-2xl text-red-500 shrink-0"><i class="fas fa-triangle-exclamation"></i></div>
+                    <div class="text-xs">
+                        <strong class="text-red-700 dark:text-red-300 font-bold">绝对铁律：跑出数字千万别急着写 PPT 汇报！</strong><br>
+                        未经验证的模型跑得越快，翻车越惨烈。在真实业务中，<strong>“模型说有疑点业务说没有，通常不是业务错了，是你的口径错了！”</strong>
+                    </div>
+                </div>
+
+                <!-- 四道铁血防线网格 -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <!-- 防线 1 -->
+                    <div class="custom-card !p-4">
+                        <div class="w-8 h-8 rounded bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold text-sm mb-3">01</div>
+                        <h4 class="text-sm font-bold mb-1">总量与行数对账</h4>
+                        <p class="text-xs text-secondary leading-relaxed">
+                            算出的累计出口总值，必须与统计处发布的官方法定月报核对，误差严控在 0.01% 以内，谨防漏算退税或撤单。
+                        </p>
+                    </div>
+
+                    <!-- 防线 2 -->
+                    <div class="custom-card !p-4">
+                        <div class="w-8 h-8 rounded bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold text-sm mb-3">02</div>
+                        <h4 class="text-sm font-bold mb-1">空值脱落排查</h4>
+                        <p class="text-xs text-secondary leading-relaxed">
+                            检查 `hs4 IS NULL` 或 `dest_country IS NULL` 占比。空值一旦超过 0.5%，说明维表关联存在逻辑断裂。
+                        </p>
+                    </div>
+
+                    <!-- 防线 3 -->
+                    <div class="custom-card !p-4">
+                        <div class="w-8 h-8 rounded bg-purple-500/10 text-purple-600 flex items-center justify-center font-bold text-sm mb-3">03</div>
+                        <h4 class="text-sm font-bold mb-1">极值与离群扫描</h4>
+                        <p class="text-xs text-secondary leading-relaxed">
+                            检查单笔金额是否出现几十亿美元的离群单据，排查企业录入时把美元错选为人民币或多打了几个零。
+                        </p>
+                    </div>
+
+                    <!-- 防线 4 -->
+                    <div class="custom-card !p-4 border-2 border-primary/30">
+                        <div class="w-8 h-8 rounded bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold text-sm mb-3">04</div>
+                        <h4 class="text-sm font-bold mb-1">随机抽样回溯</h4>
+                        <p class="text-xs text-secondary leading-relaxed">
+                            随机抽取 50 份原始报关单扫描件，回到业务现场系统逐字核验，确认系统数与模型跑出的数据 100% 一致。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 总结 -->
+                <div class="p-3 bg-surface-subtle rounded text-xs text-center text-secondary border border-border">
+                    🛡️ 工程化思维最硬核的特质就是<strong>“可验证”</strong>。四道防线全绿，你的数据结论才真正站得住脚。
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-border text-xs text-secondary flex justify-between">
+                <span>VERIFICATION: 4 DEFENSE LINES</span>
+                <span>12 / 15</span>
+            </div>
+        </section>
+
+        <!-- ==================== Slide 13: Step 5 & 6 ==================== -->
+        <section class="slide" data-index="12">
+            <div class="mb-4">
+                <div class="badge mb-2"><i class="fas fa-comments"></i> 模块四 · 步骤 5 & 6</div>
+                <h2 class="text-3xl lg:text-4xl font-extrabold">分析提炼与交卷：经典汇报三步法</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1 items-center">
+                <!-- Step 5 分析交付标准件 -->
+                <div class="custom-card h-full flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="badge text-cyan-700 bg-cyan-500/10">Step 5 · 归因提炼</span>
+                            <span class="text-xs font-mono opacity-60">Deliverables</span>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">交付三件套：表 + 图 + 三句话</h3>
+
+                        <div class="space-y-3 text-xs">
+                            <div class="p-2.5 rounded bg-surface-subtle">
+                                <strong class="text-primary">1. 一张表</strong>：机电/高新类重点商品量价明细表。
+                            </div>
+                            <div class="p-2.5 rounded bg-surface-subtle">
+                                <strong class="text-primary">2. 一张图</strong>：重点品类对总体跌幅贡献率瀑布图。
+                            </div>
+                            <div class="p-2.5 rounded bg-surface-subtle border-l-2 border-l-primary space-y-1">
+                                <strong class="text-primary">3. 三句话（核心归因）：</strong>
+                                <div class="text-secondary pl-2">
+                                    • <strong>空间拆</strong>：下滑 65% 集中在机电产品，欧美萎缩 -12%，东盟逆增 +8.5%；<br>
+                                    • <strong>因果拆</strong>：量贡献 -4.2%，价贡献 +0.4%，属“量跌价挺”，主因是外部订单需求减少而非恶意打价格战；<br>
+                                    • <strong>主体拆</strong>：头部骨干微增 +1.2%，中小微外贸企业降幅达 -16.4%。
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pt-3 border-t border-border text-[11px] text-secondary">
+                        把冰冷的数字，淬炼为带因果逻辑的决策证据。
+                    </div>
+                </div>
+
+                <!-- Step 6 沟通交卷：汇报三步法 -->
+                <div class="custom-card h-full flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="badge text-rose-700 bg-rose-500/10">Step 6 · 沟通闭环</span>
+                            <span class="text-xs font-mono opacity-60">Reporting</span>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">经典汇报三步法（严禁说代码）</h3>
+
+                        <div class="space-y-3 text-xs">
+                            <div class="p-3 bg-surface-subtle rounded">
+                                <strong class="text-rose-600 block mb-1">① 拆解（讲现状结构）</strong>
+                                “领导，关于今年出口乏力，我们拆解为品类、国别、企业三层。机电拉低大盘，欧美是主要萎缩点，中小微是主要承压群体。”
+                            </div>
+                            <div class="p-3 bg-surface-subtle rounded">
+                                <strong class="text-rose-600 block mb-1">② 模型（讲因果逻辑）</strong>
+                                “通过量价归因模型：目前呈‘量跌价稳’态势，核心矛盾是海外客户库存周期带来的订单转移，非自身产品竞争力下滑。”
+                            </div>
+                            <div class="p-3 bg-surface-subtle rounded">
+                                <strong class="text-rose-600 block mb-1">③ 方案（讲工程化动作）</strong>
+                                “建议业务出台三项动作：东盟航线通关便利化、对中小微企业落实退税稳岗提速、建立重点企业量价哨兵预警模型。”
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pt-3 border-t border-border text-[11px] text-primary font-semibold">
+                        回译检验标准：业务听得懂、当场能拍板、愿意签字闭环！
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-border text-xs text-secondary flex justify-between">
+                <span>REPORTING: 3-STEP COMMUNICATION & CLOSE-LOOP</span>
+                <span>13 / 15</span>
+            </div>
+        </section>
+
+        <!-- ==================== Slide 14: 避坑指南 ==================== -->
+        <section class="slide" data-index="13">
+            <div class="mb-4">
+                <div class="badge mb-2"><i class="fas fa-triangle-exclamation"></i> 模块五 · 避坑指南</div>
+                <h2 class="text-3xl lg:text-4xl font-extrabold">零基础学员 5 大经典陷阱与自检三问</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 flex-1 items-center">
+                <!-- 5 大陷阱表 -->
+                <div class="md:col-span-8 custom-card overflow-hidden">
+                    <h3 class="text-sm font-bold mb-3 flex items-center justify-between">
+                        <span>新手避坑清单</span>
+                        <span class="text-[11px] text-red-500 font-mono">5 Common Pitfalls</span>
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="border-b border-border text-secondary">
+                                    <th class="py-1.5 w-24">陷阱名称</th>
+                                    <th class="py-1.5">错误症状表现</th>
+                                    <th class="py-1.5">正确的破局动作</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-border/50 text-[11px]">
+                                <tr>
+                                    <td class="py-2 font-bold text-red-600">1. 手痒症</td>
+                                    <td>拿到题目立刻打开 SQL 窗口乱查一气</td>
+                                    <td class="text-emerald-600 font-medium">关掉电脑，在白纸上先写出问题模型公式</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 font-bold text-red-600">2. 盲目症</td>
+                                    <td>口径没定义就聚合，拿申报额当结算额</td>
+                                    <td class="text-emerald-600 font-medium">动手前必须找业务老师核准字段字典与口径</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 font-bold text-red-600">3. 盲从症</td>
+                                    <td>SQL 跑出数就狂喜，未经核对直接做 PPT</td>
+                                    <td class="text-emerald-600 font-medium">强制执行四道防线（总量、空值、极值、抽样）</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 font-bold text-red-600">4. 炫技症</td>
+                                    <td>堆砌 10 个五颜六色图表，讲不出因果</td>
+                                    <td class="text-emerald-600 font-medium">交付固定三件套：一张表 + 一张图 + 三句话</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 font-bold text-red-600">5. 传教士症</td>
+                                    <td>汇报时大谈 `JOIN`、`GROUP BY` 技术词</td>
+                                    <td class="text-emerald-600 font-medium">汇报严禁出现代码词，全篇翻译为业务行动</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 回译自检三问 -->
+                <div class="md:col-span-4 custom-card bg-surface-subtle space-y-4">
+                    <h3 class="text-sm font-bold text-primary flex items-center gap-2">
+                        <i class="fas fa-clipboard-check"></i> “回译检验”三问
+                    </h3>
+                    <p class="text-xs text-secondary">
+                        每次分析做完，问自己这 3 个问题，全通过才算真正学会：
+                    </p>
+
+                    <div class="space-y-2.5 text-xs">
+                        <div class="p-2.5 bg-surface rounded border border-border">
+                            <strong>问 1</strong>：我能否用一句话讲清这六步分别在做什么？
+                        </div>
+                        <div class="p-2.5 bg-surface rounded border border-border">
+                            <strong>问 2</strong>：我能否把同事随便抛来的一句业务话，拆成可计算的公式？
+                        </div>
+                        <div class="p-2.5 bg-surface rounded border border-border">
+                            <strong>问 3</strong>：我拿出的分析结论，业务部门能直接用来指导下一步工作吗？
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-border text-xs text-secondary flex justify-between">
+                <span>SELF-CHECK: PITFALLS & 3 REFLECTION QUESTIONS</span>
+                <span>14 / 15</span>
+            </div>
+        </section>
+
+        <!-- ==================== Slide 15: 总结收官 ==================== -->
+        <section class="slide" data-index="14">
+            <div class="flex-1 flex flex-col justify-center items-center text-center max-w-4xl mx-auto w-full">
+                <div class="badge mb-4"><i class="fas fa-flag-checkered"></i> 结课收官 · 用数据改变现实</div>
+
+                <h2 class="text-4xl lg:text-5xl font-black mb-6">
+                    业务出题，分析解题，工具提速<br>
+                    <span class="text-primary">署名的永远是你自己</span>
+                </h2>
+
+                <!-- 四大核心口诀 -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full text-left my-6">
+                    <div class="custom-card !p-4">
+                        <div class="font-bold text-sm text-primary mb-1">① 骨架与肌肉</div>
+                        <p class="text-xs text-secondary leading-relaxed">
+                            <strong>两种思维是骨架，六步法是关节，SQL 是肌肉</strong>。三者合一，模型才真正立得住。
+                        </p>
+                    </div>
+
+                    <div class="custom-card !p-4">
+                        <div class="font-bold text-primary mb-1">② 价值的重心</div>
+                        <p class="text-xs text-secondary leading-relaxed">
+                            <strong>好问题比好模型值钱</strong>。会拖拽写代码是手艺，会拆解和提出好问题才是稀缺的判断力。
+                        </p>
+                    </div>
+
+                    <div class="custom-card !p-4">
+                        <div class="font-bold text-primary mb-1">③ 工程师的严谨</div>
+                        <p class="text-xs text-secondary leading-relaxed">
+                            <strong>模型说有疑点业务说没有，通常不是业务错了</strong>。筑牢四道防线，永远把工程验证挺在前面。
+                        </p>
+                    </div>
+
+                    <div class="custom-card !p-4">
+                        <div class="font-bold text-primary mb-1">④ 闭环的终点</div>
+                        <p class="text-xs text-secondary leading-relaxed">
+                            <strong>业务点头拍板，分析才有生命</strong>。从业务话出发，进系统跑一圈，必须完整回译给业务。
+                        </p>
+                    </div>
+                </div>
+
+                <div class="text-sm font-medium text-secondary">
+                    祝各位学员：以数据为笔，以业务为纸，学有所成，致知力行！
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-border text-xs text-secondary flex justify-between w-full">
+                <span>CONGRATULATIONS: COURSE COMPLETED</span>
+                <span>15 / 15</span>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 底部常驻悬浮翻页控制栏 -->
+    <footer class="no-print fixed bottom-5 left-10 right-10 flex items-center justify-between z-50 pointer-events-none">
+        <div class="control-pill pointer-events-auto px-4 py-1.5 rounded-full text-xs font-mono font-medium flex items-center gap-2">
+            <span id="pageInfoCurrent">01</span>
+            <span class="opacity-40">/</span>
+            <span id="pageInfoTotal" class="opacity-70">15</span>
+            <span class="text-[10px] opacity-40 ml-2 hidden sm:inline">[← / → / Space]</span>
+        </div>
+
+        <div class="control-pill pointer-events-auto p-1 rounded-full flex items-center gap-1">
+            <button onclick="prevSlide()" class="icon-btn" title="上一页 (←)">
+                <i class="fas fa-chevron-left text-xs"></i>
+            </button>
+            <button onclick="nextSlide()" class="icon-btn" title="下一页 (→ / Space)">
+                <i class="fas fa-chevron-right text-xs"></i>
+            </button>
+        </div>
+    </footer>
+
+    <!-- 底部进度条 -->
+    <div class="no-print fixed bottom-0 left-0 w-full h-1 bg-black/5 dark:bg-white/5 z-50">
+        <div id="slideProgressBar" class="h-full bg-primary transition-all duration-300 w-0"></div>
+    </div>
+
+    <!-- =========================================================
+       交互控制脚本 (双风格切换、深浅主题切换、键盘响应与翻页逻辑)
+       ========================================================= -->
+    <script>
+        let currentSlideIndex = 0;
+        let slides = [];
+
+        // 初始化
+        function initPresentation() {
+            slides = Array.from(document.querySelectorAll('#presentation-stage > section'));
+            document.getElementById('pageInfoTotal').innerText = String(slides.length).padStart(2, '0');
+            
+            // 恢复本地存储的偏好 (如果有)
+            const savedTheme = localStorage.getItem('user-theme') || 'light';
+            const savedStyle = localStorage.getItem('user-style') || 'notebook';
+            
+            applyTheme(savedTheme);
+            applyStyle(savedStyle);
+            
+            showSlide(0);
+        }
+
+        // 幻灯片切换核心函数
+        function showSlide(index) {
+            if (index < 0 || index >= slides.length) return;
+
+            slides.forEach((slide, idx) => {
+                if (idx === index) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+
+            currentSlideIndex = index;
+            document.getElementById('pageInfoCurrent').innerText = String(currentSlideIndex + 1).padStart(2, '0');
+            
+            // 更新进度条
+            const progress = ((currentSlideIndex + 1) / slides.length) * 100;
+            document.getElementById('slideProgressBar').style.width = `${progress}%`;
+        }
+
+        function nextSlide() {
+            if (currentSlideIndex < slides.length - 1) {
+                showSlide(currentSlideIndex + 1);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlideIndex > 0) {
+                showSlide(currentSlideIndex - 1);
+            }
+        }
+
+        // 风格切换逻辑 (NotebookLM 雅致风 vs 工程蓝图风)
+        function togglePresentationStyle() {
+            const currentStyle = document.documentElement.getAttribute('data-style') || 'notebook';
+            const nextStyle = currentStyle === 'notebook' ? 'architectural' : 'notebook';
+            applyStyle(nextStyle);
+            localStorage.setItem('user-style', nextStyle);
+        }
+
+        function applyStyle(style) {
+            document.documentElement.setAttribute('data-style', style);
+            const styleLabel = document.getElementById('styleNameLabel');
+            if (style === 'notebook') {
+                styleLabel.innerText = 'NotebookLM 雅致风';
+            } else {
+                styleLabel.innerText = '工程蓝图风';
+            }
+        }
+
+        // 深浅色主题切换逻辑 (Light vs Dark)
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            const nextTheme = currentTheme === 'light' ? 'dark' : 'light';
+            applyTheme(nextTheme);
+            localStorage.setItem('user-theme', nextTheme);
+        }
+
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            const icon = document.getElementById('themeIcon');
+            if (theme === 'dark') {
+                icon.className = 'fas fa-sun text-amber-400';
+            } else {
+                icon.className = 'fas fa-moon text-slate-600';
+            }
+        }
+
+        // 全屏切换
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => console.log(err));
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // 键盘监听
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                prevSlide();
+            } else if (e.key === 't' || e.key === 'T') {
+                toggleTheme();
+            } else if (e.key === 's' || e.key === 'S') {
+                togglePresentationStyle();
+            } else if (e.key === 'f' || e.key === 'F') {
+                toggleFullScreen();
+            } else if (e.key === 'Home') {
+                showSlide(0);
+            } else if (e.key === 'End') {
+                showSlide(slides.length - 1);
+            }
+        });
+
+        // 触摸滑动支持 (移动端/平板演示)
+        let touchStartX = 0;
+        let touchEndX = 0;
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            if (touchStartX - touchEndX > 50) nextSlide();
+            if (touchEndX - touchStartX > 50) prevSlide();
+        }, { passive: true });
+
+        // 启动
+        window.addEventListener('DOMContentLoaded', initPresentation);
+    </script>
+</body>
+</html>
