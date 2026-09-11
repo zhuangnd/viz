@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>业务 -> 拖拽式 SQL 模型：零基础的 6 步法 · v2</title>
+<style>
+:root{
+  --bg:#f6f6f7; --panel:#ffffff; --line:#e5e5e8; --line2:#efeff1;
+  --tx:#1b1b1f; --tx2:#5b5f68; --tx3:#9aa0a8;
+  --hit:#15803d; --hitbg:#eaf7ee;
+  --miss:#b91c1c; --missbg:#fdecec;
+  --accent:#4f46e5; --accentbg:#eeecfd; --accent2:#3730a3; --accent3:#5b21b6;
+  --shadow:0 1px 2px rgba(16,24,40,.05), 0 6px 20px rgba(16,24,40,.05);
+  --shadow-h:0 2px 4px rgba(16,24,40,.06), 0 10px 28px rgba(16,24,40,.08);
+  --r:14px;
+  /* 思维色（同色系，靛蓝梯度） */
+  --t-s-bg:#eef2ff; --t-s-tx:#4f46e5;
+  --t-e-bg:#e0e7ff; --t-e-tx:#3730a3;
+  --t-m-bg:linear-gradient(90deg,#eef2ff,#e0e7ff); --t-m-tx:#312e81;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--tx);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  font-size:14px; line-height:1.65; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1200px; margin:0 auto; padding:36px 24px 80px}
+
+/* ============ Header ============ */
+header.hd{margin-bottom:14px}
+h1{font-size:26px; line-height:1.3; margin:0 0 8px; letter-spacing:-.01em; font-weight:650}
+h1 em{font-style:normal; color:var(--accent)}
+.sub{color:var(--tx2); font-size:13.5px; max-width:820px; margin:0 0 14px}
+.facts{display:flex; flex-wrap:wrap; gap:6px; margin:6px 0 4px}
+.fact{font-size:12px; color:var(--tx2); background:#f3f3f5; border-radius:999px; padding:4px 11px}
+.fact b{color:var(--tx); font-weight:640; margin-right:3px}
+
+/* ============ Section ============ */
+section{margin-top:34px}
+h2{font-size:17px; margin:0 0 4px; display:flex; align-items:center; gap:9px; font-weight:650}
+h2 .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block; flex:none}
+.lead{color:var(--tx2); font-size:13px; margin:0 0 16px; max-width:860px}
+
+/* ============ Card (inline expand) ============ */
+.cards{display:grid; gap:14px}
+.cards.cols4{grid-template-columns:repeat(4,1fr)}
+.cards.cols3{grid-template-columns:repeat(3,1fr)}
+.cards.cols2{grid-template-columns:repeat(2,1fr)}
+
+.card{
+  background:var(--panel); border:1px solid var(--line); border-radius:var(--r);
+  padding:16px 16px 14px; box-shadow:var(--shadow);
+  cursor:pointer; transition:.18s; position:relative; overflow:hidden;
+}
+.card:hover{transform:translateY(-2px); border-color:#d5d5da; box-shadow:var(--shadow-h)}
+.card.open{cursor:default}
+.card.open .summary .chev{transform:rotate(180deg)}
+
+.summary{display:flex; flex-direction:column; gap:8px}
+.summary .row1{display:flex; align-items:center; justify-content:space-between; gap:8px}
+.id{font-size:12px; color:var(--tx3); font-weight:600; letter-spacing:.04em}
+.chev{color:var(--tx3); transition:transform .2s ease; font-size:10px}
+.title{font-size:15px; font-weight:640; margin:0; letter-spacing:-.01em}
+.tagline{font-size:13px; color:var(--tx2); margin:0; line-height:1.55}
+.thinkpill{
+  display:inline-flex; align-items:center; gap:5px; font-size:11.5px;
+  padding:2px 9px; border-radius:999px; font-weight:600;
+  align-self:flex-start; margin-top:2px;
+}
+.thinkpill.s{background:var(--t-s-bg); color:var(--t-s-tx)}
+.thinkpill.e{background:var(--t-e-bg); color:var(--t-e-tx)}
+.thinkpill.m{background:var(--t-e-bg); color:var(--t-m-tx); position:relative; overflow:hidden}
+.thinkpill.m::before{
+  content:''; position:absolute; left:0; top:0; bottom:0; width:50%;
+  background:var(--t-s-bg);
+}
+
+.detail{display:none; margin-top:14px; padding-top:14px; border-top:1px dashed var(--line); font-size:13.5px}
+.card.open .detail{display:block}
+.pitfall-row.open .detail{display:block}
+.detail h4{
+  font-size:12px; color:var(--tx3); font-weight:600; letter-spacing:.06em;
+  text-transform:uppercase; margin:14px 0 6px;
+}
+.detail h4:first-child{margin-top:0}
+.detail p{margin:0 0 10px; color:var(--tx); line-height:1.7}
+.detail ul,.detail ol{padding-left:20px; margin:0 0 10px; color:var(--tx)}
+.detail li{margin-bottom:5px}
+.detail table{width:100%; border-collapse:collapse; margin:6px 0 12px; font-size:12.5px}
+.detail th,.detail td{border:1px solid var(--line2); padding:7px 9px; text-align:left; vertical-align:top}
+.detail th{background:#fafafb; color:var(--tx2); font-weight:600; font-size:12px}
+.detail code{
+  font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px;
+  background:#f3f3f5; padding:1px 5px; border-radius:4px; color:var(--accent2);
+}
+.detail pre{
+  background:#fafafb; border:1px solid var(--line); border-radius:8px;
+  padding:10px 12px; overflow-x:auto; margin:6px 0 10px;
+  font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; line-height:1.65;
+  color:var(--tx);
+}
+.detail .quote{
+  border-left:3px solid var(--accent); background:var(--accentbg);
+  padding:9px 12px; border-radius:0 8px 8px 0; margin:10px 0;
+  color:var(--tx); font-size:13px; line-height:1.7;
+}
+.detail .wrong{color:var(--miss); font-weight:600}
+.detail .right{color:var(--hit); font-weight:600}
+
+/* ============ Filter (segmented) ============ */
+.bar{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:14px}
+.seg{
+  display:inline-flex; background:#ececef; border-radius:9px; padding:3px;
+}
+.seg button{
+  border:0; background:transparent; padding:6px 13px; border-radius:7px;
+  font:inherit; font-size:12.5px; color:var(--tx2); cursor:pointer; transition:.15s;
+}
+.seg button.on{background:#fff; color:var(--tx); font-weight:600; box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.seg button:hover{color:var(--tx)}
+.chip{
+  border:1px solid var(--line); background:var(--panel); color:var(--tx2);
+  border-radius:999px; padding:5px 12px; font:inherit; font-size:12.5px; cursor:pointer;
+  transition:.15s;
+}
+.chip.on{background:var(--accentbg); border-color:#c9c4f5; color:#3b32c9; font-weight:600}
+
+/* ============ 6 nodes chain ============ */
+.chain{
+  background:var(--panel); border:1px solid var(--line); border-radius:var(--r);
+  padding:18px 20px 14px; box-shadow:var(--shadow);
+}
+.chain-row{
+  display:flex; align-items:center; gap:6px; flex-wrap:nowrap; overflow-x:auto; padding:4px 2px;
+}
+.node{
+  flex:1 1 0; min-width:96px; max-width:170px;
+  background:#fafafb; border:1px solid var(--line); border-radius:10px;
+  padding:12px 8px; text-align:center; cursor:pointer; transition:.15s;
+}
+.node:hover{transform:translateY(-2px); border-color:var(--accent); background:#fff; box-shadow:var(--shadow-h)}
+.node .ni{font-family:Georgia,serif; font-size:18px; color:var(--accent); font-weight:400; line-height:1}
+.node .nl{font-size:13px; font-weight:640; margin-top:4px}
+.node .nt{font-size:11px; color:var(--tx3); margin-top:2px; line-height:1.4}
+.arr{color:var(--tx3); font-size:14px; flex:none}
+.chain-tip{font-size:12px; color:var(--tx3); margin-top:10px; text-align:center}
+
+/* ============ Golden + check ============ */
+.golden{font-size:14.5px; line-height:1.7; font-weight:600; color:var(--tx)}
+.golden::before{
+  content:'\201C'; font-family:Georgia,serif; font-size:32px; color:var(--accent);
+  line-height:.6; margin-right:6px; vertical-align:-4px;
+}
+.check{
+  background:#fafafb; border:1px solid var(--line); border-left:3px solid var(--accent);
+  border-radius:0 var(--r) var(--r) 0; padding:18px 22px; margin-top:18px;
+}
+.check h3{font-size:14px; margin:0 0 10px; color:var(--accent); font-weight:650}
+.check ol{margin:0; padding-left:22px; color:var(--tx)}
+.check li{margin-bottom:6px; font-size:13.5px; line-height:1.7}
+
+/* ============ Appendix chips ============ */
+.aps{display:flex; flex-wrap:wrap; gap:8px}
+.ap{
+  display:inline-flex; align-items:center; gap:6px;
+  border:1px solid var(--line); background:var(--panel); border-radius:999px;
+  padding:7px 13px; color:var(--tx2); text-decoration:none; font-size:13px;
+  transition:.15s; cursor:pointer;
+}
+.ap:hover{border-color:var(--accent); color:var(--accent); transform:translateY(-1px)}
+.ap b{color:var(--tx); font-weight:640}
+.ap small{color:var(--tx3); font-size:11.5px; margin-left:2px}
+
+/* ============ Pitfalls list ============ */
+.pitfall-row{
+  display:grid; grid-template-columns:32px 1fr auto; gap:12px; align-items:center;
+  background:var(--panel); border:1px solid var(--line); border-radius:var(--r);
+  padding:14px 16px; margin-bottom:14px; box-shadow:var(--shadow); cursor:pointer; transition:.15s;
+}
+.pitfall-row:last-child{margin-bottom:0}
+.pitfall-row:hover{border-color:#d5d5da; transform:translateY(-1px); box-shadow:var(--shadow-h)}
+.pitfall-row.open{border-color:var(--accent)}
+.pitfall-row .pi{
+  width:32px; height:32px; border-radius:8px;
+  background:var(--missbg); color:var(--miss);
+  display:flex; align-items:center; justify-content:center;
+  font-weight:650; font-family:Georgia,serif; font-size:16px;
+}
+.pitfall-row h4{font-size:14px; font-weight:640; margin:0; line-height:1.4}
+.pitfall-row .open-hint{font-size:12px; color:var(--tx3)}
+.pitfall-row .detail{margin-top:14px; grid-column:1 / -1}
+
+/* ============ Bottom drawer (for 6 nodes SQL) ============ */
+.mask{
+  position:fixed; inset:0; background:rgba(16,24,40,.4);
+  z-index:90; opacity:0; visibility:hidden; transition:.25s;
+}
+.mask.on{opacity:1; visibility:visible}
+.bdrawer{
+  position:fixed; left:0; right:0; bottom:0; max-height:62vh;
+  background:var(--panel); border-top:1px solid var(--line);
+  box-shadow:0 -10px 40px rgba(16,24,40,.12);
+  z-index:95; transform:translateY(100%); transition:transform .35s cubic-bezier(.2,.7,.2,1);
+  display:flex; flex-direction:column;
+}
+.bdrawer.on{transform:translateY(0)}
+.bd-head{
+  padding:14px 22px; border-bottom:1px solid var(--line);
+  display:flex; align-items:center; gap:12px; flex-shrink:0;
+}
+.bd-head .ni{font-family:Georgia,serif; font-size:20px; color:var(--accent); line-height:1}
+.bd-head h3{font-size:15px; font-weight:650; margin:0}
+.bd-head .close{
+  margin-left:auto; width:30px; height:30px; border-radius:7px;
+  background:#f3f3f5; border:1px solid var(--line); color:var(--tx2);
+  cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px;
+}
+.bd-head .close:hover{color:var(--miss); border-color:var(--miss)}
+.bd-body{padding:18px 22px 24px; overflow-y:auto; flex:1}
+.bd-body pre{
+  background:#fafafb; border:1px solid var(--line); border-radius:10px;
+  padding:14px 16px; font-family:ui-monospace,Menlo,Consolas,monospace;
+  font-size:12.5px; line-height:1.7; color:var(--tx);
+  white-space:pre; overflow-x:auto; margin:0 0 12px;
+}
+.bd-body p{font-size:13.5px; color:var(--tx2); margin:0; line-height:1.7}
+
+/* ============ Footer ============ */
+footer{margin-top:38px; padding-top:16px; border-top:1px solid var(--line); color:var(--tx3); font-size:12px; line-height:1.8}
+footer code{background:#f3f3f5; padding:1px 6px; border-radius:4px; font-size:11.5px; color:var(--accent2)}
+
+/* ============ Responsive ============ */
+@media(max-width:1000px){
+  .cards.cols4{grid-template-columns:repeat(2,1fr)}
+  .cards.cols3{grid-template-columns:repeat(2,1fr)}
+  .cards.cols2{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+  .wrap{padding:24px 14px 60px}
+  h1{font-size:22px}
+  .cards.cols4,.cards.cols3,.cards.cols2{grid-template-columns:1fr}
+  .chain-row{flex-wrap:wrap; justify-content:center}
+  .node{min-width:84px}
+  .arr{display:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hd">
+  <h1>业务 -> 拖拽式 SQL 模型：<em>零基础的 6 步法</em> <span style="font-size:14px;color:var(--tx3);font-weight:400">· v2</span></h1>
+  <p class="sub">用结构化思维 + 工程化思维两条主线，把一句业务话，<strong>一步一步</strong> 拖成一个能跑出数来的可视化 SQL 模型。贯穿示例：海关业务 —— "今年出口贸易增长乏力，怎么看？"</p>
+  <div class="facts">
+    <span class="fact"><b>👥</b>零基础学员</span>
+    <span class="fact"><b>🧭</b>海关场景</span>
+    <span class="fact"><b>🧩</b>拖拽式 SQL</span>
+    <span class="fact"><b>💡</b>6 步闭环</span>
+    <span class="fact"><b>🎨</b>attribution-wbd 风格</span>
+  </div>
+</header>
+
+<!-- ② 工具箱 -->
+<section id="toolbox">
+  <h2><span class="dot"></span>工具箱 · 本文用到的 3 个核心概念</h2>
+  <p class="lead">先看这一页，后文出现的概念都汇总在这里。点开看定义、4 动作、在第几步出现。</p>
+  <div class="cards cols4" id="toolboxGrid"></div>
+</section>
+
+<!-- ③ 6 步主区 -->
+<section id="steps">
+  <h2><span class="dot"></span>6 步主区 · 一句业务话 -> 一份可视化 SQL</h2>
+  <p class="lead">每张卡 1 句人话 · 点开看完整动作 / 节点链 / 海关例 / 易错点。顶部可按思维筛选。</p>
+  <div class="bar">
+    <div class="seg" id="stepFilter">
+      <button data-f="all" class="on">全部 6 步</button>
+      <button data-f="s">🧭 结构化</button>
+      <button data-f="e">⚙ 工程化</button>
+      <button data-f="m">混合</button>
+    </div>
+  </div>
+  <div class="cards cols3" id="stepsGrid"></div>
+</section>
+
+<!-- ④ 6 节点链路 -->
+<section id="chain">
+  <h2><span class="dot"></span>6 节点链路 · 步骤 3 拆解</h2>
+  <p class="lead">每个节点 = 一段 SQL 代码。点击任意圆点，在底部抽屉里查看对应 SQL 段。</p>
+  <div class="chain">
+    <div class="chain-row" id="chainBar"></div>
+    <p class="chain-tip">← 悬停浮起 · 点击底部抽屉出对应 SQL 段 →</p>
+  </div>
+</section>
+
+<!-- ⑤ 汇报三步法 -->
+<section id="report">
+  <h2><span class="dot"></span>汇报三步法 · 把分析结果讲明白</h2>
+  <p class="lead">《总结摘要》"经典汇报三步法"原话：拆解 -> 模型 -> 方案。点开看完整话术。</p>
+  <div class="cards cols3" id="reportGrid"></div>
+</section>
+
+<!-- ⑥ 5 大常见坑 -->
+<section id="pitfalls">
+  <h2><span class="dot"></span>5 大常见坑 · 零基础最容易犯的 5 个错</h2>
+  <p class="lead">点开看 ❌ 错例 vs ✅ 对例 + 一句话避坑。</p>
+  <div id="pitfallsList"></div>
+</section>
+
+<!-- ⑦ 金句自检 -->
+<section id="check">
+  <h2><span class="dot"></span>记住四句话 · 回答三问题</h2>
+  <p class="lead">点击金句看出处和应用场景 · 自检三问用来检验是否真"会了"。</p>
+  <div class="cards cols2" id="goldenGrid"></div>
+  <div class="check">
+    <h3>回译自检 3 问</h3>
+    <ol>
+      <li>能不能用一句业务话讲清 6 步分别是做什么的？（"拆问题 -> 找数据 -> 拖节点 -> 验数 -> 分析 -> 讲明白"）</li>
+      <li>能不能把任何一句业务话拆成一个公式？（套步骤 1：跟谁比 / 在哪乏力 / 为什么乏力）</li>
+      <li>能不能在白板上画出一份"汇报一页纸"？（套步骤 6 的拆解 -> 模型 -> 方案）</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ⑧ 附录 -->
+<section id="appendix">
+  <h2><span class="dot"></span>附录 · 与 slide/ 下其它资料互引</h2>
+  <p class="lead">讲稿 · 演示页 · 思维科普版 · 总结摘要 · 配套培训讲义。</p>
+  <div class="aps" id="appendixGrid"></div>
+</section>
+
+<footer>
+  本页为 <code>业务到拖拽式SQL模型的6步法_零基础培训版.md</code> 的可视化版本 v2，视觉风格参照 <code>viz/hollywood/ai-analysis-lab/attribution-wbd.html</code>（白底 + 靛蓝 + inline 展开为主）。<br>
+  与 <code>..._v2.html</code> 并列保留的还有深色玻璃版 <code>业务到拖拽式SQL模型的6步法_零基础培训版.html</code>。<br>
+  ESC 关闭底部抽屉 · 单页可滚动 · 零依赖单文件
+</footer>
+
+</div>
+
+<!-- 底部抽屉：6 节点 SQL 唯一浮层 -->
+<div class="mask" id="mask"></div>
+<aside class="bdrawer" id="bdrawer">
+  <div class="bd-head">
+    <span class="ni" id="bdNi">①</span>
+    <h3 id="bdTitle">节点</h3>
+    <button class="close" id="bdClose" aria-label="关闭">×</button>
+  </div>
+  <div class="bd-body" id="bdBody"></div>
+</aside>
+
+<script>
+/* ============ 数据 ============ */
+var toolbox = [
+  {id:'s', icon:'S', name:'结构化思维', tag:'s', tagline:'把含糊的问题拆清楚、说清楚', pill:'🧭 看清问题', pillCls:'s',
+    detail:`
+      <h4>一句话</h4><p>把含糊的问题 <strong>拆清楚、说清楚</strong>。</p>
+      <h4>干什么用</h4><p>解决"如何 <em>看清</em> 问题"。</p>
+      <h4>4 个动作</h4>
+      <ol>
+        <li>分解（拆成小块）</li><li>分类（互不重叠）</li>
+        <li>构建逻辑关系（因果 / 层级）</li><li>可表达（能画成图 / 写成公式）</li>
+      </ol>
+      <h4>出现在</h4><p>步骤 1、2、6</p>`
+  },
+  {id:'e', icon:'E', name:'工程化思维', tag:'e', tagline:'把问题变成能落地、能验证、能迭代的系统', pill:'⚙ 改变现实', pillCls:'e',
+    detail:`
+      <h4>一句话</h4><p>把问题变成 <strong>能落地、能验证、能迭代</strong> 的系统。</p>
+      <h4>干什么用</h4><p>解决"如何 <em>改变</em> 现实"。</p>
+      <h4>4 个特征</h4>
+      <ol>
+        <li>问题可定义（输入 / 输出 / 约束）</li><li>系统设计（模块化）</li>
+        <li>可验证（指标 / 测试）</li><li>迭代（闭环改进）</li>
+      </ol>
+      <h4>出现在</h4><p>步骤 2 -> 3 -> 4 -> 5</p>`
+  },
+  {id:'m', icon:'M', name:'模型（3 种）', tag:'e', tagline:'问题模型=公式 / 信息模型=表格 / 数学模型=SQL', pill:'🧩 3 种模型', pillCls:'e',
+    detail:`
+      <h4>一句话</h4><p>模型 = 一个用来理解复杂问题的简单框架或公式。</p>
+      <h4>3 种模型对照</h4>
+      <table>
+        <thead><tr><th>模型</th><th>人话</th><th>对应步骤</th></tr></thead>
+        <tbody>
+          <tr><td><b>问题模型</b></td><td>解释问题的逻辑结构（公式）</td><td>步骤 1：贸易额 = Σ HS × 单价 × 数量</td></tr>
+          <tr><td><b>信息模型</b></td><td>组织数据的结构（表/字段）</td><td>步骤 2：报关单 + 4 张维表</td></tr>
+          <tr><td><b>数学模型</b></td><td>用于预测/计算的数学公式</td><td>步骤 3：6 节点可视化 SQL 链</td></tr>
+        </tbody>
+      </table>
+      <h4>速记</h4><p>问题模型 = 公式 · 信息模型 = 表格 · 数学模型 = SQL / 算法</p>`
+  },
+  {id:'r', icon:'R', name:'两种思维的关系', tag:'m', tagline:'工程化思维 包含 结构化思维', pill:'🧭->⚙ 路径', pillCls:'m',
+    detail:`
+      <div class="quote">工程化思维 <em>包含</em> 结构化思维。一般路径：<br>
+      <b>结构化思维</b>（看清问题）-> 建出问题模型 -> <b>工程化思维</b>（设计系统）-> 产出信息模型 + 数学模型 -> 解决现实问题。</div>
+      <h4>6 步法里</h4>
+      <ul>
+        <li><b>1、2、6</b> 偏结构化（拆、找、讲）</li>
+        <li><b>3、4、5</b> 偏工程化（建、验、用）</li>
+      </ul>
+      <p>两思维交替出现，缺一不可。</p>`
+  }
+];
+
+var steps = [
+  {num:1, name:'拆解', tag:'s', pill:'🧭 结构化',
+    tagline:'把含糊的业务话拆成互不重叠的几块，再拼成公式',
+    detail:`
+      <h4>这一阶段不进工具</h4>
+      <p>拿白纸或 Word 写就行。业务原话 <em>"今年出口贸易增长乏力，得查查怎么回事"</em> —— 同款含糊：带情绪、有方向、没动作。</p>
+      <h4>三问</h4>
+      <table><thead><tr><th>问什么</th><th>海关例</th><th>为什么重要</th></tr></thead><tbody>
+        <tr><td>跟谁比？</td><td>去年同期 / 全国均值 / 兄弟关</td><td>无基准，"乏力"二字站不住</td></tr>
+        <tr><td>乏力在哪？</td><td>国家、HS 大类、企业、贸易方式</td><td>不拆维度，永远原地打转</td></tr>
+        <tr><td>为什么乏力？</td><td>量？价？结构变了？</td><td>拆因才能拆方案</td></tr>
+      </tbody></table>
+      <h4>拼成公式（问题模型）</h4>
+      <pre>出口贸易额 = Σ 各 HS 编码 × 单价 × 数量
+同比增长率 = (本期 - 同期) / 同期
+乏力归因  = 量贡献 + 价贡献 + 结构贡献</pre>
+      <p>此刻一个数字都没有。问题被"拆开、说清"——这就是《总结摘要》说的"问题模型"。</p>
+      <h4>零基础自检：拆到什么时候停？</h4>
+      <p>拆到 <strong>"能落到一张表的一个字段"</strong> 为止。想到了，就停笔，进步骤 2。</p>`
+  },
+  {num:2, name:'找数', tag:'m', pill:'🧭->⚙ 混合',
+    tagline:'把公式里的每个变量，对应到具体的数据源和字段',
+    detail:`
+      <h4>公式里的变量，翻译成"数据在哪儿"</h4>
+      <table><thead><tr><th>变量</th><th>数据落在哪</th><th>零基础要问的口径坑</th></tr></thead><tbody>
+        <tr><td>贸易额</td><td>报关单 × 总价（统计美元价）</td><td>用 <code>美元</code> 还是 <code>人民币</code>？含运保费？</td></tr>
+        <tr><td>数量</td><td>报关单 × 数量 + 法定单位</td><td>散货 / 整柜 / 第二计量单位怎么折？</td></tr>
+        <tr><td>HS 编码</td><td>报关单 × 商品编码</td><td>拆到 4 位 / 6 位 / 8 位？</td></tr>
+        <tr><td>出口主体</td><td>报关单 × 经营单位代码</td><td>含不含跨境电商、海外仓？</td></tr>
+        <tr><td>同期数据</td><td>历史归档表</td><td>行政区划调整过没？编码版本换过没？</td></tr>
+      </tbody></table>
+      <h4>在工具里做什么</h4>
+      <p>拖一个 <code>数据源</code> 节点，配置成：</p>
+      <pre>[数据源：报关单]
+   |-- 关联：商品归类表（按 HS 编码）
+   |-- 关联：企业备案表（按经营单位代码）
+   |-- 关联：国别代码表（按目的国）
+   |-- 关联：历史归档表（按月份）</pre>
+      <h4>零基础最常犯的错</h4>
+      <p><span class="wrong">❌</span> 上来就拖【过滤】【聚合】节点，数据从哪来都没搞清楚。</p>
+      <p><span class="right">✅</span> 先把 5 张表的关系画清楚，再用工程化的态度进工具。</p>`
+  },
+  {num:3, name:'建模（拖拽式 SQL）', tag:'e', pill:'⚙ 工程化',
+    tagline:'在工具里拖节点、连节点，拼出可视化 SQL',
+    detail:`
+      <h4>一句话理解"拖拽式 SQL"</h4>
+      <p>每个节点 = 一段 SQL 代码，工具自动拼成 <code>SELECT-WHERE-GROUP BY</code>。你只是 <em>没看见</em> 它。</p>
+      <h4>海关版 6 节点完整链路</h4>
+      <pre>① [数据源：报关单]   &lt;- 步骤 2 配好的主表 + 4 张维表
+        |
+② [过滤]             &lt;- ie_flag='出口' AND 时间窗 IN (2025,2026)
+        |
+③ [聚合]             &lt;- 按 hs4, dest_country, decl_company 分组
+                       SUM(总价美元) AS v, COUNT(*) AS cnt
+        |
+④ [计算列]           &lt;- yoy_pct, price_contrib, qty_contrib
+        |
+⑤ [过滤]             &lt;- 只保留 v_2025 &gt; 100万 美元（去掉噪点小户）
+        |
+⑥ [排序 + 行数限制]  &lt;- 按 yoy_pct 升序，前 50 行
+        |
+                  [输出：明细表 / 柱图 / 折线图]</pre>
+      <h4>关键点</h4>
+      <p>拖出来的 <em>不是一张漂亮的图，是一份能跑、能改、能复用的 SQL 脚本</em>。这正是拖拽式 SQL 和"画图工具"的本质区别。</p>`
+  },
+  {num:4, name:'验证', tag:'e', pill:'⚙ 工程化',
+    tagline:'跑一遍对账：行数、空值、极值、回抽样',
+    detail:`
+      <h4>在工具里加 4 类"验证节点"</h4>
+      <pre>[原 SQL 链路]  -- 旁路挂载 --  [验证节点组]
+                                    |
+                  |-- [行数核对]     本期 vs 同期 vs 业务部门手工合计
+                  |-- [空值检查]     HS 编码 / 经营单位 / 金额是否齐全
+                  |-- [极值检查]     单笔最大、最小、是否为离群点
+                  |-- [抽样回溯]     随机抽 100 条回原系统比对</pre>
+      <h4>海关版 4 个动作</h4>
+      <table><thead><tr><th>节点</th><th>动作</th><th>验什么</th></tr></thead><tbody>
+        <tr><td>行数核对</td><td>跟总署下发的贸易统计月报对总数</td><td>工具数 = 月报数？</td></tr>
+        <tr><td>空值检查</td><td>查 HS 编码为空的报关单占比</td><td>&lt; 0.5% 才放心</td></tr>
+        <tr><td>极值检查</td><td>单笔 &gt; 1 亿美元 / &lt; 100 美元的报关单列出来</td><td>看看是不是录错</td></tr>
+        <tr><td>抽样回溯</td><td>抽 100 条回 H2010 报关单回执系统比对</td><td>字段、金额、HS 三件套一致</td></tr>
+      </tbody></table>
+      <h4>零基础最常犯的错</h4>
+      <p><span class="wrong">❌</span> "SQL 跑出来了，同比增长 -3.6%，报告。"</p>
+      <p><span class="right">✅</span> "先验行数、空值、极值、抽样都对得上，<em>才能</em> 用 -3.6% 这个数。"</p>`
+  },
+  {num:5, name:'分析', tag:'m', pill:'🧭->⚙ 混合',
+    tagline:'在已验证的 SQL 上加分组、TOP N、同比节点',
+    detail:`
+      <h4>在已验证的 SQL 上"加挂"分析节点</h4>
+      <pre>[已验证的 6 节点链路]
+        |
+   [分组汇总节点]    &lt;-  按 HS 大类 x 国别 x 企业 三维度分别出表
+        |
+   [TOP N 节点]      &lt;-  每维度取下滑 TOP 20
+        |
+   [同比 / 环比节点]  &lt;-  与上年同期 / 上月对比
+        |
+   [占比 / 贡献度节点] &lt;-  算每个 HS 的下滑占总下滑的份额
+        |
+   [图表节点]         &lt;-  柱图看量、折线看趋势、桑基图看结构
+        |
+   [输出：表 + 图 + 三句话]</pre>
+      <h4>海关版"三句话"怎么来？</h4>
+      <table><thead><tr><th>拆</th><th>例</th></tr></thead><tbody>
+        <tr><td>空间拆</td><td>"下滑 60% 集中在机电产品，前 3 个 HS 大类就贡献了 8 成。"</td></tr>
+        <tr><td>因果拆</td><td>"量贡献 -2.1pp、价贡献 -1.5pp、结构贡献 +0.4pp——量价齐跌是主因，结构升级是亮点。"</td></tr>
+        <tr><td>主体拆</td><td>"中小企业下滑 -15%，头部企业 +6%，集中度在上升。"</td></tr>
+      </tbody></table>
+      <h4>零基础自检：分析做完要交付什么？</h4>
+      <p>一个固定的 <strong>三件套</strong>：一张表 + 一张图 + 三句话。</p>`
+  },
+  {num:6, name:'报告', tag:'s', pill:'🧭 结构化',
+    tagline:'用汇报三步法讲：拆解 -> 模型 -> 方案',
+    detail:`
+      <h4>《总结摘要》"经典汇报三步法"原话</h4>
+      <div class="quote">"我们先把问题拆开来看（拆解）-> 从结构上可以用一个简单模型理解（公式）-> 因此解决路径主要分为三步（方案 / 工程化）。"</div>
+      <h4>海关版完整一页纸</h4>
+      <p><b>① 拆解</b>：增长乏力，拆开看，主要来自三个维度——按 HS 大类，机电产品同比 -4.2%；按国别，对东盟 +12%、对欧美 -8%；按企业，中小企业 -15%、头部 +6%。</p>
+      <p><b>② 模型</b>：用 <em>"贸易额 = 量 × 价 × 结构"</em> 一拆——量贡献 -2.1pp、价贡献 -1.5pp、结构贡献 +0.4pp。翻译成业务话：<em>量价齐跌是主因，结构升级是亮点</em>。</p>
+      <p><b>③ 方案</b>：下一步分三条线核实——查机电产品前 10 大 HS 的量价明细；拉头部企业新增客户清单；抽样 5 家中小出口企业了解资金 / 汇率 / 关税压力。</p>
+      <h4>报告里不要出现这些词</h4>
+      <table><thead><tr><th>不要说</th><th>为什么</th><th>应该替换为</th></tr></thead><tbody>
+        <tr><td>我用了结构化思维</td><td>方法论名词</td><td>"我们把问题拆成三块来看"</td></tr>
+        <tr><td>我用 SQL 跑了一下</td><td>技术词</td><td>"我们拉了一下数据"</td></tr>
+        <tr><td>yoy_pct 是 -3.6%</td><td>直接念 SQL 输出</td><td>"今年前八月同比下滑 3.6%"</td></tr>
+        <tr><td>JOIN 了 6 张表</td><td>暴露工程细节</td><td>"把企业、HS、国别几方面都纳入了分析"</td></tr>
+      </tbody></table>
+      <p>业务点头了，6 步才算闭环。反过来，只会念节点、念 SQL 输出，翻译链就是断的。</p>`
+  }
+];
+
+var chain = [
+  {n:'①', name:'数据源', sub:'报关单 + 4 维表',
+    title:'数据源节点', desc:'步骤 2 配好的主表 + 4 张维表（商品归类 / 企业备案 / 国别代码 / 历史归档）。所有可能用到的表，先都摆上桌。',
+    sql:`-- 等价 SQL
+SELECT *
+FROM   customs_declaration        -- 报关单主表
+LEFT JOIN dim_hs         ON customs_declaration.hs_code      = dim_hs.hs_code
+LEFT JOIN dim_company    ON customs_declaration.decl_company = dim_company.company_code
+LEFT JOIN dim_country   ON customs_declaration.dest_country = dim_country.country_code
+LEFT JOIN fact_history  ON customs_declaration.decl_date    = fact_history.decl_date;`
+  },
+  {n:'②', name:'过滤', sub:'ie_flag + 时间窗',
+    title:'过滤节点', desc:'把不符合口径的一刀切掉——口径错了后面全错。常见过滤：进出口标志、时间窗、删单状态、担保标志。',
+    sql:`-- 等价 SQL
+SELECT *
+FROM   <① 数据源>
+WHERE  ie_flag = 'E'                              -- 出口
+  AND  decl_date BETWEEN '2025-01-01' AND '2026-08-31'
+  AND  status <> '已删单'                          -- 剔除异常
+  AND  guarantee_flag = 'N';                       -- 非担保`
+  },
+  {n:'③', name:'聚合', sub:'按 HS x 国别 x 企业',
+    title:'聚合节点', desc:'把明细压缩成口径一致的合计。分组键决定后续可拆维度。',
+    sql:`-- 等价 SQL
+SELECT
+  hs4,
+  dest_country,
+  decl_company,
+  SUM(total_price_usd) AS v,
+  COUNT(*)            AS cnt
+FROM   <② 过滤>
+GROUP  BY hs4, dest_country, decl_company;`
+  },
+  {n:'④', name:'计算列', sub:'yoy_pct + 贡献度',
+    title:'计算列节点', desc:'把业务关心的派生指标算出来：同比、量价贡献度、结构贡献。',
+    sql:`-- 等价 SQL
+SELECT
+  *,
+  ROUND((v_2026 - v_2025) / NULLIF(v_2025,0) * 100, 2) AS yoy_pct,
+  ROUND(SUM((qty_c - qty_y) * avg_price_y) / y_total * 100, 2) AS qty_contrib,
+  ROUND(SUM(avg_price_c - avg_price_y * qty_c) / y_total * 100, 2) AS price_contrib
+FROM   <③ 聚合>;
+-- 结构贡献已通过加权分摊到上两列`
+  },
+  {n:'⑤', name:'过滤', sub:'剔除噪点小户',
+    title:'过滤节点（第二道）', desc:'把噪点剔掉，让结论站得住。常用阈值：绝对额下限、yoy 极值、连续月份为空等。',
+    sql:`-- 等价 SQL
+SELECT *
+FROM   <④ 计算列>
+WHERE  v_2025 > 1000000          -- 筛掉噪点小户（&lt; 100 万美元）
+  AND  ABS(yoy_pct) &lt; 500;        -- 剔除录入错误（同比超 500%）`
+  },
+  {n:'⑥', name:'排序 + 限制', sub:'TOP 50',
+    title:'排序 + 行数限制', desc:'把答案按业务可读的方式排出来。出口找下滑最大（升序）、找新增（降序）。',
+    sql:`-- 等价 SQL
+SELECT *
+FROM   <⑤ 过滤>
+ORDER  BY yoy_pct ASC            -- 下滑最猛的在前
+LIMIT  50;`
+  }
+];
+
+var report = [
+  {stage:'STAGE 01', name:'拆解结构', pill:'🧭 拆',
+    example:'"这个问题主要由三个因素/部分组成"',
+    detail:`
+      <h4>海关例 · 拆三维度</h4>
+      <div class="quote">"增长乏力，拆开看，主要来自 <b>三个维度</b>：
+        <br>· 按 HS 大类分，机电产品占出口 60%，今年前八月同比 <b>-4.2%</b>，是主力拖累；
+        <br>· 按国别分，对东盟 <b>+12%</b>，对欧美 <b>-8%</b>，<em>结构在悄悄切换</em>；
+        <br>· 按企业分，中小企业下滑 <b>-15%</b>，头部企业反而 <b>+6%</b>，<em>集中度在上升</em>。"</div>
+      <h4>对应《总结摘要》模板</h4>
+      <p>"这个问题主要由三个因素/部分组成。" —— <strong>拆解结构</strong></p>`
+  },
+  {stage:'STAGE 02', name:'公式 / 模型结构', pill:'🧩 公式',
+    example:'"这个业务可以用一个简单公式/框架来理解"',
+    detail:`
+      <h4>海关例 · 量 × 价 × 结构</h4>
+      <div class="quote">"用 <b>贸易额 = 量 × 价 × 结构</b> 一拆：
+        <br>量贡献 <b>-2.1 个百分点</b>、价贡献 <b>-1.5 个百分点</b>、结构贡献 <b>+0.4 个百分点</b>。
+        <br>翻译成业务话——<em>量价齐跌是主因，结构升级是亮点</em>。"</div>
+      <h4>对应《总结摘要》模板</h4>
+      <p>"这个业务可以用一个简单公式/框架来理解。" —— <strong>公式 / 模型结构</strong></p>`
+  },
+  {stage:'STAGE 03', name:'方案结构', pill:'⚙ 方案',
+    example:'"针对这个问题，我们有三个解决方向"',
+    detail:`
+      <h4>海关例 · 三条线核实</h4>
+      <div class="quote">"建议下一步分 <b>三条线</b>核实：
+        <br>① 查机电产品前十大 HS 编码的量价明细，看是订单转移还是价格战；
+        <br>② 拉头部企业新增客户清单，看集中度上升是产业升级还是订单聚集；
+        <br>③ 抽样 5 家中小出口企业，了解是资金压力还是汇率/关税问题。"</div>
+      <h4>对应《总结摘要》模板</h4>
+      <p>"针对这个问题，我们有三个解决方向。" —— <strong>方案结构</strong></p>`
+  }
+];
+
+var pitfalls = [
+  {n:1, name:'跳过拆解，直接进工具拖节点',
+    detail:`
+      <p><span class="wrong">❌ 错</span>：拿到"出口增长乏力"立刻打开工具，开始拖【过滤】【聚合】。</p>
+      <p><span class="right">✅ 对</span>：先用 5 分钟白纸写公式，写不出来就别进工具。</p>
+      <h4>为什么这条最致命</h4>
+      <p>没有公式就没有"验收标准"——后面跑出来什么都对、什么都不对。</p>`
+  },
+  {n:2, name:'跳过找数，口径没对齐就开始聚合',
+    detail:`
+      <p><span class="wrong">❌ 错</span>：在工具里只拖了"报关单"主表就开始 SUM。</p>
+      <p><span class="right">✅ 对</span>：先拖"数据源"节点，确认字段名 / 字段含义 / 单位 / 是否含运保费 / 编码版本，再 join 维表。</p>
+      <h4>典型代价</h4>
+      <p>HS 编码拆到几位没说清 = 同比基线错 = 整条分析结论作废。</p>`
+  },
+  {n:3, name:'跳过验证，SQL 跑出来就当结论',
+    detail:`
+      <p><span class="wrong">❌ 错</span>："SQL 跑出来了，同比增长 -3.6%，报告。"</p>
+      <p><span class="right">✅ 对</span>：把"行数核对 / 空值检查 / 极值检查 / 抽样回溯"四节点 <em>强制挂上</em>。</p>
+      <h4>讲稿原话</h4>
+      <p>"模型说有疑点，业务说没有，通常不是业务错了。"</p>`
+  },
+  {n:4, name:'把"分析"当"出图"，图漂亮，结论说不清',
+    detail:`
+      <p><span class="wrong">❌ 错</span>：出了一张精美的桑基图，配一句"详见附件"。</p>
+      <p><span class="right">✅ 对</span>：每张图强制配 3 句话——空间拆 / 因果拆 / 主体拆。</p>
+      <h4>交付三件套</h4>
+      <p>1 张表 + 1 张图 + 3 句话 = 一个完整的分析产出。</p>`
+  },
+  {n:5, name:'报告里堆 SQL 词、念节点名',
+    detail:`
+      <p><span class="wrong">❌ 错</span>："我用 <code>SELECT-WHERE-GROUP BY-JOIN</code> 跑了 6 个节点……"</p>
+      <p><span class="right">✅ 对</span>："今年前八月同比下滑 3.6%，主要是机电产品拖累。"</p>
+      <h4>自查清单</h4>
+      <p>报告里 <em>不许出现</em> <code>SELECT</code> / <code>WHERE</code> / <code>JOIN</code> / <code>GROUP BY</code> / "节点" 这类词。</p>`
+  }
+];
+
+var golden = [
+  {text:'拖拽式 SQL 不是"画图工具"，是"不写代码的 SQL 编辑器"——你拖的是计算过程。',
+    detail:`
+      <p><b>出处</b>：本文件 〇 节"两句话定调"+ 步骤 3 详细解释。</p>
+      <h4>应用场景</h4>
+      <p>学员问"这工具是不是只能画图"时，直接引用这一句。</p>`
+  },
+  {text:'两种思维是骨架，6 步是关节，拖拽是肌肉——三者缺一，模型就瘫。',
+    detail:`
+      <p><b>出处</b>：本文件 十二节"记住四句话"+ 工具箱 · 四"两种思维的关系"。</p>
+      <h4>应用场景</h4>
+      <p>学员只学拖拽不学思维时，用来点醒"光会拖不够"。</p>`
+  },
+  {text:'能拖不代表会分析——会拖是手艺，会拆问题是判断；手艺决定快不快，判断决定会不会掉坑。',
+    detail:`
+      <p><b>出处</b>：本文件 十二节"记住四句话"+ 步骤 1 拆解的强调。</p>
+      <h4>应用场景</h4>
+      <p>和 20260910.md 讲稿"五懂 vs 懂 AI"的论证一致——手艺 vs 判断。</p>`
+  },
+  {text:'6 步闭环的标志是"回译"——业务能听懂、能点头、能拍板，6 步才算完。',
+    detail:`
+      <p><b>出处</b>：本文件 十节"回译检验"+ 总结摘要 §三"经典汇报三步法"。</p>
+      <h4>应用场景</h4>
+      <p>培训收尾时让学员回答"回译自检 3 问"，全答出才算结业。</p>`
+  }
+];
+
+var appendix = [
+  {name:'结构化与工程化思维 · 总结摘要', sub:'腾讯文档', href:'https://workbuddy-bga-1258344699.cos.ap-beijing.myqcloud.com/attachments/1838ff88-8f72-45f6-80c3-9354b2d00e38/1789037449_88981f54/%E5%88%86%E6%9E%90%E7%BB%93%E6%9E%84%E5%8C%96%E6%80%9D%E7%BB%B4%E5%92%8C%E5%B7%A5%E7%A8%8B%E5%8C%96%E6%80%9D%E7%BB%B4%E7%9A%84%E5%AE%9A%E4%B9%89%E3%80%81%E5%BC%82%E5%90%8C%E5%92%8C%E5%85%B7%E4%BD%93%E5%9C%BA%E6%99%AF_%E6%80%BB%E7%BB%93%E6%91%98%E8%A6%81.md?q-sign-algorithm=sha1&q-ak=AKID6A1d7VrU8gw1tYzKapy22sb7RZUQAfut&q-sign-time=1789037449%3B1796813449&q-key-time=1789037449%3B1796813449&q-header-list=host&q-url-param-list=&q-signature=8f6eee34d6482d20a3386142e4e1412a8b5322b8', ext:true},
+  {name:'slide/20260910.md', sub:'开班动员讲稿', href:'20260910.md'},
+  {name:'slide/20260910.html', sub:'开班动员演示页', href:'20260910.html'},
+  {name:'思维科普版 md', sub:'业务到数据分析模型的转化 · 通俗解释', href:'业务到数据分析模型的转化_通俗解释.md'},
+  {name:'培训讲义 md', sub:'业务到拖拽式 SQL 模型的 6 步法 · 零基础', href:'业务到拖拽式SQL模型的6步法_零基础培训版.md'},
+  {name:'深色玻璃版 v1', sub:'本培训讲义的另一版可视化（保留参考）', href:'业务到拖拽式SQL模型的6步法_零基础培训版.html'}
+];
+
+/* ============ 渲染：工具箱 ============ */
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function cardHTML(summary, detailHTML, isOpen){
+  return '<div class="card' + (isOpen ? ' open' : '') + '">' +
+    '<div class="summary">' + summary + '<span class="chev" style="align-self:flex-end;margin-top:4px">▾</span></div>' +
+    '<div class="detail">' + detailHTML + '</div></div>';
+}
+function pillHTML(cls, txt){
+  return '<span class="thinkpill ' + cls + '">' + txt + '</span>';
+}
+
+var tbox = document.getElementById('toolboxGrid');
+toolbox.forEach(function(t){
+  var summary =
+    '<div class="row1"><span class="id">' + esc(t.icon) + '</span>' + pillHTML(t.pillCls, t.pill) + '</div>' +
+    '<h3 class="title">' + esc(t.name) + '</h3>' +
+    '<p class="tagline">' + esc(t.tagline) + '</p>';
+  tbox.insertAdjacentHTML('beforeend', cardHTML(summary, t.detail, false));
+});
+
+/* ============ 渲染：6 步 ============ */
+var sgrid = document.getElementById('stepsGrid');
+function renderSteps(filter){
+  filter = filter || 'all';
+  sgrid.innerHTML = steps.filter(function(s){
+    return filter === 'all' || s.tag === filter;
+  }).map(function(s){
+    var summary =
+      '<div class="row1"><span class="id">STEP ' + s.num + '</span>' + pillHTML(s.tag, s.pill) + '</div>' +
+      '<h3 class="title">' + esc(s.name) + '</h3>' +
+      '<p class="tagline">' + esc(s.tagline) + '</p>';
+    return cardHTML(summary, s.detail, false);
+  }).join('');
+}
+renderSteps('all');
+
+/* ============ 渲染：6 节点链路 ============ */
+var cbar = document.getElementById('chainBar');
+chain.forEach(function(c, i){
+  if(i > 0){
+    var a = document.createElement('div');
+    a.className = 'arr'; a.textContent = '->';
+    cbar.appendChild(a);
+  }
+  var el = document.createElement('div');
+  el.className = 'node'; el.dataset.idx = i;
+  el.innerHTML = '<div class="ni">' + c.n + '</div><div class="nl">' + esc(c.name) + '</div><div class="nt">' + esc(c.sub) + '</div>';
+  cbar.appendChild(el);
+});
+
+/* ============ 渲染：汇报三步法 ============ */
+var rgrid = document.getElementById('reportGrid');
+report.forEach(function(r){
+  var summary =
+    '<div class="row1"><span class="id">' + esc(r.stage) + '</span>' + pillHTML('s', r.pill) + '</div>' +
+    '<h3 class="title">' + esc(r.name) + '</h3>' +
+    '<p class="tagline">"' + esc(r.example) + '"</p>';
+  rgrid.insertAdjacentHTML('beforeend', cardHTML(summary, r.detail, false));
+});
+
+/* ============ 渲染：5 大常见坑 ============ */
+var plist = document.getElementById('pitfallsList');
+pitfalls.forEach(function(p){
+  var row = document.createElement('div');
+  row.className = 'pitfall-row';
+  row.dataset.kind = 'pitfall';
+  row.dataset.n = p.n;
+  row.innerHTML =
+    '<div class="pi">' + p.n + '</div>' +
+    '<h4>' + esc(p.name) + '</h4>' +
+    '<div class="open-hint">点开看 ❌ vs ✅</div>' +
+    '<div class="detail">' + p.detail + '</div>';
+  plist.appendChild(row);
+});
+
+/* ============ 渲染：金句 ============ */
+var ggrid = document.getElementById('goldenGrid');
+golden.forEach(function(g, i){
+  var summary =
+    '<div class="row1"><span class="id">GOLDEN ' + (i+1) + '</span><span class="id">点击展开</span></div>' +
+    '<p class="golden" style="margin:0">' + esc(g.text) + '</p>';
+  ggrid.insertAdjacentHTML('beforeend', cardHTML(summary, g.detail, false));
+});
+
+/* ============ 渲染：附录 ============ */
+var agrid = document.getElementById('appendixGrid');
+appendix.forEach(function(a){
+  var ext = a.ext ? ' target="_blank" rel="noopener"' : '';
+  agrid.insertAdjacentHTML('beforeend',
+    '<a class="ap" href="' + a.href + '"' + ext + '><b>' + esc(a.name) + '</b><small>' + esc(a.sub) + '</small></a>'
+  );
+});
+
+/* ============ 交互：inline 展开卡片（点击切换开/合）============ */
+document.addEventListener('click', function(e){
+  var card = e.target.closest('.card');
+  if(card){
+    card.classList.toggle('open');
+    return;
+  }
+  var pit = e.target.closest('.pitfall-row');
+  if(pit){
+    pit.classList.toggle('open');
+    return;
+  }
+});
+
+/* ============ 交互：6 步 筛选 ============ */
+document.querySelectorAll('#stepFilter button').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('#stepFilter button').forEach(function(b){ b.classList.remove('on'); });
+    btn.classList.add('on');
+    renderSteps(btn.dataset.f);
+  });
+});
+
+/* ============ 底部抽屉：6 节点 SQL（唯一浮层）============ */
+var mask = document.getElementById('mask');
+var bdrawer = document.getElementById('bdrawer');
+var bdNi = document.getElementById('bdNi');
+var bdTitle = document.getElementById('bdTitle');
+var bdBody = document.getElementById('bdBody');
+function openBD(c){
+  bdNi.textContent = c.n;
+  bdTitle.textContent = c.n + ' ' + c.title;
+  bdBody.innerHTML = '<pre>' + esc(c.sql) + '</pre><p>' + esc(c.desc) + '</p>';
+  bdrawer.classList.add('on'); mask.classList.add('on');
+}
+function closeBD(){
+  bdrawer.classList.remove('on'); mask.classList.remove('on');
+}
+document.getElementById('bdClose').onclick = closeBD;
+mask.onclick = closeBD;
+cbar.addEventListener('click', function(e){
+  var n = e.target.closest('.node');
+  if(n) openBD(chain[+n.dataset.idx]);
+});
+
+/* ============ ESC 关闭浮层 ============ */
+window.addEventListener('keydown', function(e){
+  if(e.key === 'Escape') closeBD();
+});
+</script>
+</body>
+</html>
