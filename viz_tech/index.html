@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>前端可视化技术全景与范式辨析 — ECharts vs D3.js vs Observable Plot</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- 本地第三方核心依赖库 (按依赖顺序加载) -->
+  <script src="lib/echarts.min.js"></script>
+  <script src="lib/d3.min.js"></script>
+  <script src="lib/plot.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- 顶部导航栏 -->
+  <nav class="top-navbar">
+    <div class="nav-container">
+      <a href="#hero" class="brand">
+        <div class="brand-icon">V</div>
+        <span class="brand-title">Viz Tech Stack</span>
+        <span class="brand-badge">三方实战横评</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#matrix" class="nav-link">全景对比</a></li>
+        <li><a href="#showcase" class="nav-link">同源实战演练</a></li>
+        <li><a href="#inspector" class="nav-link">源码检视</a></li>
+        <li><a href="#deepdive" class="nav-link">框架与性能</a></li>
+        <li><a href="#wizard" class="nav-link">智能选型向导</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="main-wrapper">
+
+    <!-- Hero 区域 -->
+    <header id="hero" class="hero-section">
+      <div class="hero-tag">
+        <span class="dot"></span> 前端可视化架构工程指南 · 本地离线版
+      </div>
+      <h1 class="hero-title">前端数据可视化技术全景与范式辨析</h1>
+      <p class="hero-subtitle">
+        全面解构 <b>Apache ECharts</b>、<b>D3.js</b> 与 <b>Observable Plot</b> 的核心差异。从图形哲学、心智模型到同源数据现场渲染与工程选型。
+      </p>
+
+      <!-- 三巨头核心定位名片 -->
+      <div class="tri-cards-grid">
+        <!-- ECharts -->
+        <div class="tech-card card-echarts">
+          <div class="card-header-row">
+            <span class="tech-name">Apache ECharts</span>
+            <span class="card-badge badge-echarts">图表级 / 配置驱动</span>
+          </div>
+          <div class="tech-paradigm">开箱即用的企业级商业仪表盘</div>
+          <p class="tech-desc">
+            基于 ZRender 的双引擎（Canvas/SVG）高阶图表库。内置完整的坐标轴、缩放组件、中国地图与工具栏，配置即所得，交付速度极快。
+          </p>
+          <div class="tech-meta-list">
+            <div class="meta-item"><span class="meta-label">学习门槛</span><span class="meta-val" style="color:var(--success);">🟢 低 (配置驱动)</span></div>
+            <div class="meta-item"><span class="meta-label">渲染引擎</span><span class="meta-val">Canvas / SVG / WebGL</span></div>
+            <div class="meta-item"><span class="meta-label">适用领域</span><span class="meta-val">商业 BI、后台大屏、金融报表</span></div>
+          </div>
+        </div>
+
+        <!-- D3.js -->
+        <div class="tech-card card-d3">
+          <div class="card-header-row">
+            <span class="tech-name">D3.js</span>
+            <span class="card-badge badge-d3">基元级 / 数据管道</span>
+          </div>
+          <div class="tech-paradigm">可视化领域的底层数学与图元基建</div>
+          <p class="tech-desc">
+            直接将任意数据绑定至 SVG/DOM 节点。拥有极致的数学比例尺、力导向物理引擎、曲线生成器与动画过渡，定制能力毫无天花板。
+          </p>
+          <div class="tech-meta-list">
+            <div class="meta-item"><span class="meta-label">学习门槛</span><span class="meta-val" style="color:#DC2626;">🔴 高 (需精通数学与DOM)</span></div>
+            <div class="meta-item"><span class="meta-label">渲染引擎</span><span class="meta-val">原生 SVG / HTML5 / Canvas</span></div>
+            <div class="meta-item"><span class="meta-label">适用领域</span><span class="meta-val">创意叙事、拓扑网络、前沿科研</span></div>
+          </div>
+        </div>
+
+        <!-- Observable Plot -->
+        <div class="tech-card card-plot">
+          <div class="card-header-row">
+            <span class="tech-name">Observable Plot</span>
+            <span class="card-badge badge-plot">语法级 / 声明式图层</span>
+          </div>
+          <div class="tech-paradigm">现代探索性数据分析 (EDA) 首选</div>
+          <p class="tech-desc">
+            由 D3 作者主导研发，基于经典的图形语法（Grammar of Graphics）。以精炼的 Mark 正交图层组合替代繁冗的低级样板代码，纯函数返回 SVG。
+          </p>
+          <div class="tech-meta-list">
+            <div class="meta-item"><span class="meta-label">学习门槛</span><span class="meta-val" style="color:#D97706;">🟡 中低 (需理解图形语法)</span></div>
+            <div class="meta-item"><span class="meta-label">渲染引擎</span><span class="meta-val">基于 D3 的原生 SVG</span></div>
+            <div class="meta-item"><span class="meta-label">适用领域</span><span class="meta-val">数据科学、统计分面、快速原型</span></div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- SECTION 1: 全景对比矩阵 -->
+    <section id="matrix" class="section-block">
+      <div class="section-head">
+        <div class="section-tag">Architecture & Paradigm</div>
+        <h2 class="section-title">三大技术栈全景对比矩阵</h2>
+        <p class="section-desc">
+          横跨抽象层级、渲染机制、心智模型、现代前端框架集成友好度与性能瓶颈等多维度全方位透析。
+        </p>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th style="width: 16%;">对比维度</th>
+              <th class="col-tech" style="color: #B45309;">Apache ECharts</th>
+              <th class="col-tech" style="color: #C2410C;">D3.js (v7)</th>
+              <th class="col-tech" style="color: #6D28D9;">Observable Plot</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="dim-tag">抽象层级</span></td>
+              <td><b>高层级</b> (图表级 / Chart-level)</td>
+              <td><b>低层级</b> (图元算法级 / Primitive)</td>
+              <td><b>中-高层级</b> (图形语法级 / Grammar)</td>
+            </tr>
+            <tr>
+              <td><span class="dim-tag">核心心智模型</span></td>
+              <td>将数据塞入预设的 <code>option</code> 配置树</td>
+              <td>数据与 DOM 属性双向绑定的生命周期管道</td>
+              <td>标记（Marks）、尺度（Scales）与正交图层堆叠</td>
+            </tr>
+            <tr>
+              <td><span class="dim-tag">典型代码量</span></td>
+              <td>中等 (结构化 JSON 配置，可达 50~150 行)</td>
+              <td>较多 (需手动绘制轴、比例尺、节点，100~300+ 行)</td>
+              <td><b>极少</b> (声明式组合，通常 10~30 行即可成图)</td>
+            </tr>
+            <tr>
+              <td><span class="dim-tag">定制天花板</span></td>
+              <td><span class="tag-badge tb-mid">有限</span> 超出常规图表需编写 custom 系列</td>
+              <td><span class="tag-badge tb-good">无限</span> 只要数学能算出的视觉均能构建</td>
+              <td><span class="tag-badge tb-good">较高</span> 图层可自由正交叠加，覆盖绝大多数统计分析</td>
+            </tr>
+            <tr>
+              <td><span class="dim-tag">大数据量性能</span></td>
+              <td><span class="tag-badge tb-good">极强</span> Canvas 抽样与渐进渲染，支持10万+点</td>
+              <td><span class="tag-badge tb-mid">中等</span> 原生 SVG 节点过多卡顿，需转写 Canvas</td>
+              <td><span class="tag-badge tb-mid">中等</span> 偏向 SVG 呈现，适合千点至万点规模探索</td>
+            </tr>
+            <tr>
+              <td><span class="dim-tag">开箱即用能力</span></td>
+              <td><span class="tag-badge tb-good">极高</span> 默认包含 Tooltip、图例、区域缩放、工具箱</td>
+              <td><span class="tag-badge tb-hard">极低</span> 连基本的轴线和 Tooltip 都需自行手写</td>
+              <td><span class="tag-badge tb-good">高</span> 原生内置智能 Tooltip、颜色图例与分面</td>
+            </tr>
+            <tr>
+              <td><span class="dim-tag">React / Vue 契合度</span></td>
+              <td>良好 (作为 Canvas/DOM 容器挂载，需注意 resize 销毁)</td>
+              <td>较差 (抢占真实 DOM 控制权，常推荐仅用 D3 计算)</td>
+              <td><b>极佳</b> (纯函数输入数据直接返回标准 DOM 节点)</td>
+            </tr>
+            <tr>
+              <td><span class="dim-tag">本土化与生态</span></td>
+              <td>🌟 中文文档顶流，内置全国/省市丰富地图数据</td>
+              <td>🌟 国际学术/叙事顶流，海量前沿图表示例</td>
+              <td>以 Observable 社区为核心，文档精美但国内案例偏少</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SECTION 2: 同源数据三引擎现场演练场 -->
+    <section id="showcase" class="section-block">
+      <div class="section-head">
+        <div class="section-tag">Live Tri-Engine Arena</div>
+        <h2 class="section-title">同源数据现场实战演练场</h2>
+        <p class="section-desc">
+          使用完全同一份「全球科技创新研发投入与成长性」真实结构化数据，分别由三个引擎同时现场渲染，直观感受其渲染机制、视觉质感与微交互特色。
+        </p>
+      </div>
+
+      <div class="showcase-card">
+        <!-- 演练场工具栏 -->
+        <div class="showcase-toolbar">
+          <div class="engine-tabs">
+            <button class="engine-tab-btn tab-all active" data-engine="all">
+              <span>⊞ 并排同屏矩阵</span>
+            </button>
+            <button class="engine-tab-btn tab-echarts" data-engine="echarts">
+              <span>● Apache ECharts</span>
+            </button>
+            <button class="engine-tab-btn tab-d3" data-engine="d3">
+              <span>▲ D3.js (v7)</span>
+            </button>
+            <button class="engine-tab-btn tab-plot" data-engine="plot">
+              <span>◆ Observable Plot</span>
+            </button>
+          </div>
+
+          <!-- 动态引擎专属微调按钮 -->
+          <div class="showcase-controls">
+            <div id="d3-extra-controls" style="display: none; gap: 8px;">
+              <button class="ctrl-btn" id="btn-d3-replay">↻ 重新播放入场动画</button>
+            </div>
+            <div id="plot-extra-controls" style="display: none; gap: 8px;">
+              <button class="ctrl-btn active" id="btn-toggle-regression">趋势拟合: 开</button>
+              <button class="ctrl-btn" id="btn-toggle-facet">区域分面: 关闭</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 交互提示状态栏 (HUD) -->
+        <div class="interactive-hud" id="interactive-hud">
+          ✨ <b>同构多引擎矩阵：</b>当前并排展示由同一份数据实时驱动的 ECharts、D3.js 与 Observable Plot 实例。
+        </div>
+
+        <!-- 图表展示画板 -->
+        <div class="chart-view-panel">
+          <!-- 并排展示布局 -->
+          <div class="multi-engine-grid" id="multi-engine-grid">
+            <!-- Grid Cell 1: ECharts -->
+            <div class="grid-cell">
+              <div class="grid-cell-header">
+                <span class="grid-cell-title" style="color: #B45309;">
+                  <span>●</span> Apache ECharts
+                </span>
+                <span class="card-badge badge-echarts">商业看板 / Canvas</span>
+              </div>
+              <div class="grid-chart-box" id="chart-grid-echarts"></div>
+            </div>
+
+            <!-- Grid Cell 2: D3.js -->
+            <div class="grid-cell">
+              <div class="grid-cell-header">
+                <span class="grid-cell-title" style="color: #C2410C;">
+                  <span>▲</span> D3.js (v7)
+                </span>
+                <span class="card-badge badge-d3">物理动画 / 原生 SVG</span>
+              </div>
+              <div class="grid-chart-box" id="chart-grid-d3"></div>
+            </div>
+
+            <!-- Grid Cell 3: Observable Plot -->
+            <div class="grid-cell">
+              <div class="grid-cell-header">
+                <span class="grid-cell-title" style="color: #6D28D9;">
+                  <span>◆</span> Observable Plot
+                </span>
+                <span class="card-badge badge-plot">图形语法 / 极简声明</span>
+              </div>
+              <div class="grid-chart-box" id="chart-grid-plot"></div>
+            </div>
+          </div>
+
+          <!-- 单引擎独占大屏容器 -->
+          <div class="single-engine-container" id="single-chart-view" style="display: none;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: 源码对照检视器 -->
+    <section id="inspector" class="section-block">
+      <div class="section-head">
+        <div class="section-tag">Code & Mental Model</div>
+        <h2 class="section-title">源码对照检视器 (Code Inspector)</h2>
+        <p class="section-desc">
+          查看实现上述同款气泡图在不同技术栈下的真实核心源码。对比代码行数、配置样板与架构心智。
+        </p>
+      </div>
+
+      <div class="code-inspector-card">
+        <div class="inspector-header">
+          <div class="code-tabs">
+            <button class="code-tab-btn active" data-tab="echarts">ECharts 配置式</button>
+            <button class="code-tab-btn" data-tab="d3">D3.js 管道式</button>
+            <button class="code-tab-btn" data-tab="plot">Observable Plot 图形语法</button>
+          </div>
+
+          <div class="code-metrics">
+            <span class="metric-pill">有效代码: <b id="metric-loc">约 68 行</b></span>
+            <span class="metric-pill">心智模型: <b id="metric-mental">配置项树 (Option Object)</b></span>
+            <span class="metric-pill">范式: <b id="metric-paradigm">高阶图表配置 / Canvas</b></span>
+            <button class="copy-btn" id="btn-copy-code">复制当前代码</button>
+          </div>
+        </div>
+
+        <div class="code-display-area">
+          <pre><code id="code-pre"></code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: 架构深剖：现代前端框架与渲染性能 -->
+    <section id="deepdive" class="section-block">
+      <div class="section-head">
+        <div class="section-tag">Engineering Deep-Dive</div>
+        <h2 class="section-title">现代前端工程集成与性能分水岭</h2>
+        <p class="section-desc">
+          在真实的 React / Vue 大型企业项目中，如何解决 DOM 冲突？大数据量下如何选取渲染载体？
+        </p>
+      </div>
+
+      <div class="deep-dive-grid">
+        <!-- 卡片 1: 框架集成冲突与解决 -->
+        <div class="deep-card">
+          <h3 class="deep-card-title">
+            <span style="color:var(--primary);">⚛</span> React / Vue 中的 DOM 所有权之争
+          </h3>
+          <p>
+            <b>D3 的根本冲突：</b> D3 诞生于 jQuery 时代，设计假设是“由 D3 完全操纵原生 DOM”。这与现代前端框架虚拟 DOM（Virtual DOM）或响应式代理发生直接冲突——双方都在争夺同一个节点的创建与销毁。
+          </p>
+          <div class="code-mini-block">
+// 业界成熟解法：D3 作为数学计算内核 + React/Vue 渲染
+import { scaleLinear } from "d3-scale";
+
+export function ReactScatter({ data }) {
+  const xScale = scaleLinear().domain([0, 100]).range([0, 500]);
+  // D3 仅计算坐标，JSX 声明原生 SVG 节点，由 React 享受完整 Diff 优势
+  return (
+    &lt;svg width={500} height={300}&gt;
+      {data.map(d =&gt; &lt;circle cx={xScale(d.x)} cy={d.y} r={4} /&gt;)}
+    &lt;/svg&gt;
+  );
+}
+          </div>
+          <p>
+            <b>ECharts 与 Plot 的模式：</b> ECharts 采用经典的 <code>useRef()</code> 容器挂载模式；而 Observable Plot 是无副作用的纯函数，直接返回标准 SVG DOM 元素，配合 <code>container.replaceChildren(plotNode)</code> 能实现近乎零心智的无缝嵌入。
+          </p>
+        </div>
+
+        <!-- 卡片 2: 渲染引擎分水岭 -->
+        <div class="deep-card">
+          <h3 class="deep-card-title">
+            <span style="color:var(--c-d3);">⚡</span> Canvas vs SVG vs WebGL 性能分水岭
+          </h3>
+          <p>
+            <b>节点数量与技术载体选择阈值：</b>
+          </p>
+          <ul style="padding-left: 20px; font-size: 13.5px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.8;">
+            <li><b>&lt; 3,000 个图元（推荐 SVG / D3 / Plot）</b>：SVG 保留矢量清晰度、原生 CSS 样式穿透和 DOM 级别的高精度事件响应，交互体验最佳。</li>
+            <li><b>3,000 ~ 100,000 个数据点（首选 Canvas / ECharts）</b>：此时 SVG 节点创建导致浏览器重排严重卡顿。ECharts 内部的 ZRender 采用 Canvas 离屏缓冲与渐进式分批渲染（Progressive Rendering），依然可以做到 60FPS。</li>
+            <li><b>&gt; 100,000+ 个极大规模（选用 WebGL / ECharts-GL / Deck.gl）</b>：必须将点阵计算直接推入 GPU Shader 进行并行渲染，避免主线程阻塞。</li>
+          </ul>
+          <p>
+            <b>架构建议：</b> 80% 的企业后台报表数据量在 100~2000 点之间，优先考虑开发交付效率与维护成本，无需过早陷入低级渲染优化。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: 交互式智能选型决策向导 -->
+    <section id="wizard" class="section-block">
+      <div class="section-head">
+        <div class="section-tag">Interactive Selection Wizard</div>
+        <h2 class="section-title">交互式技术选型顾问</h2>
+        <p class="section-desc">
+          勾选您当前项目的实际诉求与团队资源背景，系统将动态权衡各项指标，给出匹配度百分比与架构落地建议。
+        </p>
+      </div>
+
+      <div class="wizard-card">
+        <!-- 题目 1 -->
+        <div class="wizard-step" data-question="q1">
+          <div class="step-label">DIMENSION 01</div>
+          <div class="step-question">您要呈现的可视化图形在视觉形态上属于哪一类？</div>
+          <div class="options-group">
+            <button class="option-btn selected" data-val="a">
+              <span class="opt-title">常规标准图表 / 业务看板</span>
+              <span class="opt-desc">柱状、折线、多轴组合、标准散点、雷达图、中国地图</span>
+            </button>
+            <button class="option-btn" data-val="b">
+              <span class="opt-title">高度定制非标图谱 / 创意形态</span>
+              <span class="opt-desc">力导向图、自定义物理轨迹、树状层级网络、粒子连线</span>
+            </button>
+            <button class="option-btn" data-val="c">
+              <span class="opt-title">统计探索 / 分布分析 / 多维分面</span>
+              <span class="opt-desc">数据科学、箱线图、密度核估计、回归线与 Faceting</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 题目 2 -->
+        <div class="wizard-step" data-question="q2">
+          <div class="step-label">DIMENSION 02</div>
+          <div class="step-question">您的项目交付时限与研发资源预算？</div>
+          <div class="options-group">
+            <button class="option-btn selected" data-val="a">
+              <span class="opt-title">周期紧迫 / 追求开箱即用</span>
+              <span class="opt-desc">要求 1~2 周内落地，不希望在坐标轴与浮窗细节上耗费人力</span>
+            </button>
+            <button class="option-btn" data-val="b">
+              <span class="opt-title">时间充裕 / 有专属前端或算法资源</span>
+              <span class="opt-desc">愿意为极致的视觉表现和微交互投入充沛的代码编写与调试</span>
+            </button>
+            <button class="option-btn" data-val="c">
+              <span class="opt-title">敏捷迭代 / 代码需极其精简易读</span>
+              <span class="opt-desc">团队注重数据分析效率，希望几行代码即可完成统计呈现</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 题目 3 -->
+        <div class="wizard-step" data-question="q3">
+          <div class="step-label">DIMENSION 03</div>
+          <div class="step-question">宿主技术栈与框架集成模式？</div>
+          <div class="options-group">
+            <button class="option-btn selected" data-val="a">
+              <span class="opt-title">传统后台系统 / 常规 Vue 或 React 容器</span>
+              <span class="opt-desc">组件仅提供一个 div 挂载点，内部全权交由图表库打理</span>
+            </button>
+            <button class="option-btn" data-val="b">
+              <span class="opt-title">深度 React/Vue 声明式组件化体系</span>
+              <span class="opt-desc">希望图形图元与框架虚拟 DOM 深度整合，状态由框架全权调度</span>
+            </button>
+            <button class="option-btn" data-val="c">
+              <span class="opt-title">纯函数式 / 无副作用生成独立 DOM</span>
+              <span class="opt-desc">轻量直出，可轻松嵌入各类文档、Notebook 或静态页面</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 题目 4 -->
+        <div class="wizard-step" data-question="q4">
+          <div class="step-label">DIMENSION 04</div>
+          <div class="step-question">是否需要深度内置的商业交互套件？</div>
+          <div class="options-group">
+            <button class="option-btn selected" data-val="a">
+              <span class="opt-title">需要完整的开箱工具链</span>
+              <span class="opt-desc">原生区域缩放滑块、保存图片按钮、图例点击隐藏、无障碍</span>
+            </button>
+            <button class="option-btn" data-val="b">
+              <span class="opt-title">需要自由的手势与微交互</span>
+              <span class="opt-desc">任意区域画刷框选（Brush）、拖拽连线、物理弹性动画</span>
+            </button>
+            <button class="option-btn" data-val="c">
+              <span class="opt-title">极简悬浮提示即可</span>
+              <span class="opt-desc">仅需干净的数据 Tooltip，更关注图表本身传递的统计规律</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 题目 5 -->
+        <div class="wizard-step" data-question="q5">
+          <div class="step-label">DIMENSION 05</div>
+          <div class="step-question">预估单张图表的数据点体量？</div>
+          <div class="options-group">
+            <button class="option-btn selected" data-val="a">
+              <span class="opt-title">万级至十万级大数据量</span>
+              <span class="opt-desc">实时高频金融曲线、几十万散点采样、需要 Canvas 硬件加速</span>
+            </button>
+            <button class="option-btn" data-val="b">
+              <span class="opt-title">中等体量（几十至几千个复杂图元）</span>
+              <span class="opt-desc">侧重图元间复杂的几何关系与动态连线计算，而非庞大数据点</span>
+            </button>
+            <button class="option-btn" data-val="c">
+              <span class="opt-title">百级至数千级轻量统计样本</span>
+              <span class="opt-desc">常规数据报表，注重清晰易读的分组分布与趋势拟合</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 选型诊断推荐结果面板 -->
+        <div class="wizard-result-box">
+          <div class="result-verdict">
+            <div class="verdict-tag">DIAGNOSTIC VERDICT</div>
+            <h3 class="verdict-title" id="verdict-title">首选推荐：计算中...</h3>
+            <p class="verdict-text" id="verdict-text">
+              正在根据您的问卷选项综合计算最佳选型...
+            </p>
+          </div>
+
+          <div class="result-scores">
+            <!-- ECharts 评分 -->
+            <div class="score-bar-row">
+              <div class="score-label-row">
+                <span style="color: #B45309;">Apache ECharts</span>
+                <span id="val-echarts">--%</span>
+              </div>
+              <div class="score-track">
+                <div class="score-fill score-fill-echarts" id="bar-echarts" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <!-- D3 评分 -->
+            <div class="score-bar-row">
+              <div class="score-label-row">
+                <span style="color: #C2410C;">D3.js (v7)</span>
+                <span id="val-d3">--%</span>
+              </div>
+              <div class="score-track">
+                <div class="score-fill score-fill-d3" id="bar-d3" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <!-- Plot 评分 -->
+            <div class="score-bar-row">
+              <div class="score-label-row">
+                <span style="color: #6D28D9;">Observable Plot</span>
+                <span id="val-plot">--%</span>
+              </div>
+              <div class="score-track">
+                <div class="score-fill score-fill-plot" id="bar-plot" style="width: 0%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>前端可视化技术全景与范式辨析 · 纯本地离线工程范例 · Apache ECharts &middot; D3.js &middot; Observable Plot</p>
+  </footer>
+
+  <!-- 业务逻辑与演示渲染驱动脚本 -->
+  <script src="charts/data.js"></script>
+  <script src="charts/echarts-demo.js"></script>
+  <script src="charts/d3-demo.js"></script>
+  <script src="charts/plot-demo.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
