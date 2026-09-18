@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>福建·连城 3D 旅行导览</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232d6e5e'/%3E%3Cpath d='M14 44 L26 24 L36 38 L44 28 L50 44 Z' fill='%23cfe8f5'/%3E%3C/svg%3E">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; font-family: "PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif; background: #cfe8f5; }
+  #scene { position: fixed; inset: 0; display: block; touch-action: none; }
+
+  /* 顶部标题 */
+  #header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+    padding: 12px 18px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.75) 70%, rgba(255,255,255,0));
+    pointer-events: none;
+  }
+  #header h1 { font-size: 20px; color: #2d4a3e; letter-spacing: 1px; width: calc(100% - 110px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #header h1 .sub { font-size: 12px; color: #5a7a6e; font-weight: normal; margin-left: 8px; }
+  #header p { font-size: 12px; color: #5a7a6e; margin-top: 2px; }
+
+  /* 复位按钮 */
+  #resetBtn {
+    position: fixed; top: 16px; right: 16px; z-index: 25;
+    padding: 8px 14px; background: #2d6e5e; color: #fff; border: none; border-radius: 20px;
+    font-size: 13px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  }
+  #resetBtn:hover { background: #245a4d; }
+
+  /* 侧栏 */
+  #sidebar {
+    position: fixed; top: 70px; left: 12px; bottom: 12px; width: 240px; z-index: 15;
+    background: rgba(255,255,255,0.92); border-radius: 12px; padding: 12px;
+    overflow-y: auto; box-shadow: 0 4px 18px rgba(0,0,0,0.12);
+    transition: transform 0.3s ease;
+  }
+  #sidebar h2 { font-size: 14px; color: #2d4a3e; margin-bottom: 8px; border-bottom: 2px solid #2d6e5e; padding-bottom: 4px; }
+  .cat-group { margin-bottom: 10px; }
+  .cat-title { font-size: 12px; color: #fff; background: #5a8a7a; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-bottom: 4px; }
+  .spot-item {
+    padding: 6px 8px; margin: 3px 0; border-radius: 6px; cursor: pointer;
+    font-size: 13px; color: #333; display: flex; align-items: center; gap: 6px;
+  }
+  .spot-item:hover { background: #e8f2ee; }
+  .spot-item.active { background: #d0e8de; color: #1a5a48; font-weight: bold; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .cross-badge { font-size: 10px; background: #fff3cd; color: #8a6d00; border: 1px dashed #c9a800; border-radius: 3px; padding: 0 3px; margin-left: auto; }
+
+  /* 图例 */
+  #legend {
+    position: fixed; bottom: 12px; left: 12px; z-index: 15;
+    background: rgba(255,255,255,0.92); border-radius: 12px; padding: 10px 12px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.12); font-size: 12px;
+  }
+  #legend h3 { font-size: 12px; color: #2d4a3e; margin-bottom: 6px; }
+  .legend-row { display: flex; align-items: center; gap: 6px; margin: 3px 0; color: #444; }
+  .legend-icon { width: 14px; height: 14px; display: inline-block; }
+
+  /* 信息面板 */
+  #panel {
+    position: fixed; top: 70px; right: 16px; bottom: 12px; width: 340px; max-width: calc(100vw - 32px);
+    background: rgba(255,255,255,0.96); border-radius: 14px; padding: 18px;
+    z-index: 22; box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+    overflow-y: auto; transform: translateX(400px); transition: transform 0.3s ease;
+  }
+  #panel.open { transform: translateX(0); }
+  #panel .close {
+    position: absolute; top: 10px; right: 12px; cursor: pointer; font-size: 20px;
+    color: #999; width: 28px; height: 28px; line-height: 28px; text-align: center; border-radius: 50%;
+  }
+  #panel .close:hover { background: #eee; color: #333; }
+  #panel h2 { font-size: 18px; color: #2d4a3e; margin-bottom: 4px; padding-right: 30px; }
+  #panel .town { font-size: 12px; color: #666; margin-bottom: 8px; }
+  #panel .cross-note {
+    background: #fff8e1; border-left: 3px solid #e6b800; padding: 6px 8px; border-radius: 4px;
+    font-size: 12px; color: #7a5d00; margin-bottom: 10px;
+  }
+  #panel .field { margin-bottom: 10px; }
+  #panel .field-label { font-size: 12px; color: #2d6e5e; font-weight: bold; margin-bottom: 3px; }
+  #panel .field-val { font-size: 13px; color: #333; line-height: 1.6; }
+  #panel ul { padding-left: 18px; }
+  #panel li { font-size: 13px; color: #333; line-height: 1.6; margin-bottom: 2px; }
+
+  /* 底部美食 + 路线 + 来源 */
+  #bottomBar {
+    position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%);
+    width: min(760px, calc(100vw - 480px)); z-index: 14;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .card {
+    background: rgba(255,255,255,0.92); border-radius: 12px; padding: 10px 14px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+  }
+  .card h3 { font-size: 13px; color: #2d4a3e; margin-bottom: 6px; }
+  .food-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  .food-item { font-size: 11px; }
+  .food-item .fn { font-weight: bold; color: #b5532a; margin-bottom: 2px; }
+  .food-item .fd { color: #555; line-height: 1.4; }
+  .route-text { font-size: 12px; color: #444; line-height: 1.7; }
+  .route-text b { color: #2d6e5e; }
+  details.sources { font-size: 11px; color: #666; }
+  details.sources summary { cursor: pointer; color: #2d6e5e; font-weight: bold; }
+  details.sources ul { padding-left: 16px; margin-top: 4px; line-height: 1.6; }
+
+  /* 移动端切换按钮 */
+  #toggleSide {
+    position: fixed; top: 16px; right: 16px; z-index: 26; display: none;
+    padding: 8px 12px; background: #2d6e5e; color: #fff; border: none; border-radius: 20px;
+    font-size: 13px; cursor: pointer;
+  }
+
+  @media (max-width: 900px) {
+    #sidebar { transform: translateX(-260px); width: 230px; }
+    #sidebar.show { transform: translateX(0); }
+    #toggleSide { display: block; top: 50px; right: 12px; padding: 6px 10px; font-size: 12px; }
+    #resetBtn { top: 50px; right: 96px; padding: 6px 10px; font-size: 12px; }
+    #header h1 { font-size: 15px; }
+    #header p { display: none; }
+    #panel { width: calc(100vw - 24px); left: 12px; right: 12px; }
+    #bottomBar { width: calc(100vw - 24px); left: 12px; transform: none; }
+    .food-grid { grid-template-columns: repeat(2, 1fr); }
+    #legend { display: none; }
+  }
+</style>
+</head>
+<body>
+<canvas id="scene"></canvas>
+
+<div id="header">
+  <h1>福建·连城 3D 旅行导览<span class="sub">龙岩市连城县 · 武夷山余脉 / 丹霞地貌</span></h1>
+  <p>鼠标拖拽旋转 · 右键/双指平移 · 滚轮缩放 · 点击标记查看详情</p>
+</div>
+
+<button id="resetBtn">复位视角</button>
+<button id="toggleSide">景点列表</button>
+
+<div id="sidebar">
+  <h2>连城 12 景</h2>
+  <div id="spotList"></div>
+</div>
+
+<div id="legend">
+  <h3>图例</h3>
+  <div class="legend-row"><span class="legend-icon" style="background:#c0392b;border-radius:50%"></span>山水自然（丹霞）</div>
+  <div class="legend-row"><span class="legend-icon" style="background:#8a9a7a"></span>古村人文</div>
+  <div class="legend-row"><span class="legend-icon" style="background:#e74c3c"></span>红色旅游</div>
+  <div class="legend-row"><span class="legend-icon" style="background:#3aa6c8"></span>温泉度假</div>
+  <div class="legend-row"><span class="legend-icon" style="background:#7d5a3a"></span>溶洞</div>
+</div>
+
+<div id="panel">
+  <div class="close" id="panelClose">×</div>
+  <h2 id="pName"></h2>
+  <div class="town" id="pTown"></div>
+  <div class="cross-note" id="pCross" style="display:none"></div>
+  <div class="field"><div class="field-label">相对县城方位</div><div class="field-val" id="pDir"></div></div>
+  <div class="field"><div class="field-label">主要看点</div><div class="field-val"><ul id="pHigh"></ul></div></div>
+  <div class="field"><div class="field-label">门票</div><div class="field-val" id="pTickets"></div></div>
+  <div class="field"><div class="field-label">开放时间</div><div class="field-val" id="pHours"></div></div>
+  <div class="field"><div class="field-label">建议时长</div><div class="field-val" id="pDur"></div></div>
+  <div class="field"><div class="field-label">游玩贴士</div><div class="field-val"><ul id="pTips"></ul></div></div>
+</div>
+
+<div id="bottomBar">
+  <div class="card">
+    <h3>2 日推荐路线</h3>
+    <div class="route-text">
+      <b>D1</b>：县城莲峰镇 → 冠豸山景区全天（石门湖游船 + 登山）→ 傍晚赴天一温泉夜泡 → 住县城或温泉度假村<br>
+      <b>D2</b>：培田古村 → 新泉整训旧址群 → 新泉温泉 + 涮九品；或北线改走 四堡雕版印刷古村。
+    </div>
+  </div>
+  <div class="card">
+    <h3>连城味道</h3>
+    <div class="food-grid" id="foodGrid"></div>
+  </div>
+  <div class="card sources-card">
+    <details class="sources">
+      <summary>数据来源（点击展开）</summary>
+      <ul id="srcList"></ul>
+    </details>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+/* ============================================================
+   数据：源自 _research/shard1.json / shard2.json / shard3.json
+   收录 12 个景点（不含冯地村）。梅花山虎园为跨区域联动点。
+   ============================================================ */
+var SPOTS = [
+  {
+    id:"guanzhai", name:"冠豸山景区（含石门湖、竹安寨、九龙湖）", township:"莲峰镇大坪村 / 揭乐乡",
+    dir:"县城东郊，距城区约1.5km（官方口径），高德实测从莲峰镇政府约4-6km，车程约5-10分钟",
+    highlights:[
+      "国家5A级旅游景区（2024年12月27日文化和旅游部公布）、世界地质公园，与武夷山并称'北夷南豸、丹霞双绝'",
+      "冠豸山主峰丹霞赤壁、鲤鱼背登山道、'生命之根'象形石景、文人崖刻",
+      "石门湖碧水丹山，乘游船赏丹霞倒影，'阳刚天下第一、阴柔举世无双'",
+      "竹安寨'中国丹霞第一墙'天墙、摩天岭险道、寿星岩（竹安寨三绝：险摩天岭、奇寿星岩、壮观天墙）",
+      "九龙湖峡谷乘竹筏/游船，高空索道俯瞰丹霞群峰，天池点缀其间"
+    ],
+    tickets:"冠豸山（含石门湖）门票80元/人次；竹安寨（含九龙湖）门票70元/人次；石门湖船票40元/人次、九龙湖船票40元/人次（龙岩市发改委2026年7月核定）。A线联票（冠豸山+石门湖船票+景交车）约120元。以景区当日公示为准。",
+    hours:"5-10月 08:00-17:30（约15:30停止入园）；11月-次年4月 08:00-17:00（约14:30停止入园）。以官方当日公示为准。",
+    duration:"1天（全天，含登山+游船+索道）",
+    tips:[
+      "春秋两季（3-5月、9-11月）最佳，夏季山中凉爽可避暑，冬季温和少寒",
+      "景区含登山、游船、索道，建议穿舒适运动鞋，带防晒/雨具及饮用水",
+      "距县城极近，可步行、公交或打车前往；景区内有景交车连接各片区",
+      "客家美食推荐：涮九品（涮九门头）、芋子包、红心地瓜干、米熏白鸭"
+    ],
+    category:"nature", pos:[7, 0, 1.5]
+  },
+  {
+    id:"tianyi", name:"天一温泉度假村", township:"文亨镇文保村白坑路",
+    dir:"县城以南（南偏东），约12km（官方：距连城县政府12km），车程约20分钟；距冠豸山景区约10km/车程15分钟",
+    highlights:[
+      "国家4A级温泉度假景区，客家文化主题设计",
+      "露天温泉汤池群，原生态森林环绕的别墅群",
+      "毗邻冠豸山丹霞景区，适合'丹霞+温泉'组合度假",
+      "温泉酒店+会务+康养旅居配套"
+    ],
+    tickets:"温泉门票以景区当日公示为准（参考平台价约198元/人，住宿套餐另计）。",
+    hours:"约14:00-22:30（最晚约22:00入园）。以官方当日公示为准。",
+    duration:"半天至1天（可住一晚深度体验）",
+    tips:[
+      "秋冬泡温泉最佳，夏季也有消暑亲水项目",
+      "距连城冠豸山机场约5-7km，距永武高速出口约2-5km，自驾极为方便",
+      "距冠豸山景区车程约15分钟，建议与山景联游",
+      "度假村周边有客家红衣花生（国家地理标志）等特产"
+    ],
+    category:"hotspring", pos:[1, 0, 10]
+  },
+  {
+    id:"yunlong", name:"云龙桥", township:"罗坊乡下罗村",
+    dir:"县城西北，约18km（罗坊乡政府官方口径距县城18km），高德实测约19.4km，车程约24-25分钟",
+    highlights:[
+      "始建于明崇祯七年（1634年），近400年历史的客家古廊桥（风雨桥/屋桥）",
+      "1996年公布为福建省文物保护单位",
+      "六墩七孔石砌屋桥，桥长81米、宽5米、高30米，石砌船形桥墩",
+      "桥中设双层六角尖顶魁星楼，桥顶有岳阳楼形制文昌阁",
+      "周边有国家级非物质文化遗产'罗坊走古事'（客家狂欢节）"
+    ],
+    tickets:"免费（户外古桥，无门票，以现场为准）。",
+    hours:"全天开放（户外古桥，无固定售票时间）。",
+    duration:"约0.5-1小时",
+    tips:[
+      "免费参观，适合从县城自驾顺路探访",
+      "元宵节前后'罗坊走古事'民俗活动期间氛围最佳（正月）",
+      "乡村道路较窄，建议自驾前往，注意会车",
+      "可与罗坊乡梯田茶山、石壁山风电景观一并游览"
+    ],
+    category:"village", pos:[-8, 0, -7]
+  },
+  {
+    id:"siba", name:"四堡雕版印刷（古书坊群 / 雕版印刷陈列馆）", township:"四堡镇（雾阁村、马屋村）",
+    dir:"莲峰镇最北部，约24-25公里，车程约30分钟（连城县政府口径：镇政府距城区24km、景区距县城25km）",
+    highlights:[
+      "明清时期全国四大雕版印刷基地之一，拥有我国唯一幸存、保存最完整的雕版印刷书坊群",
+      "50座古书坊建筑单体列为全国重点文物保护单位（第五批），主要分布于雾阁村、马屋村",
+      "四堡雕版印刷技艺为国家级非物质文化遗产，建有雕版印刷陈列馆/展览馆、体验馆、流程展示馆",
+      "陈列袖珍版古籍《论语》等珍贵雕版、古书与印刷工具，被誉为'古代印刷术活化石'",
+      "中国四堡雕版印刷古镇旅游区为国家AAA级旅游景区；春季李花盛开"
+    ],
+    tickets:"雕版印刷陈列馆（博物馆）约20元；游览古书坊群与民居不收费（以景区当日公示为准）。",
+    hours:"以官方当日公示为准（陈列馆一般白天开放，建议出行前电话确认）。",
+    duration:"2-3小时",
+    tips:[
+      "连城县城汽车站有发往四堡镇的乡村班车（约5元），自驾沿204省道北行约25公里，沿途有'四堡雕版古镇'指示牌",
+      "最佳游览季节为2-7月，雾阁村春季李花较美",
+      "更适合对雕版印刷史、非遗文化感兴趣的游客，可与培田、芷溪等古村连线",
+      "古书坊多为村民住宅，参观请勿惊扰住户，注意保护雕版与古建"
+    ],
+    category:"village", pos:[-2, 0, -13]
+  },
+  {
+    id:"peitian", name:"培田古民居（培田古村落）", township:"宣和镇（原宣和乡）",
+    dir:"莲峰镇西部，约40公里，车程约40分钟（连城县政府及省文旅厅口径均为距县城40公里）",
+    highlights:[
+      "始建于南宋、约800年历史的客家古村落，被誉为'客家庄园''民间故宫'，第六批全国重点文物保护单位、中国历史文化名村",
+      "现存约7万平方米明清建筑群：30余幢'九厅十八井'高堂华屋、21座宗祠、6座书院、5座庵庙、2座跨街牌坊、一条千米古街",
+      "核心建筑继述堂（衍庆堂）为'九厅十八井'典范；官厅等大宅规模宏大",
+      "南山书院始建于明代，门楣'南山书院'传为清代纪晓岚督学福建时所题；明清两代出秀才190余人",
+      "'枕山、环水、面屏'的客家传统风水选址格局"
+    ],
+    tickets:"官方景区预订页显示约30元/张（含观光车）；不同攻略平台有45元、50元等说法，建议以景区当日公示为准。",
+    hours:"官方景区预订页为08:00-17:00；省旅游信息中心称全天开放，建议以官方当日公示为准。",
+    duration:"半天至1天",
+    tips:[
+      "连城县城汽车站有班车可达，自驾经永武高速朋口入口转旅游公路约11公里",
+      "四季皆宜，古街适合慢逛拍照，村内有客家民宿与农家菜可体验",
+      "距冠豸山约20公里、离冠豸山机场约37公里，可与冠豸山、芷溪串线游览",
+      "部分宗祠/厅堂开放时间不一，进宅院参观请尊重村民生活"
+    ],
+    category:"village", pos:[-18, 0, -1]
+  },
+  {
+    id:"bizhou", name:"璧洲古村（璧洲三宝：永隆桥·文昌阁·天后宫）", township:"莒溪镇（璧洲村）",
+    dir:"莲峰镇中南部/偏东，莒溪镇距县城约25-30公里，车程约35-40分钟",
+    highlights:[
+      "首批中国传统村落、中国历史文化名村，有800多年历史的千年客家古村，完好留存南宋至明清百余座古建民居",
+      "'璧洲三宝'：明代永隆桥（石墩木廊桥，桥头重檐歇山阁楼，福建省文物保护单位）、清代文昌阁、天后宫",
+      "天后宫为宫殿式砖木建筑，正殿坤元殿斗拱绘阴阳八卦与鱼戏图，对面建有固定大戏台",
+      "非遗'二月二游灯笼'素有'南宋灯笼活化石'之誉，元宵与农历二月二灯火最盛",
+      "莒溪镇素有'银莒溪'之称，南部毗邻梅花山自然保护区，自然与人文兼具"
+    ],
+    tickets:"古村与古桥为开放式，无大门票（以景区当日公示为准）。",
+    hours:"开放式村落，全天可外部游览；宫庙内部开放以当日公示为准。",
+    duration:"1.5-2小时",
+    tips:[
+      "自驾从县城沿莒溪方向公路约25-30公里可达，适合与培田/芷溪等古村连线",
+      "农历二月二'游灯笼'民俗最具特色，春节至二月二期间氛围最佳",
+      "永隆桥、文昌阁、天后宫三处相距不远，可步行串联",
+      "古村餐饮接待相对简单，建议自备饮水或在莒溪镇用餐"
+    ],
+    category:"village", pos:[8, 0, 13]
+  },
+  {
+    id:"zhixi", name:"芷溪古村（芷溪宗祠民居群）", township:"庙前镇（芷溪村及芷红、芷星、芷民、芷联、坪头等连片村落）",
+    dir:"莲峰镇南端，庙前镇距县城约44公里，车程约50-60分钟",
+    highlights:[
+      "清代发展起来的万人客家大村，有'客家大宅门''千烟之家'之誉，中国历史文化名村、中国传统村落",
+      "现存明清古宗祠74座、古民居139幢，其中8座为'九厅十八井'格局，多为祠居合一复合型建筑",
+      "坐拥连城县数量最多的明清故居：5处全国重点文物保护单位、17处省级文保、5处县保",
+      "黄氏家庙、澄川公祠等国保单位门楼壮观、木雕窗雕精美；村内保留毛泽东召开农工商学代表座谈会等红色旧址",
+      "芷溪花灯为国家级非物质文化遗产；'家家酿酒'，素有'客家米酒之乡'之称"
+    ],
+    tickets:"古村为开放式村落，一般无需大门票（以景区当日公示为准）。",
+    hours:"开放式村落，全天可外部游览；内部宗祠/故居具体开放以当日公示为准。",
+    duration:"2-3小时",
+    tips:[
+      "位于205国道沿线、近新泉与古田会议会址方向，可与新泉整训旧址、古田会址串线",
+      "几乎家家自酿米酒，逢年过节米酒香浓，可体验客家米酒与米酒鱼干等风味",
+      "规模大、院落分散，建议沿主路步行并留意国保/省保文保碑指引",
+      "古民居多仍有人居住，参观时注意礼貌、不随意进入私宅内院"
+    ],
+    category:"village", pos:[6, 0, 18]
+  },
+  {
+    id:"xinquanRed", name:"新泉整训旧址群（望云草室·新泉整训纪念馆）", township:"连城县新泉镇新泉村",
+    dir:"县城莲峰镇以南偏西，约45km（镇政府口径45km，区划资料48km），车程约1小时；205/319国道过境，南接上杭古田",
+    highlights:[
+      "新泉整训是红四军首次大规模、规范化的全军政治军事整训，被誉为人民军队正规化建设的起点",
+      "望云草室为清代咸丰年间书院，1929年红四军前委机关与政治部驻地，毛泽东在此起草《古田会议决议》",
+      "旧址群含前委机关旧址望云草室、红四军司令部旧址于溪公祠、中央苏区第一所工农妇女夜校张家祠、连南区革命委员会旧址张氏家庙等十几处",
+      "新泉整训纪念馆前身系1959年设立的新泉革命纪念馆，2024年新泉整训95周年时正式揭牌开馆",
+      "毛泽东在此完成《给林彪的信》，并首次以文字形式提出'绝对的党领导'建军思想"
+    ],
+    tickets:"旧址群与纪念馆以红色教育参观为主，多数旧址免费开放，以景区当日公示为准。",
+    hours:"以官方当日公示为准（纪念馆通常工作日白天开放，需提前确认）。",
+    duration:"约1.5-2小时",
+    tips:[
+      "属古田会议旧址群重要组成部分，可与上杭古田会议会址串成一条红色线路",
+      "旧址多在205国道旁，自驾便利，建议与新泉温泉、涮九品美食安排同一天",
+      "部分旧址为文保单位，参观注意保持肃穆、不随意触碰文物"
+    ],
+    category:"red", pos:[-4, 0, 18.5]
+  },
+  {
+    id:"xinquanHot", name:"新泉温泉度假区（新泉小鱼温泉·萨瓦迪卡温泉等）", township:"连城县新泉镇北村（温泉度假村）",
+    dir:"县城莲峰镇以南，与新泉镇政府同片区，约45km，车程约1小时",
+    highlights:[
+      "新泉地热资源丰富，温泉出水温度70℃—81℃，日出水量达9000吨",
+      "属重碳酸钠型医疗热矿水，富含铁、钙、硫、氟、偏硅酸，氟与偏硅酸含量达《医疗热矿水》标准，具疗养保健价值",
+      "新泉小鱼温泉度假村建有标准泳池、桑拿房、鱼疗池、药浴温泉池，以珍稀氡温泉品种为特色",
+      "萨瓦迪卡温泉度假村为泰式/东南亚园林风格，50余个温泉泡池，另有独立院落私汤与亲子水乐园"
+    ],
+    tickets:"小鱼温泉约108元；萨瓦迪卡温泉成人票约99-139元（含活动浮动）；价格随节假日变动，以景区当日公示为准。",
+    hours:"小鱼温泉约6:00-10:30；萨瓦迪卡等综合温泉通常日间至晚间营业，以官方当日公示为准。",
+    duration:"半天至一天（可住宿泡汤）",
+    tips:[
+      "四季皆宜，冬季泡汤体验最佳",
+      "温泉与新泉红色旧址、涮九品美食集中在新泉镇，适合一日串联",
+      "鱼疗池、私汤院落需另询；儿童身高免票政策以现场公示为准",
+      "自驾最便利，距冠豸山机场约45km、冠豸山南站约25km"
+    ],
+    category:"hotspring", pos:[-2.5, 0, 17]
+  },
+  {
+    id:"taipingliao", name:"太平僚村", township:"莒溪镇",
+    dir:"县城东南方向，约40km（约，山区县道），车程约60分钟（莒溪镇政府驻莒市村距县城约25-30km，太平僚村在镇域更深处梅花山）",
+    highlights:[
+      "梅花山国家级自然保护区（世界A级）腹地，'山村布达拉宫'/'客家布达拉宫'",
+      "国家级传统村落、省级森林生态村，闽西重要革命基点村",
+      "古民居依山而建、村头村尾高差超200米，明末清初古建筑群完好",
+      "千年古道、罗氏公祠、永灵宫、红军会址等人文遗存",
+      "红豆杉古树群、飞瀑溪涧，原生态森林风光"
+    ],
+    tickets:"免费村落（乡村旅游，无门票，以现场为准）。",
+    hours:"全天（开放村落，无固定售票时间）。",
+    duration:"约2-3小时",
+    tips:[
+      "海拔近千米，夏季凉爽避暑，春秋两季最佳",
+      "山区道路弯多坡陡，建议自驾，注意行车安全",
+      "村内有农家乐，可体验客家饭菜",
+      "地处梅花山保护区，注意森林防火，勿进入未开放核心区"
+    ],
+    category:"village", pos:[14, 0, 14]
+  },
+  {
+    id:"laiyuan", name:"赖源溶洞群（幽琴洞·仙云洞·石燕岩）", township:"连城县赖源乡上村",
+    dir:"县城莲峰镇以东（县境东端），乡政府驻地距县城约78km（旧资料84km），溶洞景区在赖源乡上村，车程约1.5-2小时；可由文亨上高速姑田站下或经曲溪方向",
+    highlights:[
+      "近2平方公里石灰岩山丘中分布大小十余个溶洞，是华东已发现规模较大的溶洞群之一",
+      "三大主洞：幽琴洞、仙云洞、石燕岩；幽琴洞以洞中泉水潺流、音韵幽幽得名，洞内有四季不枯的地下河",
+      "仙云洞有完整石笋沉积记录，具地质科研价值（第四纪古气候研究采样点）",
+      "上村海拔较高、常年云雾缭绕，村落即景，适合避暑与自然研学"
+    ],
+    tickets:"幽琴洞景区门票约80元/人（冠豸山景区官方预订平台）；早年资料称免费，现以景区当日公示为准。",
+    hours:"约8:00-16:30（11月-次年4月）/ 8:00-17:30（5-10月），夏季稍长，以官方当日公示为准。",
+    duration:"约1-2小时",
+    tips:[
+      "洞内冬暖夏凉，是夏季避暑佳地；洞内温度各来源说法不一（约18℃与约26℃并存），建议带薄外套",
+      "位置偏远、山路弯多，建议自驾并早出晚归，预留充足车程",
+      "洞内湿滑，穿防滑鞋；灯光步道为主，不建议擅自进入未开放支洞探险",
+      "可结合赖源乡廖天山草场、万隆廊桥等周边资源安排"
+    ],
+    category:"cave", pos:[24, 0, 4]
+  },
+  {
+    id:"meihuashan", name:"梅花山·中国虎园（华南虎繁育基地）", township:"景区主体位于上杭县步云乡（古蛟新区），非连城县境内",
+    dir:"景区主体不在连城；距上杭古田会议会址约18km，海拔约1350m。从连城县城莲峰镇前往需绕行，约60-70km以上、车程约1.5-2小时（估计值，建议导航实测）。",
+    highlights:[
+      "梅花山国家级自然保护区地处新罗、上杭、连城三县（区）交界，面积约22168.5公顷，被誉为'北回归荒漠带上的绿色翡翠'",
+      "中国虎园是现存华南虎数量最多、活动最频繁的区域，集华南虎科研、科普教育、生态旅游于一体",
+      "平均海拔1200多米，原生林茂密，动植物资源丰富，是避暑与观虎胜地",
+      "与古田会议旧址相邻，可形成'红色古田+生态梅花山'联线"
+    ],
+    tickets:"以景区当日公示为准（不在连城辖内，需按上杭步云乡虎园景区官网/平台查询）。",
+    hours:"以官方当日公示为准。",
+    duration:"约2-3小时",
+    tips:[
+      "重要：虎园景区主体在上杭县步云乡，连城仅为保护区边界延伸（西至连城庙前镇岩背村、北至连城曲溪乡罗胜村），不应作为连城境内核心景点",
+      "列入'连城旅游地图'时标注为'跨区域/上杭方向联动点'，而非连城本地景点",
+      "高海拔山区，昼夜温差大，备外套；山路弯多注意行车安全",
+      "建议与古田会议旧址串联游览，而非从连城县城单独专程前往"
+    ],
+    category:"nature", cross:true, pos:[-14, 0, 12]
+  }
+];
+
+var FOOD = [
+  {name:"连城白鸭汤（白鹜鸭汤）", desc:"白鹜鸭隔水炖汤，汤清味醇，被誉为'中国唯一药用鸭'，连城招牌。"},
+  {name:"涮九品（九门头）", desc:"牛身上九个部位配香藤根、米酒边涮边吃，'一道涮九品，品福一头牛'。"},
+  {name:"连城红心地瓜干", desc:"闽西'八大干'之一，心红味甜，清代贡品，连城标志性伴手礼。"},
+  {name:"连城芋子饺", desc:"芋泥拌薯粉作皮包肉馅蒸制，皮薄馅鲜、软糯咸香的客家小点。"},
+  {name:"新泉牛系列", desc:"新泉一带鲜牛肉爆炒、炝、炖多种做法，与涮九品齐名，205国道沿线最地道。"}
+];
+
+var SOURCES = [
+  "连城县人民政府 fjlylc.gov.cn（景区介绍、票价、距离官方口径）",
+  "福建省文化和旅游厅 wlt.fujian.gov.cn / 福建省旅游信息中心 fjta.com",
+  "龙岩市发改委 xxgk.longyan.gov.cn（2026年7月冠豸山票价核定文件）",
+  "央视网 local.cctv.com（2024年12月冠豸山获评5A）",
+  "新华网 news.cn / 人民网 people.com.cn（培田、虎园权威报道）",
+  "中国军网 81.cn / 新华网福建（新泉整训旧址群）",
+  "冠豸山景区官方预订平台 lcxgzs.cn（门票与开放时间）",
+  "国家林草局保护区研究中心 / 福建省林业局 lyj.fujian.gov.cn（梅花山保护区边界）"
+];
+
+var CAT_COLOR = { nature:"#c0392b", village:"#8a9a7a", red:"#e74c3c", hotspring:"#3aa6c8", cave:"#7d5a3a" };
+var CAT_NAME  = { nature:"山水自然", village:"古村人文", red:"红色旅游", hotspring:"温泉度假", cave:"溶洞" };
+
+/* ============================================================
+   Three.js 场景
+   ============================================================ */
+var scene, camera, renderer, controls, raycaster, mouse;
+var markerGroups = [];       // 所有可拾取标记
+var labelSprite = null;       // hover label
+var flightTarget = null;     // 相机飞行
+var clock = new THREE.Clock();
+var bubbles = [];            // 温泉气泡
+var clouds = [];
+var birds = [];
+var COUNTY_POS = new THREE.Vector3(0, 0, 0);
+
+function initUI() {
+  buildSidebar();
+  buildFood();
+  buildSources();
+  document.getElementById('resetBtn').addEventListener('click', function(){ flightTarget = null; resetView(); });
+  document.getElementById('panelClose').addEventListener('click', closePanel);
+  document.getElementById('toggleSide').addEventListener('click', function(){
+    document.getElementById('sidebar').classList.toggle('show');
+  });
+}
+
+function init3D() {
+  var canvas = document.getElementById('scene');
+  renderer = new THREE.WebGLRenderer({ canvas:canvas, antialias:true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xcfe8f5);
+  scene.fog = new THREE.Fog(0xcfe8f5, 60, 160);
+
+  camera = new THREE.PerspectiveCamera(48, window.innerWidth/window.innerHeight, 0.1, 300);
+  camera.position.set(28, 32, 38);
+
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  controls.minDistance = 8;
+  controls.maxDistance = 90;
+  controls.maxPolarAngle = Math.PI * 0.49;
+  controls.minPolarAngle = Math.PI * 0.12;
+  controls.target.set(0, 0, 4);
+
+  var ambient = new THREE.AmbientLight(0xffffff, 0.55);
+  scene.add(ambient);
+  var hemi = new THREE.HemisphereLight(0xbfe3ff, 0x88aa77, 0.45);
+  scene.add(hemi);
+  var sun = new THREE.DirectionalLight(0xfff4e0, 0.9);
+  sun.position.set(30, 50, 20);
+  sun.castShadow = true;
+  sun.shadow.mapSize.width = 2048;
+  sun.shadow.mapSize.height = 2048;
+  sun.shadow.camera.left = -50; sun.shadow.camera.right = 50;
+  sun.shadow.camera.top = 50; sun.shadow.camera.bottom = -50;
+  sun.shadow.camera.far = 150;
+  scene.add(sun);
+
+  raycaster = new THREE.Raycaster();
+  mouse = new THREE.Vector2(-10, -10);
+
+  buildTerrain();
+  buildCounty();
+  buildLake();
+  buildMarkers();
+  buildClouds();
+  buildBirds();
+
+  window.addEventListener('resize', onResize);
+  renderer.domElement.addEventListener('pointermove', onPointerMove);
+  renderer.domElement.addEventListener('click', onClick);
+
+  renderer.render(scene, camera);
+  animate();
+}
+
+/* ---- 地形高度函数（与 buildTerrain 循环一致，供标记贴地使用） ---- */
+function terrainHeightAt(x, z) {
+  var h = 0;
+  h += Math.sin(x*0.25)*Math.cos(z*0.22)*1.4;
+  h += Math.sin(x*0.6+1.3)*Math.cos(z*0.55+0.7)*0.6;
+  h += (Math.sin(x*1.3)+Math.cos(z*1.1))*0.25;
+  var dCenter = Math.sqrt(x*x+z*z);
+  if (dCenter < 6) { h *= (dCenter/6)*0.5; if (h<0) h*=0.3; }
+  var dGz = Math.sqrt((x-7)*(x-7)+(z-1.5)*(z-1.5));
+  if (dGz < 8) { h += Math.max(0, 1-dGz/8)*3.2; }
+  var dLy = Math.sqrt((x-24)*(x-24)+(z-4)*(z-4));
+  if (dLy < 6) { h += Math.max(0, 1-dLy/6)*2.5; }
+  return h;
+}
+
+/* ---- 地形：低多边形卡通山地 ---- */
+function buildTerrain() {
+  var size = 70, seg = 56;
+  var geo = new THREE.PlaneGeometry(size, size, seg, seg);
+  geo.rotateX(-Math.PI/2);
+  var pos = geo.attributes.position;
+  var colors = [];
+  var cGreen = new THREE.Color(0x6fa85f);
+  var cGreenDark = new THREE.Color(0x4e8a48);
+  var cRed = new THREE.Color(0xb5623a); // 丹霞红褐
+  var cBrown = new THREE.Color(0x8a6a4a);
+
+  for (var i = 0; i < pos.count; i++) {
+    var x = pos.getX(i), z = pos.getZ(i);
+    var h = terrainHeightAt(x, z);
+    var dGz = Math.sqrt((x-7)*(x-7)+(z-1.5)*(z-1.5));
+    pos.setY(i, h);
+
+    var col;
+    if (dGz < 6 && h > 1.2) col = cRed.clone().lerp(cBrown, Math.random()*0.4);
+    else if (h > 1.6) col = cGreenDark.clone();
+    else col = cGreen.clone().lerp(cGreenDark, Math.min(1, h/2.2));
+    colors.push(col.r, col.g, col.b);
+  }
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+  geo.computeVertexNormals();
+  var mat = new THREE.MeshLambertMaterial({ vertexColors:true });
+  var terrain = new THREE.Mesh(geo, mat);
+  terrain.receiveShadow = true;
+  scene.add(terrain);
+
+  // 冠豸山红色岩壁小峰
+  var rockMat = new THREE.MeshLambertMaterial({ color:0xa84a2a });
+  for (var k = 0; k < 6; k++) {
+    var rx = 7+(Math.random()-0.5)*11, rz = 1.5+(Math.random()-0.5)*11;
+    var g = new THREE.ConeGeometry(0.8+Math.random()*0.6, 2.5+Math.random()*1.5, 5);
+    var m = new THREE.Mesh(g, rockMat);
+    m.position.set(rx, terrainHeightAt(rx, rz)+1.3, rz);
+    m.castShadow = true;
+    scene.add(m);
+  }
+}
+
+/* ---- 县城莲峰镇：低矮白盒建筑群 ---- */
+function buildCounty() {
+  var group = new THREE.Group();
+  var wallMat = new THREE.MeshLambertMaterial({ color:0xf2ede2 });
+  var roofMat = new THREE.MeshLambertMaterial({ color:0x6b6b6b });
+  for (var i = 0; i < 14; i++) {
+    var w = 0.5+Math.random()*0.7, d = 0.5+Math.random()*0.7, h = 0.4+Math.random()*0.6;
+    var house = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), wallMat);
+    var angle = Math.random()*Math.PI*2;
+    var r = 0.6+Math.random()*1.8;
+    house.position.set(Math.cos(angle)*r, h/2, Math.sin(angle)*r);
+    house.castShadow = true;
+    group.add(house);
+    var roof = new THREE.Mesh(new THREE.ConeGeometry(Math.max(w,d)*0.75, 0.35, 4), roofMat);
+    roof.position.set(house.position.x, h+0.18, house.position.z);
+    roof.rotation.y = Math.PI/4;
+    roof.castShadow = true;
+    group.add(roof);
+  }
+  // 县城标签 sprite
+  var label = makeTextSprite("莲峰镇（县城）", "#2d4a3e");
+  label.position.set(0, 2.2, 0);
+  group.add(label);
+  scene.add(group);
+}
+
+/* ---- 石门湖：蓝色湖泊 ---- */
+function buildLake() {
+  var lakeGeo = new THREE.CircleGeometry(2.6, 24);
+  lakeGeo.rotateX(-Math.PI/2);
+  var lakeMat = new THREE.MeshLambertMaterial({ color:0x4fa8d8, transparent:true, opacity:0.85 });
+  var lake = new THREE.Mesh(lakeGeo, lakeMat);
+  lake.position.set(9.5, 0.05, 3.5);
+  scene.add(lake);
+  var lbl = makeTextSprite("石门湖", "#1a6a9a");
+  lbl.position.set(9.5, 0.8, 3.5);
+  scene.add(lbl);
+}
+
+/* ---- 各类标记造型 ---- */
+function makeMarker(spot) {
+  var group = new THREE.Group();
+  var color = CAT_COLOR[spot.category];
+  var mat = new THREE.MeshLambertMaterial({ color:new THREE.Color(color) });
+
+  if (spot.category === "nature") {
+    // 红色丹霞小山峰 + 发光光柱
+    var cone = new THREE.Mesh(new THREE.ConeGeometry(0.55, 1.6, 5), mat);
+    cone.position.y = 0.8; cone.castShadow = true;
+    group.add(cone);
+    var pillarH = (spot.cross) ? 2.2 : 3.5;
+    var pillar = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.08, 0.08, pillarH, 6),
+      new THREE.MeshBasicMaterial({ color:0xffe08a, transparent:true, opacity:0.55 })
+    );
+    pillar.position.y = (spot.cross) ? 1.6 : 2.6;
+    group.add(pillar);
+    group.userData.pulse = pillar;
+  } else if (spot.category === "village") {
+    // 灰瓦白墙小房子
+    var body = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.6, 0.7),
+      new THREE.MeshLambertMaterial({ color:0xf2ede2 }));
+    body.position.y = 0.3; body.castShadow = true;
+    group.add(body);
+    var roof = new THREE.Mesh(new THREE.ConeGeometry(0.6, 0.5, 4),
+      new THREE.MeshLambertMaterial({ color:0x5a5a5a }));
+    roof.position.y = 0.85; roof.rotation.y = Math.PI/4; roof.castShadow = true;
+    group.add(roof);
+  } else if (spot.category === "red") {
+    // 红色立柱 + 五角星
+    var col = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 1.4, 6), mat);
+    col.position.y = 0.7; col.castShadow = true;
+    group.add(col);
+    var star = makeStarMesh(0.28, 0.12, 0xe74c3c);
+    star.position.y = 1.6;
+    group.add(star);
+  } else if (spot.category === "hotspring") {
+    // 温泉池 + 气泡
+    var pool = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.7, 0.25, 12),
+      new THREE.MeshLambertMaterial({ color:0x9ad4e8 }));
+    pool.position.y = 0.12;
+    group.add(pool);
+    var poolRim = new THREE.Mesh(new THREE.TorusGeometry(0.65, 0.08, 6, 16),
+      new THREE.MeshLambertMaterial({ color:0x7a5a3a }));
+    poolRim.rotation.x = Math.PI/2; poolRim.position.y = 0.25;
+    group.add(poolRim);
+    for (var b = 0; b < 3; b++) {
+      var bubble = new THREE.Mesh(new THREE.SphereGeometry(0.08+Math.random()*0.05, 6, 6),
+        new THREE.MeshBasicMaterial({ color:0xffffff, transparent:true, opacity:0.8 }));
+      bubble.position.set((Math.random()-0.5)*0.6, 0.4+b*0.15, (Math.random()-0.5)*0.6);
+      group.add(bubble);
+      bubbles.push({ mesh:bubble, phase:Math.random()*Math.PI*2, speed:1.2+Math.random() });
+    }
+  } else if (spot.category === "cave") {
+    // 拱形洞口 + 钟乳石柱
+    var arch = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.18, 6, 12, Math.PI),
+      new THREE.MeshLambertMaterial({ color:0x7d5a3a }));
+    arch.position.y = 0.4; arch.rotation.z = 0;
+    group.add(arch);
+    var inner = new THREE.Mesh(new THREE.CircleGeometry(0.45, 12, 0, Math.PI),
+      new THREE.MeshBasicMaterial({ color:0x2a1a10 }));
+    inner.position.y = 0.4; inner.position.z = -0.05;
+    group.add(inner);
+    var stal = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.9, 5),
+      new THREE.MeshLambertMaterial({ color:0x9a7a5a }));
+    stal.position.set(0.35, 0.45, 0.1); stal.rotation.z = -0.2;
+    group.add(stal);
+  }
+
+  // 跨区域：虚线光环
+  if (spot.cross) {
+    var ringGeo = new THREE.RingGeometry(1.0, 1.15, 24);
+    ringGeo.rotateX(-Math.PI/2);
+    var ring = new THREE.Mesh(ringGeo,
+      new THREE.MeshBasicMaterial({ color:0xe6b800, transparent:true, opacity:0.8, side:THREE.DoubleSide }));
+    ring.position.y = 0.15;
+    group.add(ring);
+    group.userData.crossRing = ring;
+    // 角标 sprite（上移，避开光柱）
+    var badge = makeTextSprite("跨区域·上杭方向", "#b8860b");
+    badge.scale.set(2.4, 0.4, 1);
+    badge.position.y = 3.6;
+    group.add(badge);
+  }
+
+  group.position.set(spot.pos[0], terrainHeightAt(spot.pos[0], spot.pos[2]) + 0.45, spot.pos[2]);
+  group.userData.spot = spot;
+  if (!spot.cross) {
+    var lbl = makeTextSprite(spot.name.split('（')[0], "#1a5a48");
+    lbl.scale.multiplyScalar(0.65);
+    lbl.position.y = 2.6;
+    group.add(lbl);
+  }
+  return group;
+}
+
+function makeStarMesh(outerR, innerR, color) {
+  var shape = new THREE.Shape();
+  for (var i = 0; i < 10; i++) {
+    var r = (i%2===0) ? outerR : innerR;
+    var a = (i/10)*Math.PI*2 - Math.PI/2;
+    var x = Math.cos(a)*r, y = Math.sin(a)*r;
+    if (i===0) shape.moveTo(x,y); else shape.lineTo(x,y);
+  }
+  shape.closePath();
+  var geo = new THREE.ShapeGeometry(shape);
+  return new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color:color, side:THREE.DoubleSide }));
+}
+
+function buildMarkers() {
+  SPOTS.forEach(function(spot) {
+    var m = makeMarker(spot);
+    scene.add(m);
+    markerGroups.push(m);
+  });
+}
+
+/* ---- 文字 Sprite ---- */
+function makeTextSprite(text, color) {
+  var canvas = document.createElement('canvas');
+  var ctx = canvas.getContext('2d');
+  var fontSize = 36;
+  ctx.font = 'bold '+fontSize+'px "PingFang SC","Microsoft YaHei",sans-serif';
+  var w = ctx.measureText(text).width + 24;
+  canvas.width = w; canvas.height = 56;
+  ctx = canvas.getContext('2d');
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  roundRect(ctx, 0, 0, canvas.width, canvas.height, 14);
+  ctx.fill();
+  ctx.font = 'bold '+fontSize+'px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillStyle = color || '#222';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, 12, canvas.height/2);
+  var tex = new THREE.CanvasTexture(canvas);
+  var mat = new THREE.SpriteMaterial({ map:tex, transparent:true });
+  var spr = new THREE.Sprite(mat);
+  spr.scale.set(w/80, 56/80, 1);
+  return spr;
+}
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.arcTo(x+w, y, x+w, y+h, r);
+  ctx.arcTo(x+w, y+h, x, y+h, r);
+  ctx.arcTo(x, y+h, x, y, r);
+  ctx.arcTo(x, y, x+w, y, r);
+  ctx.closePath();
+}
+
+/* ---- 白云 ---- */
+function buildClouds() {
+  var mat = new THREE.MeshLambertMaterial({ color:0xffffff, transparent:true, opacity:0.85 });
+  for (var i = 0; i < 7; i++) {
+    var g = new THREE.Group();
+    var n = 3 + Math.floor(Math.random()*3);
+    for (var j = 0; j < n; j++) {
+      var s = new THREE.Mesh(new THREE.SphereGeometry(0.8+Math.random()*0.8, 6, 6), mat);
+      s.position.set(j*1.0 - n*0.5 + (Math.random()-0.5), (Math.random()-0.5)*0.4, (Math.random()-0.5)*0.6);
+      g.add(s);
+    }
+    g.position.set((Math.random()-0.5)*80, 14+Math.random()*8, (Math.random()-0.5)*70);
+    g.userData.speed = 0.008 + Math.random()*0.012;
+    scene.add(g);
+    clouds.push(g);
+  }
+}
+
+/* ---- 简化飞鸟 ---- */
+function buildBirds() {
+  var mat = new THREE.LineBasicMaterial({ color:0x333333 });
+  for (var i = 0; i < 4; i++) {
+    var geo = new THREE.BufferGeometry();
+    var pts = [
+      new THREE.Vector3(-0.4, 0, 0), new THREE.Vector3(0, 0.15, 0),
+      new THREE.Vector3(0.4, 0, 0)
+    ];
+    geo.setFromPoints(pts);
+    var line = new THREE.Line(geo, mat);
+    line.position.set((Math.random()-0.5)*50, 10+Math.random()*4, (Math.random()-0.5)*50);
+    line.userData = { speed:0.03+Math.random()*0.02, flap:Math.random()*Math.PI*2 };
+    scene.add(line);
+    birds.push(line);
+  }
+}
+
+/* ---- 拾取 ---- */
+function onPointerMove(e) {
+  mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  if (renderer) {
+    var hit = pickMarker();
+    renderer.domElement.style.cursor = hit ? 'pointer' : '';
+  }
+}
+
+function pickMarker() {
+  raycaster.setFromCamera(mouse, camera);
+  var hits = raycaster.intersectObjects(markerGroups, true);
+  if (hits.length === 0) return null;
+  var obj = hits[0].object;
+  while (obj && !obj.userData.spot) obj = obj.parent;
+  return obj || null;
+}
+
+function onClick() {
+  var m = pickMarker();
+  if (m) openSpot(m.userData.spot, m);
+}
+
+/* ---- 面板 ---- */
+function openSpot(spot, markerGroup) {
+  document.getElementById('pName').textContent = spot.name;
+  document.getElementById('pTown').textContent = "所在乡镇：" + spot.township;
+  document.getElementById('pDir').textContent = spot.dir;
+  var hl = document.getElementById('pHigh'); hl.innerHTML = '';
+  spot.highlights.forEach(function(t){ var li=document.createElement('li'); li.textContent=t; hl.appendChild(li); });
+  document.getElementById('pTickets').textContent = spot.tickets;
+  document.getElementById('pHours').textContent = spot.hours;
+  document.getElementById('pDur').textContent = spot.duration;
+  var tips = document.getElementById('pTips'); tips.innerHTML = '';
+  spot.tips.forEach(function(t){ var li=document.createElement('li'); li.textContent=t; tips.appendChild(li); });
+  var cross = document.getElementById('pCross');
+  if (spot.cross) {
+    cross.style.display = 'block';
+    cross.textContent = "说明：虎园景区主体在上杭县步云乡，距古田会议会址约18km，连城仅为保护区边界延伸。此处作为跨区域联动点展示。";
+  } else { cross.style.display = 'none'; }
+  document.getElementById('panel').classList.add('open');
+
+  // 侧栏高亮
+  document.querySelectorAll('.spot-item').forEach(function(el){ el.classList.remove('active'); });
+  var el = document.querySelector('.spot-item[data-id="'+spot.id+'"]');
+  if (el) el.classList.add('active');
+
+  // 相机飞行到标记
+  if (markerGroup) {
+    var p = markerGroup.position.clone();
+    flightTarget = {
+      pos: new THREE.Vector3(p.x + 8, p.y + 6, p.z + 8),
+      look: new THREE.Vector3(p.x, p.y + 1, p.z),
+      t: 0
+    };
+  }
+}
+
+function closePanel() {
+  document.getElementById('panel').classList.remove('open');
+  document.querySelectorAll('.spot-item').forEach(function(el){ el.classList.remove('active'); });
+}
+
+/* ---- 侧栏 ---- */
+function buildSidebar() {
+  var list = document.getElementById('spotList');
+  var cats = ["nature","village","red","hotspring","cave"];
+  cats.forEach(function(c) {
+    var group = document.createElement('div');
+    group.className = 'cat-group';
+    var title = document.createElement('div');
+    title.className = 'cat-title';
+    title.textContent = CAT_NAME[c];
+    group.appendChild(title);
+    SPOTS.forEach(function(spot) {
+      if (spot.category !== c) return;
+      var item = document.createElement('div');
+      item.className = 'spot-item';
+      item.setAttribute('data-id', spot.id);
+      var dot = document.createElement('span');
+      dot.className = 'dot'; dot.style.background = CAT_COLOR[c];
+      item.appendChild(dot);
+      var nm = document.createElement('span');
+      nm.textContent = spot.name.split('（')[0];
+      item.appendChild(nm);
+      if (spot.cross) {
+        var b = document.createElement('span');
+        b.className = 'cross-badge'; b.textContent = '跨区域';
+        item.appendChild(b);
+      }
+      item.addEventListener('click', function() {
+        var mg = markerGroups.find(function(m){ return m.userData.spot.id === spot.id; });
+        if (mg) openSpot(spot, mg);
+        if (window.innerWidth <= 900) document.getElementById('sidebar').classList.remove('show');
+      });
+      group.appendChild(item);
+    });
+    list.appendChild(group);
+  });
+}
+
+function buildFood() {
+  var grid = document.getElementById('foodGrid');
+  FOOD.forEach(function(f) {
+    var d = document.createElement('div');
+    d.className = 'food-item';
+    d.innerHTML = '<div class="fn">'+f.name+'</div><div class="fd">'+f.desc+'</div>';
+    grid.appendChild(d);
+  });
+}
+
+function buildSources() {
+  var ul = document.getElementById('srcList');
+  SOURCES.forEach(function(s) {
+    var li = document.createElement('li');
+    li.textContent = s;
+    ul.appendChild(li);
+  });
+}
+
+function resetView() {
+  flightTarget = {
+    pos: new THREE.Vector3(28, 32, 38),
+    look: new THREE.Vector3(0, 0, 4),
+    t: 0
+  };
+}
+
+function onResize() {
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ---- 动画循环 ---- */
+function animate() {
+  requestAnimationFrame(animate);
+  var dt = clock.getDelta();
+  var t = clock.getElapsedTime();
+
+  controls.update();
+
+  // hover label
+  var hov = pickMarker();
+  if (labelSprite) { scene.remove(labelSprite); labelSprite = null; }
+  if (hov && !flightTarget) {
+    labelSprite = makeTextSprite(hov.userData.spot.name.split('（')[0], "#1a5a48");
+    labelSprite.position.copy(hov.position);
+    labelSprite.position.y += 2.8;
+    scene.add(labelSprite);
+  }
+
+  // 呼吸脉冲
+  markerGroups.forEach(function(m) {
+    if (m.userData.pulse) {
+      var s = 1 + Math.sin(t*2.5)*0.15;
+      m.userData.pulse.material.opacity = 0.4 + Math.sin(t*2.5)*0.2;
+      m.userData.pulse.scale.set(s, 1, s);
+    }
+    if (m.userData.crossRing) {
+      m.userData.crossRing.rotation.y += 0.01;
+    }
+  });
+
+  // 温泉气泡
+  bubbles.forEach(function(b) {
+    b.mesh.position.y += dt*b.speed;
+    b.mesh.material.opacity = Math.max(0, 0.8 - (b.mesh.position.y-0.4)*1.2);
+    if (b.mesh.position.y > 1.3) {
+      b.mesh.position.y = 0.4;
+      b.mesh.position.x = (Math.random()-0.5)*0.6;
+      b.mesh.position.z = (Math.random()-0.5)*0.6;
+    }
+  });
+
+  // 云缓飘
+  clouds.forEach(function(c) {
+    c.position.x += c.userData.speed;
+    if (c.position.x > 50) c.position.x = -50;
+  });
+
+  // 飞鸟
+  birds.forEach(function(b) {
+    b.position.x += b.userData.speed;
+    b.userData.flap += 0.2;
+    b.position.y = 10 + Math.sin(b.userData.flap)*0.5;
+    if (b.position.x > 40) b.position.x = -40;
+  });
+
+  // 相机飞行
+  if (flightTarget) {
+    flightTarget.t += dt*1.4;
+    var k = Math.min(1, flightTarget.t);
+    var ek = k<0.5 ? 2*k*k : 1-Math.pow(-2*k+2,2)/2; // easeInOut
+    camera.position.lerpVectors(camera.position, flightTarget.pos, ek*0.08);
+    controls.target.lerpVectors(controls.target, flightTarget.look, ek*0.08);
+    if (k >= 1) flightTarget = null;
+  }
+
+  renderer.render(scene, camera);
+}
+
+// reduced-motion：仍渲染一帧
+initUI();
+function webglAvailable() {
+  try {
+    var c = document.createElement('canvas');
+    return !!(window.WebGLRenderingContext && (c.getContext('webgl') || c.getContext('experimental-webgl')));
+  } catch(e) { return false; }
+}
+if (typeof THREE !== 'undefined' && webglAvailable()) {
+  try { init3D(); } catch(e) { /* 静默降级 */ }
+}
+</script>
+</body>
+</html>
