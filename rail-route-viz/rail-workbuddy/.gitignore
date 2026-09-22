@@ -1,0 +1,10 @@
+# 中间产物与原始数据：可由 etl/ 脚本重新生成，不入版本库
+data/stations.json
+data/train_list_raw.json
+data/candidates.json
+data/schedules_raw.json
+data/app_data.json
+raw/
+__pycache__/
+
+# 提交 data/app_data.js 是为了让快照可直接打开页面查看

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>厦门 / 厦门北 / 冠豸山 / 冠豸山南 — 高铁动车站点路线图</title>
+<script type="text/javascript">
+  window._TMapSecurityConfig = {
+    serviceHost: 'http://127.0.0.1:__WB_HTTP_PORT__/_TMapService/_wbt/__WB_TMAP_SECRET__',
+  };
+</script>
+<script src="https://map.qq.com/api/gljs?v=1.exp"></script>
+<style>
+  :root {
+    --bg: #f7f8fa; --panel: #ffffff; --line: #e3e6eb;
+    --text: #1f2329; --muted: #646a73; --hint: #8f959e;
+    --accent: #185fa5; --accent-soft: #e6f1fb;
+    --origin: #0f6e56; --terminus: #854f0b; --pass: #185fa5; --target: #a32d2d;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font: 13px/1.6 -apple-system, BlinkMacSystemFont, "PingFang SC",
+          "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    color: var(--text); background: var(--bg);
+  }
+  header {
+    height: 52px; display: flex; align-items: center; gap: 16px;
+    padding: 0 16px; background: var(--panel); border-bottom: 1px solid var(--line);
+  }
+  header h1 { font-size: 15px; font-weight: 500; margin: 0; white-space: nowrap; }
+  .meta { font-size: 12px; color: var(--hint); }
+  .tabs { display: flex; gap: 4px; margin-left: auto; }
+  .tab {
+    padding: 5px 12px; border: 1px solid var(--line); background: var(--panel);
+    border-radius: 6px; cursor: pointer; font-size: 13px; color: var(--muted);
+  }
+  .tab.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  main { display: flex; height: calc(100% - 52px); }
+  #map { flex: 1; height: 100%; }
+  aside {
+    width: 430px; flex: none; background: var(--panel);
+    border-left: 1px solid var(--line); display: flex; flex-direction: column;
+  }
+  .bar {
+    padding: 10px 14px; border-bottom: 1px solid var(--line);
+    display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  }
+  .chip {
+    padding: 4px 10px; border: 1px solid var(--line); border-radius: 14px;
+    cursor: pointer; font-size: 12px; color: var(--muted); background: var(--panel);
+  }
+  .chip.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+  .stat { font-size: 12px; color: var(--muted); margin-left: auto; }
+  .stat b { color: var(--text); font-weight: 500; }
+  .list { flex: 1; overflow-y: auto; }
+  .row {
+    padding: 9px 14px; border-bottom: 1px solid var(--line); cursor: pointer;
+  }
+  .row:hover { background: #f2f6fb; }
+  .row.on { background: var(--accent-soft); }
+  .row .l1 { display: flex; align-items: center; gap: 8px; }
+  .code { font-weight: 500; font-size: 14px; }
+  .tag {
+    font-size: 11px; padding: 1px 6px; border-radius: 4px; color: #fff;
+  }
+  .tag.origin { background: var(--origin); }
+  .tag.terminus { background: var(--terminus); }
+  .tag.pass { background: var(--pass); }
+  .od { color: var(--muted); font-size: 12px; margin-left: auto; }
+  .row .l2 { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .tt { margin-top: 8px; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th, td { padding: 4px 6px; text-align: left; border-bottom: 1px solid #f0f2f5; }
+  th { background: #f7f8fa; color: var(--muted); font-weight: 500; }
+  tr.hit td { background: #fdf0ef; color: var(--target); font-weight: 500; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .empty { padding: 32px 16px; text-align: center; color: var(--hint); }
+  footer {
+    padding: 6px 14px; font-size: 11px; color: var(--hint);
+    border-top: 1px solid var(--line);
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>高铁 / 动车站点路线图</h1>
+  <span class="meta" id="meta"></span>
+  <div class="tabs" id="tabs"></div>
+</header>
+<main>
+  <div id="map"></div>
+  <aside>
+    <div class="bar" id="roleBar"></div>
+    <div class="bar" id="clsBar"></div>
+    <div class="list" id="list"><div class="empty">加载中…</div></div>
+    <footer id="foot"></footer>
+  </aside>
+</main>
+
+<script src="data/app_data.js"></script>
+<script>
+(function () {
+  var D = window.RAIL_DATA;
+  if (!D) {
+    document.getElementById('list').innerHTML =
+      '<div class="empty">未找到 data/app_data.js，请先运行 ETL 脚本生成数据。</div>';
+    return;
+  }
+
+  var state = { target: D.meta.targets[0].telecode, role: 'all', cls: 'all', open: null };
+  var map, polyLayer, markLayer;
+
+  var ROLES = [['all', '全部'], ['origin', '始发'], ['terminus', '到达'], ['pass', '经过']];
+  var CLSES = [['all', '全部'], ['G', '高铁 G'], ['D', '动车 D']];
+
+  function stationOf(tc) { return D.stations[tc]; }
+
+  function trainsFor() {
+    return D.trains.filter(function (t) {
+      var hit = null;
+      for (var i = 0; i < t.hits.length; i++) {
+        if (t.hits[i].target === state.target) { hit = t.hits[i]; break; }
+      }
+      if (!hit) return false;
+      if (state.role !== 'all' && hit.role !== state.role) return false;
+      if (state.cls !== 'all' && t.cls !== state.cls) return false;
+      t._hit = hit;
+      return true;
+    }).sort(function (a, b) {
+      var at = a._hit.arrive || a._hit.depart || '99:99';
+      var bt = b._hit.arrive || b._hit.depart || '99:99';
+      if (at !== bt) return at < bt ? -1 : 1;
+      return a.code < b.code ? -1 : 1;
+    });
+  }
+
+  function fmtMin(m) {
+    if (m == null) return '—';
+    var h = Math.floor(m / 60), mm = m % 60;
+    return h > 0 ? h + '小时' + mm + '分' : mm + '分';
+  }
+
+  function svgDot(color, r) {
+    var s = '<svg xmlns="http://www.w3.org/2000/svg" width="' + (r * 2) + '" height="' +
+      (r * 2) + '"><circle cx="' + r + '" cy="' + r + '" r="' + (r - 1) +
+      '" fill="' + color + '" stroke="#fff" stroke-width="1.5"/></svg>';
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s);
+  }
+
+  function initMap() {
+    var st = stationOf(state.target);
+    map = new TMap.Map('map', {
+      zoom: 8,
+      center: new TMap.LatLng(st.lat, st.lng),
+      baseMap: { type: 'vector' }
+    });
+
+    polyLayer = new TMap.MultiPolyline({
+      map: map,
+      styles: {
+        dim: new TMap.PolylineStyle({
+          color: 'rgba(120,140,170,0.35)', width: 2, borderWidth: 0, lineCap: 'round'
+        }),
+        active: new TMap.PolylineStyle({
+          color: 'rgba(226,75,74,0.95)', width: 4, borderWidth: 0, lineCap: 'round'
+        })
+      },
+      geometries: []
+    });
+
+    markLayer = new TMap.MultiMarker({
+      map: map,
+      styles: {
+        target: new TMap.MarkerStyle({
+          width: 18, height: 18, anchor: { x: 9, y: 9 }, src: svgDot('#e24b4a', 9)
+        }),
+        stop: new TMap.MarkerStyle({
+          width: 10, height: 10, anchor: { x: 5, y: 5 }, src: svgDot('#185fa5', 5)
+        })
+      },
+      geometries: []
+    });
+  }
+
+  function pathOf(train) {
+    var pts = [];
+    train.stops.forEach(function (s) {
+      if (s.lng != null && s.lat != null) pts.push(new TMap.LatLng(s.lat, s.lng));
+    });
+    return pts;
+  }
+
+  function drawMap(trains) {
+    var geoms = [], marks = [];
+    trains.forEach(function (t) {
+      var pts = pathOf(t);
+      if (pts.length < 2) return;
+      geoms.push({
+        id: t.train_no,
+        styleId: state.open === t.train_no ? 'active' : 'dim',
+        paths: pts
+      });
+    });
+
+    var seen = {};
+    var st = stationOf(state.target);
+    marks.push({ id: 'T', styleId: 'target', position: new TMap.LatLng(st.lat, st.lng) });
+    seen[st.name] = 1;
+    var mi = 0;
+    trains.forEach(function (t) {
+      t.stops.forEach(function (s) {
+        if (s.lng == null || seen[s.name]) return;
+        seen[s.name] = 1;
+        marks.push({
+          id: 'M' + (mi++), styleId: 'stop',
+          position: new TMap.LatLng(s.lat, s.lng)
+        });
+      });
+    });
+
+    polyLayer.setGeometries(geoms);
+    markLayer.setGeometries(marks);
+
+    if (state.open) {
+      var t3 = trains.filter(function (x) { return x.train_no === state.open; })[0];
+      if (t3) {
+        var b = new TMap.LatLngBounds();
+        pathOf(t3).forEach(function (p) { b.extend(p); });
+        map.fitBounds(b, { padding: 70 });
+      }
+    }
+  }
+
+  function renderList(trains) {
+    var el = document.getElementById('list');
+    if (!trains.length) {
+      el.innerHTML = '<div class="empty">当前筛选下没有车次</div>';
+      return;
+    }
+    var html = '';
+    trains.forEach(function (t) {
+      var h = t._hit;
+      var open = state.open === t.train_no;
+      html += '<div class="row' + (open ? ' on' : '') + '" data-tn="' + t.train_no + '">';
+      html += '<div class="l1"><span class="code">' + t.code + '</span>';
+      html += '<span class="tag ' + h.role + '">' +
+        ({ origin: '始发', terminus: '到达', pass: '经过' })[h.role] + '</span>';
+      html += '<span class="od">' + t.origin + ' → ' + t.terminus + '</span></div>';
+      html += '<div class="l2">本站 ' + (h.arrive || '—') + ' 到 / ' +
+        (h.depart || '—') + ' 开 · 停 ' + h.stopover_min + ' 分 · 全程 ' +
+        fmtMin(t.total_min) + ' · ' + t.stop_count + ' 站</div>';
+
+      if (open) {
+        html += '<div class="tt"><table><thead><tr>' +
+          '<th>#</th><th>站名</th><th>到达</th><th>发车</th>' +
+          '<th class="num">停留</th><th class="num">区间</th>' +
+          '<th class="num">累计</th><th class="num">直线km</th>' +
+          '</tr></thead><tbody>';
+        t.stops.forEach(function (s, i) {
+          var isHit = t.hits.some(function (x) {
+            return x.target === state.target && x.no === s.no;
+          });
+          html += '<tr class="' + (isHit ? 'hit' : '') + '">' +
+            '<td>' + s.no + '</td><td>' + s.name + '</td>' +
+            '<td>' + (s.arrive || '—') + '</td>' +
+            '<td>' + (s.depart || '—') + '</td>' +
+            '<td class="num">' + (s.stopover_min || '—') + '</td>' +
+            '<td class="num">' + (i === 0 ? '—' : fmtMin(s.seg_min)) + '</td>' +
+            '<td class="num">' + fmtMin(s.cum_min) + '</td>' +
+            '<td class="num">' + Math.round(s.cum_km) + '</td></tr>';
+        });
+        html += '</tbody></table></div>';
+      }
+      html += '</div>';
+    });
+    el.innerHTML = html;
+    Array.prototype.forEach.call(el.querySelectorAll('.row'), function (r) {
+      r.onclick = function () {
+        var tn = r.getAttribute('data-tn');
+        state.open = state.open === tn ? null : tn;
+        refresh();
+      };
+    });
+  }
+
+  function renderBars() {
+    var rb = document.getElementById('roleBar');
+    rb.innerHTML = ROLES.map(function (r) {
+      return '<span class="chip' + (state.role === r[0] ? ' on' : '') +
+        '" data-role="' + r[0] + '">' + r[1] + '</span>';
+    }).join('') + '<span class="stat" id="stat"></span>';
+    Array.prototype.forEach.call(rb.querySelectorAll('.chip'), function (c) {
+      c.onclick = function () {
+        state.role = c.getAttribute('data-role'); state.open = null; refresh();
+      };
+    });
+
+    var cb = document.getElementById('clsBar');
+    cb.innerHTML = CLSES.map(function (r) {
+      return '<span class="chip' + (state.cls === r[0] ? ' on' : '') +
+        '" data-cls="' + r[0] + '">' + r[1] + '</span>';
+    }).join('');
+    Array.prototype.forEach.call(cb.querySelectorAll('.chip'), function (c) {
+      c.onclick = function () {
+        state.cls = c.getAttribute('data-cls'); state.open = null; refresh();
+      };
+    });
+  }
+
+  function renderTabs() {
+    var el = document.getElementById('tabs');
+    el.innerHTML = D.meta.targets.map(function (t) {
+      return '<span class="tab' + (state.target === t.telecode ? ' on' : '') +
+        '" data-tc="' + t.telecode + '">' + t.name + '</span>';
+    }).join('');
+    Array.prototype.forEach.call(el.querySelectorAll('.tab'), function (c) {
+      c.onclick = function () {
+        state.target = c.getAttribute('data-tc'); state.open = null; refresh();
+      };
+    });
+  }
+
+  function refresh() {
+    renderTabs();
+    renderBars();
+    var trains = trainsFor();
+    var cnt = { origin: 0, terminus: 0, pass: 0 };
+    trains.forEach(function (t) { cnt[t._hit.role]++; });
+    var stat = document.getElementById('stat');
+    if (stat) {
+      stat.innerHTML = '共 <b>' + trains.length + '</b> 列 · 始发 <b>' + cnt.origin +
+        '</b> · 到达 <b>' + cnt.terminus + '</b> · 经过 <b>' + cnt.pass + '</b>';
+    }
+    renderList(trains);
+    drawMap(trains);
+  }
+
+  document.getElementById('meta').textContent =
+    '数据日期 ' + D.meta.capture_date + ' · 来源 12306 · ' + D.meta.coord_type;
+  document.getElementById('foot').textContent =
+    '直线连线仅表示站点拓扑走向，非真实线位；' + D.meta.distance_note + '。';
+
+  renderTabs();
+  initMap();
+  refresh();
+})();
+</script>
+</body>
+</html>
