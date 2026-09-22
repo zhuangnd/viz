@@ -50,7 +50,7 @@ def main():
                     for row in rows:
                         f = row.split("|")
                         tn, code = f[2], f[3]
-                        if not code.startswith(("G", "D")):
+                        if not code.startswith(("G", "D", "C")):
                             continue
                         found.setdefault(tn, set()).add((tname, f"{a}->{b}"))
                 except Exception:

@@ -23,7 +23,7 @@ MAX_DIGITS = 3          # 前缀最多 3 位数字，如 G123
 WORKERS = 5
 
 collected = {}
-stats = {"req": 0, "fail": 0, "truncated_at_max": 0}
+stats = {"req": 0, "fail": 0, "truncated_at_max": 0, "retry": 0, "dropped": 0}
 
 
 def make_session():
@@ -64,7 +64,7 @@ def absorb(rows):
         code = row.get("station_train_code") or ""
         if not tn or not code:
             continue
-        if not (code.startswith("G") or code.startswith("D")):
+        if not code.startswith(("G", "D", "C")):
             continue
         collected[tn] = {
             "train_no": tn,
@@ -76,12 +76,22 @@ def absorb(rows):
 
 def bfs(letter):
     frontier = [letter]
+    retries = {}
     while frontier:
         with ThreadPoolExecutor(max_workers=WORKERS) as pool:
             results = list(pool.map(query, frontier))
         nxt = []
         for prefix, rows in zip(frontier, results):
             if rows is None:
+                # 请求失败会把整个前缀子树静默丢掉（曾因此丢掉全部 C7xx/C8xx）。
+                # 失败重入队重试，重试次数用尽才放弃，并在统计里暴露出来。
+                n = retries.get(prefix, 0)
+                if n < 3:
+                    retries[prefix] = n + 1
+                    nxt.append(prefix)
+                    stats["retry"] += 1
+                else:
+                    stats["dropped"] += 1
                 continue
             digits = len(prefix) - 1
             if len(rows) >= LIMIT and digits < MAX_DIGITS:
@@ -100,12 +110,14 @@ def bfs(letter):
 
 def main():
     t0 = time.time()
-    for letter in ("G", "D"):
+    for letter in ("G", "D", "C"):
         bfs(letter)
 
     print(f"\n请求 {stats['req']} 次, 失败 {stats['fail']} 次, "
-          f"最大深度仍截断 {stats['truncated_at_max']} 次, 耗时 {time.time()-t0:.0f}s")
-    print("去重后 G/D 车次:", len(collected))
+          f"最大深度仍截断 {stats['truncated_at_max']} 次, "
+          f"重试 {stats['retry']} 次, 放弃子树 {stats['dropped']} 个, "
+          f"耗时 {time.time()-t0:.0f}s")
+    print("去重后 G/D/C 车次:", len(collected))
 
     by_class = {}
     for v in collected.values():
@@ -113,7 +125,20 @@ def main():
     for k in sorted(by_class):
         print(f"  {k}: {len(by_class[k])}")
 
-    dump_json(os.path.join(DATA, "train_list_raw.json"), list(collected.values()))
+    out_path = os.path.join(DATA, "train_list_raw.json")
+    new = list(collected.values())
+    # 防呆：12306 限流时请求会大面积失败，BFS 收不到结果却仍会写出一个「很小的」结果集，
+    # 直接覆盖会把已有车次库清空。数量掉到现存一半以上时宁可不写。
+    if os.path.exists(out_path):
+        try:
+            old_n = len(json.load(open(out_path, encoding="utf-8")))
+        except Exception:
+            old_n = 0
+        if old_n and len(new) < old_n * 0.5:
+            print(f"\n[中止] 本次只枚举到 {len(new)} 条，远少于已有的 {old_n} 条，"
+                  f"疑似被限流。未覆盖 {out_path}，请稍后重试。")
+            return
+    dump_json(out_path, new)
 
 
 if __name__ == "__main__":
