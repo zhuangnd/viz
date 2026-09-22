@@ -41,20 +41,20 @@ def main():
             coords[nm] = {"lat": None, "lon": None, "src": "excluded", "verified": False,
                           "note": "地理编码错位（已知误配，显式剔除）"}
 
-    # 2) 孤立点过滤：错位坐标与同线路任何已定位站距离均 > 300km → 剔除
+    # 2) 孤立点过滤：某站与全数据集最近定位站距离 > 300km 视为错位剔除（全局距离，
+    #    避免长线/少站记录把枢纽站误删；错位点与任何真实站点都相距极远）
     located = {n for n, v in coords.items() if v.get("lat") is not None}
-    for r in routes:
-        pts = [(st["name"], (coords.get(st["name"]) or {}).get("lat"),
-                (coords.get(st["name"]) or {}).get("lon")) for st in r["stops"]]
-        for nm, lat, lon in pts:
-            if lat is None:
-                continue
-            dmin = min((haversine(lat, lon, l2, o2) for n2, l2, o2 in pts
-                        if n2 != nm and l2 is not None), default=None)
-            if dmin is not None and dmin > MAX_ISO_KM:
-                coords[nm] = {"lat": None, "lon": None, "src": "excluded", "verified": False,
-                              "note": "与同线路最近定位站 %.0fkm，孤立点剔除" % dmin}
-                located.discard(nm)
+    iso = {}
+    for nm in located:
+        lat, lon = coords[nm]["lat"], coords[nm]["lon"]
+        dmin = min((haversine(lat, lon, coords[n2]["lat"], coords[n2]["lon"])
+                    for n2 in located if n2 != nm), default=None)
+        iso[nm] = dmin
+    for nm, dmin in iso.items():
+        if dmin is not None and dmin > MAX_ISO_KM:
+            coords[nm] = {"lat": None, "lon": None, "src": "excluded", "verified": False,
+                          "note": "与全数据集最近定位站 %.0fkm，孤立点剔除" % dmin}
+            located.discard(nm)
 
     stations = {n: {"lat": v["lat"], "lon": v["lon"], "label": (v.get("label") or "")[:60]}
                 for n, v in coords.items() if v.get("lat") is not None}
