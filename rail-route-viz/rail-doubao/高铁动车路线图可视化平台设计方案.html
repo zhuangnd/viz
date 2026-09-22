@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>高铁动车路线图查询与可视化平台 · 设计方案</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23E8622C'/%3E%3Cpath d='M7 20 L16 8 L25 20' stroke='%23F5F4EF' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='10' cy='23' r='2.4' fill='%23F5F4EF'/%3E%3Ccircle cx='22' cy='23' r='2.4' fill='%23F5F4EF'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Oswald:wght@500;600;700&display=swap">
+<style>
+:root{
+  --paper:#F5F4EF; --paper2:#ECEAE2; --ink:#15213A; --ink2:#3C4A60;
+  --mut:#6B7686; --line:#D9D6CB; --accent:#E8622C; --blue:#2E5E8C;
+  --dark:#101A2E; --dark2:#1C2C4A; --ok:#3F7C5B; --warn:#B7791F;
+  --sans:"Noto Sans SC","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  --num:"Oswald","Arial Narrow","Helvetica Neue",sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.75;-webkit-font-smoothing:antialiased;}
+::selection{background:#F3B394;color:var(--ink);}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+.num{font-family:var(--num);font-variant-numeric:tabular-nums;letter-spacing:.01em;}
+.wrap{max-width:1180px;margin:0 auto;padding:0 28px;}
+section{scroll-margin-top:64px;padding:76px 0;}
+
+/* ---------- 顶部导航 ---------- */
+.nav{position:sticky;top:0;z-index:50;background:#F5F4EF;border-bottom:1px solid var(--line);}
+.nav .wrap{display:flex;align-items:center;gap:16px;height:58px;}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;white-space:nowrap;}
+.brand svg{flex:none;}
+.brand b{color:var(--ink);}
+.brand span{color:var(--mut);font-weight:500;font-size:14px;}
+.nav-links{display:flex;gap:2px;margin-left:auto;align-items:center;overflow-x:auto;scrollbar-width:none;}
+.nav-links::-webkit-scrollbar{display:none;}
+.nav-links a{color:var(--ink2);text-decoration:none;font-size:14px;padding:6px 10px;border-radius:6px;white-space:nowrap;font-weight:500;}
+.nav-links a:hover{background:var(--paper2);color:var(--accent);}
+.nav-links a.on{color:var(--accent);font-weight:700;}
+
+/* ---------- Hero ---------- */
+.hero{position:relative;background:linear-gradient(100deg,rgba(16,26,46,.97) 0%,rgba(16,26,46,.86) 42%,rgba(16,26,46,.45) 72%,rgba(16,26,46,.62) 100%),url(assets/hero.jpg) center/cover no-repeat;color:#E9EDF5;padding:92px 0 84px;}
+.hero .wrap{position:relative;}
+.kicker{display:flex;align-items:center;gap:12px;font-size:14px;letter-spacing:.14em;color:#9FB2CE;font-weight:500;}
+.kicker::before{content:"";width:34px;height:2px;background:var(--accent);}
+.hero h1{font-size:clamp(34px,5.2vw,62px);line-height:1.14;font-weight:900;margin:22px 0 18px;max-width:820px;letter-spacing:.01em;}
+.hero h1 em{font-style:normal;color:#FF9C6B;}
+.hero p.lead{font-size:clamp(15px,1.6vw,18px);color:#C6D2E4;max-width:680px;margin-bottom:30px;font-weight:400;}
+.station-chips{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:34px;}
+.chip{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.22);color:#EDF1F8;padding:7px 14px;border-radius:999px;font-size:14px;font-weight:500;}
+.chip i{width:7px;height:7px;border-radius:50%;background:var(--accent);flex:none;}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;max-width:880px;}
+.metric{border-top:1px solid rgba(255,255,255,.2);padding-top:14px;}
+.metric .n{font-size:30px;font-weight:600;color:#FFB185;line-height:1.1;}
+.metric .t{font-size:14px;color:#9FB2CE;margin-top:2px;}
+
+/* ---------- 章节头 ---------- */
+.sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:14px;}
+.sec-no{font-family:var(--num);font-size:15px;font-weight:600;color:var(--accent);letter-spacing:.08em;}
+.sec-head h2{font-size:clamp(24px,3vw,34px);font-weight:900;letter-spacing:.01em;}
+.sec-sub{color:var(--mut);font-size:15px;max-width:860px;margin-bottom:34px;}
+.sec-head+.sec-sub{margin-top:-6px;}
+
+/* ---------- 01 需求 ---------- */
+.goal{background:var(--paper2);border-left:4px solid var(--accent);padding:20px 24px;margin-bottom:34px;}
+.goal p{font-size:15.5px;color:var(--ink2);}
+.rel-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:34px;}
+.rel-card{border:1px solid var(--line);background:#FCFBF7;padding:20px 20px 18px;}
+.rel-card h3{font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:3px;letter-spacing:.04em;}
+.tag-orange{background:#F7DDCE;color:#A84016;}
+.tag-blue{background:#D9E4F0;color:#1E4E7C;}
+.tag-gray{background:#E5E4DE;color:#525C6B;}
+.rel-card p{font-size:14px;color:var(--ink2);}
+.cond{font-family:var(--num);font-size:13px;color:var(--mut);margin-top:10px;border-top:1px dashed var(--line);padding-top:8px;}
+.deliver{display:grid;grid-template-columns:repeat(2,1fr);gap:12px 28px;background:var(--paper2);padding:24px 26px;}
+.deliver li{list-style:none;display:flex;gap:10px;font-size:14.5px;color:var(--ink2);align-items:baseline;}
+.deliver li::before{content:"";flex:none;width:8px;height:8px;border-radius:2px;background:var(--blue);transform:translateY(-1px);}
+
+/* ---------- 表格 ---------- */
+table{width:100%;border-collapse:collapse;table-layout:fixed;background:#FCFBF7;}
+thead th{background:var(--dark);color:#E9EDF5;font-size:13px;font-weight:700;text-align:left;padding:10px 12px;letter-spacing:.02em;}
+tbody td{border-bottom:1px solid var(--line);padding:10px 12px;font-size:14px;color:var(--ink2);vertical-align:top;line-height:1.6;}
+tbody tr:nth-child(even){background:#F7F6F1;}
+tbody td code,.mono{font-family:var(--num);font-size:12.5px;background:#EFEDE6;padding:1px 5px;border-radius:3px;color:var(--ink);}
+.tbl-caption{font-size:13px;color:var(--mut);margin-top:8px;}
+.tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.tbl-scroll table{min-width:820px;}
+td .pill{display:inline-block;font-size:11.5px;font-weight:700;padding:1px 7px;border-radius:3px;margin-right:4px;}
+.p-p0{background:#F7DDCE;color:#A84016;}
+.p-p1{background:#D9E4F0;color:#1E4E7C;}
+.p-p2{background:#E5E4DE;color:#525C6B;}
+
+/* ---------- 02 数据源 ---------- */
+.src-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--line);margin-top:26px;}
+.src-item{padding:18px 20px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:#FCFBF7;}
+.src-item:nth-child(3n){border-right:none;}
+.src-item h4{font-size:14.5px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+.src-item h4 .bar{width:4px;height:16px;background:var(--accent);flex:none;}
+.src-item p{font-size:13px;color:var(--ink2);}
+.src-item .meta{font-size:13px;color:var(--mut);margin-top:8px;}
+
+/* ---------- 03 数据模型 ---------- */
+.er{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin:8px 0 14px;}
+.er-box{border:1px solid var(--line);background:#FCFBF7;overflow:hidden;}
+.er-box .hd{padding:10px 16px;font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;}
+.er-box .hd .key{width:7px;height:18px;flex:none;}
+.er-box ul{padding:8px 16px 12px;}
+.er-box li{list-style:none;font-size:12.8px;color:var(--ink2);display:flex;gap:8px;padding:3.5px 0;border-bottom:1px dashed var(--line);}
+.er-box li:last-child{border-bottom:none;}
+.er-box li b{font-family:var(--num);font-weight:600;color:var(--ink);min-width:74px;}
+.er-rel{margin:0 0 30px;text-align:center;color:var(--mut);font-size:13px;}
+.rel-arrow{display:inline-flex;align-items:center;gap:10px;}
+.rel-arrow .ln{display:inline-block;width:44px;height:0;border-top:2px dashed var(--blue);position:relative;}
+.rel-arrow .ln::after{content:"";position:absolute;right:-1px;top:-4px;border:4px solid transparent;border-left-color:var(--blue);}
+
+/* ---------- 04 采集流程 ---------- */
+.flow{display:flex;flex-wrap:wrap;gap:0;margin:10px 0 8px;align-items:stretch;}
+.fstep{flex:1 1 150px;min-width:150px;position:relative;background:#FCFBF7;border:1px solid var(--line);padding:14px 14px 12px;margin-right:22px;}
+.fstep:last-child{margin-right:0;}
+.fstep .no{font-family:var(--num);font-size:12px;font-weight:600;color:var(--accent);}
+.fstep h5{font-size:13.5px;font-weight:700;margin:3px 0 4px;}
+.fstep p{font-size:12px;color:var(--mut);line-height:1.55;}
+.fstep::after{content:"";position:absolute;right:-16px;top:50%;width:11px;height:11px;border-top:2px solid var(--blue);border-right:2px solid var(--blue);transform:translateY(-50%) rotate(45deg);}
+.fstep:last-child::after{display:none;}
+.sub-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:30px;}
+
+/* ---------- 05 页面设计 ---------- */
+.mockup{border:1px solid #3A4A6B;border-radius:10px;overflow:hidden;background:var(--dark2);margin:6px 0 10px;box-shadow:0 14px 34px rgba(16,26,46,.18);}
+.mockup-bar{display:flex;align-items:center;gap:8px;padding:9px 14px;background:#24334F;border-bottom:1px solid #33456A;}
+.mockup-bar i{width:9px;height:9px;border-radius:50%;background:#5A6B8C;}
+.mockup-bar .addr{flex:1;background:#16233E;border:1px solid #33456A;border-radius:5px;height:22px;display:flex;align-items:center;padding:0 10px;font-size:11px;color:#8FA3C4;font-family:var(--num);}
+.mock-main{display:grid;grid-template-columns:300px 1fr;min-height:400px;}
+.mock-list{border-right:1px solid #33456A;background:#1B2A45;padding:12px;display:flex;flex-direction:column;gap:8px;}
+.mock-search{background:#16233E;border:1px solid #33456A;border-radius:5px;height:30px;display:flex;align-items:center;padding:0 10px;font-size:11px;color:#8FA3C4;margin-bottom:4px;}
+.mock-item{border:1px solid #33456A;border-radius:6px;background:#21324F;padding:7px 10px;}
+.mock-item .r1{display:flex;justify-content:space-between;font-size:11.5px;color:#C9D6EA;font-family:var(--num);}
+.mock-item .r2{font-size:10px;color:#7F92B2;margin-top:2px;}
+.mock-item.hl{border-color:#FF9C6B;box-shadow:0 0 0 1px #FF9C6B;}
+.mock-map{position:relative;background:#13203B;overflow:hidden;}
+.mock-map::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(143,163,196,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(143,163,196,.10) 1px,transparent 1px);background-size:34px 34px;}
+.mock-line{position:absolute;border-top:2px solid #7F92B2;transform-origin:left center;}
+.mock-line.hot{border-top:3px solid var(--accent);}
+.mk{position:absolute;width:10px;height:10px;border-radius:50%;transform:translate(-50%,-50%);}
+.mk-org{background:var(--accent);box-shadow:0 0 0 3px rgba(232,98,44,.35);}
+.mk-blu{background:var(--blue);box-shadow:0 0 0 3px rgba(46,94,140,.35);}
+.mk-gry{background:#C9D6EA;border:1px solid #8FA3C4;}
+.mock-label{position:absolute;font-size:10px;color:#8FA3C4;font-family:var(--num);transform:translate(-50%,14px);white-space:nowrap;}
+.mock-legend{position:absolute;right:12px;bottom:12px;background:rgba(16,26,46,.85);border:1px solid #33456A;border-radius:6px;padding:8px 12px;font-size:10.5px;color:#C9D6EA;display:flex;flex-wrap:wrap;gap:8px 14px;max-width:74%;}
+.mock-legend .lg{display:flex;align-items:center;gap:6px;}
+.mock-legend i{width:9px;height:9px;border-radius:50%;}
+.mock-foot{border-top:1px solid #33456A;background:#24334F;padding:9px 14px;font-size:10.5px;color:#8FA3C4;display:flex;gap:18px;flex-wrap:wrap;}
+.mock-note{font-size:11.5px;color:var(--mut);margin-top:6px;}
+
+/* ---------- 06 架构 ---------- */
+.dark-sec{background:var(--dark);color:#E9EDF5;}
+.dark-sec .sec-sub{color:#93A5C3;}
+.arch{display:flex;flex-direction:column;gap:10px;margin-top:8px;}
+.layer{border:1px solid #33456A;background:#182535;padding:16px 22px;display:grid;grid-template-columns:150px 1fr;gap:20px;align-items:start;}
+.layer .l-name{font-weight:700;font-size:15px;color:#FFB185;padding-top:2px;}
+.layer .l-name small{display:block;font-weight:500;font-size:12px;color:#7F92B2;margin-top:2px;}
+.layer .l-body{display:flex;flex-wrap:wrap;gap:8px;}
+.comp{background:#223353;border:1px solid #3A4A6B;color:#D7E2F3;font-size:12.5px;padding:6px 12px;border-radius:4px;}
+.comp b{font-weight:700;color:#fff;}
+.arch-arrow{text-align:center;color:#7F92B2;font-size:11px;letter-spacing:.2em;line-height:1;}
+.arch-arrow::before{content:"▼";display:block;color:#3A4A6B;font-size:13px;margin-bottom:2px;}
+
+/* ---------- 07 风险 / 09 验收 ---------- */
+.risk-notes{margin-top:22px;background:var(--paper2);border-left:4px solid var(--warn);padding:14px 20px;font-size:13.5px;color:var(--ink2);}
+
+/* ---------- 08 时间轴 ---------- */
+.timeline{display:grid;grid-template-columns:96px 44px 1fr;gap:0;margin-top:10px;}
+.tl-time{text-align:right;padding:4px 18px 34px 0;font-family:var(--num);font-size:14.5px;font-weight:600;color:var(--accent);white-space:nowrap;}
+.tl-axis{position:relative;display:flex;justify-content:center;}
+.tl-axis::before{content:"";position:absolute;top:10px;bottom:10px;width:2px;background:var(--line);}
+.tl-dot{width:13px;height:13px;border-radius:50%;background:var(--paper);border:3px solid var(--blue);position:relative;z-index:1;align-self:flex-start;margin-top:5px;}
+.tl-axis .tl-dot{justify-self:center;}
+.tl-content{padding:0 0 36px 18px;}
+.tl-content h4{font-size:16.5px;font-weight:700;margin-bottom:4px;}
+.tl-content .tl-dur{font-size:12px;color:var(--accent);font-weight:700;font-family:var(--num);letter-spacing:.04em;}
+.tl-content p{font-size:13.5px;color:var(--ink2);max-width:640px;}
+.tl-content ul{margin-top:6px;}
+.tl-content li{list-style:none;font-size:13px;color:var(--ink2);display:flex;gap:8px;align-items:baseline;}
+.tl-content li::before{content:"";flex:none;width:6px;height:6px;border-radius:50%;background:var(--accent);}
+
+/* ---------- footer ---------- */
+.footer{background:var(--dark);color:#93A5C3;padding:52px 0 40px;font-size:12.5px;line-height:1.9;}
+.footer h4{color:#D7E2F3;font-size:13.5px;font-weight:700;margin-bottom:8px;}
+.footer a{color:#9FB2CE;text-decoration:none;border-bottom:1px solid #33456A;display:inline-block;padding:6px 0;line-height:1.5;}
+.footer a:hover{color:#FFB185;border-color:#FFB185;}
+.footer .cols{display:grid;grid-template-columns:1.2fr 1.6fr;gap:36px;}
+.footer ul{list-style:none;}
+.footer li{padding-left:0;display:flex;gap:6px;}
+.footer .dot{color:var(--accent);flex:none;}
+.footer .copy{margin-top:30px;padding-top:18px;border-top:1px solid #2A3A5A;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;color:#6E82A4;}
+
+/* ---------- 返回顶部 ---------- */
+.totop{position:fixed;right:22px;bottom:22px;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-size:18px;cursor:pointer;box-shadow:0 4px 14px rgba(16,26,46,.14);display:none;align-items:center;justify-content:center;z-index:60;}
+.totop.show{display:flex;}
+.totop svg{width:16px;height:16px;stroke:currentColor;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+
+/* ---------- 响应式 ---------- */
+@media (max-width:960px){
+  .src-grid{grid-template-columns:repeat(2,1fr);}
+  .src-item:nth-child(3n){border-right:1px solid var(--line);}
+  .src-item:nth-child(2n){border-right:none;}
+  .mock-main{grid-template-columns:240px 1fr;}
+  .layer{grid-template-columns:1fr;gap:10px;}
+}
+@media (max-width:720px){
+  section{padding:58px 0;}
+  .nav-links{display:none;}
+  .metrics{grid-template-columns:repeat(2,1fr);}
+  .rel-cards{grid-template-columns:1fr;}
+  .deliver{grid-template-columns:1fr;}
+  .er{grid-template-columns:1fr;}
+  .sub-grid{grid-template-columns:1fr;}
+  .src-grid{grid-template-columns:1fr;}
+  .src-item,.src-item:nth-child(3n),.src-item:nth-child(2n){border-right:none;}
+  .fstep{margin-right:0;margin-bottom:16px;}
+  .fstep::after{display:none;}
+  .mock-main{grid-template-columns:1fr;}
+  .mock-list{display:none;}
+  .timeline{grid-template-columns:74px 30px 1fr;}
+  .tl-content{padding-left:12px;}
+  .footer .cols{grid-template-columns:1fr;gap:22px;}
+  .hero{padding:68px 0 60px;}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto;}
+  *{animation:none!important;transition:none!important;}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== 顶部导航 ===== -->
+<header class="nav">
+  <div class="wrap">
+    <div class="brand">
+      <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="15" fill="#E8622C"/><path d="M7 20 L16 8 L25 20" stroke="#F5F4EF" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="23" r="2.4" fill="#F5F4EF"/><circle cx="22" cy="23" r="2.4" fill="#F5F4EF"/></svg>
+      <b>铁路路线图可视化平台</b><span>设计方案</span>
+    </div>
+    <nav class="nav-links" id="navLinks">
+      <a href="#s1" class="on">需求拆解</a>
+      <a href="#s2">数据源</a>
+      <a href="#s3">数据模型</a>
+      <a href="#s4">采集策略</a>
+      <a href="#s5">页面设计</a>
+      <a href="#s6">系统架构</a>
+      <a href="#s7">风险合规</a>
+      <a href="#s8">实施计划</a>
+      <a href="#s9">验收标准</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ===== Hero ===== -->
+<section class="hero" style="padding-top:92px;">
+  <div class="wrap">
+    <div class="kicker">DESIGN PROPOSAL · 2026-09</div>
+    <h1>高铁·动车路线图查询与可视化平台<br><em>数据收集整理 &amp; 页面建设方案</em></h1>
+    <p class="lead">面向任意指定站点，聚合其全部始发、终到、途经的高铁与动车车次，以地图形式呈现每条线路的经停站点、到发时刻与区间时长，支持按站点多维度检索与线路联动查看。</p>
+    <div class="station-chips">
+      <span class="chip"><i></i>厦门站</span>
+      <span class="chip"><i></i>厦门北站</span>
+      <span class="chip"><i></i>冠豸山站</span>
+      <span class="chip"><i></i>冠豸山南站</span>
+      <span class="chip" style="border-style:dashed;color:#9FB2CE;">任意指定站点…</span>
+    </div>
+    <div class="metrics">
+      <div class="metric"><div class="n num">4</div><div class="t">示例站点（厦门 · 连城）</div></div>
+      <div class="metric"><div class="n num">3</div><div class="t">关系类型：始发 / 终到 / 途经</div></div>
+      <div class="metric"><div class="n num">1</div><div class="t">主数据源：12306 车站车次查询</div></div>
+      <div class="metric"><div class="n num">≤24h</div><div class="t">调图后数据更新窗口</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 01 需求拆解 ===== -->
+<section id="s1">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">01</span><h2>需求拆解与核心概念</h2></div>
+    <p class="sec-sub">把「查询指定站点的高铁动车路线图」拆成可执行的数据与展示两半：数据侧解决「哪些车次经过该站、各自停哪些站、什么时刻」，展示侧解决「在地图上把线路画出来、可筛选可联动」。</p>
+    <div class="goal">
+      <p>输入任意站点名称（如「厦门北站」），系统输出三份能力：<b>① 车次清单</b>——全部经该站的高铁（G）/ 动车（D）/ 城际（C）车次及其关系分类；<b>② 线路画像</b>——每个车次的经停序列、到发时刻、停站时长、区间时长、全程时长；<b>③ 地图视图</b>——车次线路沿地理走向绘制，站点按关系类型着色，支持点击联动与时段筛选。</p>
+    </div>
+    <div class="rel-cards">
+      <div class="rel-card">
+        <h3><span class="tag tag-orange">始发</span> 该站为车次首站</h3>
+        <p>车次在该站开始载客，停靠序列中序号为 1（seq=1），页面以实心橙标站点、线头加粗表示。</p>
+        <div class="cond">判定：stop.seq === 1</div>
+      </div>
+      <div class="rel-card">
+        <h3><span class="tag tag-blue">终到</span> 该站为车次末站</h3>
+        <p>车次在该站终到折返，停靠序列中序号为末位（seq=N），页面以空心蓝标站点、线尾收束表示。</p>
+        <div class="cond">判定：stop.seq === N</div>
+      </div>
+      <div class="rel-card">
+        <h3><span class="tag tag-gray">途经</span> 该站为中间经停站</h3>
+        <p>车次在该站短暂停靠后继续前行，停靠序列中 1&lt;seq&lt;N，页面以灰点站点、细线过站表示。</p>
+        <div class="cond">判定：1 &lt; stop.seq &lt; N</div>
+      </div>
+    </div>
+    <ul class="deliver">
+      <li>车站与车次数据字典（电报码 / 经纬度 / 车种）</li>
+      <li>采集与校验脚本（低频节流、可断点续跑）</li>
+      <li>关系型存储（车站 / 车次 / 停靠 / 线路）</li>
+      <li>只读查询服务（REST / JSON）</li>
+      <li>地图可视化页面（Web，桌面 + 移动端）</li>
+      <li>定时更新任务（每日增量 + 调图全量）</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===== 02 数据源调研与选型 ===== -->
+<section id="s2" style="background:var(--paper2);">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">02</span><h2>数据源调研与选型</h2></div>
+    <p class="sec-sub">经调研，可用数据源分四类：12306 官方页面与接口、第三方数据聚合服务、开放地图与线路几何数据、公开新闻公告。下表逐一比对覆盖范围、时效、成本与合规风险，给出分级选型结论。</p>
+    <div class="tbl-scroll"><table style="min-width:820px">
+      <colgroup><col style="width:23%"><col style="width:25%"><col style="width:17%"><col style="width:8%"><col style="width:14%"><col style="width:13%"></colgroup>
+      <thead><tr><th>数据源 / 接口</th><th>类型与获取方式</th><th>覆盖与时效</th><th>成本</th><th>合规等级</th><th>用途定级</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>kyfw.12306.cn/otn/czxx/init</code> 车站车次查询</td>
+          <td>官方「车站车次」查询页与底层接口（POST 需会话 cookie），按车站返回全部车次及到站时刻、历时</td>
+          <td>全国全列，与售票系统同步</td><td>免费</td>
+          <td>个人/内部演示可低频使用；公开发布与商业使用需书面授权</td>
+          <td><span class="pill p-p0">P0 主数据</span></td>
+        </tr>
+        <tr>
+          <td><code>otn/leftTicket/query</code> 站到站余票</td>
+          <td>官方余票/车次接口，需 UA、设备 cookie，反爬严格</td>
+          <td>按起讫站对查询，含票价余票</td><td>免费</td>
+          <td>仅作交叉校验，禁止高频抓取</td>
+          <td><span class="pill p-p1">P1 校验</span></td>
+        </tr>
+        <tr>
+          <td><code>station_name_v10036.js</code> 站点代码表</td>
+          <td>12306 公开 JS，映射中文站名 ↔ 电报码（如 厦门北=XMS）</td>
+          <td>全国站点字典</td><td>免费</td>
+          <td>低风险</td>
+          <td><span class="pill p-p0">P0 字典</span></td>
+        </tr>
+        <tr>
+          <td>第三方授权 API（极速数据、易客 API 等）</td>
+          <td>商业数据服务，站站/车次/时刻查询，宣称与 12306 同步，按量计费</td>
+          <td>全国全列</td><td>按量付费</td>
+          <td>合规，需核对服务商资质与授权范围</td>
+          <td><span class="pill p-p1">P1 生产备选</span></td>
+        </tr>
+        <tr>
+          <td>OSM 铁路线路矢量数据</td>
+          <td>OpenStreetMap 铁路几何（<code>railway=rail</code>），可转 GeoJSON；国内有整理好的全国铁路/高铁矢量数据</td>
+          <td>覆盖不全、新线滞后，需人工补线</td><td>免费</td>
+          <td>开放许可，需署名</td>
+          <td><span class="pill p-p1">P1 线路几何</span></td>
+        </tr>
+        <tr>
+          <td>站点经纬度（高德 / 百度 POI）</td>
+          <td>地图 POI 检索补全站点坐标</td>
+          <td>全国站点</td><td>免费 key</td>
+          <td>低风险，遵守地图平台条款</td>
+          <td><span class="pill p-p1">P1 坐标</span></td>
+        </tr>
+        <tr>
+          <td>新闻 / 公告（国铁集团、地方媒体）</td>
+          <td>调图公告、新线开通、车次调整的权威披露</td>
+          <td>事件型，用于触发全量更新</td><td>免费</td>
+          <td>低风险</td>
+          <td><span class="pill p-p2">P2 事件</span></td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="tbl-caption">注：12306 官方「车站车次」入口示例（迁安站）：kyfw.12306.cn/otn/czxx/init?station_code=QQP&amp;station_name=迁安。官方说明：车票全部售罄或预售期内运行方案调整的车次，网站不显示，采集结果需标注抓取时间。窄屏下表格可左右滑动查看。</p>
+
+    <div class="src-grid">
+      <div class="src-item"><h4><span class="bar"></span>方案 A · 自建轻量采集</h4><p>会话初始化获取 cookie → 站点代码表 → 车站车次查询 → 逐车次经停补齐 → 校验入库。全流程可控、零成本。</p><div class="meta">适用：个人学习 / 内部演示 / 原型验证</div></div>
+      <div class="src-item"><h4><span class="bar" style="background:var(--blue);"></span>方案 B · 第三方授权 API</h4><p>购买商业数据服务（时刻、站站查询），按调用量计费，规避自建采集的合规与稳定性负担。</p><div class="meta">适用：公开发布 / 商业产品</div></div>
+      <div class="src-item"><h4><span class="bar" style="background:#525C6B;"></span>方案 C · 混合</h4><p>自建采集做主数据（低频节流），第三方 API 做交叉校验与兜底，公告做调图触发。</p><div class="meta">适用：长期运营 / 需保障数据质量</div></div>
+    </div>
+
+    <div style="margin-top:30px;">
+      <div class="sec-head" style="margin-bottom:8px;"><span class="sec-no">·</span><h3 style="font-size:20px;">示例站点画像（供演示与验收使用）</h3></div>
+      <p class="sec-sub" style="margin-bottom:14px;">以下为四个示例站点的线路归属与代表性车次（摘自公开时刻表站点与媒体报道，具体以 12306 实时查询为准，用于演示数据组织方式）。</p>
+      <div class="tbl-scroll"><table style="min-width:620px">
+        <colgroup><col style="width:17%"><col style="width:27%"><col style="width:36%"><col style="width:20%"></colgroup>
+        <thead><tr><th>站点</th><th>所在线路</th><th>代表性车次（示例）</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><b>厦门站</b></td><td>福厦铁路（杭深线）、龙厦铁路</td><td>G5104 厦门→福州（早高峰始发）；D6229 福州→厦门（终到）</td><td>城际通勤密集，早高峰约 5–6 分钟一班始发</td></tr>
+          <tr><td><b>厦门北站</b></td><td>福厦高铁（2023-09 开通，350km/h）、杭深线、龙厦铁路</td><td>G1680 厦门北→杭州东；G2372 厦门北→成都东；D132 厦门北→北京丰台</td><td>区域枢纽，长干线始发为主</td></tr>
+          <tr><td><b>冠豸山站</b></td><td>兴泉铁路、浦梅铁路（2021-09 开通）</td><td>C875 冠豸山→龙岩（城际）；K8752 龙岩→赣州；D739 龙岩→北京西</td><td>闽西县级站，以龙岩/赣州方向为主</td></tr>
+          <tr><td><b>冠豸山南站</b></td><td>赣瑞龙铁路</td><td>G1662 瑞金→蚌埠南；D6574 赣州→福州；D3161、D6586 等</td><td>第三方站点称经停约 73 趟，需以 12306 为准</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 03 数据模型 ===== -->
+<section id="s3">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">03</span><h2>数据模型设计</h2></div>
+    <p class="sec-sub">核心是「车次—停靠」关系：一趟车次是一串按序排列的停靠记录，站点是这些记录的位置锚点。路线图即「从指定站点出发，沿每趟车次的停靠序列连成的折线集合」。</p>
+    <div class="er">
+      <div class="er-box">
+        <div class="hd"><span class="key" style="background:var(--blue);"></span>station 车站</div>
+        <ul>
+          <li><b>station_id</b> 主键</li>
+          <li><b>code</b> 电报码（唯一，厦门北=XMS）</li>
+          <li><b>name</b> 站名（厦门北站）</li>
+          <li><b>name_py</b> 拼音首字母</li>
+          <li><b>city / province</b> 行政区</li>
+          <li><b>lon / lat</b> 经纬度</li>
+        </ul>
+      </div>
+      <div class="er-box">
+        <div class="hd"><span class="key" style="background:var(--accent);"></span>train 车次</div>
+        <ul>
+          <li><b>train_no</b> 车次号（G2372）</li>
+          <li><b>train_type</b> 车种 G/D/C…</li>
+          <li><b>origin_id</b> 始发站</li>
+          <li><b>dest_id</b> 终到站</li>
+          <li><b>total_min</b> 全程时长</li>
+          <li><b>calendar</b> 开行规律（每日/周末/高峰线）</li>
+          <li><b>src / updated_at</b> 来源与版本</li>
+        </ul>
+      </div>
+      <div class="er-box">
+        <div class="hd"><span class="key" style="background:#525C6B;"></span>stop 停靠</div>
+        <ul>
+          <li><b>id</b> 主键</li>
+          <li><b>train_no</b> 所属车次</li>
+          <li><b>seq</b> 站序（1=始发）</li>
+          <li><b>station_id</b> 车站</li>
+          <li><b>arrive / depart</b> 到时 / 发时</li>
+          <li><b>stop_min</b> 停站时长</li>
+          <li><b>seg_min</b> 与上一站区间时长</li>
+        </ul>
+      </div>
+    </div>
+    <div class="er-rel"><span class="rel-arrow">train 1 ——<span class="ln"></span>N stop</span>　·　<span class="rel-arrow">station 1 ——<span class="ln"></span>N stop</span></div>
+
+    <table>
+      <colgroup><col style="width:30%"><col style="width:70%"></colgroup>
+      <thead><tr><th>关键查询逻辑（指定站点 → 路线图）</th><th>实现要点</th></tr></thead>
+      <tbody>
+        <tr><td><code>① 定位站点</code></td><td>输入站名 → 电报码归一（解决「厦门北 / 厦门北站」别名），取 <b>station</b></td></tr>
+        <tr><td><code>② 找出车次</code></td><td><b>stop</b> 表按 station_id 关联出全部车次；按 seq 判定关系：seq=1 始发、seq=N 终到、其余途经</td></tr>
+        <tr><td><code>③ 展开线路</code></td><td>对每个车次取完整停靠序列（seq 升序），拼接站点坐标与线路几何 → GeoJSON Polyline</td></tr>
+        <tr><td><code>④ 计算时长</code></td><td>区间时长 = 到达时刻差（跨日自动 +24h 标记「次日」）；全程时长 = 末站到 - 首站发</td></tr>
+        <tr><td><code>⑤ 派生视图</code></td><td>线路（route）= 同一走向多车次聚合线，按车次数分级（粗=多车次走廊）</td></tr>
+      </tbody>
+    </table>
+    <p class="tbl-caption">存储选型：原型期 SQLite 单文件即可（万级停靠记录毫秒级查询）；规模化切 PostgreSQL + 空间索引（PostGIS）。</p>
+  </div>
+</section>
+
+<!-- ===== 04 数据采集与更新策略 ===== -->
+<section id="s4" style="background:var(--paper2);">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">04</span><h2>数据采集与更新策略</h2></div>
+    <p class="sec-sub">采集遵循「低频、节流、可追溯」三原则：只取开行计划与时刻表，不抓余票；单站全量车次一次拉取，全流程断点续跑；每条数据落库都带抓取时间与来源，便于审计与回滚。</p>
+    <div class="flow">
+      <div class="fstep"><div class="no">STEP 01</div><h5>会话初始化</h5><p>访问 12306 车站查询页获取会话 cookie（JSESSIONID 等），UA 轮换</p></div>
+      <div class="fstep"><div class="no">STEP 02</div><h5>站点字典</h5><p>解析 station_name_v10036.js，站名 ↔ 电报码归一，过滤高铁/动车/城际站</p></div>
+      <div class="fstep"><div class="no">STEP 03</div><h5>车站车次查询</h5><p>逐目标站请求车站车次接口，得车次、到时/发时、到站历时</p></div>
+      <div class="fstep"><div class="no">STEP 04</div><h5>经停补齐</h5><p>对每个车次拉完整经停序列（站序/时刻），第三方 API 抽样交叉核对</p></div>
+      <div class="fstep"><div class="no">STEP 05</div><h5>规则校验</h5><p>时间单调、区间时长自洽、跨日标记、停站时长 &gt;0，异常进对账队列</p></div>
+      <div class="fstep"><div class="no">STEP 06</div><h5>入库与版本</h5><p>增量 upsert，写 data_version 快照，调图后全量重建</p></div>
+    </div>
+    <div class="sub-grid">
+      <div>
+        <div class="sec-head" style="margin-bottom:10px;"><span class="sec-no">·</span><h3 style="font-size:19px;">更新策略</h3></div>
+        <table>
+          <colgroup><col style="width:30%"><col style="width:34%"><col style="width:36%"></colgroup>
+          <thead><tr><th>触发时机</th><th>范围</th><th>方式</th></tr></thead>
+          <tbody>
+            <tr><td>每日低峰（02:00–05:00）</td><td>全部目标站车次</td><td>增量刷新，差异比对，只写变化</td></tr>
+            <tr><td>调图期（约每年 1 月 / 7 月，如 2026-07-01 全路调图）</td><td>全国</td><td>公告触发 → 全量重建 + 基线快照</td></tr>
+            <tr><td>新线开通 / 舆情事件</td><td>相关线路</td><td>人工触发定向刷新</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="sec-head" style="margin-bottom:10px;"><span class="sec-no">·</span><h3 style="font-size:19px;">校验规则</h3></div>
+        <table>
+          <colgroup><col style="width:34%"><col style="width:66%"></colgroup>
+          <thead><tr><th>规则</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>时刻单调递增</td><td>同一车次后续站到时 &gt;= 前站发时</td></tr>
+            <tr><td>区间时长自洽</td><td>seg_min ≈ 到时差 - 停站时长，容差 ±2min</td></tr>
+            <tr><td>跨日标记</td><td>次日到达标注「+1」，避免 24 点误解</td></tr>
+            <tr><td>多源交叉</td><td>第三方 API 抽样比对，不一致告警</td></tr>
+            <tr><td>开行规律</td><td>区分每日线 / 周末线 / 高峰线，避免漏线误判</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <p class="tbl-caption">节流与容错：请求间隔 ≥5s 加随机抖动、失败指数退避（上限 5 次）、断点续传、全量日志留痕；单站全量约 30–60 秒内完成，日均调用量控制在百次以内，不对 12306 造成任何实质负载。</p>
+  </div>
+</section>
+
+<!-- ===== 05 可视化页面设计 ===== -->
+<section id="s5">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">05</span><h2>可视化页面设计</h2></div>
+    <p class="sec-sub">页面以地图为主视图、车次列表为副视图：地图承载「线路走向与站点关系」，列表承载「车次与时刻的精确信息」，点击任意一侧联动另一侧。下图为页面布局示意（非真实地图数据）。</p>
+
+    <div class="mockup">
+      <div class="mockup-bar"><i></i><i></i><i></i><div class="addr">rail-viz.local / stations/厦门北</div></div>
+      <div class="mock-main">
+        <div class="mock-list">
+          <div class="mock-search">搜索站点：厦门北 · 更新时间 09-22 03:12</div>
+          <div class="mock-item hl"><div class="r1"><b>G2372</b><span>06:48 → 20:33</span></div><div class="r2">厦门北 → 成都东 · 高铁 · 全程 13h45m</div></div>
+          <div class="mock-item"><div class="r1"><b>G1680</b><span>07:35 → 13:57</span></div><div class="r2">厦门北 → 杭州东 · 高铁 · 全程 6h22m</div></div>
+          <div class="mock-item"><div class="r1"><b>D132</b><span>06:39 发车</span></div><div class="r2">厦门北 → 北京丰台 · 动车 · 长途干线</div></div>
+          <div class="mock-item"><div class="r1"><b>G1609</b><span>09:53 发车</span></div><div class="r2">厦门北 → 深圳北 · 高铁 · 经停漳州、云霄</div></div>
+        </div>
+        <div class="mock-map">
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;">
+            <path d="M45 55 L 88 20" stroke="#7F92B2" stroke-width="0.5" fill="none"/>
+            <path d="M45 55 L 16 88" stroke="#7F92B2" stroke-width="0.5" fill="none"/>
+            <path d="M14 20 L 45 55 L 56 70" stroke="#7F92B2" stroke-width="0.4" stroke-dasharray="2.5 2.5" fill="none"/>
+            <path d="M45 55 L 88 20" stroke="#E8622C" stroke-width="1.1" fill="none"/>
+          </svg>
+          <span class="mk mk-org" style="left:45%;top:55%;"></span>
+          <span class="mock-label" style="left:45%;top:55%;color:#FFB185;">厦门北</span>
+          <span class="mk mk-blu" style="left:88%;top:20%;"></span>
+          <span class="mock-label" style="left:88%;top:20%;">杭州东</span>
+          <span class="mk mk-blu" style="left:16%;top:88%;"></span>
+          <span class="mock-label" style="left:16%;top:88%;">成都东</span>
+          <span class="mk mk-gry" style="left:14%;top:20%;"></span>
+          <span class="mock-label" style="left:14%;top:20%;">南昌西</span>
+          <span class="mk mk-gry" style="left:56%;top:70%;"></span>
+          <span class="mock-label" style="left:56%;top:70%;">厦门</span>
+          <div class="mock-legend"><span class="lg"><i style="background:var(--accent);"></i>查询站 / 始发</span><span class="lg"><i style="background:var(--blue);"></i>终到站</span><span class="lg"><i style="background:#C9D6EA;border:1px solid #8FA3C4;"></i>途经站</span><span class="lg"><i style="width:16px;height:3px;border-radius:0;background:var(--accent);"></i>选中线路</span></div>
+        </div>
+      </div>
+      <div class="mock-foot"><span><b style="color:#C9D6EA;">G2372 经停表</b>　厦门北 06:48 → 漳州 07:3x → … → 成都东 20:33</span><span>点击车次高亮线路 · 点击站点列出经停车次</span></div>
+    </div>
+    <p class="mock-note">上图为布局示意，列表与时刻均为示意图示数据（非实时查询结果）；真实地图将使用合规底图 + 真实线路几何。</p>
+
+    <div class="sub-grid" style="grid-template-columns:1fr 1fr;margin-top:26px;">
+      <div>
+        <div class="sec-head" style="margin-bottom:10px;"><span class="sec-no">·</span><h3 style="font-size:19px;">图层与视觉规范</h3></div>
+        <table>
+          <colgroup><col style="width:28%"><col style="width:38%"><col style="width:34%"></colgroup>
+          <thead><tr><th>图层元素</th><th>视觉样式</th><th>信息含义</th></tr></thead>
+          <tbody>
+            <tr><td>查询站</td><td>橙色实心圆 + 光环</td><td>当前检索的指定站点</td></tr>
+            <tr><td>始发站</td><td>橙实心小点</td><td>车次首站（seq=1）</td></tr>
+            <tr><td>终到站</td><td>蓝空心点</td><td>车次末站（seq=N）</td></tr>
+            <tr><td>途经站</td><td>灰小点</td><td>中间经停站</td></tr>
+            <tr><td>线路（默认）</td><td>1.5px 蓝灰细线</td><td>车次停靠序列连线</td></tr>
+            <tr><td>线路（选中）</td><td>3px 橙线</td><td>当前选中车次，其余置灰</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="sec-head" style="margin-bottom:10px;"><span class="sec-no">·</span><h3 style="font-size:19px;">交互设计</h3></div>
+        <table>
+          <colgroup><col style="width:34%"><col style="width:66%"></colgroup>
+          <thead><tr><th>交互</th><th>行为</th></tr></thead>
+          <tbody>
+            <tr><td>站点搜索</td><td>支持站名 / 拼音 / 别名，回车定位</td></tr>
+            <tr><td>多维筛选</td><td>车种（G/D/C）、关系（始发/终到/途经）、发车时段</td></tr>
+            <tr><td>点击车次</td><td>线路高亮 + 经停表详情（到时/发时/停站/区间时长）</td></tr>
+            <tr><td>点击站点</td><td>列出经停该站全部车次，可反向联动</td></tr>
+            <tr><td>时段滑块</td><td>按发车时间过滤线路，观察早晚高峰分布</td></tr>
+            <tr><td>悬停站点</td><td>迷你信息卡：经停车次数、最早/最晚车次</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="margin-top:30px;">
+      <div class="sec-head" style="margin-bottom:10px;"><span class="sec-no">·</span><h3 style="font-size:19px;">技术选型</h3></div>
+      <table>
+        <colgroup><col style="width:16%"><col style="width:30%"><col style="width:54%"></colgroup>
+        <thead><tr><th>环节</th><th>选型</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>地图底图</td><td>天地图 / 高德 JS API（国内推荐）</td><td>国内地名标注与审图合规；OSM 作免费备选，需署名</td></tr>
+          <tr><td>矢量渲染</td><td>MapLibre GL / Leaflet</td><td>MapLibre 支持矢量瓦片与海量要素；Leaflet 轻量通用</td></tr>
+          <tr><td>线路数据</td><td>GeoJSON Polyline</td><td>两级精度：站点直线示意 / OSM 铁路走向拟合</td></tr>
+          <tr><td>数据图层</td><td>GeoJSON source / ECharts GL lines</td><td>按线路数量级选择；千线以上走 Canvas 分级渲染</td></tr>
+          <tr><td>数据服务</td><td>REST + JSON</td><td>/stations、/trains、/routes、/schedule</td></tr>
+          <tr><td>前端框架</td><td>原生 JS 单页</td><td>无构建依赖，便于交付与迭代</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 06 系统架构 ===== -->
+<section id="s6" class="dark-sec">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no" style="color:#FFB185;">06</span><h2 style="color:#EDF1F8;">系统架构</h2></div>
+    <p class="sec-sub">四层结构，自上而下单向依赖：展示层消费服务层，服务层读写存储层，存储层由采集层持续写入。每层均可独立替换（如展示层换引擎、数据源切第三方 API），不影响其余层。</p>
+    <div class="arch">
+      <div class="layer">
+        <div class="l-name">展示层<small>Web 地图页面</small></div>
+        <div class="l-body">
+          <span class="comp">站点搜索 &amp; 别名</span>
+          <span class="comp">地图视图（底图+线路+站点）</span>
+          <span class="comp">车次列表 &amp; 筛选</span>
+          <span class="comp">经停表详情</span>
+          <span class="comp">时段滑块联动</span>
+        </div>
+      </div>
+      <div class="arch-arrow">DATA FLOW</div>
+      <div class="layer">
+        <div class="l-name">服务层<small>只读 REST API</small></div>
+        <div class="l-body">
+          <span class="comp"><b>/stations</b> 站点定位</span>
+          <span class="comp"><b>/trains</b> 车次清单</span>
+          <span class="comp"><b>/routes</b> 线路几何</span>
+          <span class="comp"><b>/schedule</b> 经停表</span>
+          <span class="comp">版本 &amp; 缓存</span>
+        </div>
+      </div>
+      <div class="arch-arrow">DATA FLOW</div>
+      <div class="layer">
+        <div class="l-name">存储层<small>关系库 + 空间索引</small></div>
+        <div class="l-body">
+          <span class="comp">station / train / stop 表</span>
+          <span class="comp">PostGIS 空间索引</span>
+          <span class="comp">data_version 快照</span>
+          <span class="comp">变更对账日志</span>
+        </div>
+      </div>
+      <div class="arch-arrow">DATA FLOW</div>
+      <div class="layer">
+        <div class="l-name">采集层<small>定时任务（低频节流）</small></div>
+        <div class="l-body">
+          <span class="comp">会话 / cookie 管理</span>
+          <span class="comp">车站车次采集器</span>
+          <span class="comp">经停补齐 &amp; 交叉校验</span>
+          <span class="comp">每日增量 / 调图全量</span>
+          <span class="comp">告警 &amp; 日志审计</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 07 风险与合规 ===== -->
+<section id="s7">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">07</span><h2>风险与合规</h2></div>
+    <p class="sec-sub">本方案最大的不确定性不在技术，而在数据来源的合规与时效。下表按影响从高到低列出主要风险与处置预案。</p>
+    <table>
+      <colgroup><col style="width:20%"><col style="width:32%"><col style="width:48%"></colgroup>
+      <thead><tr><th>风险</th><th>影响</th><th>处置预案</th></tr></thead>
+      <tbody>
+        <tr><td>数据版权</td><td>12306 使用条款明确未经书面许可不得复制、发布或商业使用其内容</td><td>默认仅个人/内部低频采集与缓存；公开发布或商业化前切换第三方授权 API 或与国铁数据服务商洽谈授权</td></tr>
+        <tr><td>反爬封禁</td><td>高频或异常请求触发限流、封禁</td><td>请求间隔 ≥5s + 随机抖动、UA/cookie 池、指数退避、全量日志；不抓余票、不碰购票链路</td></tr>
+        <tr><td>数据时效</td><td>车票售罄或预售期内方案调整的车次，官方页面不显示</td><td>以开行计划口径为准，页面标注数据抓取时间；每日增量兜底修正</td></tr>
+        <tr><td>调图变更</td><td>一年约 1–2 次大调图（如 2026-07-01），时刻表大面积变化</td><td>公告监控触发全量重建，保留上一基线可回滚，重建后自动对账</td></tr>
+        <tr><td>同名 / 别名站点</td><td>「冠豸山」与「冠豸山南」易混、站名别名多</td><td>电报码为唯一主键，建立名称归一表，搜索走别名映射</td></tr>
+        <tr><td>地图合规</td><td>境外底图或未审图底图对外发布不合规</td><td>国内使用天地图 / 高德底图；发布前核对使用条款与审图要求</td></tr>
+        <tr><td>渲染性能</td><td>数千条折线导致地图卡顿</td><td>视口裁剪、按车次数分级渲染、千线以上 Canvas 聚合</td></tr>
+      </tbody>
+    </table>
+    <div class="risk-notes">
+      <b>合规红线：</b>本方案默认形态定位为「个人学习 / 内部研究 / 原型演示」。若用于对外公开发布或商业产品，必须完成两步——① 数据获取切换到已授权渠道（第三方数据服务或铁路数据授权）；② 底图与发布环节通过地图合规审查。两条缺一不可。
+    </div>
+  </div>
+</section>
+
+<!-- ===== 08 实施计划 ===== -->
+<section id="s8" style="background:var(--paper2);">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">08</span><h2>实施计划</h2></div>
+    <p class="sec-sub">按「先验证数据可行性、再建工程、后做可视化」的顺序推进，约 6 周。阶段 1 结束时应能回答「数据拿不拿得到、准不准」，避免在不可行的数据方案上继续投入。</p>
+    <div class="timeline">
+      <div class="tl-time num">W1</div>
+      <div class="tl-axis"><span class="tl-dot"></span></div>
+      <div class="tl-content">
+        <h4>阶段 1 · 数据可行性验证</h4>
+        <div class="tl-dur num">第 1 周</div>
+        <p>以厦门北站为试点：验证会话初始化、车站车次查询与经停补齐三个环节，产出样例数据与校验报告。</p>
+        <ul><li>目标：单站全量车次清单 + 完整经停表</li><li>产出：验证脚本、样例 JSON、可行性结论</li></ul>
+      </div>
+      <div class="tl-time num">W2–3</div>
+      <div class="tl-axis"><span class="tl-dot"></span></div>
+      <div class="tl-content">
+        <h4>阶段 2 · 数据工程</h4>
+        <div class="tl-dur num">第 2–3 周</div>
+        <p>数据模型落库，建设站点字典（含坐标）、采集任务与校验对账，接入定时更新。</p>
+        <ul><li>目标：四个示例站点 + 坐标库 + 每日增量任务</li><li>产出：数据库、采集服务、监控告警</li></ul>
+      </div>
+      <div class="tl-time num">W3–4</div>
+      <div class="tl-axis"><span class="tl-dot"></span></div>
+      <div class="tl-content">
+        <h4>阶段 3 · 可视化原型</h4>
+        <div class="tl-dur num">第 3–4 周</div>
+        <p>地图页 v1：合规底图 + 线路与站点绘制 + 车次列表与经停表，打通「搜索 → 列表 → 地图 → 详情」主链路。</p>
+        <ul><li>目标：单站点路线图可用，桌面 + 移动端</li><li>产出：可演示的地图页面</li></ul>
+      </div>
+      <div class="tl-time num">W5–6</div>
+      <div class="tl-axis"><span class="tl-dot"></span></div>
+      <div class="tl-content">
+        <h4>阶段 4 · 完善与部署</h4>
+        <div class="tl-dur num">第 5–6 周</div>
+        <p>多站点支持、调图全量流程、渲染性能优化、时段筛选等高级交互，完成部署与验收。</p>
+        <ul><li>目标：通过验收标准清单（第 09 节）</li><li>产出：正式版本 + 运维手册</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 09 验收标准 ===== -->
+<section id="s9">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">09</span><h2>验收标准</h2></div>
+    <p class="sec-sub">验收以「与 12306 官方口径比对」为核心，辅以性能与多端走查。逐项打勾后方可宣布交付完成。</p>
+    <table>
+      <colgroup><col style="width:26%"><col style="width:30%"><col style="width:44%"></colgroup>
+      <thead><tr><th>指标</th><th>目标值</th><th>验收方式</th></tr></thead>
+      <tbody>
+        <tr><td>数据一致性</td><td>与 12306 当日查询一致率 ≥ 98%</td><td>抽样 20 个车次逐站核对到发时刻与停站</td></tr>
+        <tr><td>覆盖率</td><td>始发 / 终到 / 途经三类无遗漏</td><td>与官方车站车次页逐条比对</td></tr>
+        <tr><td>采集时效</td><td>单站全量 ≤ 60s</td><td>计时压测（节流规则内）</td></tr>
+        <tr><td>交互性能</td><td>500+ 线路保持 60fps</td><td>Chrome Performance 面板走查</td></tr>
+        <tr><td>更新窗口</td><td>调图后 ≤ 24h 上线新时刻</td><td>调图演练（全量重建 + 对账）</td></tr>
+        <tr><td>多端可用</td><td>桌面 / 移动无错位、无横向滚动</td><td>1440×900 与 390×844 截图走查</td></tr>
+        <tr><td>可追溯</td><td>每条数据带来源与抓取时间</td><td>审计查询脚本</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===== 页脚 ===== -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <h4>数据来源与参考</h4>
+        <ul>
+          <li><span class="dot">·</span><a href="https://kyfw.12306.cn/otn/czxx/init?station_code=QQP&amp;station_name=%E8%BF%81%E5%AE%89" target="_blank" rel="noopener">12306 车站车次查询页（示例）</a></li>
+          <li><span class="dot">·</span><a href="https://kyfw.12306.cn/otn/regist/rule" target="_blank" rel="noopener">12306 网站使用条款（版权声明）</a></li>
+          <li><span class="dot">·</span><a href="https://www.12306.cn/index/script/core/common/station_name_v10036.js" target="_blank" rel="noopener">12306 站点代码表（公开 JS）</a></li>
+          <li><span class="dot">·</span><a href="https://www.jisuapi.com/api/train/" target="_blank" rel="noopener">第三方火车查询 API（极速数据）</a></li>
+          <li><span class="dot">·</span><a href="https://yikeapi.com/index/train" target="_blank" rel="noopener">第三方火车查询 API（易客）</a></li>
+          <li><span class="dot">·</span><a href="https://www.spp.gov.cn/zdgz/202111/t20211101_534081.shtml" target="_blank" rel="noopener">网络爬虫侵权边界（最高人民检察院）</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>示例站点资料</h4>
+        <ul>
+          <li><span class="dot">·</span><a href="https://szb.qzwb.com/dnzb/pc/att/202309/27/e37a1201-c615-4987-8be0-a8addda35b98.pdf" target="_blank" rel="noopener">福厦高铁开通运营报道（泉州晚报）</a></li>
+          <li><span class="dot">·</span><a href="https://dzb.sunnews.cn/page/2026-06/18/A05/hxcb20260618A05.pdf" target="_blank" rel="noopener">2026-07-01 全国铁路调图·厦门开行变化（海西晨报）</a></li>
+          <li><span class="dot">·</span><a href="https://m.thepaper.cn/newsDetail_forward_14721702" target="_blank" rel="noopener">兴泉、浦梅铁路开行客车（澎湃新闻）</a></li>
+          <li><span class="dot">·</span><a href="https://www.ip.cn/train/fujian/guanzhaishannan.html" target="_blank" rel="noopener">冠豸山南站时刻（第三方站点）</a></li>
+          <li><span class="dot">·</span><a href="https://blog.csdn.net/mrib/article/details/143507252" target="_blank" rel="noopener">OSM 全国铁路矢量数据整理</a></li>
+        </ul>
+        <h4 style="margin-top:18px;">免责声明</h4>
+        <p>本页为设计方案文档。示例车次与站点信息摘自公开第三方时刻表站点与媒体报道（截至 2026-09），仅用于演示数据组织方式，实际数据以铁路 12306 官方实时查询为准。文中 12306 相关接口信息来自公开技术资料，实际采集请遵守网站条款与相关法律法规，保持低频、节流，仅用于个人学习与研究。</p>
+      </div>
+    </div>
+    <div class="copy">
+      <span>高铁动车路线图查询与可视化平台 · 设计方案 v1.0</span>
+      <span>2026-09-22 · 厦门</span>
+    </div>
+  </div>
+</footer>
+
+<button class="totop" id="toTop" type="button" aria-label="返回顶部"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+
+<script>
+(function(){
+  "use strict";
+  var topBtn = document.getElementById("toTop");
+  var navLinks = document.querySelectorAll(".nav-links a");
+  var sections = [];
+  navLinks.forEach(function(a){
+    var id = a.getAttribute("href");
+    if(id && id.charAt(0) === "#"){ var el = document.querySelector(id); if(el){ sections.push({id:id, el:el, a:a}); } }
+  });
+  function onScroll(){
+    var y = window.scrollY || document.documentElement.scrollTop;
+    if(y > 480){ topBtn.classList.add("show"); } else { topBtn.classList.remove("show"); }
+    var current = null, best = -1;
+    sections.forEach(function(s){
+      var top = s.el.getBoundingClientRect().top - 120;
+      if(top <= 0 && top > best){ best = top; current = s; }
+    });
+    sections.forEach(function(s){ s.a.classList.toggle("on", s === current); });
+  }
+  if(topBtn){
+    topBtn.addEventListener("click", function(){ window.scrollTo({top:0, behavior:"smooth"}); });
+  }
+  window.addEventListener("scroll", onScroll, {passive:true});
+  onScroll();
+})();
+</script>
+
+
+
+</body>
+</html>

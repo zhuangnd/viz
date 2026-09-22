@@ -1,0 +1,11 @@
+# 系统与缓存
+.DS_Store
+__pycache__/
+*.pyc
+
+# 截图临时目录（shot.py 自检产物，可再生成）
+_shots/
+web/_shots/
+
+# 采集经停缓存（可按脚本重新生成）
+data/schedules/
