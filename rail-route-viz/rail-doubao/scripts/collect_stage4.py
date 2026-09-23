@@ -16,14 +16,14 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import collect_pilot as cp
 
 ODS = [
-    ("GPS", "LYS", "2026-09-23", "冠豸山→龙岩（GPS 直查验证）"),
-    ("GPS", "XKS", "2026-09-23", "冠豸山→厦门北（GPS 直查验证）"),
-    ("GSS", "LYS", "2026-09-23", "冠豸山南→龙岩"),
-    ("GSS", "GZG", "2026-09-23", "冠豸山南→赣州"),
-    ("GSS", "XKS", "2026-09-23", "冠豸山南→厦门北"),
-    ("IOQ", "FZS", "2026-09-23", "深圳北→福州（厦门/厦门北 途经样本）"),
-    ("FZS", "IOQ", "2026-09-23", "福州→深圳北（厦门/厦门北 途经样本）"),
-    ("XMS", "FZS", "2026-09-23", "厦门→福州（厦门 始发样本）"),
+    ("GPS", "LYS", cp.TODAY, "冠豸山→龙岩（GPS 直查验证）"),
+    ("GPS", "XKS", cp.TODAY, "冠豸山→厦门北（GPS 直查验证）"),
+    ("GSS", "LYS", cp.TODAY, "冠豸山南→龙岩"),
+    ("GSS", "GZG", cp.TODAY, "冠豸山南→赣州"),
+    ("GSS", "XKS", cp.TODAY, "冠豸山南→厦门北"),
+    ("IOQ", "FZS", cp.TODAY, "深圳北→福州（厦门/厦门北 途经样本）"),
+    ("FZS", "IOQ", cp.TODAY, "福州→深圳北（厦门/厦门北 途经样本）"),
+    ("XMS", "FZS", cp.TODAY, "厦门→福州（厦门 始发样本）"),
 ]
 MAX_PER_OD = 8
 
@@ -74,8 +74,8 @@ def main():
     cp.save("routes_pilot.json", existing)
     cp.log("=== 完成：新增线路=%d 累计=%d ===" % (added, len(existing)))
     for r in existing:
-        if r["date"] == "2026-09-23" and (r["station"] in ("冠豸山", "冠豸山南", "厦门")
-                                          or r["seg_from"] in ("深圳北", "福州")):
+        if r["date"] == cp.TODAY and (r["station"] in ("冠豸山", "冠豸山南", "厦门")
+                                      or r["seg_from"] in ("深圳北", "福州")):
             cp.log("  [%s] %s %s→%s 本段%s→%s 经停%d站" % (
                 r["role"], r["code"], r["origin"], r["dest"], r["seg_from"], r["seg_to"], r["stop_count"]))
 

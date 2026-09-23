@@ -34,14 +34,16 @@ os.makedirs(SCHED_DIR, exist_ok=True)
 LOG = []
 
 # 方向清单：(起点站, 终点站, 日期, 说明)
+# 日期动态取当天：12306 不支持查询过去日期（返回错误页），每日增量采集须滚动日期
+TODAY = time.strftime("%Y-%m-%d")
 ODS = [
-    ("XKS", "HGH", "2026-09-22", "厦门北→杭州东（出向样例）"),
-    ("XKS", "CDW", "2026-09-23", "厦门北→成都东（出向样例）"),
-    ("HGH", "XKS", "2026-09-22", "杭州东→厦门北（入向，补验终到/途经）"),
-    ("CDW", "XKS", "2026-09-23", "成都东→厦门北（入向，补验终到/途经）"),
-    ("XKS", "XMS", "2026-09-22", "厦门北→厦门（示例站·厦门）"),
-    ("XMS", "GPS", "2026-09-22", "厦门→冠豸山（示例站·冠豸山）"),
-    ("XMS", "GSS", "2026-09-22", "厦门→冠豸山南（示例站·冠豸山南）"),
+    ("XKS", "HGH", TODAY, "厦门北→杭州东（出向样例）"),
+    ("XKS", "CDW", TODAY, "厦门北→成都东（出向样例）"),
+    ("HGH", "XKS", TODAY, "杭州东→厦门北（入向，补验终到/途经）"),
+    ("CDW", "XKS", TODAY, "成都东→厦门北（入向，补验终到/途经）"),
+    ("XKS", "XMS", TODAY, "厦门北→厦门（示例站·厦门）"),
+    ("XMS", "GPS", TODAY, "厦门→冠豸山（示例站·冠豸山）"),
+    ("XMS", "GSS", TODAY, "厦门→冠豸山南（示例站·冠豸山南）"),
 ]
 
 D2 = {v["code"]: k for k, v in json.load(
@@ -103,7 +105,7 @@ def queryG(opener, frm, to, date):
     rows = []
     if text and status == 200:
         try:
-            j = json.loads(text)
+            j = json.loads(text.lstrip("\ufeff"))
             rows = (j.get("data") or {}).get("result") or []
             log("  车次数=%d" % len(rows))
         except Exception as exc:
@@ -134,7 +136,7 @@ def schedule(opener, row):
     stops = []
     if text and status == 200:
         try:
-            j = json.loads(text)
+            j = json.loads(text.lstrip("\ufeff"))
             arr = (j.get("data") or {}).get("data") if isinstance(j.get("data"), dict) else None
             for st in arr or []:
                 stops.append({"no": st.get("station_no"), "name": st.get("station_name"),
@@ -168,8 +170,12 @@ def main():
         ROOT, urllib.parse.quote("厦门北")), is_json=False)
     pause()
 
-    all_routes = []
-    seen = set()
+    # 追加式合并：读已有线路作为基线，按 (train_no, seg_to) 去重，避免覆盖丢失历史数据
+    rp = os.path.join(DATA_DIR, "routes_pilot.json")
+    existing = json.load(open(rp, encoding="utf-8")) if os.path.exists(rp) else []
+    all_routes = list(existing)
+    seen = {(r["train_no"], r["seg_to"]) for r in existing}
+    added = 0
     for frm, to, date, note in ODS:
         log("OD %s→%s @%s（%s）" % (D2.get(frm, frm), D2.get(to, to), date, note))
         rows = queryG(opener, frm, to, date)
@@ -199,12 +205,14 @@ def main():
                 "lishi": r["lishi"], "stop_count": len(stops),
                 "stops": stops,
             })
+            added += 1
         pause()
 
     save("routes_pilot.json", all_routes)
-    log("=== 完成：线路数=%d ===" % len(all_routes))
+    log("=== 完成：新增线路=%d 累计=%d ===" % (added, len(all_routes)))
     for r in all_routes:
-        log("  [%s] %s %s→%s 经停%d站" % (r["role"], r["code"], r["origin"], r["dest"], r["stop_count"]))
+        if r["date"] == TODAY:
+            log("  [%s] %s %s→%s 经停%d站" % (r["role"], r["code"], r["origin"], r["dest"], r["stop_count"]))
 
 
 if __name__ == "__main__":

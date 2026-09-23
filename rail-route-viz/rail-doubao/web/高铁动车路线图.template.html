@@ -121,6 +121,12 @@ body{font-family:"Noto Sans SC","PingFang SC","Hiragino Sans GB","Microsoft YaHe
   background:rgba(255,253,248,.85);border:1px solid var(--line);border-radius:4px;
   padding:0 4px;line-height:1.5;white-space:nowrap;pointer-events:none;box-shadow:0 1px 2px rgba(30,42,56,.08)}
 .st-label.big{font-weight:700;color:var(--navy-d);border-color:#C9BFA8}
+.st-tip{background:rgba(255,253,248,.98);border:1px solid var(--line);border-radius:8px;
+  box-shadow:0 3px 12px rgba(30,42,56,.16);padding:6px 9px;font-size:12px;color:var(--ink);line-height:1.45}
+.st-tip .tip-row{display:flex;align-items:center;gap:6px;font-weight:900;color:var(--navy-d);white-space:nowrap}
+.st-tip .tip-dot{width:8px;height:8px;border-radius:50%;flex:none}
+.st-tip .tip-tag{font-size:10px;font-weight:700;color:#B14A1F;background:#FBEAE3;border-radius:999px;padding:0 6px;flex:none}
+.st-tip .tip-sub{font-size:11px;color:var(--muted);margin-top:1px;white-space:nowrap}
 .leaflet-marker-icon{pointer-events:none}
 .leaflet-popup-content{font-size:12px;line-height:1.5}
 .leaflet-popup-content b{color:var(--navy-d)}
@@ -184,7 +190,7 @@ body{font-family:"Noto Sans SC","PingFang SC","Hiragino Sans GB","Microsoft YaHe
 /*<![CDATA[*/
 const D = __DATA_JSON__;
 /*]]>*/
-const ROLE_ORDER = ["始发", "终到", "途经"];
+const ROLE_ORDER = ["全部", "始发", "终到", "途经"];
 const TYPE_COLOR = {G: "#E8622C", D: "#2E5E8C", C: "#E8622C", K: "#6B5B95"};
 const TYPE_PRI = {G: 0, C: 0, D: 1, K: 2};
 const tColor = c => TYPE_COLOR[(c || "?")[0]] || "#6B5B95";
@@ -214,6 +220,7 @@ function addTiles(){
 
 let map = null, layerRoute = null, layerStops = null, layerLabels = null;
 let stopsAll = {};
+let stationMarkers = {};
 let hub = D.meta.hub_default, role = "始发", selCode = null;
 let fType = "全部", fSlot = "全部";
 let showBase = true, showLabels = false;
@@ -238,12 +245,16 @@ function initHubs(){
 
 function initTabs(){
   const box = document.getElementById("tabs");
-  const st = D.hub_stats[hub] || {count:0,始发:0,终到:0,途经:0};
+  // 按当前视图结果集统计角色数（station/search 视图联动更新）
+  const base = view === "station" ? trainsVia(viewArg) :
+               view === "search" ? searchTrainSet() :
+               baseOfRoleView();
+  const st = {全部: base.length, 始发: 0, 终到: 0, 途经: 0};
+  base.forEach(r=>{ st[r.role] = (st[r.role] || 0) + 1; });
   box.innerHTML = "";
   ROLE_ORDER.forEach(r=>{
     const t = el('<button class="tab'+(r===role?' on':'')+'" data-role="'+r+'">'+r+' <span class="n">'+(st[r]||0)+'</span></button>');
-    t.addEventListener("click", ()=>{ role=r; view="role"; viewArg=null; document.getElementById("q").value="";
-      initTabs(); renderList(); renderMap(); });
+    t.addEventListener("click", ()=>{ role=r; initTabs(); renderList(); renderMap(); });
     box.appendChild(t);
   });
 }
@@ -258,10 +269,24 @@ function slotOf(dep){
 }
 
 function routesOf(){
+  return roleFiltered(baseOfRoleView());
+}
+function baseOfRoleView(){
   return (D.by_hub[hub] || []).filter(r=>
-    r.role===role &&
     (fType==="全部" || (r.code||"")[0]===fType) &&
     (fSlot==="全部" || slotOf(r.seg_depart)===fSlot));
+}
+function roleFiltered(arr){
+  return role === "全部" ? arr : arr.filter(r=>r.role===role);
+}
+// 搜索视图命中的车次全集（车次号匹配 + 站点命中站的相关车次，按车次去重）
+function searchTrainSet(){
+  const q = (viewArg || "").trim().toUpperCase();
+  const set = new Map();
+  (D.by_hub[hub] || []).forEach(r=>{ if(r.code.toUpperCase().includes(q)) set.set(r.code, r); });
+  if(q){ allStationNames().filter(n=>n.toUpperCase().includes(q)).forEach(nm=>{
+    trainsVia(nm).forEach(r=>set.set(r.code, r)); }); }
+  return [...set.values()];
 }
 
 function initFilters(){
@@ -269,7 +294,7 @@ function initFilters(){
   box.innerHTML = "";
   const mk = (label, val, cur, cb)=>{
     const c = el('<button class="chip'+(cur===val?' on':'')+'" data-v="'+val+'">'+label+'</button>');
-    c.addEventListener("click", ()=>{ cb(val); initFilters(); renderList(); });
+    c.addEventListener("click", ()=>{ cb(val); initFilters(); initTabs(); renderList(); renderMap(); });
     return c;
   };
   const tg = el('<div class="fgrp"><b>类型</b></div>');
@@ -358,7 +383,7 @@ function renderList(){
 }
 
 function renderStationList(list){
-  const rs = trainsVia(viewArg);
+  const rs = roleFiltered(trainsVia(viewArg));
   if(!rs.length){ list.innerHTML = '<div class="empty">“'+viewArg+'”暂无当前站相关车次</div>'; return; }
   rs.forEach(r=>{
     const row = el(
@@ -380,7 +405,7 @@ function renderSearchList(list){
   const q = (viewArg || "").trim().toUpperCase();
   if(!q){ list.innerHTML = '<div class="empty">输入站点名或车次号开始搜索<br>（支持模糊匹配）</div>'; return; }
   const stHits = allStationNames().filter(nm=>nm.toUpperCase().includes(q)).slice(0,30);
-  const trHits = uniqueCodes(hub).filter(r=>r.code.toUpperCase().includes(q)).slice(0,30);
+  const trHits = roleFiltered(uniqueCodes(hub).filter(r=>r.code.toUpperCase().includes(q))).slice(0,30);
   if(!stHits.length && !trHits.length){
     list.innerHTML = '<div class="empty">未找到匹配“'+viewArg+'”的站点或车次</div>'; return;
   }
@@ -459,8 +484,8 @@ function selectTrain(code){
 }
 
 function openStation(nm){
-  view = "station"; viewArg = nm; selCode = null;
-  renderCtx(); renderList();
+  view = "station"; viewArg = nm; selCode = null; role = "全部";
+  initTabs(); renderCtx(); renderList(); renderMap();
   const st = D.stations[nm];
   if(st && map) map.setView([st.lat, st.lon], Math.max(map.getZoom(), 7));
 }
@@ -525,29 +550,46 @@ function refreshLabels(){
   });
 }
 
+// 地图绘制集：选中车次 → 仅该车次；站点视图 → 仅该站相关路线；否则当前筛选
+function mapTrains(){
+  if(selCode){ const r = (D.by_hub[hub] || []).find(x=>x.code===selCode); return r ? [r] : []; }
+  if(view === "station") return roleFiltered(trainsVia(viewArg));
+  return routesOf();
+}
+
 function renderMap(sel){
   if(!map){ initMap(); }
   if(layerRoute){ layerRoute.remove(); }
   if(layerStops){ layerStops.remove(); }
   layerRoute = L.layerGroup().addTo(map);
   layerStops = L.layerGroup().addTo(map);
-  const rs = routesOf();
+  const rs = mapTrains();
   stopsAll = {};
-  (D.by_hub[hub] || []).forEach(r=>r.stops.forEach(s=>{ stopsAll[s.name]=s; }));
+  rs.forEach(r=>r.stops.forEach(s=>{ stopsAll[s.name]=s; }));
   const hubInfo = D.stations[hub];
 
-  // 站点标记：枢纽琥珀色；普通站按该站最快列车类别着色（Canvas）
+  // 站点标记：置于 markerPane（最高层，鼠标交互优先）；枢纽琥珀色；普通站按该站最快列车类别着色；悬停显示详情
   Object.keys(stopsAll).forEach(nm=>{
     const st = D.stations[nm];
     if(!st) return;
     const isHub = nm===hub;
     const m = L.circleMarker([st.lat, st.lon], {
+      pane: "markerPane",
       radius: isHub?9:5.5, weight: isHub?3:2,
       color: "#fff", fillColor: stationFill(nm),
       fillOpacity: isHub?1:0.9, className: isHub?"hub-mark":"st-mark"
     });
+    const via = trainsVia(nm).length;
+    const tc = stationTypeCode(nm);
+    m.bindTooltip(L.tooltip({direction:"top", offset:[0,-12], className:"st-tip", opacity:1}), {
+      sticky: false
+    }).setTooltipContent(
+      '<div class="tip-row"><span class="tip-dot" style="background:'+stationFill(nm)+'"></span><b>'+nm+'</b>'+
+      (isHub?'<span class="tip-tag">枢纽</span>':'')+'</div>'+
+      '<div class="tip-sub">当前站相关 '+via+' 趟 · '+(tc?tc+' 字头为主':'普速/未知')+'</div>');
     m.on("click", ()=>openStation(nm));
     m.addTo(layerStops);
+    stationMarkers[nm] = m;
   });
 
   // 线路折线（当前筛选结果；按车次类别着色，选中车次高亮；跳过未定位点分段绘制）
@@ -593,9 +635,9 @@ document.getElementById("legendHead").addEventListener("click", function(){
 });
 document.getElementById("q").addEventListener("input", function(){
   const q = this.value.trim();
-  if(!q){ view="role"; viewArg=null; }
-  else { view="search"; viewArg=q; }
-  renderCtx(); renderList();
+  if(!q){ view="role"; viewArg=null; role="始发"; }
+  else { view="search"; viewArg=q; role="全部"; }
+  renderCtx(); initTabs(); renderList();
 });
 document.getElementById("q").addEventListener("keydown", function(e){
   if(e.key === "Enter"){ e.preventDefault(); this.blur(); }
