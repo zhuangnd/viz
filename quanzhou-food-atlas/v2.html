@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>半城烟火半城仙 · 泉州美食图鉴 v2</title>
+<title>半城烟火半城仙 · 泉州美食图鉴</title>
 <meta name="description" content="值得专程前往的福建美食之都——泉州。八章长卷 × 52 味 × 50 家店 × 六大街区，五种视角切换的美食图鉴。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23A8352A'/%3E%3Cpath d='M6 20c4-8 8-8 10 0s6 8 10 0' stroke='%23F5F0E6' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
@@ -232,15 +232,17 @@ main{position:relative;z-index:2}
 .route-stage svg{position:absolute;inset:0;width:100%;height:100%}
 .rpath{fill:none;stroke:var(--brick);stroke-width:3;stroke-linecap:round;stroke-dasharray:var(--len);stroke-dashoffset:var(--len);animation:draw 1.5s cubic-bezier(.4,0,.2,1) forwards}
 @keyframes draw{to{stroke-dashoffset:0}}
-.rstop{opacity:0;animation:stopIn .5s cubic-bezier(.2,1.4,.4,1) forwards}
-@keyframes stopIn{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}
-.rstop circle{transform-box:fill-box;transform-origin:center}
+.rstop{opacity:0;animation:stopIn .45s ease var(--d,0ms) forwards}
+@keyframes stopIn{to{opacity:1}}
+.rstop circle{transform-box:fill-box;transform-origin:center;animation:pop .55s cubic-bezier(.2,1.5,.4,1) var(--d,0ms) both}
+@keyframes pop{from{transform:scale(.15)}to{transform:scale(1)}}
+.rstop text{paint-order:stroke;stroke:rgba(242,235,221,.94);stroke-width:3.4;stroke-linejoin:round}
 .stop-card{
   border:1px solid var(--line);border-radius:14px;padding:16px 18px;background:rgba(255,255,255,.6);
   margin-bottom:12px;opacity:0;transform:translateY(14px);animation:cardIn .55s ease forwards;transition:.3s;
   display:flex;gap:14px
 }
-.stop-card:hover{background:#fff;box-shadow:var(--shadow);transform:translateY(-2px)}
+.stop-card:hover{background:#fff;box-shadow:var(--shadow);translate:0 -2px}
 @keyframes cardIn{to{opacity:1;transform:none}}
 .stop-card .tm{font-family:var(--serif);font-size:14px;color:var(--brick);flex:none;width:48px;letter-spacing:.02em}
 .stop-card b{font-family:var(--serif);font-size:16px;letter-spacing:.03em}
@@ -336,10 +338,10 @@ footer{border-top:1px solid var(--line);padding:44px 28px 56px;background:var(--
     <a class="brand" href="#top"><b>半城烟火半城仙</b><i>Quanzhou</i></a>
     <nav id="tabs">
       <button data-m="origin"><span>01</span>缘起</button>
-      <button data-m="chapter"><span>02</span>八章</button>
-      <button data-m="map"><span>03</span>地图</button>
-      <button data-m="route"><span>04</span>路线</button>
-      <button data-m="coords"><span>05</span>坐标</button>
+      <button data-m="chapter"><span>02</span>美味长卷</button>
+      <button data-m="map"><span>03</span>味觉地图</button>
+      <button data-m="route"><span>04</span>逛吃路线</button>
+      <button data-m="coords"><span>05</span>食物坐标</button>
     </nav>
   </div>
 </header>
@@ -398,8 +400,8 @@ footer{border-top:1px solid var(--line);padding:44px 28px 56px;background:var(--
       <svg class="ridge" viewBox="0 0 600 34" preserveAspectRatio="none"><path d="M0,30 C120,30 150,4 300,4 C450,4 480,30 600,30" fill="none" stroke="#A8352A" stroke-width="1.4"/></svg>
       <div class="sec-head rv">
         <div class="eyebrow">02 · EIGHT CHAPTERS</div>
-        <h2>八章长卷</h2>
-        <p>章节标题严格取自原文标题卡。每章一幅味觉星丛——点开任意一味，看它落在哪条街、哪家店。</p>
+        <h2>美味长卷</h2>
+        <p>味觉星丛——点开任意一味，看它落在哪条街、哪家店。</p>
       </div>
       <div class="ch-grid">
         <div class="ch-list" id="chList"></div>
@@ -488,7 +490,7 @@ footer{border-top:1px solid var(--line);padding:44px 28px 56px;background:var(--
   <div class="foot-in">
     <b>半城烟火半城仙 · 泉州美食图鉴</b>
     <div>八章 52 味 50 店 · 数据取自原文《值得专程前往的福建美食之都！》</div>
-    <span>v2 · 单文件 · 零依赖</span>
+    
   </div>
 </footer>
 
@@ -1216,15 +1218,17 @@ function drawRoute(i){
   document.getElementById("routeMeta").textContent=r.t+"　·　"+r.d+"　·　"+r.stops.length+" 站";
   const pts=r.stops.map(s=>[s[4],s[5]]);
   const d=smooth(pts);
-  let g=baseMap(true)+`<path class="rpath" d="${d}" style="--len:2600"/>`;
+  let g=baseMap(true)+`<path id="rpath" class="rpath" d="${d}" style="--len:2600"/>`;
   g+=`<g>${r.stops.map((s,j)=>`
-    <g class="rstop" style="animation-delay:${300+j*260}ms" transform="translate(${s[4]},${s[5]})">
+    <g class="rstop" style="--d:${300+j*260}ms" transform="translate(${s[4]},${s[5]})">
       <circle r="13" fill="none" stroke="#A8352A" stroke-width="1.4" opacity=".45"/>
       <circle r="7.5" fill="#A8352A"/>
       <text y="-20" font-size="13" font-family="var(--serif)" fill="#7E2419" text-anchor="middle">${s[0]}</text>
       <text y="30" font-size="11.5" fill="#5F544A" text-anchor="middle">${s[1]}</text>
     </g>`).join("")}</g>`;
   svg.innerHTML=g;
+  const rp=svg.querySelector("#rpath");
+  if(rp&&rp.getTotalLength) rp.style.setProperty("--len", Math.ceil(rp.getTotalLength()));
   document.getElementById("routeCards").innerHTML=r.stops.map((s,j)=>`
     <div class="stop-card" style="animation-delay:${260+j*200}ms">
       <div class="tm">${s[0]}</div>
