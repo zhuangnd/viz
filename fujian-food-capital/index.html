@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>值得专程前往的福建美食之都 · 泉州全景美食图谱</title>
+  <meta name="description" content="根据公众号《美食台/一条》特写制作。宋元海丝起点、联合国教科文组织认证‘世界美食之都’——福建泉州交互式可视化美食指南。">
+
+  <!-- 预连接字体库 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Noto+Serif+SC:wght@400;600;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS 基础原子类工具 CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brick: '#9E3524',
+            ocean: '#112832',
+            gold: '#B8853B',
+            paper: '#F9F7F1',
+            ink: '#14171A'
+          },
+          fontFamily: {
+            serif: ['"Noto Serif SC"', '"Songti SC"', 'STSong', 'serif'],
+            sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', '"PingFang SC"', 'sans-serif'],
+            cinzel: ['"Cinzel"', 'serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- 高定定制样式系统 -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="selection:bg-amber-200 selection:text-stone-900">
+
+  <!-- 纸实质感微粒叠加层 -->
+  <div class="texture-overlay"></div>
+
+  <!-- 顶部吸顶全景导航条 (Glass Header) -->
+  <header id="main-header" class="glass-header">
+    <div class="editorial-container h-16 md:h-20 flex items-center justify-between">
+      <!-- 品牌标识 -->
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="w-9 h-9 rounded-md bg-stone-900 text-amber-500 flex items-center justify-center font-serif text-sm font-bold shadow-sm group-hover:bg-red-900 transition">
+          刺桐
+        </div>
+        <div>
+          <div class="text-xs text-stone-400 font-cinzel tracking-widest uppercase">Quanzhou Gastronomy Atlas</div>
+          <div class="text-sm md:text-base font-bold font-serif text-stone-900">值得专程前往的福建美食之都</div>
+        </div>
+      </a>
+
+      <!-- 快捷锚点与寻味护照按钮 -->
+      <div class="flex items-center gap-2 md:gap-4">
+        <nav class="hidden md:flex items-center gap-6 text-xs font-serif text-stone-600">
+          <a href="#food-atlas-section" class="hover:text-red-800 transition">风味全谱</a>
+          <a href="#noodle-lab-section" class="hover:text-red-800 transition">面线糊实验室</a>
+          <a href="#beef-trio-section" class="hover:text-red-800 transition">牛肉三件套</a>
+          <a href="#tasting-routes-section" class="hover:text-red-800 transition">寻味四线</a>
+        </nav>
+
+        <button id="passport-toggle-btn" class="btn-outline-gold text-xs py-1.5 px-3.5 rounded-full" title="打开我的寻味打卡护照">
+          <span class="w-4 h-4 text-amber-800">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="10" r="3"/><path d="M7 17a5 5 0 0 1 10 0"/></svg>
+          </span>
+          <span class="font-serif">寻味护照</span>
+          <span id="passport-badge-count" class="w-5 h-5 rounded-full bg-red-800 text-white text-xs flex items-center justify-center font-mono ml-0.5">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 杂志级英雄主视觉区 (Editorial Hero) -->
+  <section class="hero-editorial">
+    <div class="editorial-container">
+      <div class="max-w-4xl mx-auto text-center">
+        <!-- 权威认证与风味座右铭微标 -->
+        <div class="flex flex-wrap items-center justify-center gap-2 mb-6">
+          <span class="minnan-seal">世界美食之都 · 联合国教科文组织认证</span>
+          <span class="gold-seal">宋元海丝起点 · 刺桐千年味脉</span>
+          <span class="text-xs px-2.5 py-1 rounded bg-stone-200/60 text-stone-700 font-serif">八山一水一分田，靠山吃山、向海讨鲜</span>
+        </div>
+
+        <!-- 视觉大标题 -->
+        <h1 class="hero-title-main font-serif mb-6">
+          值得专程前往的<br class="hidden sm:inline">
+          <span>福建美食之都</span>
+        </h1>
+
+        <!-- 核心引述金句 -->
+        <p class="text-stone-600 font-serif text-base md:text-xl leading-relaxed max-w-2xl mx-auto mb-8">
+          “国庆假期，如果你准备去泉州，不妨把时间留给吃。<br class="hidden sm:inline">
+          山海交汇的泉州，吃出了自己的节奏。主食配菜共治一炉，牛肉香料跨洋交响，地瓜淀粉化腐成奇。”
+        </p>
+
+        <!-- 关键数据胶囊行 -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl mx-auto pt-6 border-t border-stone-200/80">
+          <div class="p-3 bg-white/70 rounded-xl border border-stone-100 backdrop-blur-sm">
+            <div class="text-xl md:text-2xl font-serif font-bold text-stone-900">20<span class="text-sm font-normal text-amber-700">+</span></div>
+            <div class="text-xs text-stone-500 font-sans mt-0.5">全量考据珍味</div>
+          </div>
+          <div class="p-3 bg-white/70 rounded-xl border border-stone-100 backdrop-blur-sm">
+            <div class="text-xl md:text-2xl font-serif font-bold text-stone-900">5<span class="text-sm font-normal text-amber-700">大</span></div>
+            <div class="text-xs text-stone-500 font-sans mt-0.5">核心风味体系</div>
+          </div>
+          <div class="p-3 bg-white/70 rounded-xl border border-stone-100 backdrop-blur-sm">
+            <div class="text-xl md:text-2xl font-serif font-bold text-stone-900">4<span class="text-sm font-normal text-amber-700">条</span></div>
+            <div class="text-xs text-stone-500 font-sans mt-0.5">深度寻味专线</div>
+          </div>
+          <div class="p-3 bg-white/70 rounded-xl border border-stone-100 backdrop-blur-sm">
+            <div class="text-xl md:text-2xl font-serif font-bold text-stone-900">100<span class="text-sm font-normal text-amber-700">%</span></div>
+            <div class="text-xs text-stone-500 font-sans mt-0.5">文章原著溯源</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 章节快捷浏览横栏 (Chapters Bar) -->
+  <section class="py-6 bg-stone-100/60 border-b border-stone-200/70">
+    <div class="editorial-container">
+      <div id="chapter-quick-nav" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5">
+        <!-- 动态注入章节卡片 -->
+      </div>
+    </div>
+  </section>
+
+  <!-- 全景美食图谱 (Food Atlas Main Grid) -->
+  <section id="food-atlas-section" class="py-14">
+    <div class="editorial-container">
+      
+      <!-- 检索与多维筛选工具栏 -->
+      <div class="search-bar-row mb-10 space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-2xl md:text-3xl font-serif font-bold text-stone-900">刺桐全域珍味图谱</h2>
+            <p id="food-count-label" class="text-xs text-stone-400 font-sans mt-1">加载中...</p>
+          </div>
+
+          <!-- 搜索输入框 -->
+          <div class="search-input-wrapper w-full md:w-80">
+            <span class="w-4 h-4 text-stone-400">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </span>
+            <input type="text" id="search-input" placeholder="检索菜名、料头、老字号或风味..." autocomplete="off">
+          </div>
+        </div>
+
+        <!-- 二级过滤标签：坐标与时段 -->
+        <div class="flex flex-wrap items-center gap-y-3 gap-x-6 pt-3 border-t border-stone-200/60 text-xs">
+          <div class="flex items-center gap-2">
+            <span class="text-stone-400 font-serif">地理坐标:</span>
+            <div id="region-filter-row" class="flex flex-wrap items-center gap-1.5"></div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-stone-400 font-serif">用餐时段:</span>
+            <div id="time-filter-row" class="flex flex-wrap items-center gap-1.5"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 美食卡片主网格 -->
+      <div id="foods-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- 动态注入美食卡片 -->
+      </div>
+    </div>
+  </section>
+
+  <!-- 交互实验室 1：面线糊自选调配碗 (Noodle Lab) -->
+  <section id="noodle-lab-section" class="py-16 bg-stone-100/50 border-t border-b border-stone-200/70">
+    <div class="editorial-container">
+      <div class="text-center max-w-2xl mx-auto mb-12">
+        <div class="flex items-center justify-center gap-2 mb-2">
+          <span class="minnan-seal">沉浸式味觉实验室</span>
+          <span class="gold-seal">当仁不让的早餐扛把子</span>
+        </div>
+        <h2 class="text-2xl md:text-4xl font-serif font-bold text-stone-900">面线糊自选调配实验室</h2>
+        <p class="text-stone-600 font-serif text-sm md:text-base mt-2">
+          大骨浓汤 vs 鱼骨清鲜？数十种自选料头如何成就老饕巅峰？在这里亲手定制属于你的那一碗刺桐晨光。
+        </p>
+      </div>
+
+      <div class="lab-card-shell p-6 md:p-10">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          
+          <!-- 左侧：动态陶瓷面线糊大碗展示舞台 -->
+          <div class="lg:col-span-5 text-center flex flex-col items-center justify-center">
+            <div class="ceramic-bowl-stage">
+              <!-- 上升蒸汽微粒子 -->
+              <div class="steam-emitter">
+                <div class="steam-wave"></div>
+                <div class="steam-wave"></div>
+                <div class="steam-wave"></div>
+              </div>
+
+              <!-- 瓷碗外缘与汤底层 -->
+              <div class="bowl-rim">
+                <div id="bowl-broth-layer" class="bowl-broth-layer broth-fish">
+                  <!-- 面线细如发丝纹理 -->
+                  <div class="bowl-noodle-texture"></div>
+                </div>
+
+                <!-- 浮于汤面的料头动态微标 -->
+                <div class="relative z-10 w-4/5 flex flex-wrap items-center justify-center" id="bowl-active-tags">
+                  <!-- 动态插入料头徽章 -->
+                </div>
+              </div>
+            </div>
+
+            <!-- 当前组合实时计价与预设快捷键 -->
+            <div class="mt-6 flex flex-col items-center">
+              <div class="flex items-baseline gap-2 mb-3">
+                <span class="text-xs text-stone-500 font-sans">当前调配总计:</span>
+                <span id="noodle-total-price" class="text-3xl font-serif font-bold text-red-900">¥16</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button id="preset-local-btn" class="btn-outline-gold text-xs py-1.5 px-3">
+                  清晨市井标配 (醋肉+大肠+油条)
+                </button>
+                <button id="preset-deluxe-btn" class="btn-primary-brick text-xs py-1.5 px-3">
+                  豪奢海陆顶配
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 右侧：汤底流派切换与料头配料池 -->
+          <div class="lg:col-span-7">
+            <!-- 汤底切换 -->
+            <div class="mb-6">
+              <h4 class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-2.5">
+                步骤 1 · 挑选汤底流派
+              </h4>
+              <div class="grid grid-cols-2 gap-3">
+                <button id="broth-btn-fish" class="filter-pill active justify-between p-3.5 h-auto text-left w-full">
+                  <div>
+                    <div class="font-serif font-bold text-sm">鱼骨清鲜派</div>
+                    <div class="text-xs opacity-75 font-sans mt-0.5">炸鱼骨与海虾米同熬 · 清甜回甘</div>
+                  </div>
+                  <span class="minnan-seal shrink-0">县后街派</span>
+                </button>
+                <button id="broth-btn-pork" class="filter-pill justify-between p-3.5 h-auto text-left w-full">
+                  <div>
+                    <div class="font-serif font-bold text-sm">大骨浓汤派</div>
+                    <div class="text-xs opacity-75 font-sans mt-0.5">猪大筒骨文火久熬 · 醇厚粘糯</div>
+                  </div>
+                  <span class="gold-seal shrink-0">传统浓郁</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 料头选择池 -->
+            <div class="mb-6">
+              <h4 class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-2.5">
+                步骤 2 · 勾选你的独家料头 (可多选)
+              </h4>
+              <div id="toppings-options-pool" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-72 overflow-y-auto pr-1">
+                <!-- 动态注入料头选择按钮 -->
+              </div>
+            </div>
+
+            <!-- 老饕综合品评卡 -->
+            <div class="p-4 rounded-xl bg-amber-50/70 border border-amber-200/80">
+              <div class="flex items-center gap-1.5 text-xs font-bold text-amber-900 uppercase tracking-wider mb-1">
+                <span class="w-3.5 h-3.5 text-amber-700">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                </span>
+                泉州老饕品鉴官实时评语
+              </div>
+              <p id="noodle-expert-review" class="text-xs md:text-sm text-stone-800 leading-relaxed font-sans">
+                醋肉微酸解腻、大肠弹韧入味、剪段油条吸尽滚烫糊汤。这是全泉州老饕心照不宣的灵魂配置，无可挑剔！
+              </p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 交互实验室 2：一人食牛肉三件套解构台 (Beef Trio Lab) -->
+  <section id="beef-trio-section" class="py-16">
+    <div class="editorial-container">
+      <div class="text-center max-w-2xl mx-auto mb-12">
+        <div class="flex items-center justify-center gap-2 mb-2">
+          <span class="minnan-seal">牛肉原动力</span>
+          <span class="gold-seal">海丝香料奇遇</span>
+        </div>
+        <h2 class="text-2xl md:text-4xl font-serif font-bold text-stone-900">一人食牛肉三件套解构台</h2>
+        <p class="text-stone-600 font-serif text-sm md:text-base mt-2">
+          “牛肉之于泉州人，好比汽油之于汽车。”点击卡片解构这套统治泉州午间市井的黄金组合。
+        </p>
+      </div>
+
+      <div class="max-w-4xl mx-auto">
+        <!-- 三件套卡片选择行 -->
+        <div id="beef-trio-cards" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <!-- 动态渲染三件套部件卡 -->
+        </div>
+
+        <!-- 深度解构详情容器 -->
+        <div id="beef-trio-detail-box">
+          <!-- 动态渲染当前部件深度解构 -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 四大深度寻味专线 (Tasting Routes) -->
+  <section id="tasting-routes-section" class="py-16 bg-stone-100/50 border-t border-b border-stone-200/70">
+    <div class="editorial-container">
+      <div class="text-center max-w-2xl mx-auto mb-10">
+        <div class="flex items-center justify-center gap-2 mb-2">
+          <span class="minnan-seal">深度探味指南</span>
+          <span class="gold-seal">四大县域风情</span>
+        </div>
+        <h2 class="text-2xl md:text-4xl font-serif font-bold text-stone-900">从古城一路逛到石狮、晋江与崇武</h2>
+        <p class="text-stone-600 font-serif text-sm md:text-base mt-2">
+          “慢慢逛，慢慢吃，进入泉州的节奏。”基于文章考据定制的四条地道老饕路线。
+        </p>
+      </div>
+
+      <div class="max-w-4xl mx-auto">
+        <!-- 路线选项卡 -->
+        <div id="route-tabs" class="flex flex-wrap items-center justify-center gap-2 mb-8">
+          <!-- 动态注入路线 Tabs -->
+        </div>
+
+        <!-- 路线内容卡片 -->
+        <div id="route-content-container">
+          <!-- 动态渲染路线内容与时间线 -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 刺桐尾声与文化致谢 (Footer) -->
+  <footer class="py-16 bg-stone-900 text-stone-300">
+    <div class="editorial-container">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-8 pb-12 border-b border-stone-800">
+        <div class="md:col-span-6">
+          <div class="text-xs text-amber-500 font-cinzel tracking-widest uppercase mb-2">Maritime Silk Road Heritage</div>
+          <h3 class="text-2xl font-serif font-bold text-white mb-3">半城烟火半城仙，世遗之城的味觉长存</h3>
+          <p class="text-stone-400 font-serif text-sm leading-relaxed max-w-lg">
+            八百年前，刺桐港舟舶继踵、商贾云集；八百年后，阿拉伯的香料、南洋的咖喱与闽南的红砖番薯，深深熔铸于这一碗面线糊与一锅姜母鸭中。专程前往，不负味蕾。
+          </p>
+        </div>
+
+        <div class="md:col-span-3">
+          <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-3">风味维度</h4>
+          <ul class="text-xs space-y-2 text-stone-400 font-serif">
+            <li>壹 · 主食配菜二合一 (面线糊 / 咸饭)</li>
+            <li>贰 · 牛肉原动力 (咖喱牛排 / 牛肉羹)</li>
+            <li>叁 · 地瓜的报恩 (炸醋肉 / 安海菜粿)</li>
+            <li>肆 · 山海味觉暴击 (盐烧姜母鸭 / 土笋冻)</li>
+            <li>伍 · 石花膏与蜜水 (秉正堂 / 四果汤)</li>
+          </ul>
+        </div>
+
+        <div class="md:col-span-3">
+          <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-3">设计与文脉致敬</h4>
+          <p class="text-xs text-stone-400 leading-relaxed font-sans mb-3">
+            本数字化交互展根据微信公众号《美食台 / 一条》重磅特写《值得专程前往的福建美食之都！》悉心制作。
+          </p>
+          <div class="text-xs text-stone-500 font-mono">
+            零 Emoji · 纯正 SVG 矢量 · 纯净响应式排版
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-stone-500 gap-4">
+        <div>© 值得专程前往的福建美食之都 · 泉州全景美食交互图谱</div>
+        <div class="font-serif">宋元中国的世界海洋商贸中心 · 泉州</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 深度美食详情模态弹窗 (Food Detail Modal) -->
+  <div id="food-modal-backdrop" class="modal-backdrop">
+    <div class="modal-sheet">
+      <button id="modal-close-btn" class="absolute top-5 right-5 p-2 rounded-full text-stone-400 hover:text-stone-800 hover:bg-stone-100 transition z-10" title="关闭弹窗">
+        <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div id="food-modal-content">
+        <!-- 动态注入模态框深度内容 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 寻味打卡护照侧边抽屉 (Passport Drawer) -->
+  <aside id="passport-drawer" class="passport-drawer">
+    <!-- 护照头部 -->
+    <div class="p-6 border-b border-stone-200 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <span class="w-8 h-8 rounded-lg bg-red-900 text-amber-400 flex items-center justify-center">
+          <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="10" r="3"/><path d="M7 17a5 5 0 0 1 10 0"/></svg>
+        </span>
+        <div>
+          <h3 class="font-serif font-bold text-stone-900">我的泉州寻味护照</h3>
+          <p class="text-xs text-stone-400 font-sans">私人定制寻味清单</p>
+        </div>
+      </div>
+      <button id="passport-close-btn" class="p-2 text-stone-400 hover:text-stone-700 transition">
+        <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- 探索打卡进度条 -->
+    <div class="px-6 py-4 bg-stone-50 border-b border-stone-200/80">
+      <div class="flex items-center justify-between text-xs text-stone-500 mb-1.5 font-sans">
+        <span>打卡收集进度</span>
+        <span id="passport-progress-text" class="font-semibold text-red-800">已解锁 0 / 20</span>
+      </div>
+      <div class="w-full bg-stone-200 h-2 rounded-full overflow-hidden">
+        <div id="passport-progress-fill" class="bg-red-800 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <!-- 已收藏美食列表 -->
+    <div id="passport-items-list" class="flex-1 overflow-y-auto p-6 space-y-3">
+      <!-- 动态注入已收录美味项 -->
+    </div>
+
+    <!-- 底部操作栏 -->
+    <div class="p-6 border-t border-stone-200 bg-stone-50/50 space-y-2">
+      <button id="passport-print-btn" class="btn-primary-brick w-full justify-center text-xs py-2.5">
+        <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        打印 / 导出我的寻味手账
+      </button>
+      <button id="passport-clear-btn" class="text-xs text-stone-400 hover:text-red-700 w-full text-center py-1 transition">
+        清空全部收藏
+      </button>
+    </div>
+  </aside>
+
+  <!-- 引入脚本 -->
+  <script src="js/icons.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
