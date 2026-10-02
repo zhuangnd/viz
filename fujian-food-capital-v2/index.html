@@ -505,17 +505,25 @@ body.night-active .cartogram-canvas-box {
   display: block;
 }
 
-/* 地图标注动效 */
+/* 地图标注动效与高灵敏度响应 */
 .shop-pin {
   cursor: pointer;
-  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
 }
 
-.shop-pin:hover {
-  transform: scale(1.35);
+.shop-pin .hit-area {
+  cursor: pointer;
+  pointer-events: all;
 }
 
-.shop-pin.highlighted circle {
+.shop-pin .core-pin {
+  transition: r 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), stroke-width 0.22s ease, filter 0.22s ease;
+}
+
+.shop-pin:hover .core-pin {
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.35));
+}
+
+.shop-pin.highlighted .core-pin {
   stroke-width: 3px;
   stroke: #FFF;
   animation: pulsePin 1.5s infinite;
@@ -523,8 +531,146 @@ body.night-active .cartogram-canvas-box {
 
 @keyframes pulsePin {
   0% { r: 7; opacity: 1; }
-  50% { r: 11; opacity: 0.6; }
+  50% { r: 12; opacity: 0.65; }
   100% { r: 7; opacity: 1; }
+}
+
+.shop-pin text {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  paint-order: stroke fill;
+  stroke: rgba(255, 255, 255, 0.95);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  user-select: none;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+body.night-active .shop-pin text {
+  stroke: rgba(13, 20, 24, 0.95);
+  stroke-width: 3px;
+}
+
+/* 地理区域标题铭牌（位于各区域 rect 正上方） */
+.zone-label-plate {
+  pointer-events: none;
+}
+
+.zone-label-plate text {
+  font-family: var(--font-serif);
+  paint-order: stroke fill;
+  stroke: rgba(255, 255, 255, 0.96);
+  stroke-width: 3.5px;
+  stroke-linejoin: round;
+  user-select: none;
+}
+
+body.night-active .zone-label-plate text {
+  stroke: rgba(13, 20, 24, 0.96);
+  stroke-width: 3.5px;
+}
+
+/* 拓扑地图浮动跟随卡片 (Carto HUD Tooltip) */
+.carto-hud-tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(168, 53, 42, 0.25);
+  box-shadow: 0 14px 36px rgba(45, 38, 32, 0.16), 0 2px 8px rgba(45, 38, 32, 0.08);
+  border-radius: 10px;
+  padding: 12px 16px;
+  width: 260px;
+  z-index: 45;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, -100%) translateY(-14px);
+  transition: opacity 0.18s ease, transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.18s;
+}
+
+body.night-active .carto-hud-tooltip {
+  background: rgba(18, 26, 30, 0.95);
+  border-color: rgba(224, 178, 94, 0.35);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(224, 122, 43, 0.15);
+}
+
+.carto-hud-tooltip.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.carto-hud-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.carto-hud-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--c-brick);
+  color: var(--c-brick);
+  background: rgba(168, 53, 42, 0.06);
+}
+
+body.night-active .carto-hud-badge {
+  border-color: var(--c-gold);
+  color: var(--c-gold);
+  background: rgba(224, 178, 94, 0.12);
+}
+
+.carto-hud-district {
+  font-size: 11px;
+  color: var(--c-ink-muted);
+}
+
+body.night-active .carto-hud-district {
+  color: #94A3B8;
+}
+
+.carto-hud-title {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--c-ink);
+  margin-bottom: 4px;
+}
+
+body.night-active .carto-hud-title {
+  color: #FFF;
+}
+
+.carto-hud-desc {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--c-ink-light);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+body.night-active .carto-hud-desc {
+  color: #CBD5E1;
+}
+
+.carto-hud-hint {
+  font-size: 11px;
+  color: var(--c-brick);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+body.night-active .carto-hud-hint {
+  color: var(--c-gold);
 }
 
 /* 拓扑地图侧滑牌匾详情抽屉 */
@@ -890,6 +1036,87 @@ body.night-active .dissection-box {
   width: 100%;
   height: 100%;
   display: block;
+}
+
+/* 星图浮动卡片 (Constellation Star HUD Tooltip) */
+.star-hud-tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: rgba(15, 23, 30, 0.95);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(197, 147, 65, 0.4);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 0 25px rgba(197, 147, 65, 0.15);
+  border-radius: 10px;
+  padding: 12px 16px;
+  width: 260px;
+  z-index: 30;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, -100%) translateY(-14px);
+  transition: opacity 0.18s ease, transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.18s;
+}
+
+.star-hud-tooltip.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.star-hud-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.star-hud-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--c-gold);
+  border: 1px solid rgba(197, 147, 65, 0.4);
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(197, 147, 65, 0.1);
+}
+
+.star-hud-district {
+  font-size: 11px;
+  color: #94A3B8;
+}
+
+.star-hud-title {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 700;
+  color: #FFF;
+  margin-bottom: 4px;
+}
+
+.star-hud-quote {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #CBD5E1;
+  font-style: italic;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.star-hud-meta {
+  font-size: 11px;
+  color: #8C9BAE;
+  margin-bottom: 8px;
+}
+
+.star-hud-action {
+  font-size: 11px;
+  color: var(--c-gold);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 /* ==========================================================================
@@ -1319,52 +1546,78 @@ body.night-active .food-card-footer {
               <path d="M 720,220 C 780,320 850,420 980,520 L 1000,700 L 600,700 Z" fill="#DCE7E5" opacity="0.3"/>
               <text x="840" y="670" font-family="Noto Serif SC" font-size="14" fill="#4B6F73" opacity="0.6">台湾海峡 · 向海讨鲜</text>
 
-              <!-- 六大地理板块轮廓区 -->
+              <!-- 六大地理板块轮廓区（标题标签统一置于 rect 正上方，杜绝与内部 shop-pin 相互遮盖） -->
               <!-- 1. 鲤城古城 (核心十字轴) -->
-              <g id="zone-gucheng">
+              <g id="zone-gucheng" class="carto-zone-group">
                 <rect x="360" y="210" width="190" height="225" rx="16" fill="url(#cityGlow)" stroke="#A8352A" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.65"/>
-                <text x="375" y="235" font-family="Noto Serif SC" font-weight="700" font-size="13" fill="#A8352A">鲤城古城核心 (27家)</text>
-                <text x="375" y="250" font-size="10" fill="#782215" opacity="0.8">西街 · 中山路 · 涂门街 · 县后街</text>
+                <g class="zone-label-plate" transform="translate(362, 172)">
+                  <text x="0" y="15" font-family="Noto Serif SC" font-weight="700" font-size="13.5" fill="#A8352A">鲤城古城核心 (27家)</text>
+                  <text x="0" y="30" font-size="10.5" fill="#782215" opacity="0.85">西街 · 中山路 · 涂门街 · 县后街</text>
+                </g>
               </g>
 
               <!-- 2. 石狮老街与商市 -->
-              <g id="zone-shishi">
+              <g id="zone-shishi" class="carto-zone-group">
                 <rect x="630" y="470" width="160" height="160" rx="14" fill="#FAF0E6" stroke="#C59341" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.65"/>
-                <text x="645" y="495" font-family="Noto Serif SC" font-weight="700" font-size="13" fill="#C59341">石狮老街与夜市 (13家)</text>
-                <text x="645" y="510" font-size="10" fill="#8C6320" opacity="0.8">城隍老街 · 旧菜市 · 新华路</text>
+                <g class="zone-label-plate" transform="translate(632, 432)">
+                  <text x="0" y="15" font-family="Noto Serif SC" font-weight="700" font-size="13" fill="#C59341">石狮老街与夜市 (13家)</text>
+                  <text x="0" y="30" font-size="10" fill="#8C6320" opacity="0.85">城隍老街 · 旧菜市 · 新华路</text>
+                </g>
               </g>
 
               <!-- 3. 晋江·安海 (五里桥头) -->
-              <g id="zone-anhai">
+              <g id="zone-anhai" class="carto-zone-group">
                 <rect x="210" y="460" width="125" height="115" rx="12" fill="#E6EEF0" stroke="#366B73" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.6"/>
-                <text x="220" y="480" font-family="Noto Serif SC" font-weight="700" font-size="12" fill="#366B73">晋江 · 安海 (4家)</text>
-                <text x="220" y="495" font-size="10" fill="#204A50" opacity="0.8">五里桥 · 土笋冻故乡</text>
+                <g class="zone-label-plate" transform="translate(212, 424)">
+                  <text x="0" y="15" font-family="Noto Serif SC" font-weight="700" font-size="12" fill="#366B73">晋江 · 安海 (4家)</text>
+                  <text x="0" y="29" font-size="10" fill="#204A50" opacity="0.85">五里桥 · 土笋冻故乡</text>
+                </g>
               </g>
 
               <!-- 4. 晋江·张林 (姜母鸭一条街) -->
-              <g id="zone-zhanglin">
+              <g id="zone-zhanglin" class="carto-zone-group">
                 <rect x="250" y="350" width="100" height="85" rx="10" fill="#F4EFE6" stroke="#9E4A28" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.6"/>
-                <text x="260" y="370" font-family="Noto Serif SC" font-weight="700" font-size="11" fill="#9E4A28">晋江 · 张林 (3家)</text>
-                <text x="260" y="385" font-size="9" fill="#7A3215">磁灶吃鸭金字招牌</text>
+                <g class="zone-label-plate" transform="translate(252, 316)">
+                  <text x="0" y="14" font-family="Noto Serif SC" font-weight="700" font-size="11.5" fill="#9E4A28">晋江 · 张林 (3家)</text>
+                  <text x="0" y="27" font-size="9.5" fill="#7A3215" opacity="0.85">磁灶吃鸭金字招牌</text>
+                </g>
               </g>
 
               <!-- 5. 晋江·深沪 (渔港小镇) -->
-              <g id="zone-shenhu">
+              <g id="zone-shenhu" class="carto-zone-group">
                 <rect x="520" y="595" width="115" height="80" rx="10" fill="#E0EBEB" stroke="#2F6E7A" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.6"/>
-                <text x="530" y="615" font-family="Noto Serif SC" font-weight="700" font-size="11" fill="#2F6E7A">晋江 · 深沪 (2家)</text>
-                <text x="530" y="630" font-size="9" fill="#1C454D">宝泉庵 · 壶仔饭水丸</text>
+                <g class="zone-label-plate" transform="translate(522, 560)">
+                  <text x="0" y="14" font-family="Noto Serif SC" font-weight="700" font-size="11.5" fill="#2F6E7A">晋江 · 深沪 (2家)</text>
+                  <text x="0" y="27" font-size="9.5" fill="#1C454D" opacity="0.85">宝泉庵 · 壶仔饭水丸</text>
+                </g>
               </g>
 
               <!-- 6. 丰泽·蟳埔 -->
-              <g id="zone-fengze">
+              <g id="zone-fengze" class="carto-zone-group">
                 <rect x="645" y="235" width="110" height="75" rx="10" fill="#F0EDE4" stroke="#8C7A68" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.6"/>
-                <text x="655" y="255" font-family="Noto Serif SC" font-weight="700" font-size="11" fill="#5F544A">丰泽 · 蟳埔之侧 (1家)</text>
-                <text x="655" y="270" font-size="9" fill="#5F544A">渔港小馆 · 炣鲳鱼</text>
+                <g class="zone-label-plate" transform="translate(647, 200)">
+                  <text x="0" y="14" font-family="Noto Serif SC" font-weight="700" font-size="11.5" fill="#5F544A">丰泽 · 蟳埔之侧 (1家)</text>
+                  <text x="0" y="27" font-size="9.5" fill="#5F544A" opacity="0.85">渔港小馆 · 炣鲳鱼</text>
+                </g>
               </g>
 
               <!-- 50 店动态渲染层 (由 JS 注入) -->
               <g id="carto-shops-layer"></g>
             </svg>
+
+            <!-- 店铺悬停跟随卡片 (Carto HUD Tooltip) -->
+            <div class="carto-hud-tooltip" id="carto-hud-tooltip">
+              <div class="carto-hud-top">
+                <span class="carto-hud-badge" id="hud-carto-attitude">本地力荐</span>
+                <span class="carto-hud-district" id="hud-carto-district">街区 · 街道</span>
+              </div>
+              <div class="carto-hud-title" id="hud-carto-name">店铺名</div>
+              <div class="carto-hud-desc" id="hud-carto-desc">老饕探店指南</div>
+              <div class="carto-hud-hint">
+                <span>点击展开老饕探店实录</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </div>
+            </div>
 
             <!-- 店铺侧滑牌匾抽屉 (Shop Ledger Drawer) -->
             <div class="shop-ledger-drawer" id="shop-drawer">
@@ -1509,6 +1762,21 @@ body.night-active .food-card-footer {
             <div style="position:absolute; right:20px; top:50%; transform:translateY(-50%); font-size:12px; color:rgba(255,255,255,0.4); font-family:var(--font-serif); pointer-events:none;">海错狂澜 (星虫/海蛎/马鲛) ▶</div>
             <div style="position:absolute; top:20px; left:50%; transform:translateX(-50%); font-size:12px; color:rgba(255,255,255,0.4); font-family:var(--font-serif); pointer-events:none;">▲ 纯正甘甜 (百花蜜水/花生汤)</div>
             <div style="position:absolute; bottom:20px; left:50%; transform:translateX(-50%); font-size:12px; color:rgba(255,255,255,0.4); font-family:var(--font-serif); pointer-events:none;">▼ 咸鲜大味 (骨汤卤味/酱油水)</div>
+            
+            <!-- 星宿悬停浮动卡片 (Star HUD Tooltip) -->
+            <div class="star-hud-tooltip" id="star-hud-tooltip">
+              <div class="star-hud-header">
+                <span class="star-hud-badge" id="star-hud-chapter">章节</span>
+                <span class="star-hud-district" id="star-hud-district">地标</span>
+              </div>
+              <h4 class="star-hud-title" id="star-hud-name">美食名</h4>
+              <p class="star-hud-quote" id="star-hud-quote">“风味速描”</p>
+              <div class="star-hud-meta" id="star-hud-meta">风味维度</div>
+              <div class="star-hud-action">
+                <span>点击探微完整风味档案</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1598,8 +1866,8 @@ body.night-active .food-card-footer {
   <!-- 嵌入完整核心数据集与交互逻辑 -->
   <script>
     const CHAPTERS = [{"id": 1, "num": "01", "title": "主食配菜二合一", "page": 2, "foodCount": 8, "proposition": "「二合一」是泉州最底层的进食结构：汤底与料头不分家，饭与菜同锅焖熟。", "desc": "一碗解决一顿。泉州人把主食与配菜烩进同一只碗、卷进同一张饼皮、包进同一片粽叶——面线糊是这套逻辑的扛把子，咸饭、烧肉粽、润饼菜各擅其场。", "icon": "bowl", "color": "#A8352A"}, {"id": 2, "num": "02", "title": "地瓜的报恩", "page": 15, "foodCount": 7, "proposition": "地瓜粉是泉州小吃的隐形骨架：勾芡、裹浆、捏团，几乎无所不在。", "desc": "八山一水一分田，地瓜曾是闽南人的救命粮。闽南人把这份恩情还了回去：熬粥、炸枣、搓粉团，连芋头也一并入伙，成就半甜咸的迷之爱好。", "icon": "potato", "color": "#9E4A28"}, {"id": 3, "num": "03", "title": "牛肉原动力", "page": 25, "foodCount": 4, "proposition": "一人食标配三件套：一碗咸饭、一份牛肉汤或牛肉羹、一支牛排。", "desc": "宋元时阿拉伯人在刺桐港掀起吃牛风潮，下南洋的番客又带回咖喱与香料——这解释了口味清淡的泉州为何用重香料烹牛。牛肉之于泉州人，好比汽油之于汽车。", "icon": "beef", "color": "#8C3B24"}, {"id": 4, "num": "04", "title": "小海鲜盛宴", "page": 29, "foodCount": 10, "proposition": "「炣」即酱油兑水烹煮，毫无技巧可言，把最关键的一步交给选料的原点。", "desc": "向海讨生活。从滩涂上的土笋冻、近郊蟳埔的蚵仔，到宴席上的桂花蟹与葱烧河鳗——鲜是唯一的评判标准，最好的烹饪往往最不需要技巧。", "icon": "fish", "color": "#2F6E7A"}, {"id": 5, "num": "05", "title": "咸甜羹汤相斗阵", "page": 46, "foodCount": 8, "proposition": "闽南人三餐离不开汤水，在外吃盒饭也要一碗大骨汤落胃才舒服。", "desc": "羹是汤的另一种表达。清汤派与厚糊派隔空对峙，花生汤与四果汤在甜的一端接棒，咸与甜在泉州的餐桌上正面交锋、不分昼夜。", "icon": "soup", "color": "#B98A2F"}, {"id": 6, "num": "06", "title": "闽南天妇罗", "page": 54, "foodCount": 4, "proposition": "在泉州走两三步路就能看见一家炸物小摊，油纸一包，边走边吃。", "desc": "万物皆可裹粉下锅。炸物既是零嘴，也是泉州人与神明维系关系的食物——供桌上的鸡卷，与油锅边的菜粿，出自同一套逻辑。", "icon": "fire", "color": "#B2562B"}, {"id": 7, "num": "07", "title": "烧酒客烧酒配", "page": 58, "foodCount": 4, "proposition": "打菜类似打盒饭，码放一个盘子，配一壶烧酒，是闽南的居酒屋。", "desc": "从前挑担游走戏台庙口，称「卤料担」；烧酒在闽南就是「酒」，烧酒配由此演化。卤料、捆蹄、姜母鸭——置身其中的体验感，要明显胜于食物本身。", "icon": "wine", "color": "#6B3B52"}, {"id": 8, "num": "08", "title": "糕粿茶配伴手礼", "page": 61, "foodCount": 7, "proposition": "与潮汕「粿」单指米制品不同，泉州糕粿种类庞杂，大米、糯米之外还包含发面。", "desc": "糕粿由民间祭祀供品发展而来，是神明介入一城之味的金身显现。它从仙境下凡的第一站，稳稳停在茶盘上——身处铁观音之乡安溪之侧，泉州人少不了茶配陪伴。", "icon": "cake", "color": "#A0703B"}];
-    const FOODS = [{"id": 1, "chapterId": 1, "name": "面线糊", "sub": "扛把子", "district": "鲤城古城", "time": "早市 / 夜宵", "category": "主食", "flavor": "咸", "quote": "泉州小吃的当仁不让。面线捻碎与汤底同煮，地瓜粉浆勾芡——糊而不烂，清而不浊。", "detail": "汤底分猪骨汤、鱼骨汤两派，自选料头多达二三十种，分卤味、海鲜、炸物小炒、内脏四大类。早市调味清淡：一把葱花、白胡椒、几滴当归黄芪浸的高度酒；到了夜宵时段，流动摊头为饮酒夜归的「麻龟」们而生，偏好重口味。", "shops": "「水门国仔」骨汤派·梭子蟹吊鲜，配醋肉卤大肠油条；「文啊面线糊」县后街·鱼骨派，清淡鲜美毫无腥气；「罗记面线糊」县后街·鱼骨派，香气先声夺人；「客常来面线糊」中山路×打锡巷·夜宵，汤底味咸；「婷婷面线糊」百源路巨头·下蒜末不容商量；「吴淑珍面线糊」夜宵·卤料八角味略重", "x": 45, "y": 15, "tags": ["市井碳水", "一人食神装"]}, {"id": 2, "chapterId": 1, "name": "猪血汤", "sub": "面线糊的官配", "district": "鲤城古城", "time": "早市", "category": "汤羹", "flavor": "辛鲜", "quote": "看似骨汤清淡，喝起来辛辣开胃，孔洞之间偶有爆汁。", "detail": "白胡椒粉和姜的辛辣、当归的清甜随汤汁浸润猪血。几乎所有面线糊店都会供应，是内脏爱好者的天堂一角。", "shops": "「文啊面线糊」招牌之一，辛辣开胃；「水门国仔」同为招牌", "x": 20, "y": 10, "tags": ["市井碳水"]}, {"id": 3, "chapterId": 1, "name": "卤面", "sub": "72 般变化", "district": "鲤城古城", "time": "午市", "category": "主食", "flavor": "咸", "quote": "碱水面打底，花生酱点睛——看得到汤，却喝不到汤。", "detail": "宴席常客。肉类、海鲜、内脏、羹丸排列组合，足足 72 般变化。「卤」不是卤汁而是面的状态，相比莆田、漳州做法，泉州出品有些「拖泥带水」。", "shops": "「泉府卤面馆」花巷·花生酱+沙茶酱等十几味秘料，面汤浓郁着色深", "x": 40, "y": 25, "tags": ["市井碳水", "海丝印记"]}, {"id": 4, "chapterId": 1, "name": "咸饭", "sub": "无物不能焖", "district": "鲤城古城 / 石狮", "time": "午市", "category": "主食", "flavor": "咸", "quote": "在泉州，咸饭的地位几乎和白米饭平起平坐。", "detail": "葱头油、干香菇、五花肉、虾米海蛎干架构基础风味，主食材可换胡萝卜、白萝卜、芋头、挂菜、高丽菜、紫菜。盒饭摊、牛肉馆、海鲜酒楼均有供应。", "shops": "「石狮绿岛海鲜酒楼」萝卜饭是咸饭的高光时刻", "x": 35, "y": 20, "tags": ["市井碳水", "一人食神装"]}, {"id": 5, "chapterId": 1, "name": "萝卜饭", "sub": "家常的高光时刻", "district": "石狮", "time": "午市", "category": "主食", "flavor": "咸", "quote": "沙土白萝卜甘甜多汁，与配料生米翻炒再焖制，油光饱满、鲜香四溢。", "detail": "本地沙土地铸就更高的含水量与更少的纤维，让一锅家常咸饭拥有了精致的「高光时刻」。", "shops": "「石狮绿岛海鲜酒楼」全文最推荐的一碗咸饭", "x": 25, "y": 20, "tags": ["市井碳水"]}, {"id": 6, "chapterId": 1, "name": "壶仔饭", "sub": "陶罐焖制", "district": "晋江·深沪", "time": "午市", "category": "主食", "flavor": "咸", "quote": "晋江深沪以陶罐焖制的咸饭，配一碗扎实的牛肉拳头母汤。", "detail": "宝泉庵附近的老街小店，不仅饭好吃，汤头熬得扎实入味。", "shops": "「老街壶仔饭」深沪宝泉庵附近·乡镇宝藏", "x": 40, "y": 20, "tags": ["市井碳水", "一人食神装"]}, {"id": 7, "chapterId": 1, "name": "烧肉粽", "sub": "包山包海", "district": "鲤城古城 / 石狮", "time": "全天 / 夜宵", "category": "主食", "flavor": "咸", "quote": "「烧」是滚烫热乎。包山、包海、卤肉、炒米、骨汤煨煮，才是一只闽南烧肉粽的修养。", "detail": "市区三大巨头随游客涌入，在本地人心目中地位大不如前；古早味要出城去石狮寻。闽南话煮肉粽叫「炕肉粽」——骨汤鲜香沁入糯米，与粽叶清香交汇。", "shops": "「马脚桥肉粽」石狮城隍老街·五香卤汁配蒜泥与高仔辣椒酱；「约记大仑街肉粽」石狮夜市·成捆粽子大骨汤慢炕；「蓝氏钟楼肉粽」市区巨头·甜辣酱花生酱；「东街钟楼肉粽」市区巨头；「侯阿婆肉粽」市区巨头", "x": 30, "y": 30, "tags": ["市井碳水", "海丝印记"]}, {"id": 8, "chapterId": 1, "name": "润饼菜", "sub": "清明食俗", "district": "鲤城古城 / 石狮", "time": "午市", "category": "小吃", "flavor": "半甜咸", "quote": "主配料二合一的集大成者，还能包进麻粩——甜咸交织的全新体验。", "detail": "馅料在家做，饼皮到西街老铺买。石狮老街的住家之味：大锅炒杂素加煎海蛎，炸粉丝、浒苔、花生糖带来甜咸层次；麻粩的花生香、棉絮胚心与柔韧饼皮交融。同门兄弟有台湾润饼、潮汕薄饼、台州食饼筒。", "shops": "「亚佛春饼」西街老铺·专买饼皮；「王记润饼菜」石狮老街·住家之味", "x": 35, "y": 55, "tags": ["半甜咸魔性", "市井碳水"]}, {"id": 9, "chapterId": 2, "name": "地瓜粥", "sub": "清晨第一碗", "district": "鲤城古城", "time": "早市", "category": "主食", "flavor": "甜", "quote": "胃口刚醒来的第一顿，配菜脯或炣咸，山珍海味都不换。", "detail": "新鲜地瓜、晒制地瓜干、地瓜签皆可熬粥，浓稠香甜。地瓜是闽南人曾经的救命粮，闽南人报以「地瓜腔」般的深情。", "shops": "「家常 / 早市摊」家家户户的味道", "x": 15, "y": 65, "tags": ["一人食神装"]}, {"id": 10, "chapterId": 2, "name": "炸枣", "sub": "地瓜×麻团", "district": "石狮", "time": "下午茶", "category": "炸物", "flavor": "半甜咸", "quote": "糯米粉混地瓜泥搓成枣形，内里中空、外皮薄脆，不油不腻。", "detail": "上可烧香敬神明，下可解馋打牙祭。石狮人叫它煎粿，味道是泉州人迷之爱好的半甜咸。", "shops": "「金辉煎粿」石狮老街·口感最像麻团的一款", "x": 20, "y": 60, "tags": ["半甜咸魔性", "神明供桌"]}, {"id": 11, "chapterId": 2, "name": "地瓜粉团", "sub": "不中看却中吃", "district": "鲤城古城", "time": "午市", "category": "主食", "flavor": "咸", "quote": "巴浪鱼干的腥香、三层肉的丰腴、花菜的爽脆，在地瓜粉裹挟下和解、碰撞。", "detail": "脱胎自饥荒年代的大杂烩：地瓜粉拌四五样食材沸水调匀，分团下锅旺火煮熟，撒米粉青菜。粉团回弹，花生提味，湖头米粉柔韧加分。", "shops": "「惠安地瓜粉团」南俊巷·朋友力荐", "x": 35, "y": 20, "tags": ["市井碳水"]}, {"id": 12, "chapterId": 2, "name": "芋圆", "sub": "槟榔芋的弹牙", "district": "石狮", "time": "下午茶", "category": "小吃", "flavor": "半甜咸", "quote": "蒸芋圆拌甜辣酱花生糖，弹牙中吃出芋丝肌理；炸芋圆皮酥芋香更过瘾。", "detail": "本地芋头与福鼎芋、荔浦芋同属粉糯的槟榔芋，刨丝加地瓜粉捏成团。", "shops": "「石狮阿凸芋圆」更推荐炸芋圆", "x": 25, "y": 55, "tags": ["半甜咸魔性"]}, {"id": 13, "chapterId": 2, "name": "芋泥", "sub": "甜咸皆有层次", "district": "鲤城古城", "time": "下午茶", "category": "甜汤", "flavor": "半甜咸", "quote": "甜咸口、不过甜腻，细腻与颗粒感兼具。", "detail": "泉州芋泥自有风格，出自市区元宵名店之手。", "shops": "「海丝金凤」金鱼巷·百年老店的层次", "x": 20, "y": 60, "tags": ["半甜咸魔性"]}, {"id": 14, "chapterId": 2, "name": "八宝芋泥", "sub": "水围城", "district": "石狮", "time": "晚市", "category": "甜汤", "flavor": "半甜咸", "quote": "芋泥外圈勾芡糖水如「水围城」，中心咸口干贝荸荠肉馅——由外向内舀，如引水淹城。", "detail": "与福州全甜做法不同，甜咸交融，直赴高潮。宴席上的造型派。", "shops": "「石狮绿岛海鲜酒楼」宴席甜品", "x": 30, "y": 58, "tags": ["半甜咸魔性"]}, {"id": 15, "chapterId": 2, "name": "菜头酸", "sub": "闽氏硬核酸明治", "district": "鲤城古城", "time": "下午茶", "category": "小吃", "flavor": "酸甜", "quote": "白萝卜盐腌甘草渍，自然发酵的酸香，佐餐解腻、汁水下火。", "detail": "泉州人喊白萝卜「菜头」。名店还脑洞大开：菜头酸一剖为二，夹花生糖和甜辣酱，堪称闽氏硬核酸明治。可散卖，自己拿牙签串着吃。", "shops": "「东来菜头酸」本地制酸名店·首创菜头酸夹花生", "x": 15, "y": 50, "tags": ["半甜咸魔性"]}, {"id": 16, "chapterId": 3, "name": "闽式牛排", "sub": "咖喱味的乡土", "district": "鲤城古城 / 石狮", "time": "午市 / 晚市", "category": "硬菜", "flavor": "咸", "quote": "黄牛肋排加咖喱、大料、辣椒焖炖酥软——乡土外表下的洋气味道。", "detail": "牛肉之于泉州人好比汽油之于汽车。宋元时阿拉伯人掀起吃牛风潮，下南洋的华侨带回咖喱香料，解释了清淡泉州为何重香料烹牛。一人食标配三件套：一碗咸饭、一份牛肉汤或牛肉羹、一支牛排。", "shops": "「街头牛肉馆」密度极高的「原力加油站」；「王贼」晋江·各有拥趸；「林东升牛头狮」石狮·各有拥趸；「大华福记」安海·各有拥趸", "x": 25, "y": 20, "tags": ["海丝印记", "一人食神装"]}, {"id": 17, "chapterId": 3, "name": "牛肉羹·牛肉汤", "sub": "三件套之二", "district": "鲤城古城", "time": "午市", "category": "汤羹", "flavor": "咸", "quote": "地瓜粉赋予的嫩滑软 Q，是牛肉馆的日常底气。", "detail": "三五朋友可以加点干拌牛肉、牛杂；胃口够大，吃遍牛肉全身轻而易举。", "shops": "「街头牛肉馆」与咸饭、牛排组成一人食三件套", "x": 20, "y": 15, "tags": ["海丝印记", "一人食神装"]}, {"id": 18, "chapterId": 3, "name": "牛肉面", "sub": "网红本红", "district": "鲤城古城", "time": "夜宵", "category": "主食", "flavor": "咸", "quote": "沙茶味浓郁的牛肉料头，料多味重，是年轻人的「菜」。", "detail": "状元街夜宵路边摊起家，走红时正逢「网红」一词流行，有了铺位后店招也留住了这个词。面有碱面、泡面两种，全家福含牛肚、牛肉羹、牛舌、牛肉丸和牛肉。", "shops": "「网红牛肉面」状元街·夜宵", "x": 35, "y": 25, "tags": ["海丝印记"]}, {"id": 19, "chapterId": 3, "name": "牛肉拳头母", "sub": "形似拳头", "district": "晋江·深沪", "time": "午市", "category": "汤羹", "flavor": "咸", "quote": "牛肉、肉筋摔打而成，弹牙好吃；汤头熬得扎实入味。", "detail": "类似潮汕牛筋丸，因形似拳头得名。深沪的惊喜，藏在壶仔饭老店里。", "shops": "「老街壶仔饭」深沪宝泉庵附近", "x": 30, "y": 15, "tags": ["市井碳水"]}, {"id": 20, "chapterId": 4, "name": "蚵仔煎", "sub": "一青二白三红四黄", "district": "鲤城古城 / 石狮", "time": "午市 / 晚市", "category": "小吃", "flavor": "咸", "quote": "青蒜、菜头酸、甜辣酱、鸭蛋——颜值正义之外，各派有各派的执念。", "detail": "蚵仔（海蛎）出现在泉州餐桌的频率无海鲜出其右，近郊蟳埔村养蛎近百年，头戴簪花开蚵的蟳埔女是城中风景。老派地瓜粉多蚵仔少、煎得湿润；泉府派不加蛋，鲜甜爽弹带颗粒酥脆；石狮派现点现做，胜在镬气，直接拿甜辣酱当调味料。", "shops": "「群众牛肉小点」公私合营·老一代古早味；「泉府卤面馆」不加蛋·货真价实；「福记海蛎煎」石狮大仑街·镬气最足；「福记阿明」旧菜场内·同一家族", "x": 80, "y": 30, "tags": ["向海讨鲜", "市井碳水"]}, {"id": 21, "chapterId": 4, "name": "土笋冻", "sub": "安海的下午茶果冻", "district": "晋江·安海", "time": "下午茶", "category": "小吃", "flavor": "咸", "quote": "海星虫熬煮出胶，冷却成果冻——滑溜脆爽，处理干净者胜。", "detail": "海星虫学名可口革囊星虫，滩涂打洞，土缸养一天去泥沙，石锤碾压出内脏，加水煮沸后胶原蛋白融于水，盛碗冷却便如果冻。想吃正宗的必须到安海走一遭——吃过纯天然无添加的正确味道，加凝固剂的硬质冒牌货将无处容身。", "shops": "「长火土笋冻」位置隐蔽时间飘忽·处理干净土笋肥美，入门首选；「五里桥土笋冻」自调蒜酱加分·另有更硬更浓的球形土笋冻", "x": 95, "y": 15, "tags": ["向海讨鲜", "大味至简"]}, {"id": 22, "chapterId": 4, "name": "白灼小章鱼", "sub": "手磨二十分钟的脆嫩", "district": "鲤城古城", "time": "晚市", "category": "海鲜", "flavor": "咸", "quote": "短蛸白灼前手磨搅拌 20 分钟以上，冰爽脆嫩，口感极佳。", "detail": "手磨去粘液也让肉质紧实有弹性；有的店家加盐、草木灰或花生壳增摩擦，春虹用茶油油粕，摩擦之余提味增香。闽南冷菜的开场。", "shops": "「春虹食尚坊」东鲁路·社区海鲜小馆", "x": 95, "y": 10, "tags": ["向海讨鲜", "大味至简"]}, {"id": 23, "chapterId": 4, "name": "咖喱鲨鱼皮", "sub": "罪恶却不油腻", "district": "鲤城古城", "time": "晚市", "category": "海鲜", "flavor": "咸", "quote": "鲨鱼皮肥糯胶质丰富，和咖喱搭档吃起来罪恶，但却不油腻。", "detail": "闽南鲨鱼皮通常红烧做煲或与蹄筋同炖，这家用咖喱炒，实属难得。同店还有蠘仔炒花菜、沙螺苦瓜汤，一炒一汤都走清甜路数；招牌「番茄炒蛋」实为茄汁炒蛋，是绝对的饭扫光。", "shops": "「新秀餐馆」不设菜单·看菜点菜，点完即上", "x": 90, "y": 30, "tags": ["向海讨鲜", "海丝印记"]}, {"id": 24, "chapterId": 4, "name": "炣鲳鱼", "sub": "海鲜馆子的试金石", "district": "丰泽", "time": "晚市", "category": "海鲜", "flavor": "咸", "quote": "炣，即酱油兑水烹煮——毫无技巧可言，却把最关键的一步交给选料的原点。", "detail": "店内食材多来自蟳埔渔港，每天不同全凭运气。同店的干煎小墨鱼煸得干香焦脆适合下酒，爆炒小鳗鱼油脂不重、爽脆弹牙、葱香四溢。", "shops": "「桥仔头餐馆」丰泽凤山街道桥头小巷·藏得深", "x": 95, "y": 15, "tags": ["向海讨鲜", "大味至简"]}, {"id": 25, "chapterId": 4, "name": "花生酱炒钉螺", "sub": "嘬腮吸螺", "district": "石狮", "time": "夜宵", "category": "海鲜", "flavor": "咸", "quote": "钉螺提供口感，味道全在特调花生酱里——浓郁鲜香带微辣。", "detail": "泉州人对花生酱爱得深沉，城中最热的烧烤店、麻辣拌、铁板烧都拿它做文章。闽南话把花生叫「土豆」，花生酱即「土豆酱」。暗夜勾动多少馋虫从各地奔袭而来，既为味道，也为氛围。", "shops": "「王吉螺仔摊」石狮新华路·大名鼎鼎夜宵排档", "x": 85, "y": 35, "tags": ["向海讨鲜", "海丝印记"]}, {"id": 26, "chapterId": 4, "name": "桂花蟹", "sub": "年节大菜", "district": "石狮", "time": "晚市", "category": "海鲜", "flavor": "咸", "quote": "梭子蟹剔肉剔黄，与鸭蛋、荸荠、韭黄同炒——寻常炒蛋瞬间鲜美浓烈。", "detail": "老底子闽南菜，因颇为费工现已不多见，是年节餐桌上的大菜。", "shops": "「石狮绿岛海鲜酒楼」宴席标杆；「吴树卤肉担」难得一见的老菜", "x": 85, "y": 25, "tags": ["向海讨鲜"]}, {"id": 27, "chapterId": 4, "name": "葱烧河鳗", "sub": "酸甜口的宴席主菜", "district": "石狮", "time": "晚市", "category": "海鲜", "flavor": "咸", "quote": "炸过的滑糯鱼皮包裹肥厚鱼肉，烧汁中醋味贯穿，肥而不腻。", "detail": "比江浙蒜子河鳗的浓油赤酱清淡，属于酸甜口，口感爆炸。", "shops": "「石狮绿岛海鲜酒楼」宴席主菜", "x": 75, "y": 40, "tags": ["向海讨鲜"]}, {"id": 28, "chapterId": 4, "name": "松茸包", "sub": "没有松茸的松茸包", "district": "石狮", "time": "晚市", "category": "小吃", "flavor": "咸", "quote": "馅心是肉松、葱茸、咸蛋黄——趁热吃，皮松软、馅流心。", "detail": "绿岛名物，很多人一「吃」倾心。", "shops": "「石狮绿岛海鲜酒楼」名物点心", "x": 40, "y": 35, "tags": ["市井碳水"]}, {"id": 29, "chapterId": 4, "name": "紫菜鳗鱼卷", "sub": "三种口感层层递进", "district": "石狮", "time": "晚市", "category": "小吃", "flavor": "咸", "quote": "外紫菜、中芋头、心鳗鱼——外脆中松内软，三种香气冲上云霄。", "detail": "三种食材、三种口感、三种香气层层递进，是绿岛点心里最让人喜欢的一道。", "shops": "「石狮绿岛海鲜酒楼」点心头牌", "x": 80, "y": 30, "tags": ["向海讨鲜"]}, {"id": 30, "chapterId": 5, "name": "大骨汤", "sub": "盒饭摊的落胃汤", "district": "鲤城古城 / 石狮", "time": "午市 / 全天", "category": "汤羹", "flavor": "咸", "quote": "闽南人三餐离不开汤水，在外吃盒饭也要大骨汤落胃才舒服。", "detail": "典型泉州盒饭摊：炒米粉+卤料+可选料头的猪大骨汤。料头从二师兄的腮边肉吃到尾巴，肠子部位细分得惊人。", "shops": "「街头盒饭摊」做海蛎煎、芋圆、拌面的摊头也常供应", "x": 20, "y": 10, "tags": ["一人食神装"]}, {"id": 31, "chapterId": 5, "name": "灌肠", "sub": "内脏版甜甜圈", "district": "鲤城古城", "time": "全天", "category": "小吃", "flavor": "咸", "quote": "灌蛋、灌葱、灌米、灌血、灌莲子；米血双灌是拼配，肠灌肠是俄罗斯套娃。", "detail": "小肠被泉州人玩坏了——肠灌肠环环相套，形似内脏版甜甜圈。另有粉肠与颇为重口的生肠。", "shops": "「大骨汤摊 / 卤料摊」随汤而售", "x": 20, "y": 15, "tags": ["一人食神装"]}, {"id": 32, "chapterId": 5, "name": "三鲜羹", "sub": "清汤派", "district": "鲤城古城", "time": "午市", "category": "汤羹", "flavor": "咸", "quote": "重汤头、不勾芡——市区清汤派的代表。", "detail": "羹是汤的另一种表达：牛肉、猪肉、大肠与马鲛鱼、鲨鱼、鳗鱼、目鱼，或切片裹粉或绞碎拌粉或做成水丸，均被地瓜粉赋予嫩滑软 Q。", "shops": "「老厨房」市区·三鲜羹", "x": 65, "y": 10, "tags": ["大味至简"]}, {"id": 33, "chapterId": 5, "name": "猪肉羹·马加羹", "sub": "厚糊派", "district": "石狮", "time": "午市", "category": "汤羹", "flavor": "咸", "quote": "清水调姜丝、醋，勾个芡——爽滑又粘稠。", "detail": "石狮、晋江的厚糊派与市区清汤派相对，双拼一碗两味。闽南话「水丸」是肉丸鱼丸的统称。", "shops": "「博记老字号」石狮·猪肉羹马加羹双拼", "x": 60, "y": 20, "tags": ["市井碳水"]}, {"id": 34, "chapterId": 5, "name": "花生汤", "sub": "蛋花如云", "district": "鲤城古城", "time": "早市 / 下午茶", "category": "甜汤", "flavor": "甜", "quote": "滚烫花生汤浇进大力搅散的蛋液，蛋花便轻盈蓬松地浮了起来。", "detail": "去皮花生仁慢熬，滋味各家天差地别。纯花生汤、加蛋、加芋头三种选项——浓郁、蓬松、粉糯。", "shops": "「王川花生汤」三家名店在它面前都黯淡了不少；「老爱甜品店」市区；「福人颐煎包」市区；「承天巷铁门花生汤」市区", "x": 15, "y": 85, "tags": ["大味至简"]}, {"id": 35, "chapterId": 5, "name": "元宵圆", "sub": "锤出来的馅", "district": "鲤城古城", "time": "下午茶 / 全天", "category": "甜汤", "flavor": "甜", "quote": "花生芝麻冬瓜糖干葱头猪油，钢锤暴锤紧实，再滚上糯米粉。", "detail": "滚出来的元宵、包出来的汤圆，泉州元宵内馅用钢制工具暴锤而出鲜为人知。点一碗大圆拼小圆，元宵圆与冬至无馅小圆尽收腹中，红糖姜汤底补气驱寒。", "shops": "「海丝金凤」金鱼巷·传承百年", "x": 20, "y": 80, "tags": ["神明供桌"]}, {"id": 36, "chapterId": 5, "name": "汤圆", "sub": "红薯紫薯的皮", "district": "石狮", "time": "下午茶", "category": "甜汤", "flavor": "甜", "quote": "流沙芝麻花生馅降低了糖度，外皮用三种红薯紫薯调色调味，甜糯不粘牙。", "detail": "与市区传统元宵相对的另一种风格。", "shops": "「清廉汤圆店」石狮人民路", "x": 20, "y": 75, "tags": ["神明供桌"]}, {"id": 37, "chapterId": 5, "name": "四果汤", "sub": "泉州糖水之王", "district": "鲤城古城", "time": "下午茶 / 夜宵", "category": "甜汤", "flavor": "甜", "quote": "选四样料加蜜水——石花膏必点，剩下的交给纠结的 PICK 时段。", "detail": "石花膏用富含胶质的石花草做成，本身没味道，主要提供口感。料头分蜜豆类（蜜红豆绿豆芸豆、蜜芋头、蜜薏仁、银耳）、粿子类（阿达子、珍珠、仙草冻）、水果类（跟着季节走）。", "shops": "「秉正堂」天后宫旁老店·胜在蜜水醇厚，蜜豆类出色；「爱啊石花膏」后起之秀·粿子类是拳头产品", "x": 70, "y": 90, "tags": ["向海讨鲜", "大味至简"]}, {"id": 38, "chapterId": 6, "name": "菜粿", "sub": "最好吃的在安海", "district": "晋江·安海", "time": "下午茶", "category": "炸物", "flavor": "咸", "quote": "外皮极酥、脆得掉渣，内里极软、入口即化——刚出锅小心烫嘴。", "detail": "通俗理解即萝卜糕：米浆和萝卜泥熬成糊状，上笼蒸出型，彻底凉透后切块，旺火快炸方成。懂行的吃客都知道往安海去。", "shops": "「安海老街炸物摊」懂行者的目的地", "x": 25, "y": 25, "tags": ["市井碳水"]}, {"id": 39, "chapterId": 6, "name": "醋肉", "sub": "面线糊的黄金搭档", "district": "鲤城古城", "time": "全天", "category": "炸物", "flavor": "咸", "quote": "腌肉时加永春老醋——中国四大名醋之一，近水楼台的最佳调味。", "detail": "可惜市面上很多醋肉被蒜味和五香粉盖过风头，名不副实。醋肉也属于妈妈菜范畴，每个妈妈的味道都不尽相同。", "shops": "「称重炸物摊」与炸排骨、炸菜圆、炸紫菜同锅", "x": 20, "y": 25, "tags": ["一人食神装"]}, {"id": 40, "chapterId": 6, "name": "鸡卷", "sub": "和鸡没有关系", "district": "鲤城古城 / 石狮", "time": "全天", "category": "炸物", "flavor": "咸", "quote": "猪肉荸荠拌五香粉地瓜粉为馅，传统猪网油来包，嘴里淌油、香气十足。", "detail": "传闻因形似鸡脖子得名，是供桌上的常客——炸物既是零嘴，也是泉州人与神明维系关系的食物。后简化成豆皮，新吃法「一口酥」以小张豆皮包卷，算是时代更迭。", "shops": "「吴树卤肉担」网油包的老做法；「街市炸物摊」豆皮版香酥", "x": 30, "y": 30, "tags": ["神明供桌"]}, {"id": 41, "chapterId": 6, "name": "街头炸物小摊", "sub": "油纸一包边走边吃", "district": "鲤城古城", "time": "全天", "category": "炸物", "flavor": "咸", "quote": "饭嗲、米糕、春卷……仅一人可操持的小摊，是泉州烟火气的具象。", "detail": "混杂小葱米粒的饭嗲、糯米炸成菱形块的米糕、包卷胡萝卜丝的春卷、白萝卜米浆做的菜粿——在泉州经常走两三步路就看到一家这样的小摊。", "shops": "「街头巷尾」两三步一家的密度", "x": 30, "y": 30, "tags": ["市井碳水"]}, {"id": 42, "chapterId": 7, "name": "卤料·烧酒配", "sub": "闽南居酒屋", "district": "石狮", "time": "晚市 / 夜宵", "category": "卤味", "flavor": "咸", "quote": "卤料是完美的下酒菜——大肠、生肠、猪头皮、卤鸭、卤豆腐，任君选择。", "detail": "从前挑担游走戏台庙口，称「卤料担」；烧酒在闽南就是「酒」，烧酒配由此演化。卤料之外还有老板自己灌的肉肠和蛋肠。打菜类似打盒饭，码放一个盘子，置身其中的体验感要明显胜于食物本身。", "shops": "「吴树卤肉担」石狮旧菜市·白天饮酒的完美理由；海鲜生猛：白灼小卷、红糟鳗鱼、清蒸鲈鱼、葱姜蒸鲨鱼肝、酱油水海蛎", "x": 55, "y": 20, "tags": ["大味至简"]}, {"id": 43, "chapterId": 7, "name": "捆蹄", "sub": "口服胶原蛋白", "district": "晋江·安海", "time": "下午茶 / 全天", "category": "卤味", "flavor": "咸", "quote": "猪前脚剃肉取皮，灌入猪肉猪筋压实缝合，捆牢煮熟——皮子弹、猪肉脆。", "detail": "工序繁复的技术活，且吃且珍惜。百年老店无店面，藏身安海古厝。", "shops": "「李慨捆蹄」安海·百年历史，藏身古厝", "x": 25, "y": 20, "tags": ["大味至简"]}, {"id": 44, "chapterId": 7, "name": "姜母鸭", "sub": "泉州重磅", "district": "鲤城古城 / 晋江·张林", "time": "晚市", "category": "硬菜", "flavor": "咸", "quote": "三斤正番鸭、三年老姜母、芝麻油——缺了姜，这道菜将不复存在。", "detail": "干烧煮汤、是否切块、上色程度各家不同。张林做法据说加麦芽糖提色增香，吃口更甜、上色更深，是远近闻名的金字招牌。", "shops": "「斯丹姜母鸭」涂门街·后生家偏爱，入味干香极下饭；「忠记姜母鸭」二十年老店·盐烧炭火，整鸭成盘；「阿山姜母鸭」张林·姜味浓郁番鸭酥烂，老饕指路；「远华饭店」张林·吃鸭名店；「春生饭店」张林·卤料同样不容错过", "x": 20, "y": 15, "tags": ["大味至简"]}, {"id": 45, "chapterId": 7, "name": "卤大肠头·糯米鸭血", "sub": "姜母鸭店的彩蛋", "district": "晋江·张林", "time": "晚市", "category": "卤味", "flavor": "咸", "quote": "肠壁厚实、软糯入味，卤汤带姜母的辛辣，非常上头。", "detail": "春生饭店除姜母鸭外，还供应鸭肠、鸭腱等卤料和炒菜，这两样是此行亮眼发现。", "shops": "「春生饭店」张林·卤料不容错过", "x": 20, "y": 20, "tags": ["大味至简"]}, {"id": 46, "chapterId": 8, "name": "碗糕", "sub": "泉州人的发糕", "district": "鲤城古城", "time": "早市 / 全天", "category": "糕粿", "flavor": "甜", "quote": "米浆发酵舀入小瓷碗蒸制，成败的关键是冲破瓷碗的开花。", "detail": "有些人的童年噩梦，是啊嬷蒸糕时不让出声，否则要承担开不出花的「罪责」。另有田螺肉碗糕一派：对发酵要求极高，切面须介于死面与发酵之间、呈蜂窝状态。", "shops": "「王川花生汤」田螺肉碗糕与正常碗糕并售", "x": 15, "y": 70, "tags": ["神明供桌"]}, {"id": 47, "chapterId": 8, "name": "糯米粿", "sub": "糕粿界的孙悟空", "district": "石狮", "time": "全天", "category": "糕粿", "flavor": "甜", "quote": "去皮绿豆或芝麻花生馅，蒸好后放放凉，Q 弹更明显。", "detail": "依祈福事项万般变化：龟形的龟粿、拌鼠尾草的黑龟粿、满月婴孩的满月圆（捏成奶头状，象征母乳饱满）。闽南人继承中原对龟的崇拜，视乌龟为吉祥物。", "shops": "「金辉煎粿」石狮老街·内馅甜蜜外皮爽弹", "x": 15, "y": 75, "tags": ["神明供桌"]}, {"id": 48, "chapterId": 8, "name": "麦夹粿·菜包", "sub": "名不副实的粿", "district": "鲤城古城", "time": "全天", "category": "糕粿", "flavor": "半甜咸", "quote": "麦夹粿虽叫粿却由麦子铸就；菜包虽叫包，却是咸口糯米粿。", "detail": "与潮汕「粿」单指米制品不同，泉州糕粿种类庞杂：大米、糯米制品之外还包含发面——它由民间祭祀供品发展而来，是神明介入一城之味的金身显现。", "shops": "「糕粿老铺」年节祭祀与日常之间", "x": 20, "y": 50, "tags": ["神明供桌", "半甜咸魔性"]}, {"id": 49, "chapterId": 8, "name": "甜粿", "sub": "年节炸物", "district": "石狮", "time": "全天", "category": "糕粿", "flavor": "甜", "quote": "近 1:1 的糯米粉与糖揉合蒸制，裹面粉蛋液油炸——脆壳薄、蛋液香、甜粿拉丝。", "detail": "石狮甜粿在闽南颇负盛名，这道经典年节炸物平时在绿岛也能点到，甜甜蜜蜜。", "shops": "「石狮绿岛海鲜酒楼」平日可点", "x": 15, "y": 85, "tags": ["神明供桌"]}, {"id": 50, "chapterId": 8, "name": "满煎糕", "sub": "饱肚的茶配", "district": "鲤城古城", "time": "下午茶", "category": "糕粿", "flavor": "甜", "quote": "茶配的容忍度极高，饱肚的糕点茶汤也能吸收化解。", "detail": "身处铁观音之乡安溪之侧，泉州人每天少不了茶水温润，也少不了茶配陪伴。", "shops": "「茶桌之上」与铁观音同席", "x": 20, "y": 70, "tags": ["市井碳水"]}, {"id": 51, "chapterId": 8, "name": "麻粩·贡糖", "sub": "酥香作响", "district": "鲤城古城 / 石狮", "time": "下午茶", "category": "糕粿", "flavor": "甜", "quote": "花生香、棉絮状胚心——既上茶盘，也能包进润饼菜。", "detail": "传统糕点的两重身份：茶配常客，也是润饼菜里打开味蕾的全新体验。", "shops": "「老铺糕饼店」祭拜三牲的糕饼替身，很是可爱", "x": 20, "y": 80, "tags": ["神明供桌"]}, {"id": 52, "chapterId": 8, "name": "桔红糕·蒜蓉枝·蜜饯·绿豆糕", "sub": "茶盘众生", "district": "鲤城古城", "time": "下午茶", "category": "糕粿", "flavor": "甜", "quote": "雪白柔韧的桔红糕、重口的蒜蓉枝、零嘴蜜饯——茶汤皆可化解。", "detail": "糕粿从仙境下凡的第一站，稳稳停在茶盘上。", "shops": "「茶配铺子」佐铁观音", "x": 20, "y": 75, "tags": ["神明供桌"]}];
-    const SHOPS = [{"name": "水门国仔面线糊", "district": "鲤城古城", "attitude": "老字号", "desc": "骨汤派代表，坚持用梭子蟹吊鲜，汤底清甜。醋肉、卤大肠、油条蘸汤汁是在地人雷打不动的固定搭配。", "x": 430, "y": 390, "street": "水门巷"}, {"name": "文啊面线糊", "district": "鲤城古城", "attitude": "本地力荐", "desc": "县后街。鱼骨派却隐藏极深，清淡鲜美毫无腥气，料头地道家常；猪血汤辛辣开胃，偶有爆汁。", "x": 430, "y": 260, "street": "县后街"}, {"name": "罗记面线糊", "district": "鲤城古城", "attitude": "老字号", "desc": "县后街。同属鱼骨派，光凭嗅觉就能猜出一二。", "x": 450, "y": 255, "street": "县后街"}, {"name": "客常来面线糊", "district": "鲤城古城", "attitude": "夜宵摊", "desc": "中山路与打锡巷交界。夜宵摊，汤底味咸，服务饮酒夜归的「麻龟」。", "x": 470, "y": 310, "street": "中山路×打锡巷"}, {"name": "婷婷面线糊", "district": "鲤城古城", "attitude": "夜宵摊", "desc": "百源路巨头。下起蒜末来不容商量，重口味夜宵之选。", "x": 485, "y": 325, "street": "百源路"}, {"name": "吴淑珍面线糊", "district": "鲤城古城", "attitude": "夜宵摊", "desc": "夜宵摊。卤料八角味略有些过头，适合微醺之后。", "x": 420, "y": 360, "street": "老城区"}, {"name": "泉府卤面馆", "district": "鲤城古城", "attitude": "本地力荐", "desc": "花巷。菜单晃眼又紧凑，72 般变化；花生酱加沙茶酱等十几味秘料。蚵仔煎不加蛋，货真价实。", "x": 410, "y": 300, "street": "花巷"}, {"name": "亚佛春饼", "district": "鲤城古城", "attitude": "老字号", "desc": "西街老铺。清明将至时，泉州人跑来买润饼皮的地方。", "x": 380, "y": 250, "street": "西街165号"}, {"name": "东来菜头酸", "district": "鲤城古城", "attitude": "标杆名店", "desc": "本地制酸名店。脑洞大开首创「菜头酸夹花生」——闽氏硬核酸明治。", "x": 435, "y": 280, "street": "金鱼巷/西街"}, {"name": "斯丹姜母鸭", "district": "鲤城古城", "attitude": "本地力荐", "desc": "涂门街。后生家偏爱，入味干香、极为下饭，只是姜味淡了一些。", "x": 490, "y": 350, "street": "涂门街关帝庙旁"}, {"name": "忠记姜母鸭", "district": "鲤城古城", "attitude": "老字号", "desc": "二十年老店，主打盐烧：铁锅盐焗入味再上灶慢炖，整鸭成盘。", "x": 525, "y": 270, "street": "崇福路中段"}, {"name": "网红牛肉面", "district": "鲤城古城", "attitude": "夜宵摊", "desc": "状元街。夜宵路边摊起家，沙茶牛肉料多味重，全家福一碗吃遍牛全身。", "x": 500, "y": 290, "street": "状元街"}, {"name": "群众牛肉小点", "district": "鲤城古城", "attitude": "老字号", "desc": "公私合营的老店，蚵仔煎代表老一代古早味：地瓜粉多蚵仔少，煎得湿润。", "x": 425, "y": 315, "street": "中山南路"}, {"name": "海丝金凤", "district": "鲤城古城", "attitude": "老字号", "desc": "金鱼巷，传承百年。元宵圆钢锤打馅，大圆拼小圆配红糖姜汤；芋泥甜咸有层次。", "x": 440, "y": 330, "street": "金鱼巷"}, {"name": "王川花生汤", "district": "鲤城古城", "attitude": "本地力荐", "desc": "打蛋大力搅散再浇滚烫花生汤，蛋花轻盈如云。还卖田螺肉碗糕。", "x": 450, "y": 345, "street": "惠安/鲤城老铺"}, {"name": "老爱甜品店", "district": "鲤城古城", "attitude": "老字号", "desc": "市区花生汤名店之一。", "x": 420, "y": 340, "street": "市区老街"}, {"name": "福人颐煎包", "district": "鲤城古城", "attitude": "老字号", "desc": "煎包出名，花生汤也在榜单上。", "x": 400, "y": 335, "street": "中山路老街"}, {"name": "承天巷铁门花生汤", "district": "鲤城古城", "attitude": "隐世小店", "desc": "藏在铁门后的花生汤，街坊才知道。", "x": 475, "y": 300, "street": "承天巷"}, {"name": "秉正堂", "district": "鲤城古城", "attitude": "标杆名店", "desc": "四果汤地头蛇，得去天后宫旁的老店。蜜水蜜香醇厚，蜜豆类料头出色。", "x": 455, "y": 415, "street": "天后宫旁"}, {"name": "爱啊石花膏", "district": "鲤城古城", "attitude": "本地力荐", "desc": "后起之秀，粿子类是拳头产品：阿达子、芋圆、番薯圆口感味道俱佳。", "x": 465, "y": 400, "street": "天后宫/西街"}, {"name": "惠安地瓜粉团", "district": "鲤城古城", "attitude": "本地力荐", "desc": "南俊巷。鱼干腥香、三层肉丰腴、粉团回弹，湖头米粉加分不少。", "x": 470, "y": 275, "street": "南俊巷"}, {"name": "老厨房", "district": "鲤城古城", "attitude": "本地力荐", "desc": "市区清汤派代表，三鲜羹重汤头不勾芡。", "x": 415, "y": 270, "street": "市区"}, {"name": "春虹食尚坊", "district": "鲤城古城", "attitude": "本地力荐", "desc": "东鲁路社区海鲜小馆。白灼小章鱼手磨 20 分钟以上，加茶油油粕提香，冰爽脆嫩。", "x": 530, "y": 355, "street": "东鲁路"}, {"name": "新秀餐馆", "district": "鲤城古城", "attitude": "隐世小店", "desc": "不设菜单、看菜点菜。咖喱炒鲨鱼皮罪恶却不油腻；招牌番茄炒蛋是绝对的饭扫光。", "x": 510, "y": 335, "street": "老巷子"}, {"name": "蓝氏钟楼肉粽", "district": "鲤城古城", "attitude": "游客巨头", "desc": "市区三大巨头之一。游客涌入后，在本地人心目中地位大不如前——古早味请出城去石狮寻。", "x": 445, "y": 275, "street": "钟楼东街"}, {"name": "东街钟楼肉粽", "district": "鲤城古城", "attitude": "游客巨头", "desc": "市区三大巨头之一，调料主打甜辣酱与花生酱。", "x": 460, "y": 270, "street": "东街"}, {"name": "侯阿婆肉粽", "district": "鲤城古城", "attitude": "游客巨头", "desc": "市区三大巨头之一，名声在外，本地人已另有心头好。", "x": 465, "y": 290, "street": "东街"}, {"name": "绿岛海鲜酒楼", "district": "石狮", "attitude": "标杆名店", "desc": "石狮绝对的标杆。萝卜饭、八宝芋泥、桂花蟹、葱烧河鳗、松茸包、紫菜鳗鱼卷、甜粿——红白喜事的宴席载体。", "x": 740, "y": 500, "street": "石狮市区"}, {"name": "马脚桥肉粽", "district": "石狮", "attitude": "本地力荐", "desc": "城隍老街。配料朴素，五香卤汁是特色，配蒜泥和高仔辣椒酱更显本味。", "x": 670, "y": 530, "street": "石狮城隍老街"}, {"name": "约记大仑街肉粽", "district": "石狮", "attitude": "夜宵摊", "desc": "专营夜市。成捆粽子大骨汤慢炕，着色不深却有滋有味。", "x": 700, "y": 560, "street": "石狮大仑街夜市"}, {"name": "王记润饼菜", "district": "石狮", "attitude": "本地力荐", "desc": "石狮老街。炒杂素加煎海蛎，炸粉丝浒苔花生糖，还可以包进麻粩。", "x": 660, "y": 520, "street": "石狮老街"}, {"name": "金辉煎粿", "district": "石狮", "attitude": "本地力荐", "desc": "石狮老街。炸枣口感最像麻团，中空薄脆半甜咸；糯米粿放凉后更 Q。", "x": 680, "y": 510, "street": "石狮老街"}, {"name": "阿凸芋圆", "district": "石狮", "attitude": "本地力荐", "desc": "小小一颗蒸芋圆弹牙有芋丝肌理；炸芋圆皮酥芋香，更为推荐。", "x": 650, "y": 545, "street": "石狮老街"}, {"name": "福记海蛎煎（大仑街）", "district": "石狮", "attitude": "本地力荐", "desc": "现点现做胜在镬气，直接把蘸料甜辣酱当调味料，猛火快炒鲜香诱人。", "x": 710, "y": 550, "street": "石狮大仑街"}, {"name": "福记阿明海蛎煎", "district": "石狮", "attitude": "老字号", "desc": "旧菜场内，与大仑街福记同属一个家族，很多人推荐。", "x": 720, "y": 570, "street": "石狮旧菜场内"}, {"name": "王吉螺仔摊", "district": "石狮", "attitude": "夜宵摊", "desc": "新华路大名鼎鼎的夜宵排档。花生酱炒钉螺是镇店明星，食客嘬腮吸螺。", "x": 750, "y": 580, "street": "石狮新华路夜市"}, {"name": "博记老字号", "district": "石狮", "attitude": "老字号", "desc": "猪肉羹、马加羹双拼，石狮厚糊派代表：姜丝醋勾芡，爽滑粘稠。", "x": 685, "y": 575, "street": "石狮市区"}, {"name": "清廉汤圆店", "district": "石狮", "attitude": "本地力荐", "desc": "人民路。流沙芝麻花生馅降了糖度，红薯紫薯外皮调色调味。", "x": 675, "y": 600, "street": "石狮人民路"}, {"name": "吴树卤肉担", "district": "石狮", "attitude": "标杆名店", "desc": "旧菜市的「闽南居酒屋」。卤料打头，海鲜生猛，还有桂花蟹、网油鸡卷等难得老菜。", "x": 715, "y": 530, "street": "石狮旧菜市"}, {"name": "林东升牛头狮", "district": "石狮", "attitude": "本地力荐", "desc": "石狮牛肉一派的拥趸之选。", "x": 690, "y": 500, "street": "石狮老城"}, {"name": "长火土笋冻", "district": "晋江·安海", "attitude": "隐世小店", "desc": "城中热店，位置隐蔽、时间飘忽。处理干净、口感纯粹、土笋量足肥美，最适合入门级吃客。", "x": 260, "y": 490, "street": "安海隐秘小巷"}, {"name": "五里桥土笋冻", "district": "晋江·安海", "attitude": "本地力荐", "desc": "自调蒜酱是加分项；另有小海星虫不脱皮直接煮的球形土笋冻，更硬更浓。", "x": 280, "y": 520, "street": "安海五里桥头"}, {"name": "李慨捆蹄", "district": "晋江·安海", "attitude": "隐世小店", "desc": "百年历史，无店面、藏身古厝。工序繁复，皮弹肉脆，且吃且珍惜。", "x": 240, "y": 500, "street": "安海古厝"}, {"name": "大华福记", "district": "晋江·安海", "attitude": "本地力荐", "desc": "安海牛肉名店，各有拥趸。", "x": 270, "y": 540, "street": "安海老街"}, {"name": "老街壶仔饭", "district": "晋江·深沪", "attitude": "隐世小店", "desc": "深沪宝泉庵附近。陶罐焖制的壶仔饭香，牛肉拳头母弹牙、汤头扎实——乡镇里的惊喜。", "x": 570, "y": 630, "street": "深沪宝泉庵附近"}, {"name": "王贼", "district": "晋江·深沪", "attitude": "本地力荐", "desc": "晋江牛肉一派的名店，往乡镇深处探寻的对象。", "x": 490, "y": 500, "street": "晋江青阳/乡镇"}, {"name": "阿山姜母鸭", "district": "晋江·张林", "attitude": "隐世小店", "desc": "张林。老饕指路才找到——姜味浓郁、番鸭酥烂，颇为惊喜。", "x": 285, "y": 375, "street": "磁灶张林镇"}, {"name": "远华饭店", "district": "晋江·张林", "attitude": "老字号", "desc": "磁灶张林镇，远近闻名的吃鸭名店。", "x": 310, "y": 395, "street": "磁灶张林镇"}, {"name": "春生饭店", "district": "晋江·张林", "attitude": "本地力荐", "desc": "张林吃鸭名店，麦芽糖提色增香；卤大肠头、糯米鸭血是亮眼发现。", "x": 280, "y": 410, "street": "磁灶张林镇"}, {"name": "桥仔头餐馆", "district": "丰泽", "attitude": "隐世小店", "desc": "凤山街道桥头小巷。食材多来自蟳埔渔港，每天不同全凭运气；炣鲳鱼胜在选料原点。", "x": 680, "y": 260, "street": "凤山街道桥头小巷"}];
+    const FOODS = [{"id": 1, "chapterId": 1, "name": "面线糊", "sub": "扛把子", "district": "鲤城古城", "time": "早市 / 夜宵", "category": "主食", "flavor": "咸", "quote": "泉州小吃的当仁不让。面线捻碎与汤底同煮，地瓜粉浆勾芡——糊而不烂，清而不浊。", "detail": "汤底分猪骨汤、鱼骨汤两派，自选料头多达二三十种，分卤味、海鲜、炸物小炒、内脏四大类。早市调味清淡：一把葱花、白胡椒、几滴当归黄芪浸的高度酒；到了夜宵时段，流动摊头为饮酒夜归的「麻龟」们而生，偏好重口味。", "shops": "「水门国仔」骨汤派·梭子蟹吊鲜，配醋肉卤大肠油条；「文啊面线糊」县后街·鱼骨派，清淡鲜美毫无腥气；「罗记面线糊」县后街·鱼骨派，香气先声夺人；「客常来面线糊」中山路×打锡巷·夜宵，汤底味咸；「婷婷面线糊」百源路巨头·下蒜末不容商量；「吴淑珍面线糊」夜宵·卤料八角味略重", "x": 46, "y": 14, "tags": ["市井碳水", "一人食神装"]}, {"id": 2, "chapterId": 1, "name": "猪血汤", "sub": "面线糊的官配", "district": "鲤城古城", "time": "早市", "category": "汤羹", "flavor": "辛鲜", "quote": "看似骨汤清淡，喝起来辛辣开胃，孔洞之间偶有爆汁。", "detail": "白胡椒粉和姜的辛辣、当归的清甜随汤汁浸润猪血。几乎所有面线糊店都会供应，是内脏爱好者的天堂一角。", "shops": "「文啊面线糊」招牌之一，辛辣开胃；「水门国仔」同为招牌", "x": 16, "y": 10, "tags": ["市井碳水"]}, {"id": 3, "chapterId": 1, "name": "卤面", "sub": "72 般变化", "district": "鲤城古城", "time": "午市", "category": "主食", "flavor": "咸", "quote": "碱水面打底，花生酱点睛——看得到汤，却喝不到汤。", "detail": "宴席常客。肉类、海鲜、内脏、羹丸排列组合，足足 72 般变化。「卤」不是卤汁而是面的状态，相比莆田、漳州做法，泉州出品有些「拖泥带水」。", "shops": "「泉府卤面馆」花巷·花生酱+沙茶酱等十几味秘料，面汤浓郁着色深", "x": 42, "y": 24, "tags": ["市井碳水", "海丝印记"]}, {"id": 4, "chapterId": 1, "name": "咸饭", "sub": "无物不能焖", "district": "鲤城古城 / 石狮", "time": "午市", "category": "主食", "flavor": "咸", "quote": "在泉州，咸饭的地位几乎和白米饭平起平坐。", "detail": "葱头油、干香菇、五花肉、虾米海蛎干架构基础风味，主食材可换胡萝卜、白萝卜、芋头、挂菜、高丽菜、紫菜。盒饭摊、牛肉馆、海鲜酒楼均有供应。", "shops": "「石狮绿岛海鲜酒楼」萝卜饭是咸饭的高光时刻", "x": 33, "y": 20, "tags": ["市井碳水", "一人食神装"]}, {"id": 5, "chapterId": 1, "name": "萝卜饭", "sub": "家常的高光时刻", "district": "石狮", "time": "午市", "category": "主食", "flavor": "咸", "quote": "沙土白萝卜甘甜多汁，与配料生米翻炒再焖制，油光饱满、鲜香四溢。", "detail": "本地沙土地铸就更高的含水量与更少的纤维，让一锅家常咸饭拥有了精致的「高光时刻」。", "shops": "「石狮绿岛海鲜酒楼」全文最推荐的一碗咸饭", "x": 27, "y": 16, "tags": ["市井碳水"]}, {"id": 6, "chapterId": 1, "name": "壶仔饭", "sub": "陶罐焖制", "district": "晋江·深沪", "time": "午市", "category": "主食", "flavor": "咸", "quote": "晋江深沪以陶罐焖制的咸饭，配一碗扎实的牛肉拳头母汤。", "detail": "宝泉庵附近的老街小店，不仅饭好吃，汤头熬得扎实入味。", "shops": "「老街壶仔饭」深沪宝泉庵附近·乡镇宝藏", "x": 44, "y": 22, "tags": ["市井碳水", "一人食神装"]}, {"id": 7, "chapterId": 1, "name": "烧肉粽", "sub": "包山包海", "district": "鲤城古城 / 石狮", "time": "全天 / 夜宵", "category": "主食", "flavor": "咸", "quote": "「烧」是滚烫热乎。包山、包海、卤肉、炒米、骨汤煨煮，才是一只闽南烧肉粽的修养。", "detail": "市区三大巨头随游客涌入，在本地人心目中地位大不如前；古早味要出城去石狮寻。闽南话煮肉粽叫「炕肉粽」——骨汤鲜香沁入糯米，与粽叶清香交汇。", "shops": "「马脚桥肉粽」石狮城隍老街·五香卤汁配蒜泥与高仔辣椒酱；「约记大仑街肉粽」石狮夜市·成捆粽子大骨汤慢炕；「蓝氏钟楼肉粽」市区巨头·甜辣酱花生酱；「东街钟楼肉粽」市区巨头；「侯阿婆肉粽」市区巨头", "x": 32, "y": 32, "tags": ["市井碳水", "海丝印记"]}, {"id": 8, "chapterId": 1, "name": "润饼菜", "sub": "清明食俗", "district": "鲤城古城 / 石狮", "time": "午市", "category": "小吃", "flavor": "半甜咸", "quote": "主配料二合一的集大成者，还能包进麻粩——甜咸交织的全新体验。", "detail": "馅料在家做，饼皮到西街老铺买。石狮老街的住家之味：大锅炒杂素加煎海蛎，炸粉丝、浒苔、花生糖带来甜咸层次；麻粩的花生香、棉絮胚心与柔韧饼皮交融。同门兄弟有台湾润饼、潮汕薄饼、台州食饼筒。", "shops": "「亚佛春饼」西街老铺·专买饼皮；「王记润饼菜」石狮老街·住家之味", "x": 36, "y": 52, "tags": ["半甜咸魔性", "市井碳水"]}, {"id": 9, "chapterId": 2, "name": "地瓜粥", "sub": "清晨第一碗", "district": "鲤城古城", "time": "早市", "category": "主食", "flavor": "甜", "quote": "胃口刚醒来的第一顿，配菜脯或炣咸，山珍海味都不换。", "detail": "新鲜地瓜、晒制地瓜干、地瓜签皆可熬粥，浓稠香甜。地瓜是闽南人曾经的救命粮，闽南人报以「地瓜腔」般的深情。", "shops": "「家常 / 早市摊」家家户户的味道", "x": 14, "y": 64, "tags": ["一人食神装"]}, {"id": 10, "chapterId": 2, "name": "炸枣", "sub": "地瓜×麻团", "district": "石狮", "time": "下午茶", "category": "炸物", "flavor": "半甜咸", "quote": "糯米粉混地瓜泥搓成枣形，内里中空、外皮薄脆，不油不腻。", "detail": "上可烧香敬神明，下可解馋打牙祭。石狮人叫它煎粿，味道是泉州人迷之爱好的半甜咸。", "shops": "「金辉煎粿」石狮老街·口感最像麻团的一款", "x": 22, "y": 58, "tags": ["半甜咸魔性", "神明供桌"]}, {"id": 11, "chapterId": 2, "name": "地瓜粉团", "sub": "不中看却中吃", "district": "鲤城古城", "time": "午市", "category": "主食", "flavor": "咸", "quote": "巴浪鱼干的腥香、三层肉的丰腴、花菜的爽脆，在地瓜粉裹挟下和解、碰撞。", "detail": "脱胎自饥荒年代的大杂烩：地瓜粉拌四五样食材沸水调匀，分团下锅旺火煮熟，撒米粉青菜。粉团回弹，花生提味，湖头米粉柔韧加分。", "shops": "「惠安地瓜粉团」南俊巷·朋友力荐", "x": 37, "y": 18, "tags": ["市井碳水"]}, {"id": 12, "chapterId": 2, "name": "芋圆", "sub": "槟榔芋的弹牙", "district": "石狮", "time": "下午茶", "category": "小吃", "flavor": "半甜咸", "quote": "蒸芋圆拌甜辣酱花生糖，弹牙中吃出芋丝肌理；炸芋圆皮酥芋香更过瘾。", "detail": "本地芋头与福鼎芋、荔浦芋同属粉糯的槟榔芋，刨丝加地瓜粉捏成团。", "shops": "「石狮阿凸芋圆」更推荐炸芋圆", "x": 26, "y": 54, "tags": ["半甜咸魔性"]}, {"id": 13, "chapterId": 2, "name": "芋泥", "sub": "甜咸皆有层次", "district": "鲤城古城", "time": "下午茶", "category": "甜汤", "flavor": "半甜咸", "quote": "甜咸口、不过甜腻，细腻与颗粒感兼具。", "detail": "泉州芋泥自有风格，出自市区元宵名店之手。", "shops": "「海丝金凤」金鱼巷·百年老店的层次", "x": 18, "y": 62, "tags": ["半甜咸魔性"]}, {"id": 14, "chapterId": 2, "name": "八宝芋泥", "sub": "水围城", "district": "石狮", "time": "晚市", "category": "甜汤", "flavor": "半甜咸", "quote": "芋泥外圈勾芡糖水如「水围城」，中心咸口干贝荸荠肉馅——由外向内舀，如引水淹城。", "detail": "与福州全甜做法不同，甜咸交融，直赴高潮。宴席上的造型派。", "shops": "「石狮绿岛海鲜酒楼」宴席甜品", "x": 28, "y": 66, "tags": ["半甜咸魔性"]}, {"id": 15, "chapterId": 2, "name": "菜头酸", "sub": "闽氏硬核酸明治", "district": "鲤城古城", "time": "下午茶", "category": "小吃", "flavor": "酸甜", "quote": "白萝卜盐腌甘草渍，自然发酵的酸香，佐餐解腻、汁水下火。", "detail": "泉州人喊白萝卜「菜头」。名店还脑洞大开：菜头酸一剖为二，夹花生糖和甜辣酱，堪称闽氏硬核酸明治。可散卖，自己拿牙签串着吃。", "shops": "「东来菜头酸」本地制酸名店·首创菜头酸夹花生", "x": 13, "y": 48, "tags": ["半甜咸魔性"]}, {"id": 16, "chapterId": 3, "name": "闽式牛排", "sub": "咖喱味的乡土", "district": "鲤城古城 / 石狮", "time": "午市 / 晚市", "category": "硬菜", "flavor": "咸", "quote": "黄牛肋排加咖喱、大料、辣椒焖炖酥软——乡土外表下的洋气味道。", "detail": "牛肉之于泉州人好比汽油之于汽车。宋元时阿拉伯人掀起吃牛风潮，下南洋的华侨带回咖喱香料，解释了清淡泉州为何重香料烹牛。一人食标配三件套：一碗咸饭、一份牛肉汤或牛肉羹、一支牛排。", "shops": "「街头牛肉馆」密度极高的「原力加油站」；「王贼」晋江·各有拥趸；「林东升牛头狮」石狮·各有拥趸；「大华福记」安海·各有拥趸", "x": 26, "y": 24, "tags": ["海丝印记", "一人食神装"]}, {"id": 17, "chapterId": 3, "name": "牛肉羹·牛肉汤", "sub": "三件套之二", "district": "鲤城古城", "time": "午市", "category": "汤羹", "flavor": "咸", "quote": "地瓜粉赋予的嫩滑软 Q，是牛肉馆的日常底气。", "detail": "三五朋友可以加点干拌牛肉、牛杂；胃口够大，吃遍牛肉全身轻而易举。", "shops": "「街头牛肉馆」与咸饭、牛排组成一人食三件套", "x": 21, "y": 18, "tags": ["海丝印记", "一人食神装"]}, {"id": 18, "chapterId": 3, "name": "牛肉面", "sub": "网红本红", "district": "鲤城古城", "time": "夜宵", "category": "主食", "flavor": "咸", "quote": "沙茶味浓郁的牛肉料头，料多味重，是年轻人的「菜」。", "detail": "状元街夜宵路边摊起家，走红时正逢「网红」一词流行，有了铺位后店招也留住了这个词。面有碱面、泡面两种，全家福含牛肚、牛肉羹、牛舌、牛肉丸和牛肉。", "shops": "「网红牛肉面」状元街·夜宵", "x": 34, "y": 26, "tags": ["海丝印记"]}, {"id": 19, "chapterId": 3, "name": "牛肉拳头母", "sub": "形似拳头", "district": "晋江·深沪", "time": "午市", "category": "汤羹", "flavor": "咸", "quote": "牛肉、肉筋摔打而成，弹牙好吃；汤头熬得扎实入味。", "detail": "类似潮汕牛筋丸，因形似拳头得名。深沪的惊喜，藏在壶仔饭老店里。", "shops": "「老街壶仔饭」深沪宝泉庵附近", "x": 29, "y": 13, "tags": ["市井碳水"]}, {"id": 20, "chapterId": 4, "name": "蚵仔煎", "sub": "一青二白三红四黄", "district": "鲤城古城 / 石狮", "time": "午市 / 晚市", "category": "小吃", "flavor": "咸", "quote": "青蒜、菜头酸、甜辣酱、鸭蛋——颜值正义之外，各派有各派的执念。", "detail": "蚵仔（海蛎）出现在泉州餐桌的频率无海鲜出其右，近郊蟳埔村养蛎近百年，头戴簪花开蚵的蟳埔女是城中风景。老派地瓜粉多蚵仔少、煎得湿润；泉府派不加蛋，鲜甜爽弹带颗粒酥脆；石狮派现点现做，胜在镬气，直接拿甜辣酱当调味料。", "shops": "「群众牛肉小点」公私合营·老一代古早味；「泉府卤面馆」不加蛋·货真价实；「福记海蛎煎」石狮大仑街·镬气最足；「福记阿明」旧菜场内·同一家族", "x": 78, "y": 30, "tags": ["向海讨鲜", "市井碳水"]}, {"id": 21, "chapterId": 4, "name": "土笋冻", "sub": "安海的下午茶果冻", "district": "晋江·安海", "time": "下午茶", "category": "小吃", "flavor": "咸", "quote": "海星虫熬煮出胶，冷却成果冻——滑溜脆爽，处理干净者胜。", "detail": "海星虫学名可口革囊星虫，滩涂打洞，土缸养一天去泥沙，石锤碾压出内脏，加水煮沸后胶原蛋白融于水，盛碗冷却便如果冻。想吃正宗的必须到安海走一遭——吃过纯天然无添加的正确味道，加凝固剂的硬质冒牌货将无处容身。", "shops": "「长火土笋冻」位置隐蔽时间飘忽·处理干净土笋肥美，入门首选；「五里桥土笋冻」自调蒜酱加分·另有更硬更浓的球形土笋冻", "x": 93, "y": 16, "tags": ["向海讨鲜", "大味至简"]}, {"id": 22, "chapterId": 4, "name": "白灼小章鱼", "sub": "手磨二十分钟的脆嫩", "district": "鲤城古城", "time": "晚市", "category": "海鲜", "flavor": "咸", "quote": "短蛸白灼前手磨搅拌 20 分钟以上，冰爽脆嫩，口感极佳。", "detail": "手磨去粘液也让肉质紧实有弹性；有的店家加盐、草木灰或花生壳增摩擦，春虹用茶油油粕，摩擦之余提味增香。闽南冷菜的开场。", "shops": "「春虹食尚坊」东鲁路·社区海鲜小馆", "x": 96, "y": 9, "tags": ["向海讨鲜", "大味至简"]}, {"id": 23, "chapterId": 4, "name": "咖喱鲨鱼皮", "sub": "罪恶却不油腻", "district": "鲤城古城", "time": "晚市", "category": "海鲜", "flavor": "咸", "quote": "鲨鱼皮肥糯胶质丰富，和咖喱搭档吃起来罪恶，但却不油腻。", "detail": "闽南鲨鱼皮通常红烧做煲或与蹄筋同炖，这家用咖喱炒，实属难得。同店还有蠘仔炒花菜、沙螺苦瓜汤，一炒一汤都走清甜路数；招牌「番茄炒蛋」实为茄汁炒蛋，是绝对的饭扫光。", "shops": "「新秀餐馆」不设菜单·看菜点菜，点完即上", "x": 89, "y": 29, "tags": ["向海讨鲜", "海丝印记"]}, {"id": 24, "chapterId": 4, "name": "炣鲳鱼", "sub": "海鲜馆子的试金石", "district": "丰泽", "time": "晚市", "category": "海鲜", "flavor": "咸", "quote": "炣，即酱油兑水烹煮——毫无技巧可言，却把最关键的一步交给选料的原点。", "detail": "店内食材多来自蟳埔渔港，每天不同全凭运气。同店的干煎小墨鱼煸得干香焦脆适合下酒，爆炒小鳗鱼油脂不重、爽脆弹牙、葱香四溢。", "shops": "「桥仔头餐馆」丰泽凤山街道桥头小巷·藏得深", "x": 95, "y": 18, "tags": ["向海讨鲜", "大味至简"]}, {"id": 25, "chapterId": 4, "name": "花生酱炒钉螺", "sub": "嘬腮吸螺", "district": "石狮", "time": "夜宵", "category": "海鲜", "flavor": "咸", "quote": "钉螺提供口感，味道全在特调花生酱里——浓郁鲜香带微辣。", "detail": "泉州人对花生酱爱得深沉，城中最热的烧烤店、麻辣拌、铁板烧都拿它做文章。闽南话把花生叫「土豆」，花生酱即「土豆酱」。暗夜勾动多少馋虫从各地奔袭而来，既为味道，也为氛围。", "shops": "「王吉螺仔摊」石狮新华路·大名鼎鼎夜宵排档", "x": 86, "y": 36, "tags": ["向海讨鲜", "海丝印记"]}, {"id": 26, "chapterId": 4, "name": "桂花蟹", "sub": "年节大菜", "district": "石狮", "time": "晚市", "category": "海鲜", "flavor": "咸", "quote": "梭子蟹剔肉剔黄，与鸭蛋、荸荠、韭黄同炒——寻常炒蛋瞬间鲜美浓烈。", "detail": "老底子闽南菜，因颇为费工现已不多见，是年节餐桌上的大菜。", "shops": "「石狮绿岛海鲜酒楼」宴席标杆；「吴树卤肉担」难得一见的老菜", "x": 85, "y": 24, "tags": ["向海讨鲜"]}, {"id": 27, "chapterId": 4, "name": "葱烧河鳗", "sub": "酸甜口的宴席主菜", "district": "石狮", "time": "晚市", "category": "海鲜", "flavor": "咸", "quote": "炸过的滑糯鱼皮包裹肥厚鱼肉，烧汁中醋味贯穿，肥而不腻。", "detail": "比江浙蒜子河鳗的浓油赤酱清淡，属于酸甜口，口感爆炸。", "shops": "「石狮绿岛海鲜酒楼」宴席主菜", "x": 74, "y": 41, "tags": ["向海讨鲜"]}, {"id": 28, "chapterId": 4, "name": "松茸包", "sub": "没有松茸的松茸包", "district": "石狮", "time": "晚市", "category": "小吃", "flavor": "咸", "quote": "馅心是肉松、葱茸、咸蛋黄——趁热吃，皮松软、馅流心。", "detail": "绿岛名物，很多人一「吃」倾心。", "shops": "「石狮绿岛海鲜酒楼」名物点心", "x": 42, "y": 36, "tags": ["市井碳水"]}, {"id": 29, "chapterId": 4, "name": "紫菜鳗鱼卷", "sub": "三种口感层层递进", "district": "石狮", "time": "晚市", "category": "小吃", "flavor": "咸", "quote": "外紫菜、中芋头、心鳗鱼——外脆中松内软，三种香气冲上云霄。", "detail": "三种食材、三种口感、三种香气层层递进，是绿岛点心里最让人喜欢的一道。", "shops": "「石狮绿岛海鲜酒楼」点心头牌", "x": 81, "y": 26, "tags": ["向海讨鲜"]}, {"id": 30, "chapterId": 5, "name": "大骨汤", "sub": "盒饭摊的落胃汤", "district": "鲤城古城 / 石狮", "time": "午市 / 全天", "category": "汤羹", "flavor": "咸", "quote": "闽南人三餐离不开汤水，在外吃盒饭也要大骨汤落胃才舒服。", "detail": "典型泉州盒饭摊：炒米粉+卤料+可选料头的猪大骨汤。料头从二师兄的腮边肉吃到尾巴，肠子部位细分得惊人。", "shops": "「街头盒饭摊」做海蛎煎、芋圆、拌面的摊头也常供应", "x": 23, "y": 7, "tags": ["一人食神装"]}, {"id": 31, "chapterId": 5, "name": "灌肠", "sub": "内脏版甜甜圈", "district": "鲤城古城", "time": "全天", "category": "小吃", "flavor": "咸", "quote": "灌蛋、灌葱、灌米、灌血、灌莲子；米血双灌是拼配，肠灌肠是俄罗斯套娃。", "detail": "小肠被泉州人玩坏了——肠灌肠环环相套，形似内脏版甜甜圈。另有粉肠与颇为重口的生肠。", "shops": "「大骨汤摊 / 卤料摊」随汤而售", "x": 19, "y": 14, "tags": ["一人食神装"]}, {"id": 32, "chapterId": 5, "name": "三鲜羹", "sub": "清汤派", "district": "鲤城古城", "time": "午市", "category": "汤羹", "flavor": "咸", "quote": "重汤头、不勾芡——市区清汤派的代表。", "detail": "羹是汤的另一种表达：牛肉、猪肉、大肠与马鲛鱼、鲨鱼、鳗鱼、目鱼，或切片裹粉或绞碎拌粉或做成水丸，均被地瓜粉赋予嫩滑软 Q。", "shops": "「老厨房」市区·三鲜羹", "x": 66, "y": 11, "tags": ["大味至简"]}, {"id": 33, "chapterId": 5, "name": "猪肉羹·马加羹", "sub": "厚糊派", "district": "石狮", "time": "午市", "category": "汤羹", "flavor": "咸", "quote": "清水调姜丝、醋，勾个芡——爽滑又粘稠。", "detail": "石狮、晋江的厚糊派与市区清汤派相对，双拼一碗两味。闽南话「水丸」是肉丸鱼丸的统称。", "shops": "「博记老字号」石狮·猪肉羹马加羹双拼", "x": 61, "y": 21, "tags": ["市井碳水"]}, {"id": 34, "chapterId": 5, "name": "花生汤", "sub": "蛋花如云", "district": "鲤城古城", "time": "早市 / 下午茶", "category": "甜汤", "flavor": "甜", "quote": "滚烫花生汤浇进大力搅散的蛋液，蛋花便轻盈蓬松地浮了起来。", "detail": "去皮花生仁慢熬，滋味各家天差地别。纯花生汤、加蛋、加芋头三种选项——浓郁、蓬松、粉糯。", "shops": "「王川花生汤」三家名店在它面前都黯淡了不少；「老爱甜品店」市区；「福人颐煎包」市区；「承天巷铁门花生汤」市区", "x": 13, "y": 86, "tags": ["大味至简"]}, {"id": 35, "chapterId": 5, "name": "元宵圆", "sub": "锤出来的馅", "district": "鲤城古城", "time": "下午茶 / 全天", "category": "甜汤", "flavor": "甜", "quote": "花生芝麻冬瓜糖干葱头猪油，钢锤暴锤紧实，再滚上糯米粉。", "detail": "滚出来的元宵、包出来的汤圆，泉州元宵内馅用钢制工具暴锤而出鲜为人知。点一碗大圆拼小圆，元宵圆与冬至无馅小圆尽收腹中，红糖姜汤底补气驱寒。", "shops": "「海丝金凤」金鱼巷·传承百年", "x": 25, "y": 82, "tags": ["神明供桌"]}, {"id": 36, "chapterId": 5, "name": "汤圆", "sub": "红薯紫薯的皮", "district": "石狮", "time": "下午茶", "category": "甜汤", "flavor": "甜", "quote": "流沙芝麻花生馅降低了糖度，外皮用三种红薯紫薯调色调味，甜糯不粘牙。", "detail": "与市区传统元宵相对的另一种风格。", "shops": "「清廉汤圆店」石狮人民路", "x": 21, "y": 76, "tags": ["神明供桌"]}, {"id": 37, "chapterId": 5, "name": "四果汤", "sub": "泉州糖水之王", "district": "鲤城古城", "time": "下午茶 / 夜宵", "category": "甜汤", "flavor": "甜", "quote": "选四样料加蜜水——石花膏必点，剩下的交给纠结的 PICK 时段。", "detail": "石花膏用富含胶质的石花草做成，本身没味道，主要提供口感。料头分蜜豆类（蜜红豆绿豆芸豆、蜜芋头、蜜薏仁、银耳）、粿子类（阿达子、珍珠、仙草冻）、水果类（跟着季节走）。", "shops": "「秉正堂」天后宫旁老店·胜在蜜水醇厚，蜜豆类出色；「爱啊石花膏」后起之秀·粿子类是拳头产品", "x": 68, "y": 91, "tags": ["向海讨鲜", "大味至简"]}, {"id": 38, "chapterId": 6, "name": "菜粿", "sub": "最好吃的在安海", "district": "晋江·安海", "time": "下午茶", "category": "炸物", "flavor": "咸", "quote": "外皮极酥、脆得掉渣，内里极软、入口即化——刚出锅小心烫嘴。", "detail": "通俗理解即萝卜糕：米浆和萝卜泥熬成糊状，上笼蒸出型，彻底凉透后切块，旺火快炸方成。懂行的吃客都知道往安海去。", "shops": "「安海老街炸物摊」懂行者的目的地", "x": 24, "y": 26, "tags": ["市井碳水"]}, {"id": 39, "chapterId": 6, "name": "醋肉", "sub": "面线糊的黄金搭档", "district": "鲤城古城", "time": "全天", "category": "炸物", "flavor": "咸", "quote": "腌肉时加永春老醋——中国四大名醋之一，近水楼台的最佳调味。", "detail": "可惜市面上很多醋肉被蒜味和五香粉盖过风头，名不副实。醋肉也属于妈妈菜范畴，每个妈妈的味道都不尽相同。", "shops": "「称重炸物摊」与炸排骨、炸菜圆、炸紫菜同锅", "x": 18, "y": 26, "tags": ["一人食神装"]}, {"id": 40, "chapterId": 6, "name": "鸡卷", "sub": "和鸡没有关系", "district": "鲤城古城 / 石狮", "time": "全天", "category": "炸物", "flavor": "咸", "quote": "猪肉荸荠拌五香粉地瓜粉为馅，传统猪网油来包，嘴里淌油、香气十足。", "detail": "传闻因形似鸡脖子得名，是供桌上的常客——炸物既是零嘴，也是泉州人与神明维系关系的食物。后简化成豆皮，新吃法「一口酥」以小张豆皮包卷，算是时代更迭。", "shops": "「吴树卤肉担」网油包的老做法；「街市炸物摊」豆皮版香酥", "x": 28, "y": 34, "tags": ["神明供桌"]}, {"id": 41, "chapterId": 6, "name": "街头炸物小摊", "sub": "油纸一包边走边吃", "district": "鲤城古城", "time": "全天", "category": "炸物", "flavor": "咸", "quote": "饭嗲、米糕、春卷……仅一人可操持的小摊，是泉州烟火气的具象。", "detail": "混杂小葱米粒的饭嗲、糯米炸成菱形块的米糕、包卷胡萝卜丝的春卷、白萝卜米浆做的菜粿——在泉州经常走两三步路就看到一家这样的小摊。", "shops": "「街头巷尾」两三步一家的密度", "x": 33, "y": 28, "tags": ["市井碳水"]}, {"id": 42, "chapterId": 7, "name": "卤料·烧酒配", "sub": "闽南居酒屋", "district": "石狮", "time": "晚市 / 夜宵", "category": "卤味", "flavor": "咸", "quote": "卤料是完美的下酒菜——大肠、生肠、猪头皮、卤鸭、卤豆腐，任君选择。", "detail": "从前挑担游走戏台庙口，称「卤料担」；烧酒在闽南就是「酒」，烧酒配由此演化。卤料之外还有老板自己灌的肉肠和蛋肠。打菜类似打盒饭，码放一个盘子，置身其中的体验感要明显胜于食物本身。", "shops": "「吴树卤肉担」石狮旧菜市·白天饮酒的完美理由；海鲜生猛：白灼小卷、红糟鳗鱼、清蒸鲈鱼、葱姜蒸鲨鱼肝、酱油水海蛎", "x": 54, "y": 20, "tags": ["大味至简"]}, {"id": 43, "chapterId": 7, "name": "捆蹄", "sub": "口服胶原蛋白", "district": "晋江·安海", "time": "下午茶 / 全天", "category": "卤味", "flavor": "咸", "quote": "猪前脚剃肉取皮，灌入猪肉猪筋压实缝合，捆牢煮熟——皮子弹、猪肉脆。", "detail": "工序繁复的技术活，且吃且珍惜。百年老店无店面，藏身安海古厝。", "shops": "「李慨捆蹄」安海·百年历史，藏身古厝", "x": 28, "y": 21, "tags": ["大味至简"]}, {"id": 44, "chapterId": 7, "name": "姜母鸭", "sub": "泉州重磅", "district": "鲤城古城 / 晋江·张林", "time": "晚市", "category": "硬菜", "flavor": "咸", "quote": "三斤正番鸭、三年老姜母、芝麻油——缺了姜，这道菜将不复存在。", "detail": "干烧煮汤、是否切块、上色程度各家不同。张林做法据说加麦芽糖提色增香，吃口更甜、上色更深，是远近闻名的金字招牌。", "shops": "「斯丹姜母鸭」涂门街·后生家偏爱，入味干香极下饭；「忠记姜母鸭」二十年老店·盐烧炭火，整鸭成盘；「阿山姜母鸭」张林·姜味浓郁番鸭酥烂，老饕指路；「远华饭店」张林·吃鸭名店；「春生饭店」张林·卤料同样不容错过", "x": 15, "y": 15, "tags": ["大味至简"]}, {"id": 45, "chapterId": 7, "name": "卤大肠头·糯米鸭血", "sub": "姜母鸭店的彩蛋", "district": "晋江·张林", "time": "晚市", "category": "卤味", "flavor": "咸", "quote": "肠壁厚实、软糯入味，卤汤带姜母的辛辣，非常上头。", "detail": "春生饭店除姜母鸭外，还供应鸭肠、鸭腱等卤料和炒菜，这两样是此行亮眼发现。", "shops": "「春生饭店」张林·卤料不容错过", "x": 19, "y": 21, "tags": ["大味至简"]}, {"id": 46, "chapterId": 8, "name": "碗糕", "sub": "泉州人的发糕", "district": "鲤城古城", "time": "早市 / 全天", "category": "糕粿", "flavor": "甜", "quote": "米浆发酵舀入小瓷碗蒸制，成败的关键是冲破瓷碗的开花。", "detail": "有些人的童年噩梦，是啊嬷蒸糕时不让出声，否则要承担开不出花的「罪责」。另有田螺肉碗糕一派：对发酵要求极高，切面须介于死面与发酵之间、呈蜂窝状态。", "shops": "「王川花生汤」田螺肉碗糕与正常碗糕并售", "x": 14, "y": 69, "tags": ["神明供桌"]}, {"id": 47, "chapterId": 8, "name": "糯米粿", "sub": "糕粿界的孙悟空", "district": "石狮", "time": "全天", "category": "糕粿", "flavor": "甜", "quote": "去皮绿豆或芝麻花生馅，蒸好后放放凉，Q 弹更明显。", "detail": "依祈福事项万般变化：龟形的龟粿、拌鼠尾草的黑龟粿、满月婴孩的满月圆（捏成奶头状，象征母乳饱满）。闽南人继承中原对龟的崇拜，视乌龟为吉祥物。", "shops": "「金辉煎粿」石狮老街·内馅甜蜜外皮爽弹", "x": 16, "y": 74, "tags": ["神明供桌"]}, {"id": 48, "chapterId": 8, "name": "麦夹粿·菜包", "sub": "名不副实的粿", "district": "鲤城古城", "time": "全天", "category": "糕粿", "flavor": "半甜咸", "quote": "麦夹粿虽叫粿却由麦子铸就；菜包虽叫包，却是咸口糯米粿。", "detail": "与潮汕「粿」单指米制品不同，泉州糕粿种类庞杂：大米、糯米制品之外还包含发面——它由民间祭祀供品发展而来，是神明介入一城之味的金身显现。", "shops": "「糕粿老铺」年节祭祀与日常之间", "x": 21, "y": 49, "tags": ["神明供桌", "半甜咸魔性"]}, {"id": 49, "chapterId": 8, "name": "甜粿", "sub": "年节炸物", "district": "石狮", "time": "全天", "category": "糕粿", "flavor": "甜", "quote": "近 1:1 的糯米粉与糖揉合蒸制，裹面粉蛋液油炸——脆壳薄、蛋液香、甜粿拉丝。", "detail": "石狮甜粿在闽南颇负盛名，这道经典年节炸物平时在绿岛也能点到，甜甜蜜蜜。", "shops": "「石狮绿岛海鲜酒楼」平日可点", "x": 17, "y": 90, "tags": ["神明供桌"]}, {"id": 50, "chapterId": 8, "name": "满煎糕", "sub": "饱肚的茶配", "district": "鲤城古城", "time": "下午茶", "category": "糕粿", "flavor": "甜", "quote": "茶配的容忍度极高，饱肚的糕点茶汤也能吸收化解。", "detail": "身处铁观音之乡安溪之侧，泉州人每天少不了茶水温润，也少不了茶配陪伴。", "shops": "「茶桌之上」与铁观音同席", "x": 22, "y": 68, "tags": ["市井碳水"]}, {"id": 51, "chapterId": 8, "name": "麻粩·贡糖", "sub": "酥香作响", "district": "鲤城古城 / 石狮", "time": "下午茶", "category": "糕粿", "flavor": "甜", "quote": "花生香、棉絮状胚心——既上茶盘，也能包进润饼菜。", "detail": "传统糕点的两重身份：茶配常客，也是润饼菜里打开味蕾的全新体验。", "shops": "「老铺糕饼店」祭拜三牲的糕饼替身，很是可爱", "x": 18, "y": 80, "tags": ["神明供桌"]}, {"id": 52, "chapterId": 8, "name": "桔红糕·蒜蓉枝·蜜饯·绿豆糕", "sub": "茶盘众生", "district": "鲤城古城", "time": "下午茶", "category": "糕粿", "flavor": "甜", "quote": "雪白柔韧的桔红糕、重口的蒜蓉枝、零嘴蜜饯——茶汤皆可化解。", "detail": "糕粿从仙境下凡的第一站，稳稳停在茶盘上。", "shops": "「茶配铺子」佐铁观音", "x": 12, "y": 73, "tags": ["神明供桌"]}];
+    const SHOPS = [{"name": "水门国仔面线糊", "district": "鲤城古城", "attitude": "老字号", "desc": "骨汤派代表，坚持用梭子蟹吊鲜，汤底清甜。醋肉、卤大肠、油条蘸汤汁是在地人雷打不动的固定搭配。", "x": 435, "y": 395, "street": "水门巷"}, {"name": "文啊面线糊", "district": "鲤城古城", "attitude": "本地力荐", "desc": "县后街。鱼骨派却隐藏极深，清淡鲜美毫无腥气，料头地道家常；猪血汤辛辣开胃，偶有爆汁。", "x": 425, "y": 255, "street": "县后街"}, {"name": "罗记面线糊", "district": "鲤城古城", "attitude": "老字号", "desc": "县后街。同属鱼骨派，光凭嗅觉就能猜出一二。", "x": 445, "y": 250, "street": "县后街"}, {"name": "客常来面线糊", "district": "鲤城古城", "attitude": "夜宵摊", "desc": "中山路与打锡巷交界。夜宵摊，汤底味咸，服务饮酒夜归的「麻龟」。", "x": 460, "y": 320, "street": "中山路×打锡巷"}, {"name": "婷婷面线糊", "district": "鲤城古城", "attitude": "夜宵摊", "desc": "百源路巨头。下起蒜末来不容商量，重口味夜宵之选。", "x": 495, "y": 330, "street": "百源路"}, {"name": "吴淑珍面线糊", "district": "鲤城古城", "attitude": "夜宵摊", "desc": "夜宵摊。卤料八角味略有些过头，适合微醺之后。", "x": 415, "y": 375, "street": "老城区"}, {"name": "泉府卤面馆", "district": "鲤城古城", "attitude": "本地力荐", "desc": "花巷。菜单晃眼又紧凑，72 般变化；花生酱加沙茶酱等十几味秘料。蚵仔煎不加蛋，货真价实。", "x": 405, "y": 300, "street": "花巷"}, {"name": "亚佛春饼", "district": "鲤城古城", "attitude": "老字号", "desc": "西街老铺。清明将至时，泉州人跑来买润饼皮的地方。", "x": 380, "y": 250, "street": "西街165号"}, {"name": "东来菜头酸", "district": "鲤城古城", "attitude": "标杆名店", "desc": "本地制酸名店。脑洞大开首创「菜头酸夹花生」——闽氏硬核酸明治。", "x": 430, "y": 285, "street": "金鱼巷/西街"}, {"name": "斯丹姜母鸭", "district": "鲤城古城", "attitude": "本地力荐", "desc": "涂门街。后生家偏爱，入味干香、极为下饭，只是姜味淡了一些。", "x": 490, "y": 365, "street": "涂门街关帝庙旁"}, {"name": "忠记姜母鸭", "district": "鲤城古城", "attitude": "老字号", "desc": "二十年老店，主打盐烧：铁锅盐焗入味再上灶慢炖，整鸭成盘。", "x": 525, "y": 270, "street": "崇福路中段"}, {"name": "网红牛肉面", "district": "鲤城古城", "attitude": "夜宵摊", "desc": "状元街。夜宵路边摊起家，沙茶牛肉料多味重，全家福一碗吃遍牛全身。", "x": 505, "y": 295, "street": "状元街"}, {"name": "群众牛肉小点", "district": "鲤城古城", "attitude": "老字号", "desc": "公私合营的老店，蚵仔煎代表老一代古早味：地瓜粉多蚵仔少，煎得湿润。", "x": 425, "y": 320, "street": "中山南路"}, {"name": "海丝金凤", "district": "鲤城古城", "attitude": "老字号", "desc": "金鱼巷，传承百年。元宵圆钢锤打馅，大圆拼小圆配红糖姜汤；芋泥甜咸有层次。", "x": 445, "y": 335, "street": "金鱼巷"}, {"name": "王川花生汤", "district": "鲤城古城", "attitude": "本地力荐", "desc": "打蛋大力搅散再浇滚烫花生汤，蛋花轻盈如云。还卖田螺肉碗糕。", "x": 455, "y": 355, "street": "惠安/鲤城老铺"}, {"name": "老爱甜品店", "district": "鲤城古城", "attitude": "老字号", "desc": "市区花生汤名店之一。", "x": 415, "y": 350, "street": "市区老街"}, {"name": "福人颐煎包", "district": "鲤城古城", "attitude": "老字号", "desc": "煎包出名，花生汤也在榜单上。", "x": 395, "y": 335, "street": "中山路老街"}, {"name": "承天巷铁门花生汤", "district": "鲤城古城", "attitude": "隐世小店", "desc": "藏在铁门后的花生汤，街坊才知道。", "x": 480, "y": 310, "street": "承天巷"}, {"name": "秉正堂", "district": "鲤城古城", "attitude": "标杆名店", "desc": "四果汤地头蛇，得去天后宫旁的老店。蜜水蜜香醇厚，蜜豆类料头出色。", "x": 455, "y": 420, "street": "天后宫旁"}, {"name": "爱啊石花膏", "district": "鲤城古城", "attitude": "本地力荐", "desc": "后起之秀，粿子类是拳头产品：阿达子、芋圆、番薯圆口感味道俱佳。", "x": 475, "y": 410, "street": "天后宫/西街"}, {"name": "惠安地瓜粉团", "district": "鲤城古城", "attitude": "本地力荐", "desc": "南俊巷。鱼干腥香、三层肉丰腴、粉团回弹，湖头米粉加分不少。", "x": 475, "y": 275, "street": "南俊巷"}, {"name": "老厨房", "district": "鲤城古城", "attitude": "本地力荐", "desc": "市区清汤派代表，三鲜羹重汤头不勾芡。", "x": 410, "y": 265, "street": "市区"}, {"name": "春虹食尚坊", "district": "鲤城古城", "attitude": "本地力荐", "desc": "东鲁路社区海鲜小馆。白灼小章鱼手磨 20 分钟以上，加茶油油粕提香，冰爽脆嫩。", "x": 530, "y": 370, "street": "东鲁路"}, {"name": "新秀餐馆", "district": "鲤城古城", "attitude": "隐世小店", "desc": "不设菜单、看菜点菜。咖喱炒鲨鱼皮罪恶却不油腻；招牌番茄炒蛋是绝对的饭扫光。", "x": 515, "y": 345, "street": "老巷子"}, {"name": "蓝氏钟楼肉粽", "district": "鲤城古城", "attitude": "游客巨头", "desc": "市区三大巨头之一。游客涌入后，在本地人心目中地位大不如前——古早味请出城去石狮寻。", "x": 445, "y": 275, "street": "钟楼东街"}, {"name": "东街钟楼肉粽", "district": "鲤城古城", "attitude": "游客巨头", "desc": "市区三大巨头之一，调料主打甜辣酱与花生酱。", "x": 460, "y": 265, "street": "东街"}, {"name": "侯阿婆肉粽", "district": "鲤城古城", "attitude": "游客巨头", "desc": "市区三大巨头之一，名声在外，本地人已另有心头好。", "x": 485, "y": 290, "street": "东街"}, {"name": "绿岛海鲜酒楼", "district": "石狮", "attitude": "标杆名店", "desc": "石狮绝对的标杆。萝卜饭、八宝芋泥、桂花蟹、葱烧河鳗、松茸包、紫菜鳗鱼卷、甜粿——红白喜事的宴席载体。", "x": 745, "y": 495, "street": "石狮市区"}, {"name": "马脚桥肉粽", "district": "石狮", "attitude": "本地力荐", "desc": "城隍老街。配料朴素，五香卤汁是特色，配蒜泥和高仔辣椒酱更显本味。", "x": 675, "y": 535, "street": "石狮城隍老街"}, {"name": "约记大仑街肉粽", "district": "石狮", "attitude": "夜宵摊", "desc": "专营夜市。成捆粽子大骨汤慢炕，着色不深却有滋有味。", "x": 695, "y": 555, "street": "石狮大仑街夜市"}, {"name": "王记润饼菜", "district": "石狮", "attitude": "本地力荐", "desc": "石狮老街。炒杂素加煎海蛎，炸粉丝浒苔花生糖，还可以包进麻粩。", "x": 655, "y": 515, "street": "石狮老街"}, {"name": "金辉煎粿", "district": "石狮", "attitude": "本地力荐", "desc": "石狮老街。炸枣口感最像麻团，中空薄脆半甜咸；糯米粿放凉后更 Q。", "x": 680, "y": 505, "street": "石狮老街"}, {"name": "阿凸芋圆", "district": "石狮", "attitude": "本地力荐", "desc": "小小一颗蒸芋圆弹牙有芋丝肌理；炸芋圆皮酥芋香，更为推荐。", "x": 650, "y": 555, "street": "石狮老街"}, {"name": "福记海蛎煎（大仑街）", "district": "石狮", "attitude": "本地力荐", "desc": "现点现做胜在镬气，直接把蘸料甜辣酱当调味料，猛火快炒鲜香诱人。", "x": 715, "y": 555, "street": "石狮大仑街"}, {"name": "福记阿明海蛎煎", "district": "石狮", "attitude": "老字号", "desc": "旧菜场内，与大仑街福记同属一个家族，很多人推荐。", "x": 730, "y": 575, "street": "石狮旧菜场内"}, {"name": "王吉螺仔摊", "district": "石狮", "attitude": "夜宵摊", "desc": "新华路大名鼎鼎的夜宵排档。花生酱炒钉螺是镇店明星，食客嘬腮吸螺。", "x": 755, "y": 590, "street": "石狮新华路夜市"}, {"name": "博记老字号", "district": "石狮", "attitude": "老字号", "desc": "猪肉羹、马加羹双拼，石狮厚糊派代表：姜丝醋勾芡，爽滑粘稠。", "x": 685, "y": 580, "street": "石狮市区"}, {"name": "清廉汤圆店", "district": "石狮", "attitude": "本地力荐", "desc": "人民路。流沙芝麻花生馅降了糖度，红薯紫薯外皮调色调味。", "x": 665, "y": 605, "street": "石狮人民路"}, {"name": "吴树卤肉担", "district": "石狮", "attitude": "标杆名店", "desc": "旧菜市的「闽南居酒屋」。卤料打头，海鲜生猛，还有桂花蟹、网油鸡卷等难得老菜。", "x": 725, "y": 525, "street": "石狮旧菜市"}, {"name": "林东升牛头狮", "district": "石狮", "attitude": "本地力荐", "desc": "石狮牛肉一派的拥趸之选。", "x": 700, "y": 495, "street": "石狮老城"}, {"name": "长火土笋冻", "district": "晋江·安海", "attitude": "隐世小店", "desc": "城中热店，位置隐蔽、时间飘忽。处理干净、口感纯粹、土笋量足肥美，最适合入门级吃客。", "x": 260, "y": 490, "street": "安海隐秘小巷"}, {"name": "五里桥土笋冻", "district": "晋江·安海", "attitude": "本地力荐", "desc": "自调蒜酱是加分项；另有小海星虫不脱皮直接煮的球形土笋冻，更硬更浓。", "x": 280, "y": 520, "street": "安海五里桥头"}, {"name": "李慨捆蹄", "district": "晋江·安海", "attitude": "隐世小店", "desc": "百年历史，无店面、藏身古厝。工序繁复，皮弹肉脆，且吃且珍惜。", "x": 240, "y": 500, "street": "安海古厝"}, {"name": "大华福记", "district": "晋江·安海", "attitude": "本地力荐", "desc": "安海牛肉名店，各有拥趸。", "x": 270, "y": 545, "street": "安海老街"}, {"name": "老街壶仔饭", "district": "晋江·深沪", "attitude": "隐世小店", "desc": "深沪宝泉庵附近。陶罐焖制的壶仔饭香，牛肉拳头母弹牙、汤头扎实——乡镇里的惊喜。", "x": 575, "y": 635, "street": "深沪宝泉庵附近"}, {"name": "王贼", "district": "晋江·深沪", "attitude": "本地力荐", "desc": "晋江牛肉一派的名店，往乡镇深处探寻的对象。", "x": 545, "y": 625, "street": "晋江青阳/乡镇"}, {"name": "阿山姜母鸭", "district": "晋江·张林", "attitude": "隐世小店", "desc": "张林。老饕指路才找到——姜味浓郁、番鸭酥烂，颇为惊喜。", "x": 285, "y": 375, "street": "磁灶张林镇"}, {"name": "远华饭店", "district": "晋江·张林", "attitude": "老字号", "desc": "磁灶张林镇，远近闻名的吃鸭名店。", "x": 310, "y": 395, "street": "磁灶张林镇"}, {"name": "春生饭店", "district": "晋江·张林", "attitude": "本地力荐", "desc": "张林吃鸭名店，麦芽糖提色增香；卤大肠头、糯米鸭血是亮眼发现。", "x": 280, "y": 410, "street": "磁灶张林镇"}, {"name": "桥仔头餐馆", "district": "丰泽", "attitude": "隐世小店", "desc": "凤山街道桥头小巷。食材多来自蟳埔渔港，每天不同全凭运气；炣鲳鱼胜在选料原点。", "x": 680, "y": 260, "street": "凤山街道桥头小巷"}];
     const ROUTES = [{"id": "route-a", "name": "古城一日 · 从一碗糊开始，到一碗糊结束", "badge": "古城步行圈 · 1.2km 半径", "desc": "鲤城古城经典漫步，早市从清淡鱼骨糊开场，晌午一人食牛肉与72变卤面，午后天后宫蜜水，暮色盐烧姜母鸭，深夜为醉酒麻龟下蒜末面线糊收尾。", "stops": [{"time": "06:30", "dish": "面线糊", "shop": "水门国仔 / 文啊面线糊", "tip": "骨汤派与鱼骨派，早市调味清淡，点醋肉大肠剪段油条"}, {"time": "09:00", "dish": "碗糕 + 花生汤", "shop": "王川花生汤", "tip": "田螺肉碗糕配蛋花如云的花生汤，米香与蛋香轻盈"}, {"time": "12:00", "dish": "卤面 / 咸饭", "shop": "泉府卤面馆", "tip": "72 般变化，花生酱加沙茶酱点睛，看得到汤喝不到汤"}, {"time": "15:00", "dish": "四果汤 + 菜头酸", "shop": "秉正堂 / 东来菜头酸", "tip": "天后宫旁必点石花膏蜜水，菜头酸夹花生糖硬核酸明治"}, {"time": "18:00", "dish": "姜母鸭", "shop": "斯丹 / 忠记", "tip": "涂门街干香入味 vs 崇福路炭火铁锅盐烧整鸭"}, {"time": "23:00", "dish": "面线糊(夜宵) + 牛肉面", "shop": "客常来 / 婷婷 / 网红牛肉面", "tip": "百源路巨头下蒜末不容商量，重口味夜宵犒劳暗夜馋虫"}]}, {"id": "route-b", "name": "出城去石狮 · 古早味寻根", "badge": "石狮老街与夜市 · 老饕逆向狂欢", "desc": "市区三大巨头游客涌入后失了本味，古早味要出城去石狮寻。从卷麻粩的润饼菜，到大骨汤慢炕的肉粽，再到夜市嘬腮吸螺的花生酱炒钉螺。", "stops": [{"time": "10:00", "dish": "润饼菜", "shop": "王记润饼菜", "tip": "石狮老街住家之味，大锅炒杂素加煎海蛎，卷入麻粩神仙吃法"}, {"time": "11:30", "dish": "炸枣 / 糯米粿", "shop": "金辉煎粿", "tip": "中空薄脆半甜咸，放凉后糯米粿更加 Q 弹"}, {"time": "13:00", "dish": "烧肉粽", "shop": "马脚桥肉粽", "tip": "五香卤汁配蒜泥与高仔辣椒酱，骨汤鲜味沁入糯米深处"}, {"time": "15:00", "dish": "蚵仔煎 + 芋圆", "shop": "福记海蛎煎 / 阿凸芋圆", "tip": "大仑街现点现做的生猛镬气，直接拿甜辣酱调味"}, {"time": "18:30", "dish": "卤料 · 烧酒配", "shop": "吴树卤肉担", "tip": "旧菜市闽南居酒屋，码一盘自灌肉肠卤料，配海鲜与烧酒"}, {"time": "22:30", "dish": "花生酱炒钉螺", "shop": "王吉螺仔摊", "tip": "新华路大名鼎鼎夜宵排档，浓郁土豆酱微辣，食客嘬腮吸螺"}]}, {"id": "route-c", "name": "晋江乡镇 · 安海 → 深沪 → 张林", "badge": "自驾探秘 · 乡镇深处的惊艳之味", "desc": "深入晋江各大古镇与渔港：跨越五里桥吃安海纯天然土笋冻与古厝捆蹄，深沪宝泉庵吃陶罐壶仔饭，磁灶张林吃麦芽糖焦色姜母鸭。", "stops": [{"time": "10:30", "dish": "土笋冻", "shop": "长火土笋冻 / 五里桥土笋冻", "tip": "安海是土笋冻的故乡，天然星虫熬出凝脂，入口冰爽脆嫩"}, {"time": "12:00", "dish": "菜粿", "shop": "安海老街炸物摊", "tip": "懂行的吃客都去安海，外皮极酥薄如纸，内里嫩如流质"}, {"time": "13:00", "dish": "捆蹄", "shop": "李慨捆蹄", "tip": "百年历史无店面藏身古厝，猪脚皮灌猪肉猪筋缝合捆煮"}, {"time": "15:00", "dish": "壶仔饭 + 牛肉拳头母", "shop": "老街壶仔饭", "tip": "深沪宝泉庵老街，陶罐焖制咸饭配弹牙拳头母，汤头入骨"}, {"time": "18:00", "dish": "姜母鸭(张林派)", "shop": "阿山 / 远华 / 春生饭店", "tip": "磁灶张林派加麦芽糖提色增香，吃口偏甜，卤大肠头是彩蛋"}]}, {"id": "route-d", "name": "深夜镬气 · 夜猫子与麻龟的夜宵专线", "badge": "21:00 之后 · 跨古城与石狮的暗夜馋虫", "desc": "夜幕降临，流动摊头为饮酒夜归的麻龟们而生。重口味蒜末、沙茶牛肉面、骨汤慢炕肉粽与热烈花生酱，串联起泉州最生猛的午夜江湖。", "stops": [{"time": "21:30", "dish": "牛肉面", "shop": "网红牛肉面", "tip": "状元街夜宵路边摊起家，沙茶味浓料多，全家福一碗吃遍全牛"}, {"time": "22:00", "dish": "面线糊(夜宵派)", "shop": "婷婷 / 客常来 / 吴淑珍", "tip": "百源路巨头下蒜末不客气，汤底微咸，抚慰夜归人"}, {"time": "22:30", "dish": "花生酱炒钉螺", "shop": "王吉螺仔摊", "tip": "石狮新华路暗夜热店，一壶酒一盘螺，镬气翻腾"}, {"time": "23:30", "dish": "四果汤", "shop": "秉正堂", "tip": "午夜以一勺百花蜜水与冰爽石花膏收尾，清凉解酒"}]}];
     const ORIGINS = [{"id": "o-1", "title": "八山一水一分田", "event": "耕地稀缺、粮食紧张", "outcome": "地瓜成为救命粮 → 地瓜粥 / 炸枣 / 地瓜粉团 / 地瓜粉勾芡与挂浆骨架", "foods": [9, 10, 11, 1, 38, 39], "icon": "potato"}, {"id": "o-2", "title": "宋元海丝 · 刺桐港", "event": "阿拉伯、波斯商人云集东方第一大港", "outcome": "商业逻辑打破农耕禁忌，掀起吃牛风潮 → 闽式牛排 / 牛肉羹 / 牛肉面 / 拳头母", "foods": [16, 17, 18, 19], "icon": "silkRoad"}, {"id": "o-3", "title": "下南洋 · 番客归来", "event": "闽南华侨将东南亚香料与调味带回故里", "outcome": "清淡泉州出现重香料烹牛（南洋咖喱草果）、沙茶与「土豆酱」（花生酱）炒钉螺、卤面点睛", "foods": [3, 16, 18, 23, 25], "icon": "spice"}, {"id": "o-4", "title": "中原衣冠南渡", "event": "士族南迁带来深厚祭祀文化与龟崇拜", "outcome": "糕粿祭品体系（龟粿 / 满月圆 / 甜粿）与供桌炸物（鸡卷、炸枣），仙凡共席", "foods": [10, 35, 40, 46, 47, 48, 49, 51], "icon": "incense"}, {"id": "o-5", "title": "安溪铁观音茶乡", "event": "日日不可无茶，茶水温润闽南日常", "outcome": "庞大的茶配体系（满煎糕 / 桔红糕 / 蒜蓉枝 / 绿豆饼 / 麻粩），化解茶汤苦涩", "foods": [50, 51, 52, 12, 13], "icon": "tea"}];
 
@@ -1683,16 +1951,72 @@ body.night-active .food-card-footer {
     /* ==========================================================================
        2. 视域 Ⅰ · 刺桐山海图 (Topographic Cartogram & Landscape Map)
        ========================================================================== */
+    const ANCHOR_SHOPS = new Set([
+      '水门国仔面线糊', '文啊面线糊', '斯丹姜母鸭', '秉正堂', '亚佛春饼',
+      '忠记姜母鸭', '侯阿婆肉粽', '绿岛海鲜酒楼', '马脚桥肉粽',
+      '福记海蛎煎（大仑街）', '长火土笋冻', '阿山姜母鸭', '老街壶仔饭', '桥仔头餐馆'
+    ]);
+
+    const DISTRICT_VIEWBOX = {
+      'all': { x: 0, y: 0, w: 1000, h: 700 },
+      '鲤城古城': { x: 345, y: 156, w: 225, h: 290 },
+      '石狮': { x: 615, y: 418, w: 195, h: 222 },
+      '晋江·安海': { x: 195, y: 410, w: 155, h: 175 },
+      '晋江·深沪': { x: 505, y: 546, w: 145, h: 140 },
+      '晋江·张林': { x: 235, y: 302, w: 130, h: 144 },
+      '丰泽': { x: 630, y: 188, w: 140, h: 132 }
+    };
+
+    let currentViewBox = { x: 0, y: 0, w: 1000, h: 700 };
+    let viewBoxAnimId = null;
+
+    function animateViewBox(target, duration = 380) {
+      if (viewBoxAnimId) cancelAnimationFrame(viewBoxAnimId);
+      const start = { ...currentViewBox };
+      const startTime = performance.now();
+      const svg = document.getElementById('carto-svg');
+      if (!svg) return;
+
+      function step(time) {
+        const elapsed = time - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const ease = 1 - Math.pow(1 - progress, 3);
+
+        currentViewBox.x = start.x + (target.x - start.x) * ease;
+        currentViewBox.y = start.y + (target.y - start.y) * ease;
+        currentViewBox.w = start.w + (target.w - start.w) * ease;
+        currentViewBox.h = start.h + (target.h - start.h) * ease;
+
+        svg.setAttribute('viewBox', `${currentViewBox.x.toFixed(1)} ${currentViewBox.y.toFixed(1)} ${currentViewBox.w.toFixed(1)} ${currentViewBox.h.toFixed(1)}`);
+
+        if (progress < 1) {
+          viewBoxAnimId = requestAnimationFrame(step);
+        } else {
+          viewBoxAnimId = null;
+        }
+      }
+
+      viewBoxAnimId = requestAnimationFrame(step);
+    }
+
     function initCartogram() {
-      // 地区筛选按钮
+      // 地区筛选按钮与平滑镜头缩放
       document.querySelectorAll('#carto-district-filters .geo-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           document.querySelectorAll('#carto-district-filters .geo-btn').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           STATE.activeGeo = btn.dataset.geo;
+          const target = DISTRICT_VIEWBOX[STATE.activeGeo] || DISTRICT_VIEWBOX['all'];
+          animateViewBox(target);
           renderCartogramShops();
         });
       });
+
+      // 拓扑沙盘鼠标离开时隐藏 HUD 浮动卡片
+      const cartoBox = document.getElementById('carto-box');
+      if (cartoBox) {
+        cartoBox.addEventListener('mouseleave', hideCartoHudTooltip);
+      }
 
       // 关闭店铺抽屉
       document.getElementById('close-drawer-btn').addEventListener('click', () => {
@@ -1713,25 +2037,32 @@ body.night-active .food-card-footer {
 
     function renderCartogramShops() {
       const layer = document.getElementById('carto-shops-layer');
+      if (!layer) return;
       layer.innerHTML = '';
 
+      const isAll = STATE.activeGeo === 'all';
+      const isZoomed = !isAll;
+      const pinRadius = isZoomed ? 4.5 : 7;
+      const hoverRadius = isZoomed ? 6.5 : 12;
+      const fontSize = isZoomed ? 7.5 : 11;
+
       SHOPS.forEach(shop => {
-        // 区域筛选
-        if (STATE.activeGeo !== 'all' && shop.district !== STATE.activeGeo) {
+        // 区域筛选：全域时显示所有店铺；指定区域时仅显示该区域店铺
+        if (!isAll && shop.district !== STATE.activeGeo) {
           return;
         }
 
         const isNightShop = shop.attitude === '夜宵摊' || shop.desc.includes('夜市') || shop.desc.includes('夜宵');
         const color = ATTITUDE_COLORS[shop.attitude] || '#A8352A';
+        const isAnchor = ANCHOR_SHOPS.has(shop.name);
 
-        // 夜灯模式下强化夜宵摊
         let opacity = 1;
-        let r = 8;
+        let r = pinRadius;
         if (STATE.nightMode) {
           if (isNightShop) {
-            r = 13;
+            r = isZoomed ? 6 : 11;
           } else {
-            opacity = 0.25;
+            opacity = 0.35;
           }
         }
 
@@ -1739,41 +2070,119 @@ body.night-active .food-card-footer {
         g.setAttribute('class', 'shop-pin' + (isNightShop && STATE.nightMode ? ' highlighted' : ''));
         g.setAttribute('transform', `translate(${shop.x}, ${shop.y})`);
 
-        // 发光外圈
+        // 1. 夜市光晕圈
         if (isNightShop && STATE.nightMode) {
           const glow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-          glow.setAttribute('r', '18');
+          glow.setAttribute('r', isZoomed ? '9' : '17');
           glow.setAttribute('fill', '#E07A2B');
-          glow.setAttribute('opacity', '0.4');
+          glow.setAttribute('opacity', '0.45');
           g.appendChild(glow);
         }
 
+        // 2. 超宽透明点击感应圈（彻底解决鼠标抖动与悬停丢失）
+        const hit = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        hit.setAttribute('class', 'hit-area');
+        hit.setAttribute('r', isZoomed ? '12' : '20');
+        hit.setAttribute('fill', 'transparent');
+        g.appendChild(hit);
+
+        // 3. 实体核心圆点（通过属性缩放，杜绝 CSS transform 覆盖导致跳跃与闪烁）
         const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('class', 'core-pin');
         circle.setAttribute('r', r);
         circle.setAttribute('fill', color);
         circle.setAttribute('stroke', '#FFFFFF');
-        circle.setAttribute('stroke-width', '2');
+        circle.setAttribute('stroke-width', isZoomed ? '1.5' : '2');
         circle.setAttribute('opacity', opacity);
         g.appendChild(circle);
 
-        // 文字标注
+        // 4. 文字标注（全域俯瞰模式只默认展示地标店，悬停显示全部；区域缩放时全部清晰显示）
+        const showTextByDefault = isZoomed || isAnchor;
         const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        text.setAttribute('x', '12');
-        text.setAttribute('y', '4');
+        text.setAttribute('class', 'shop-pin-text');
+        text.setAttribute('x', isZoomed ? '7.5' : '11');
+        text.setAttribute('y', isZoomed ? '2.5' : '4');
         text.setAttribute('font-family', 'Noto Serif SC');
-        text.setAttribute('font-size', '11');
+        text.setAttribute('font-size', fontSize);
         text.setAttribute('font-weight', '600');
-        text.setAttribute('fill', STATE.nightMode ? (isNightShop ? '#FFD494' : '#64748B') : '#2D2620');
+        text.setAttribute('fill', STATE.nightMode ? (isNightShop ? '#FFD494' : '#E2E8F0') : '#2D2620');
         text.setAttribute('opacity', opacity);
+        text.style.display = showTextByDefault ? 'block' : 'none';
         text.textContent = shop.name;
         g.appendChild(text);
 
-        g.addEventListener('click', () => {
+        // 5. 交互事件：悬浮放大、层级提升与 HUD 跟随
+        g.addEventListener('mouseenter', (e) => {
+          g.parentNode.appendChild(g); // 提升至顶层，避免被相邻节点遮盖
+          circle.setAttribute('r', hoverRadius);
+          circle.setAttribute('stroke-width', isZoomed ? '2.5' : '3.5');
+          text.style.display = 'block';
+          text.style.opacity = '1';
+          showCartoHudTooltip(shop, e);
+        });
+
+        g.addEventListener('mousemove', (e) => {
+          moveCartoHudTooltip(e);
+        });
+
+        g.addEventListener('mouseleave', () => {
+          circle.setAttribute('r', r);
+          circle.setAttribute('stroke-width', isZoomed ? '1.5' : '2');
+          if (!showTextByDefault) {
+            text.style.display = 'none';
+            text.style.opacity = opacity;
+          }
+          hideCartoHudTooltip();
+        });
+
+        g.addEventListener('click', (e) => {
+          e.stopPropagation();
           openShopDrawer(shop);
         });
 
         layer.appendChild(g);
       });
+    }
+
+    function showCartoHudTooltip(shop, e) {
+      const tip = document.getElementById('carto-hud-tooltip');
+      if (!tip) return;
+      document.getElementById('hud-carto-attitude').textContent = shop.attitude;
+      document.getElementById('hud-carto-attitude').style.color = ATTITUDE_COLORS[shop.attitude] || '#A8352A';
+      document.getElementById('hud-carto-attitude').style.borderColor = ATTITUDE_COLORS[shop.attitude] || '#A8352A';
+      document.getElementById('hud-carto-district').textContent = shop.district + ' · ' + shop.street;
+      document.getElementById('hud-carto-name').textContent = shop.name;
+      document.getElementById('hud-carto-desc').textContent = shop.desc;
+      moveCartoHudTooltip(e);
+      tip.classList.add('active');
+    }
+
+    function moveCartoHudTooltip(e) {
+      const tip = document.getElementById('carto-hud-tooltip');
+      const box = document.getElementById('carto-box');
+      if (!tip || !box) return;
+
+      const rect = box.getBoundingClientRect();
+      let x = e.clientX - rect.left;
+      let y = e.clientY - rect.top;
+
+      const tipWidth = 260;
+      const tipHeight = 110;
+      if (x < tipWidth / 2 + 12) x = tipWidth / 2 + 12;
+      if (x > rect.width - tipWidth / 2 - 12) x = rect.width - tipWidth / 2 - 12;
+      if (y < tipHeight + 20) {
+        tip.style.transform = 'translate(-50%, 20px)';
+      } else {
+        tip.style.transform = 'translate(-50%, -100%) translateY(-14px)';
+      }
+
+      tip.style.left = `${x}px`;
+      tip.style.top = `${y}px`;
+    }
+
+    function hideCartoHudTooltip() {
+      const tip = document.getElementById('carto-hud-tooltip');
+      if (tip) tip.classList.remove('active');
     }
 
     function openShopDrawer(shop) {
@@ -2022,6 +2431,11 @@ body.night-active .food-card-footer {
 
       const canvas = document.getElementById('star-canvas');
       canvas.addEventListener('mousemove', handleCanvasHover);
+      canvas.addEventListener('mouseleave', () => {
+        hoveredStar = null;
+        hideStarHudTooltip();
+        renderConstellationCanvas();
+      });
       canvas.addEventListener('click', handleCanvasClick);
       window.addEventListener('resize', renderConstellationCanvas);
     }
@@ -2043,7 +2457,7 @@ body.night-active .food-card-footer {
 
       ctx.clearRect(0, 0, w, h);
 
-      // 绘制象限坐标十字细线
+      // 绘制象限坐标十字细线与基准环
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
       ctx.lineWidth = 1;
       ctx.setLineDash([4, 6]);
@@ -2051,32 +2465,80 @@ body.night-active .food-card-footer {
       ctx.moveTo(w / 2, 40); ctx.lineTo(w / 2, h - 40);
       ctx.moveTo(40, h / 2); ctx.lineTo(w - 40, h / 2);
       ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(w / 2, h / 2, Math.min(w, h) * 0.35, 0, Math.PI * 2);
+      ctx.stroke();
       ctx.setLineDash([]);
 
-      // 计算节点
-      starNodes = [];
-      FOODS.forEach(food => {
+      // 计算节点初始坐标
+      const padding = 70;
+      starNodes = FOODS.map(food => {
         const isMatchDna = STATE.activeDna === 'all' || food.tags.includes(STATE.activeDna);
-        const padding = 60;
-        // x: 0(mountain) -> 100(sea)
+        // x: 0(山) -> 100(海)
         const cx = padding + (food.x / 100) * (w - padding * 2);
-        // y: 0(savory) -> 100(sweet), note in canvas top is sweet, bottom is savory
+        // y: 0(咸) -> 100(甜), 画布上方为甜，下方为咸
         const cy = (h - padding) - (food.y / 100) * (h - padding * 2);
 
-        starNodes.push({
+        return {
           id: food.id,
           name: food.name,
+          category: food.category,
+          district: food.district,
+          quote: food.quote,
           chapterId: food.chapterId,
           x: cx,
           y: cy,
+          ox: cx,
+          oy: cy,
           tags: food.tags,
           active: isMatchDna,
+          foodObj: food,
           r: 5
-        });
+        };
       });
 
+      // 物理排斥力松弛算法（Force-Directed Relaxation），彻底消除节点与标签重叠
+      const minDistance = 34; // 两个星体节点之间的最小安全间距
+      const passes = 35;
+      for (let it = 0; it < passes; it++) {
+        for (let i = 0; i < starNodes.length; i++) {
+          const a = starNodes[i];
+          if (!a.active) continue;
+          for (let j = i + 1; j < starNodes.length; j++) {
+            const b = starNodes[j];
+            if (!b.active) continue;
+            let dx = a.x - b.x;
+            let dy = a.y - b.y;
+            let dist = Math.hypot(dx, dy);
+            if (dist < minDistance) {
+              if (dist < 0.001) {
+                dx = (i % 3 - 1) * 2 || 1;
+                dy = ((i + j) % 3 - 1) * 2 || 1;
+                dist = Math.hypot(dx, dy);
+              }
+              const push = (minDistance - dist) / 2;
+              const nx = dx / dist;
+              const ny = dy / dist;
+              a.x += nx * push * 0.7;
+              a.y += ny * push * 0.7;
+              b.x -= nx * push * 0.7;
+              b.y -= ny * push * 0.7;
+            }
+          }
+        }
+        // 维持象限风味锚定与画布边界安全边距
+        for (let i = 0; i < starNodes.length; i++) {
+          const n = starNodes[i];
+          n.x += (n.ox - n.x) * 0.06;
+          n.y += (n.oy - n.y) * 0.06;
+          n.x = Math.max(padding, Math.min(w - padding, n.x));
+          n.y = Math.max(padding, Math.min(h - padding, n.y));
+        }
+      }
+
       // 绘制星系引力连线
-      ctx.strokeStyle = 'rgba(197, 147, 65, 0.15)';
+      ctx.strokeStyle = 'rgba(197, 147, 65, 0.16)';
       ctx.lineWidth = 0.8;
       for (let i = 0; i < starNodes.length; i++) {
         for (let j = i + 1; j < starNodes.length; j++) {
@@ -2084,7 +2546,7 @@ body.night-active .food-card-footer {
           const b = starNodes[j];
           if (a.active && b.active && a.chapterId === b.chapterId) {
             const dist = Math.hypot(a.x - b.x, a.y - b.y);
-            if (dist < 140) {
+            if (dist < 150) {
               ctx.beginPath();
               ctx.moveTo(a.x, a.y);
               ctx.lineTo(b.x, b.y);
@@ -2094,9 +2556,9 @@ body.night-active .food-card-footer {
         }
       }
 
-      // 如果有悬浮高亮节点，画金色连接索
+      // 悬浮高亮：绘制金色引力连接索与发光辐射
       if (hoveredStar && hoveredStar.active) {
-        ctx.strokeStyle = 'rgba(224, 178, 94, 0.6)';
+        ctx.strokeStyle = 'rgba(224, 178, 94, 0.65)';
         ctx.lineWidth = 1.5;
         starNodes.forEach(other => {
           if (other.id !== hoveredStar.id && other.chapterId === hoveredStar.chapterId) {
@@ -2108,12 +2570,12 @@ body.night-active .food-card-footer {
         });
       }
 
-      // 绘制星体节点
+      // 绘制星体节点与文字标签
       starNodes.forEach(node => {
         if (!node.active) {
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
           ctx.beginPath();
-          ctx.arc(node.x, node.y, 3, 0, Math.PI * 2);
+          ctx.arc(node.x, node.y, 2.5, 0, Math.PI * 2);
           ctx.fill();
           return;
         }
@@ -2122,36 +2584,57 @@ body.night-active .food-card-footer {
         const chap = CHAPTERS.find(c => c.id === node.chapterId);
         const color = chap ? chap.color : '#C59341';
 
-        // 光晕
+        // 悬浮星轨外环
+        if (isHovered) {
+          ctx.strokeStyle = 'rgba(255, 212, 148, 0.85)';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, 16, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        // 星云光晕
         ctx.fillStyle = color;
-        ctx.globalAlpha = isHovered ? 0.8 : 0.3;
+        ctx.globalAlpha = isHovered ? 0.9 : 0.35;
         ctx.beginPath();
-        ctx.arc(node.x, node.y, isHovered ? 12 : 8, 0, Math.PI * 2);
+        ctx.arc(node.x, node.y, isHovered ? 13 : 8, 0, Math.PI * 2);
         ctx.fill();
 
-        // 实体核心
+        // 星体核心
         ctx.globalAlpha = 1;
         ctx.fillStyle = isHovered ? '#FFFFFF' : color;
         ctx.beginPath();
-        ctx.arc(node.x, node.y, isHovered ? 5 : 4, 0, Math.PI * 2);
+        ctx.arc(node.x, node.y, isHovered ? 5.5 : 4, 0, Math.PI * 2);
         ctx.fill();
 
-        // 标签文字
-        ctx.font = `${isHovered ? 'bold 12px' : '10px'} "Noto Serif SC", serif`;
-        ctx.fillStyle = isHovered ? '#FFD494' : 'rgba(255, 255, 255, 0.75)';
-        ctx.fillText(node.name, node.x + 8, node.y + 3);
+        // 标签文字：智能反向避让 + 双层轮廓 Halo 确保在任何深色背景与连线上均清晰锐利
+        const isRightSide = node.x > w - 120;
+        const tx = isRightSide ? node.x - 10 : node.x + 10;
+        ctx.textAlign = isRightSide ? 'right' : 'left';
+        ctx.textBaseline = 'middle';
+        ctx.font = `${isHovered ? 'bold 12px' : '10.5px'} "Noto Serif SC", serif`;
+
+        // 黑色抗锯齿描边轮廓（Halo）
+        ctx.lineWidth = 3.5;
+        ctx.strokeStyle = 'rgba(10, 16, 20, 0.92)';
+        ctx.strokeText(node.name, tx, node.y);
+
+        // 文字亮色填色
+        ctx.fillStyle = isHovered ? '#FFD494' : 'rgba(255, 255, 255, 0.92)';
+        ctx.fillText(node.name, tx, node.y);
       });
     }
 
     function handleCanvasHover(e) {
       const canvas = document.getElementById('star-canvas');
+      if (!canvas) return;
       const rect = canvas.getBoundingClientRect();
       const mx = e.clientX - rect.left;
       const my = e.clientY - rect.top;
 
       let found = null;
       for (const node of starNodes) {
-        if (Math.hypot(node.x - mx, node.y - my) < 14) {
+        if (node.active && Math.hypot(node.x - mx, node.y - my) < 18) {
           found = node;
           break;
         }
@@ -2161,6 +2644,54 @@ body.night-active .food-card-footer {
         hoveredStar = found;
         renderConstellationCanvas();
       }
+
+      if (hoveredStar) {
+        showStarHudTooltip(hoveredStar, e);
+      } else {
+        hideStarHudTooltip();
+      }
+    }
+
+    function showStarHudTooltip(star, e) {
+      const tip = document.getElementById('star-hud-tooltip');
+      if (!tip) return;
+      const chap = CHAPTERS.find(c => c.id === star.chapterId);
+      const chapName = chap ? chap.title : `第${star.chapterId}章`;
+      document.getElementById('star-hud-chapter').textContent = chapName;
+      document.getElementById('star-hud-district').textContent = star.district;
+      document.getElementById('star-hud-name').textContent = star.name;
+      document.getElementById('star-hud-quote').textContent = `“${star.quote}”`;
+      document.getElementById('star-hud-meta').textContent = `${star.category} · 山野海味 ${(star.foodObj?.x || 50)}% / 甘咸度 ${(star.foodObj?.y || 50)}%`;
+      moveStarHudTooltip(e);
+      tip.classList.add('active');
+    }
+
+    function moveStarHudTooltip(e) {
+      const tip = document.getElementById('star-hud-tooltip');
+      const box = document.querySelector('.constellation-canvas-box');
+      if (!tip || !box) return;
+
+      const rect = box.getBoundingClientRect();
+      let x = e.clientX - rect.left;
+      let y = e.clientY - rect.top;
+
+      const tipWidth = 260;
+      const tipHeight = 120;
+      if (x < tipWidth / 2 + 12) x = tipWidth / 2 + 12;
+      if (x > rect.width - tipWidth / 2 - 12) x = rect.width - tipWidth / 2 - 12;
+      if (y < tipHeight + 20) {
+        tip.style.transform = 'translate(-50%, 20px)';
+      } else {
+        tip.style.transform = 'translate(-50%, -100%) translateY(-14px)';
+      }
+
+      tip.style.left = `${x}px`;
+      tip.style.top = `${y}px`;
+    }
+
+    function hideStarHudTooltip() {
+      const tip = document.getElementById('star-hud-tooltip');
+      if (tip) tip.classList.remove('active');
     }
 
     function handleCanvasClick(e) {

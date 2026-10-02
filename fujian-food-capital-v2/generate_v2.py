@@ -517,17 +517,25 @@ body.night-active .cartogram-canvas-box {
   display: block;
 }
 
-/* 地图标注动效 */
+/* 地图标注动效与高灵敏度响应 */
 .shop-pin {
   cursor: pointer;
-  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
 }
 
-.shop-pin:hover {
-  transform: scale(1.35);
+.shop-pin .hit-area {
+  cursor: pointer;
+  pointer-events: all;
 }
 
-.shop-pin.highlighted circle {
+.shop-pin .core-pin {
+  transition: r 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), stroke-width 0.22s ease, filter 0.22s ease;
+}
+
+.shop-pin:hover .core-pin {
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.35));
+}
+
+.shop-pin.highlighted .core-pin {
   stroke-width: 3px;
   stroke: #FFF;
   animation: pulsePin 1.5s infinite;
@@ -535,8 +543,146 @@ body.night-active .cartogram-canvas-box {
 
 @keyframes pulsePin {
   0% { r: 7; opacity: 1; }
-  50% { r: 11; opacity: 0.6; }
+  50% { r: 12; opacity: 0.65; }
   100% { r: 7; opacity: 1; }
+}
+
+.shop-pin text {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  paint-order: stroke fill;
+  stroke: rgba(255, 255, 255, 0.95);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  user-select: none;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+body.night-active .shop-pin text {
+  stroke: rgba(13, 20, 24, 0.95);
+  stroke-width: 3px;
+}
+
+/* 地理区域标题铭牌（位于各区域 rect 正上方） */
+.zone-label-plate {
+  pointer-events: none;
+}
+
+.zone-label-plate text {
+  font-family: var(--font-serif);
+  paint-order: stroke fill;
+  stroke: rgba(255, 255, 255, 0.96);
+  stroke-width: 3.5px;
+  stroke-linejoin: round;
+  user-select: none;
+}
+
+body.night-active .zone-label-plate text {
+  stroke: rgba(13, 20, 24, 0.96);
+  stroke-width: 3.5px;
+}
+
+/* 拓扑地图浮动跟随卡片 (Carto HUD Tooltip) */
+.carto-hud-tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(168, 53, 42, 0.25);
+  box-shadow: 0 14px 36px rgba(45, 38, 32, 0.16), 0 2px 8px rgba(45, 38, 32, 0.08);
+  border-radius: 10px;
+  padding: 12px 16px;
+  width: 260px;
+  z-index: 45;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, -100%) translateY(-14px);
+  transition: opacity 0.18s ease, transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.18s;
+}
+
+body.night-active .carto-hud-tooltip {
+  background: rgba(18, 26, 30, 0.95);
+  border-color: rgba(224, 178, 94, 0.35);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(224, 122, 43, 0.15);
+}
+
+.carto-hud-tooltip.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.carto-hud-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.carto-hud-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--c-brick);
+  color: var(--c-brick);
+  background: rgba(168, 53, 42, 0.06);
+}
+
+body.night-active .carto-hud-badge {
+  border-color: var(--c-gold);
+  color: var(--c-gold);
+  background: rgba(224, 178, 94, 0.12);
+}
+
+.carto-hud-district {
+  font-size: 11px;
+  color: var(--c-ink-muted);
+}
+
+body.night-active .carto-hud-district {
+  color: #94A3B8;
+}
+
+.carto-hud-title {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--c-ink);
+  margin-bottom: 4px;
+}
+
+body.night-active .carto-hud-title {
+  color: #FFF;
+}
+
+.carto-hud-desc {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--c-ink-light);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+body.night-active .carto-hud-desc {
+  color: #CBD5E1;
+}
+
+.carto-hud-hint {
+  font-size: 11px;
+  color: var(--c-brick);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+body.night-active .carto-hud-hint {
+  color: var(--c-gold);
 }
 
 /* 拓扑地图侧滑牌匾详情抽屉 */
@@ -902,6 +1048,87 @@ body.night-active .dissection-box {
   width: 100%;
   height: 100%;
   display: block;
+}
+
+/* 星图浮动卡片 (Constellation Star HUD Tooltip) */
+.star-hud-tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: rgba(15, 23, 30, 0.95);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(197, 147, 65, 0.4);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 0 25px rgba(197, 147, 65, 0.15);
+  border-radius: 10px;
+  padding: 12px 16px;
+  width: 260px;
+  z-index: 30;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, -100%) translateY(-14px);
+  transition: opacity 0.18s ease, transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.18s;
+}
+
+.star-hud-tooltip.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.star-hud-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.star-hud-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--c-gold);
+  border: 1px solid rgba(197, 147, 65, 0.4);
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(197, 147, 65, 0.1);
+}
+
+.star-hud-district {
+  font-size: 11px;
+  color: #94A3B8;
+}
+
+.star-hud-title {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 700;
+  color: #FFF;
+  margin-bottom: 4px;
+}
+
+.star-hud-quote {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #CBD5E1;
+  font-style: italic;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.star-hud-meta {
+  font-size: 11px;
+  color: #8C9BAE;
+  margin-bottom: 8px;
+}
+
+.star-hud-action {
+  font-size: 11px;
+  color: var(--c-gold);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 /* ==========================================================================
@@ -1331,52 +1558,78 @@ body.night-active .food-card-footer {
               <path d="M 720,220 C 780,320 850,420 980,520 L 1000,700 L 600,700 Z" fill="#DCE7E5" opacity="0.3"/>
               <text x="840" y="670" font-family="Noto Serif SC" font-size="14" fill="#4B6F73" opacity="0.6">台湾海峡 · 向海讨鲜</text>
 
-              <!-- 六大地理板块轮廓区 -->
+              <!-- 六大地理板块轮廓区（标题标签统一置于 rect 正上方，杜绝与内部 shop-pin 相互遮盖） -->
               <!-- 1. 鲤城古城 (核心十字轴) -->
-              <g id="zone-gucheng">
+              <g id="zone-gucheng" class="carto-zone-group">
                 <rect x="360" y="210" width="190" height="225" rx="16" fill="url(#cityGlow)" stroke="#A8352A" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.65"/>
-                <text x="375" y="235" font-family="Noto Serif SC" font-weight="700" font-size="13" fill="#A8352A">鲤城古城核心 (27家)</text>
-                <text x="375" y="250" font-size="10" fill="#782215" opacity="0.8">西街 · 中山路 · 涂门街 · 县后街</text>
+                <g class="zone-label-plate" transform="translate(362, 172)">
+                  <text x="0" y="15" font-family="Noto Serif SC" font-weight="700" font-size="13.5" fill="#A8352A">鲤城古城核心 (27家)</text>
+                  <text x="0" y="30" font-size="10.5" fill="#782215" opacity="0.85">西街 · 中山路 · 涂门街 · 县后街</text>
+                </g>
               </g>
 
               <!-- 2. 石狮老街与商市 -->
-              <g id="zone-shishi">
+              <g id="zone-shishi" class="carto-zone-group">
                 <rect x="630" y="470" width="160" height="160" rx="14" fill="#FAF0E6" stroke="#C59341" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.65"/>
-                <text x="645" y="495" font-family="Noto Serif SC" font-weight="700" font-size="13" fill="#C59341">石狮老街与夜市 (13家)</text>
-                <text x="645" y="510" font-size="10" fill="#8C6320" opacity="0.8">城隍老街 · 旧菜市 · 新华路</text>
+                <g class="zone-label-plate" transform="translate(632, 432)">
+                  <text x="0" y="15" font-family="Noto Serif SC" font-weight="700" font-size="13" fill="#C59341">石狮老街与夜市 (13家)</text>
+                  <text x="0" y="30" font-size="10" fill="#8C6320" opacity="0.85">城隍老街 · 旧菜市 · 新华路</text>
+                </g>
               </g>
 
               <!-- 3. 晋江·安海 (五里桥头) -->
-              <g id="zone-anhai">
+              <g id="zone-anhai" class="carto-zone-group">
                 <rect x="210" y="460" width="125" height="115" rx="12" fill="#E6EEF0" stroke="#366B73" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.6"/>
-                <text x="220" y="480" font-family="Noto Serif SC" font-weight="700" font-size="12" fill="#366B73">晋江 · 安海 (4家)</text>
-                <text x="220" y="495" font-size="10" fill="#204A50" opacity="0.8">五里桥 · 土笋冻故乡</text>
+                <g class="zone-label-plate" transform="translate(212, 424)">
+                  <text x="0" y="15" font-family="Noto Serif SC" font-weight="700" font-size="12" fill="#366B73">晋江 · 安海 (4家)</text>
+                  <text x="0" y="29" font-size="10" fill="#204A50" opacity="0.85">五里桥 · 土笋冻故乡</text>
+                </g>
               </g>
 
               <!-- 4. 晋江·张林 (姜母鸭一条街) -->
-              <g id="zone-zhanglin">
+              <g id="zone-zhanglin" class="carto-zone-group">
                 <rect x="250" y="350" width="100" height="85" rx="10" fill="#F4EFE6" stroke="#9E4A28" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.6"/>
-                <text x="260" y="370" font-family="Noto Serif SC" font-weight="700" font-size="11" fill="#9E4A28">晋江 · 张林 (3家)</text>
-                <text x="260" y="385" font-size="9" fill="#7A3215">磁灶吃鸭金字招牌</text>
+                <g class="zone-label-plate" transform="translate(252, 316)">
+                  <text x="0" y="14" font-family="Noto Serif SC" font-weight="700" font-size="11.5" fill="#9E4A28">晋江 · 张林 (3家)</text>
+                  <text x="0" y="27" font-size="9.5" fill="#7A3215" opacity="0.85">磁灶吃鸭金字招牌</text>
+                </g>
               </g>
 
               <!-- 5. 晋江·深沪 (渔港小镇) -->
-              <g id="zone-shenhu">
+              <g id="zone-shenhu" class="carto-zone-group">
                 <rect x="520" y="595" width="115" height="80" rx="10" fill="#E0EBEB" stroke="#2F6E7A" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.6"/>
-                <text x="530" y="615" font-family="Noto Serif SC" font-weight="700" font-size="11" fill="#2F6E7A">晋江 · 深沪 (2家)</text>
-                <text x="530" y="630" font-size="9" fill="#1C454D">宝泉庵 · 壶仔饭水丸</text>
+                <g class="zone-label-plate" transform="translate(522, 560)">
+                  <text x="0" y="14" font-family="Noto Serif SC" font-weight="700" font-size="11.5" fill="#2F6E7A">晋江 · 深沪 (2家)</text>
+                  <text x="0" y="27" font-size="9.5" fill="#1C454D" opacity="0.85">宝泉庵 · 壶仔饭水丸</text>
+                </g>
               </g>
 
               <!-- 6. 丰泽·蟳埔 -->
-              <g id="zone-fengze">
+              <g id="zone-fengze" class="carto-zone-group">
                 <rect x="645" y="235" width="110" height="75" rx="10" fill="#F0EDE4" stroke="#8C7A68" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.6"/>
-                <text x="655" y="255" font-family="Noto Serif SC" font-weight="700" font-size="11" fill="#5F544A">丰泽 · 蟳埔之侧 (1家)</text>
-                <text x="655" y="270" font-size="9" fill="#5F544A">渔港小馆 · 炣鲳鱼</text>
+                <g class="zone-label-plate" transform="translate(647, 200)">
+                  <text x="0" y="14" font-family="Noto Serif SC" font-weight="700" font-size="11.5" fill="#5F544A">丰泽 · 蟳埔之侧 (1家)</text>
+                  <text x="0" y="27" font-size="9.5" fill="#5F544A" opacity="0.85">渔港小馆 · 炣鲳鱼</text>
+                </g>
               </g>
 
               <!-- 50 店动态渲染层 (由 JS 注入) -->
               <g id="carto-shops-layer"></g>
             </svg>
+
+            <!-- 店铺悬停跟随卡片 (Carto HUD Tooltip) -->
+            <div class="carto-hud-tooltip" id="carto-hud-tooltip">
+              <div class="carto-hud-top">
+                <span class="carto-hud-badge" id="hud-carto-attitude">本地力荐</span>
+                <span class="carto-hud-district" id="hud-carto-district">街区 · 街道</span>
+              </div>
+              <div class="carto-hud-title" id="hud-carto-name">店铺名</div>
+              <div class="carto-hud-desc" id="hud-carto-desc">老饕探店指南</div>
+              <div class="carto-hud-hint">
+                <span>点击展开老饕探店实录</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </div>
+            </div>
 
             <!-- 店铺侧滑牌匾抽屉 (Shop Ledger Drawer) -->
             <div class="shop-ledger-drawer" id="shop-drawer">
@@ -1521,6 +1774,21 @@ body.night-active .food-card-footer {
             <div style="position:absolute; right:20px; top:50%; transform:translateY(-50%); font-size:12px; color:rgba(255,255,255,0.4); font-family:var(--font-serif); pointer-events:none;">海错狂澜 (星虫/海蛎/马鲛) ▶</div>
             <div style="position:absolute; top:20px; left:50%; transform:translateX(-50%); font-size:12px; color:rgba(255,255,255,0.4); font-family:var(--font-serif); pointer-events:none;">▲ 纯正甘甜 (百花蜜水/花生汤)</div>
             <div style="position:absolute; bottom:20px; left:50%; transform:translateX(-50%); font-size:12px; color:rgba(255,255,255,0.4); font-family:var(--font-serif); pointer-events:none;">▼ 咸鲜大味 (骨汤卤味/酱油水)</div>
+            
+            <!-- 星宿悬停浮动卡片 (Star HUD Tooltip) -->
+            <div class="star-hud-tooltip" id="star-hud-tooltip">
+              <div class="star-hud-header">
+                <span class="star-hud-badge" id="star-hud-chapter">章节</span>
+                <span class="star-hud-district" id="star-hud-district">地标</span>
+              </div>
+              <h4 class="star-hud-title" id="star-hud-name">美食名</h4>
+              <p class="star-hud-quote" id="star-hud-quote">“风味速描”</p>
+              <div class="star-hud-meta" id="star-hud-meta">风味维度</div>
+              <div class="star-hud-action">
+                <span>点击探微完整风味档案</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1695,16 +1963,72 @@ body.night-active .food-card-footer {
     /* ==========================================================================
        2. 视域 Ⅰ · 刺桐山海图 (Topographic Cartogram & Landscape Map)
        ========================================================================== */
+    const ANCHOR_SHOPS = new Set([
+      '水门国仔面线糊', '文啊面线糊', '斯丹姜母鸭', '秉正堂', '亚佛春饼',
+      '忠记姜母鸭', '侯阿婆肉粽', '绿岛海鲜酒楼', '马脚桥肉粽',
+      '福记海蛎煎（大仑街）', '长火土笋冻', '阿山姜母鸭', '老街壶仔饭', '桥仔头餐馆'
+    ]);
+
+    const DISTRICT_VIEWBOX = {
+      'all': { x: 0, y: 0, w: 1000, h: 700 },
+      '鲤城古城': { x: 345, y: 156, w: 225, h: 290 },
+      '石狮': { x: 615, y: 418, w: 195, h: 222 },
+      '晋江·安海': { x: 195, y: 410, w: 155, h: 175 },
+      '晋江·深沪': { x: 505, y: 546, w: 145, h: 140 },
+      '晋江·张林': { x: 235, y: 302, w: 130, h: 144 },
+      '丰泽': { x: 630, y: 188, w: 140, h: 132 }
+    };
+
+    let currentViewBox = { x: 0, y: 0, w: 1000, h: 700 };
+    let viewBoxAnimId = null;
+
+    function animateViewBox(target, duration = 380) {
+      if (viewBoxAnimId) cancelAnimationFrame(viewBoxAnimId);
+      const start = { ...currentViewBox };
+      const startTime = performance.now();
+      const svg = document.getElementById('carto-svg');
+      if (!svg) return;
+
+      function step(time) {
+        const elapsed = time - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const ease = 1 - Math.pow(1 - progress, 3);
+
+        currentViewBox.x = start.x + (target.x - start.x) * ease;
+        currentViewBox.y = start.y + (target.y - start.y) * ease;
+        currentViewBox.w = start.w + (target.w - start.w) * ease;
+        currentViewBox.h = start.h + (target.h - start.h) * ease;
+
+        svg.setAttribute('viewBox', `${currentViewBox.x.toFixed(1)} ${currentViewBox.y.toFixed(1)} ${currentViewBox.w.toFixed(1)} ${currentViewBox.h.toFixed(1)}`);
+
+        if (progress < 1) {
+          viewBoxAnimId = requestAnimationFrame(step);
+        } else {
+          viewBoxAnimId = null;
+        }
+      }
+
+      viewBoxAnimId = requestAnimationFrame(step);
+    }
+
     function initCartogram() {
-      // 地区筛选按钮
+      // 地区筛选按钮与平滑镜头缩放
       document.querySelectorAll('#carto-district-filters .geo-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           document.querySelectorAll('#carto-district-filters .geo-btn').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           STATE.activeGeo = btn.dataset.geo;
+          const target = DISTRICT_VIEWBOX[STATE.activeGeo] || DISTRICT_VIEWBOX['all'];
+          animateViewBox(target);
           renderCartogramShops();
         });
       });
+
+      // 拓扑沙盘鼠标离开时隐藏 HUD 浮动卡片
+      const cartoBox = document.getElementById('carto-box');
+      if (cartoBox) {
+        cartoBox.addEventListener('mouseleave', hideCartoHudTooltip);
+      }
 
       // 关闭店铺抽屉
       document.getElementById('close-drawer-btn').addEventListener('click', () => {
@@ -1725,25 +2049,32 @@ body.night-active .food-card-footer {
 
     function renderCartogramShops() {
       const layer = document.getElementById('carto-shops-layer');
+      if (!layer) return;
       layer.innerHTML = '';
 
+      const isAll = STATE.activeGeo === 'all';
+      const isZoomed = !isAll;
+      const pinRadius = isZoomed ? 4.5 : 7;
+      const hoverRadius = isZoomed ? 6.5 : 12;
+      const fontSize = isZoomed ? 7.5 : 11;
+
       SHOPS.forEach(shop => {
-        // 区域筛选
-        if (STATE.activeGeo !== 'all' && shop.district !== STATE.activeGeo) {
+        // 区域筛选：全域时显示所有店铺；指定区域时仅显示该区域店铺
+        if (!isAll && shop.district !== STATE.activeGeo) {
           return;
         }
 
         const isNightShop = shop.attitude === '夜宵摊' || shop.desc.includes('夜市') || shop.desc.includes('夜宵');
         const color = ATTITUDE_COLORS[shop.attitude] || '#A8352A';
+        const isAnchor = ANCHOR_SHOPS.has(shop.name);
 
-        // 夜灯模式下强化夜宵摊
         let opacity = 1;
-        let r = 8;
+        let r = pinRadius;
         if (STATE.nightMode) {
           if (isNightShop) {
-            r = 13;
+            r = isZoomed ? 6 : 11;
           } else {
-            opacity = 0.25;
+            opacity = 0.35;
           }
         }
 
@@ -1751,41 +2082,119 @@ body.night-active .food-card-footer {
         g.setAttribute('class', 'shop-pin' + (isNightShop && STATE.nightMode ? ' highlighted' : ''));
         g.setAttribute('transform', `translate(${shop.x}, ${shop.y})`);
 
-        // 发光外圈
+        // 1. 夜市光晕圈
         if (isNightShop && STATE.nightMode) {
           const glow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-          glow.setAttribute('r', '18');
+          glow.setAttribute('r', isZoomed ? '9' : '17');
           glow.setAttribute('fill', '#E07A2B');
-          glow.setAttribute('opacity', '0.4');
+          glow.setAttribute('opacity', '0.45');
           g.appendChild(glow);
         }
 
+        // 2. 超宽透明点击感应圈（彻底解决鼠标抖动与悬停丢失）
+        const hit = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        hit.setAttribute('class', 'hit-area');
+        hit.setAttribute('r', isZoomed ? '12' : '20');
+        hit.setAttribute('fill', 'transparent');
+        g.appendChild(hit);
+
+        // 3. 实体核心圆点（通过属性缩放，杜绝 CSS transform 覆盖导致跳跃与闪烁）
         const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('class', 'core-pin');
         circle.setAttribute('r', r);
         circle.setAttribute('fill', color);
         circle.setAttribute('stroke', '#FFFFFF');
-        circle.setAttribute('stroke-width', '2');
+        circle.setAttribute('stroke-width', isZoomed ? '1.5' : '2');
         circle.setAttribute('opacity', opacity);
         g.appendChild(circle);
 
-        // 文字标注
+        // 4. 文字标注（全域俯瞰模式只默认展示地标店，悬停显示全部；区域缩放时全部清晰显示）
+        const showTextByDefault = isZoomed || isAnchor;
         const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        text.setAttribute('x', '12');
-        text.setAttribute('y', '4');
+        text.setAttribute('class', 'shop-pin-text');
+        text.setAttribute('x', isZoomed ? '7.5' : '11');
+        text.setAttribute('y', isZoomed ? '2.5' : '4');
         text.setAttribute('font-family', 'Noto Serif SC');
-        text.setAttribute('font-size', '11');
+        text.setAttribute('font-size', fontSize);
         text.setAttribute('font-weight', '600');
-        text.setAttribute('fill', STATE.nightMode ? (isNightShop ? '#FFD494' : '#64748B') : '#2D2620');
+        text.setAttribute('fill', STATE.nightMode ? (isNightShop ? '#FFD494' : '#E2E8F0') : '#2D2620');
         text.setAttribute('opacity', opacity);
+        text.style.display = showTextByDefault ? 'block' : 'none';
         text.textContent = shop.name;
         g.appendChild(text);
 
-        g.addEventListener('click', () => {
+        // 5. 交互事件：悬浮放大、层级提升与 HUD 跟随
+        g.addEventListener('mouseenter', (e) => {
+          g.parentNode.appendChild(g); // 提升至顶层，避免被相邻节点遮盖
+          circle.setAttribute('r', hoverRadius);
+          circle.setAttribute('stroke-width', isZoomed ? '2.5' : '3.5');
+          text.style.display = 'block';
+          text.style.opacity = '1';
+          showCartoHudTooltip(shop, e);
+        });
+
+        g.addEventListener('mousemove', (e) => {
+          moveCartoHudTooltip(e);
+        });
+
+        g.addEventListener('mouseleave', () => {
+          circle.setAttribute('r', r);
+          circle.setAttribute('stroke-width', isZoomed ? '1.5' : '2');
+          if (!showTextByDefault) {
+            text.style.display = 'none';
+            text.style.opacity = opacity;
+          }
+          hideCartoHudTooltip();
+        });
+
+        g.addEventListener('click', (e) => {
+          e.stopPropagation();
           openShopDrawer(shop);
         });
 
         layer.appendChild(g);
       });
+    }
+
+    function showCartoHudTooltip(shop, e) {
+      const tip = document.getElementById('carto-hud-tooltip');
+      if (!tip) return;
+      document.getElementById('hud-carto-attitude').textContent = shop.attitude;
+      document.getElementById('hud-carto-attitude').style.color = ATTITUDE_COLORS[shop.attitude] || '#A8352A';
+      document.getElementById('hud-carto-attitude').style.borderColor = ATTITUDE_COLORS[shop.attitude] || '#A8352A';
+      document.getElementById('hud-carto-district').textContent = shop.district + ' · ' + shop.street;
+      document.getElementById('hud-carto-name').textContent = shop.name;
+      document.getElementById('hud-carto-desc').textContent = shop.desc;
+      moveCartoHudTooltip(e);
+      tip.classList.add('active');
+    }
+
+    function moveCartoHudTooltip(e) {
+      const tip = document.getElementById('carto-hud-tooltip');
+      const box = document.getElementById('carto-box');
+      if (!tip || !box) return;
+
+      const rect = box.getBoundingClientRect();
+      let x = e.clientX - rect.left;
+      let y = e.clientY - rect.top;
+
+      const tipWidth = 260;
+      const tipHeight = 110;
+      if (x < tipWidth / 2 + 12) x = tipWidth / 2 + 12;
+      if (x > rect.width - tipWidth / 2 - 12) x = rect.width - tipWidth / 2 - 12;
+      if (y < tipHeight + 20) {
+        tip.style.transform = 'translate(-50%, 20px)';
+      } else {
+        tip.style.transform = 'translate(-50%, -100%) translateY(-14px)';
+      }
+
+      tip.style.left = `${x}px`;
+      tip.style.top = `${y}px`;
+    }
+
+    function hideCartoHudTooltip() {
+      const tip = document.getElementById('carto-hud-tooltip');
+      if (tip) tip.classList.remove('active');
     }
 
     function openShopDrawer(shop) {
@@ -2034,6 +2443,11 @@ body.night-active .food-card-footer {
 
       const canvas = document.getElementById('star-canvas');
       canvas.addEventListener('mousemove', handleCanvasHover);
+      canvas.addEventListener('mouseleave', () => {
+        hoveredStar = null;
+        hideStarHudTooltip();
+        renderConstellationCanvas();
+      });
       canvas.addEventListener('click', handleCanvasClick);
       window.addEventListener('resize', renderConstellationCanvas);
     }
@@ -2055,7 +2469,7 @@ body.night-active .food-card-footer {
 
       ctx.clearRect(0, 0, w, h);
 
-      // 绘制象限坐标十字细线
+      // 绘制象限坐标十字细线与基准环
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
       ctx.lineWidth = 1;
       ctx.setLineDash([4, 6]);
@@ -2063,32 +2477,80 @@ body.night-active .food-card-footer {
       ctx.moveTo(w / 2, 40); ctx.lineTo(w / 2, h - 40);
       ctx.moveTo(40, h / 2); ctx.lineTo(w - 40, h / 2);
       ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(w / 2, h / 2, Math.min(w, h) * 0.35, 0, Math.PI * 2);
+      ctx.stroke();
       ctx.setLineDash([]);
 
-      // 计算节点
-      starNodes = [];
-      FOODS.forEach(food => {
+      // 计算节点初始坐标
+      const padding = 70;
+      starNodes = FOODS.map(food => {
         const isMatchDna = STATE.activeDna === 'all' || food.tags.includes(STATE.activeDna);
-        const padding = 60;
-        // x: 0(mountain) -> 100(sea)
+        // x: 0(山) -> 100(海)
         const cx = padding + (food.x / 100) * (w - padding * 2);
-        // y: 0(savory) -> 100(sweet), note in canvas top is sweet, bottom is savory
+        // y: 0(咸) -> 100(甜), 画布上方为甜，下方为咸
         const cy = (h - padding) - (food.y / 100) * (h - padding * 2);
 
-        starNodes.push({
+        return {
           id: food.id,
           name: food.name,
+          category: food.category,
+          district: food.district,
+          quote: food.quote,
           chapterId: food.chapterId,
           x: cx,
           y: cy,
+          ox: cx,
+          oy: cy,
           tags: food.tags,
           active: isMatchDna,
+          foodObj: food,
           r: 5
-        });
+        };
       });
 
+      // 物理排斥力松弛算法（Force-Directed Relaxation），彻底消除节点与标签重叠
+      const minDistance = 34; // 两个星体节点之间的最小安全间距
+      const passes = 35;
+      for (let it = 0; it < passes; it++) {
+        for (let i = 0; i < starNodes.length; i++) {
+          const a = starNodes[i];
+          if (!a.active) continue;
+          for (let j = i + 1; j < starNodes.length; j++) {
+            const b = starNodes[j];
+            if (!b.active) continue;
+            let dx = a.x - b.x;
+            let dy = a.y - b.y;
+            let dist = Math.hypot(dx, dy);
+            if (dist < minDistance) {
+              if (dist < 0.001) {
+                dx = (i % 3 - 1) * 2 || 1;
+                dy = ((i + j) % 3 - 1) * 2 || 1;
+                dist = Math.hypot(dx, dy);
+              }
+              const push = (minDistance - dist) / 2;
+              const nx = dx / dist;
+              const ny = dy / dist;
+              a.x += nx * push * 0.7;
+              a.y += ny * push * 0.7;
+              b.x -= nx * push * 0.7;
+              b.y -= ny * push * 0.7;
+            }
+          }
+        }
+        // 维持象限风味锚定与画布边界安全边距
+        for (let i = 0; i < starNodes.length; i++) {
+          const n = starNodes[i];
+          n.x += (n.ox - n.x) * 0.06;
+          n.y += (n.oy - n.y) * 0.06;
+          n.x = Math.max(padding, Math.min(w - padding, n.x));
+          n.y = Math.max(padding, Math.min(h - padding, n.y));
+        }
+      }
+
       // 绘制星系引力连线
-      ctx.strokeStyle = 'rgba(197, 147, 65, 0.15)';
+      ctx.strokeStyle = 'rgba(197, 147, 65, 0.16)';
       ctx.lineWidth = 0.8;
       for (let i = 0; i < starNodes.length; i++) {
         for (let j = i + 1; j < starNodes.length; j++) {
@@ -2096,7 +2558,7 @@ body.night-active .food-card-footer {
           const b = starNodes[j];
           if (a.active && b.active && a.chapterId === b.chapterId) {
             const dist = Math.hypot(a.x - b.x, a.y - b.y);
-            if (dist < 140) {
+            if (dist < 150) {
               ctx.beginPath();
               ctx.moveTo(a.x, a.y);
               ctx.lineTo(b.x, b.y);
@@ -2106,9 +2568,9 @@ body.night-active .food-card-footer {
         }
       }
 
-      // 如果有悬浮高亮节点，画金色连接索
+      // 悬浮高亮：绘制金色引力连接索与发光辐射
       if (hoveredStar && hoveredStar.active) {
-        ctx.strokeStyle = 'rgba(224, 178, 94, 0.6)';
+        ctx.strokeStyle = 'rgba(224, 178, 94, 0.65)';
         ctx.lineWidth = 1.5;
         starNodes.forEach(other => {
           if (other.id !== hoveredStar.id && other.chapterId === hoveredStar.chapterId) {
@@ -2120,12 +2582,12 @@ body.night-active .food-card-footer {
         });
       }
 
-      // 绘制星体节点
+      // 绘制星体节点与文字标签
       starNodes.forEach(node => {
         if (!node.active) {
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
           ctx.beginPath();
-          ctx.arc(node.x, node.y, 3, 0, Math.PI * 2);
+          ctx.arc(node.x, node.y, 2.5, 0, Math.PI * 2);
           ctx.fill();
           return;
         }
@@ -2134,36 +2596,57 @@ body.night-active .food-card-footer {
         const chap = CHAPTERS.find(c => c.id === node.chapterId);
         const color = chap ? chap.color : '#C59341';
 
-        // 光晕
+        // 悬浮星轨外环
+        if (isHovered) {
+          ctx.strokeStyle = 'rgba(255, 212, 148, 0.85)';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, 16, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        // 星云光晕
         ctx.fillStyle = color;
-        ctx.globalAlpha = isHovered ? 0.8 : 0.3;
+        ctx.globalAlpha = isHovered ? 0.9 : 0.35;
         ctx.beginPath();
-        ctx.arc(node.x, node.y, isHovered ? 12 : 8, 0, Math.PI * 2);
+        ctx.arc(node.x, node.y, isHovered ? 13 : 8, 0, Math.PI * 2);
         ctx.fill();
 
-        // 实体核心
+        // 星体核心
         ctx.globalAlpha = 1;
         ctx.fillStyle = isHovered ? '#FFFFFF' : color;
         ctx.beginPath();
-        ctx.arc(node.x, node.y, isHovered ? 5 : 4, 0, Math.PI * 2);
+        ctx.arc(node.x, node.y, isHovered ? 5.5 : 4, 0, Math.PI * 2);
         ctx.fill();
 
-        // 标签文字
-        ctx.font = `${isHovered ? 'bold 12px' : '10px'} "Noto Serif SC", serif`;
-        ctx.fillStyle = isHovered ? '#FFD494' : 'rgba(255, 255, 255, 0.75)';
-        ctx.fillText(node.name, node.x + 8, node.y + 3);
+        // 标签文字：智能反向避让 + 双层轮廓 Halo 确保在任何深色背景与连线上均清晰锐利
+        const isRightSide = node.x > w - 120;
+        const tx = isRightSide ? node.x - 10 : node.x + 10;
+        ctx.textAlign = isRightSide ? 'right' : 'left';
+        ctx.textBaseline = 'middle';
+        ctx.font = `${isHovered ? 'bold 12px' : '10.5px'} "Noto Serif SC", serif`;
+
+        // 黑色抗锯齿描边轮廓（Halo）
+        ctx.lineWidth = 3.5;
+        ctx.strokeStyle = 'rgba(10, 16, 20, 0.92)';
+        ctx.strokeText(node.name, tx, node.y);
+
+        // 文字亮色填色
+        ctx.fillStyle = isHovered ? '#FFD494' : 'rgba(255, 255, 255, 0.92)';
+        ctx.fillText(node.name, tx, node.y);
       });
     }
 
     function handleCanvasHover(e) {
       const canvas = document.getElementById('star-canvas');
+      if (!canvas) return;
       const rect = canvas.getBoundingClientRect();
       const mx = e.clientX - rect.left;
       const my = e.clientY - rect.top;
 
       let found = null;
       for (const node of starNodes) {
-        if (Math.hypot(node.x - mx, node.y - my) < 14) {
+        if (node.active && Math.hypot(node.x - mx, node.y - my) < 18) {
           found = node;
           break;
         }
@@ -2173,6 +2656,54 @@ body.night-active .food-card-footer {
         hoveredStar = found;
         renderConstellationCanvas();
       }
+
+      if (hoveredStar) {
+        showStarHudTooltip(hoveredStar, e);
+      } else {
+        hideStarHudTooltip();
+      }
+    }
+
+    function showStarHudTooltip(star, e) {
+      const tip = document.getElementById('star-hud-tooltip');
+      if (!tip) return;
+      const chap = CHAPTERS.find(c => c.id === star.chapterId);
+      const chapName = chap ? chap.title : `第${star.chapterId}章`;
+      document.getElementById('star-hud-chapter').textContent = chapName;
+      document.getElementById('star-hud-district').textContent = star.district;
+      document.getElementById('star-hud-name').textContent = star.name;
+      document.getElementById('star-hud-quote').textContent = `“${star.quote}”`;
+      document.getElementById('star-hud-meta').textContent = `${star.category} · 山野海味 ${(star.foodObj?.x || 50)}% / 甘咸度 ${(star.foodObj?.y || 50)}%`;
+      moveStarHudTooltip(e);
+      tip.classList.add('active');
+    }
+
+    function moveStarHudTooltip(e) {
+      const tip = document.getElementById('star-hud-tooltip');
+      const box = document.querySelector('.constellation-canvas-box');
+      if (!tip || !box) return;
+
+      const rect = box.getBoundingClientRect();
+      let x = e.clientX - rect.left;
+      let y = e.clientY - rect.top;
+
+      const tipWidth = 260;
+      const tipHeight = 120;
+      if (x < tipWidth / 2 + 12) x = tipWidth / 2 + 12;
+      if (x > rect.width - tipWidth / 2 - 12) x = rect.width - tipWidth / 2 - 12;
+      if (y < tipHeight + 20) {
+        tip.style.transform = 'translate(-50%, 20px)';
+      } else {
+        tip.style.transform = 'translate(-50%, -100%) translateY(-14px)';
+      }
+
+      tip.style.left = `${x}px`;
+      tip.style.top = `${y}px`;
+    }
+
+    function hideStarHudTooltip() {
+      const tip = document.getElementById('star-hud-tooltip');
+      if (tip) tip.classList.remove('active');
     }
 
     function handleCanvasClick(e) {
