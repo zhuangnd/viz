@@ -3,21 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Viz Gallery · 数据可视化精选导航</title>
+  <title>Viz Gallery · 数据可视化全景导航中心</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #0b0f19;
       --bg-subtle: #111827;
-      --surface: rgba(17, 24, 39, 0.7);
-      --surface-hover: rgba(30, 41, 59, 0.85);
+      --surface: rgba(17, 24, 39, 0.72);
+      --surface-hover: rgba(30, 41, 59, 0.88);
       --surface-border: rgba(255, 255, 255, 0.08);
-      --surface-border-hover: rgba(99, 102, 241, 0.4);
-      --text-main: #f3f4f6;
-      --text-muted: #9ca3af;
-      --text-dim: #6b7280;
+      --surface-border-hover: rgba(99, 102, 241, 0.45);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
       --accent: #6366f1;
       --accent-glow: rgba(99, 102, 241, 0.25);
       --cyan: #06b6d4;
@@ -27,7 +27,7 @@
       --radius-xl: 18px;
       --radius-lg: 12px;
       --radius-sm: 8px;
-      --transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     * {
@@ -44,17 +44,16 @@
       overflow-x: hidden;
       line-height: 1.6;
       background-image: 
-        radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
-        radial-gradient(circle at 85% 25%, rgba(6, 182, 212, 0.1) 0%, transparent 45%),
-        radial-gradient(circle at 50% 80%, rgba(244, 63, 94, 0.06) 0%, transparent 50%);
+        radial-gradient(circle at 12% 12%, rgba(99, 102, 241, 0.14) 0%, transparent 40%),
+        radial-gradient(circle at 88% 20%, rgba(6, 182, 212, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 50% 85%, rgba(244, 63, 94, 0.08) 0%, transparent 50%);
       background-attachment: fixed;
     }
 
-    /* Ambient noise & grid */
     .bg-grid {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background-size: 40px 40px;
+      background-size: 38px 38px;
       background-image: 
         linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
@@ -63,18 +62,27 @@
     }
 
     .container {
-      max-width: 1360px;
+      max-width: 1400px;
       margin: 0 auto;
-      padding: 48px 28px 100px;
+      padding: 40px 28px 100px;
       position: relative;
       z-index: 1;
     }
 
     /* Header */
     header {
-      padding: 20px 0 44px;
+      padding: 16px 0 36px;
       border-bottom: 1px solid var(--surface-border);
-      margin-bottom: 36px;
+      margin-bottom: 32px;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 16px;
     }
 
     .badge-pill {
@@ -88,7 +96,6 @@
       font-size: 13px;
       font-weight: 500;
       color: #a5b4fc;
-      margin-bottom: 20px;
       backdrop-filter: blur(8px);
     }
     .badge-pill .pulse-dot {
@@ -101,16 +108,25 @@
     }
     @keyframes pulse {
       0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.8); }
+      50% { opacity: 0.35; transform: scale(0.8); }
+    }
+
+    .header-meta {
+      font-size: 12.5px;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .hero-title {
-      font-size: clamp(2.2rem, 4vw, 3.4rem);
+      font-size: clamp(2.2rem, 3.8vw, 3.3rem);
       font-weight: 800;
       letter-spacing: -0.03em;
       line-height: 1.15;
-      margin-bottom: 14px;
-      background: linear-gradient(135deg, #ffffff 30%, #cbd5e1 70%, #94a3b8 100%);
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #ffffff 35%, #cbd5e1 70%, #94a3b8 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
@@ -118,7 +134,7 @@
     .hero-desc {
       font-size: 1.05rem;
       color: var(--text-muted);
-      max-width: 780px;
+      max-width: 860px;
       line-height: 1.65;
     }
 
@@ -126,8 +142,8 @@
     .stats-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 16px;
-      margin-top: 28px;
+      gap: 12px;
+      margin-top: 24px;
     }
 
     .stat-chip {
@@ -145,30 +161,30 @@
       font-family: 'JetBrains Mono', monospace;
       font-weight: 700;
       color: #f1f5f9;
-      font-size: 15px;
+      font-size: 14.5px;
     }
     .stat-chip .label {
       color: var(--text-dim);
     }
 
-    /* Control Toolbar (Search & Category filter) */
+    /* Control Toolbar */
     .control-bar {
       position: sticky;
       top: 16px;
-      z-index: 10;
+      z-index: 20;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: 16px;
       padding: 12px 18px;
-      background: rgba(15, 23, 42, 0.82);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
       border: 1px solid var(--surface-border);
       border-radius: var(--radius-lg);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-      margin-bottom: 40px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.38);
+      margin-bottom: 36px;
     }
 
     .filter-tabs {
@@ -181,12 +197,12 @@
       display: inline-flex;
       align-items: center;
       gap: 7px;
-      padding: 8px 14px;
+      padding: 7px 13px;
       background: transparent;
       border: 1px solid transparent;
       border-radius: var(--radius-sm);
       color: var(--text-muted);
-      font-size: 13.5px;
+      font-size: 13px;
       font-weight: 500;
       cursor: pointer;
       transition: var(--transition);
@@ -227,12 +243,12 @@
     }
     .search-input {
       width: 100%;
-      padding: 9px 14px 9px 38px;
+      padding: 8px 14px 8px 36px;
       background: rgba(11, 15, 25, 0.7);
       border: 1px solid var(--surface-border);
       border-radius: var(--radius-sm);
       color: #ffffff;
-      font-size: 13.5px;
+      font-size: 13px;
       font-family: inherit;
       outline: none;
       transition: var(--transition);
@@ -249,75 +265,15 @@
       color: var(--accent);
     }
 
-    /* Category Section */
-    .section-wrap {
-      margin-bottom: 56px;
-      scroll-margin-top: 100px;
-    }
-
-    .section-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 22px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .section-title-wrap {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .section-icon-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: rgba(99, 102, 241, 0.15);
-      border: 1px solid rgba(99, 102, 241, 0.25);
-      color: #818cf8;
-    }
-    .section-icon-badge svg {
-      width: 18px;
-      height: 18px;
-    }
-
-    .section-title {
-      font-size: 1.35rem;
-      font-weight: 700;
-      color: #f8fafc;
-      letter-spacing: -0.01em;
-    }
-    .section-subtitle {
-      font-size: 0.85rem;
-      color: var(--text-dim);
-      margin-left: 8px;
-      font-weight: 400;
-    }
-
-    .section-count {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      color: var(--text-dim);
-      background: rgba(255, 255, 255, 0.04);
-      padding: 3px 8px;
-      border-radius: 4px;
-      border: 1px solid rgba(255, 255, 255, 0.06);
-    }
-
-    /* Grid layout */
-    .cards-grid {
+    /* Grid Layout */
+    .projects-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-      gap: 22px;
+      grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+      gap: 24px;
     }
 
-    @media (max-width: 640px) {
-      .cards-grid {
+    @media (max-width: 768px) {
+      .projects-grid {
         grid-template-columns: 1fr;
       }
       .control-bar {
@@ -329,8 +285,8 @@
       }
     }
 
-    /* Viz Card */
-    .viz-card {
+    /* Project Group Card */
+    .project-card {
       position: relative;
       display: flex;
       flex-direction: column;
@@ -338,121 +294,178 @@
       border: 1px solid var(--surface-border);
       border-radius: var(--radius-xl);
       padding: 24px;
-      backdrop-filter: blur(12px);
+      backdrop-filter: blur(14px);
       transition: var(--transition);
       overflow: hidden;
     }
 
-    .viz-card::before {
+    .project-card::before {
       content: '';
       position: absolute;
       inset: 0;
       border-radius: inherit;
-      background: radial-gradient(400px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(99, 102, 241, 0.08), transparent 40%);
+      background: radial-gradient(420px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(99, 102, 241, 0.09), transparent 45%);
       pointer-events: none;
       opacity: 0;
       transition: opacity 0.4s ease;
     }
 
-    .viz-card:hover::before {
+    .project-card:hover::before {
       opacity: 1;
     }
 
-    .viz-card:hover {
+    .project-card:hover {
       transform: translateY(-4px);
       border-color: var(--surface-border-hover);
       box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.5), 0 0 24px rgba(99, 102, 241, 0.15);
       background: var(--surface-hover);
     }
 
-    .card-top {
+    /* Card Header */
+    .card-meta-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .badge-category {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 3px 8px;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #94a3b8;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .badge-category svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .time-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+    .time-badge svg {
+      width: 12px;
+      height: 12px;
+      opacity: 0.7;
+    }
+
+    /* Primary Entry Area */
+    .primary-entry-box {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      margin-bottom: 16px;
+      position: relative;
+      transition: var(--transition);
+    }
+    .primary-entry-box:hover {
+      background: rgba(20, 30, 55, 0.85);
+      border-color: rgba(99, 102, 241, 0.5);
+      box-shadow: 0 4px 18px rgba(99, 102, 241, 0.15);
+    }
+
+    .primary-title-row {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
       gap: 12px;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
 
-    .card-title-link {
-      font-size: 1.12rem;
+    .primary-link {
+      font-size: 1.15rem;
       font-weight: 700;
-      color: #f1f5f9;
+      color: #ffffff;
       text-decoration: none;
-      line-height: 1.4;
+      line-height: 1.35;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       transition: color 0.2s;
     }
-    .card-title-link:hover {
+    .primary-link:hover {
       color: #818cf8;
     }
-    .card-title-link svg.arrow-icon {
-      width: 16px;
-      height: 16px;
-      opacity: 0;
-      transform: translate(-4px, 4px);
+    .primary-link svg.arrow-icon {
+      width: 17px;
+      height: 17px;
+      opacity: 0.6;
+      transform: translate(-2px, 2px);
       transition: var(--transition);
       flex-shrink: 0;
     }
-    .viz-card:hover .card-title-link svg.arrow-icon {
+    .primary-entry-box:hover .primary-link svg.arrow-icon {
       opacity: 1;
-      transform: translate(0, 0);
+      transform: translate(2px, -2px);
+      color: #818cf8;
     }
 
-    .category-tag {
+    .priority-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
       font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      padding: 4px 8px;
-      border-radius: 6px;
-      background: rgba(255, 255, 255, 0.05);
-      color: #cbd5e1;
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 5px;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(16, 185, 129, 0.2));
+      border: 1px solid rgba(99, 102, 241, 0.45);
+      color: #a5b4fc;
       white-space: nowrap;
       flex-shrink: 0;
     }
+    .priority-badge.v2 {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(6, 182, 212, 0.2));
+      border-color: rgba(16, 185, 129, 0.5);
+      color: #6ee7b7;
+    }
 
-    .card-desc {
+    .primary-desc {
       font-size: 0.88rem;
       color: var(--text-muted);
       line-height: 1.6;
-      margin-bottom: 18px;
-      flex-grow: 1;
+      margin-bottom: 12px;
     }
 
-    .card-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-bottom: 18px;
-    }
-    .tech-tag {
-      font-size: 11.5px;
-      font-weight: 500;
-      padding: 3px 9px;
-      border-radius: 5px;
-      background: rgba(15, 23, 42, 0.7);
-      color: #94a3b8;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    /* Action bar */
-    .card-actions {
+    .primary-footer {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding-top: 16px;
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
-      margin-top: auto;
+      gap: 12px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
     }
 
-    .btn-launch {
+    .path-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      color: var(--text-dim);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 250px;
+    }
+
+    .btn-launch-primary {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 7px 14px;
+      padding: 6px 14px;
       background: #4f46e5;
       color: #ffffff;
       font-size: 12.5px;
@@ -461,63 +474,136 @@
       border-radius: var(--radius-sm);
       transition: var(--transition);
       box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+      flex-shrink: 0;
     }
-    .btn-launch:hover {
+    .btn-launch-primary:hover {
       background: #6366f1;
       box-shadow: 0 6px 18px rgba(99, 102, 241, 0.5);
       transform: translateY(-1px);
     }
-    .btn-launch svg {
+    .btn-launch-primary svg {
       width: 14px;
       height: 14px;
     }
 
-    /* Alternate views / variants */
-    .variants-group {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-    .variant-label {
-      font-size: 11px;
-      color: var(--text-dim);
-    }
-    .variant-link {
-      font-size: 11.5px;
-      color: #a5b4fc;
-      text-decoration: none;
-      padding: 4px 8px;
-      background: rgba(99, 102, 241, 0.08);
-      border: 1px solid rgba(99, 102, 241, 0.2);
-      border-radius: 5px;
-      transition: var(--transition);
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .variant-link:hover {
-      background: rgba(99, 102, 241, 0.22);
-      color: #ffffff;
-      border-color: rgba(99, 102, 241, 0.5);
+    /* Variants & Sub-pages List */
+    .variants-section {
+      margin-top: 4px;
+      margin-bottom: 14px;
+      flex-grow: 1;
     }
 
-    /* Path badge */
-    .path-badge {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
+    .variants-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11.5px;
+      font-weight: 600;
       color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+      padding: 0 2px;
+    }
+
+    .variants-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .variant-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 7px 10px;
+      background: rgba(11, 15, 25, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 6px;
+      transition: var(--transition);
+      text-decoration: none;
+    }
+    .variant-row:hover {
+      background: rgba(99, 102, 241, 0.12);
+      border-color: rgba(99, 102, 241, 0.3);
+      transform: translateX(3px);
+    }
+
+    .variant-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .variant-info svg.sub-icon {
+      width: 13px;
+      height: 13px;
+      color: var(--text-dim);
+      flex-shrink: 0;
+    }
+    .variant-row:hover .variant-info svg.sub-icon {
+      color: #818cf8;
+    }
+
+    .variant-title {
+      font-size: 12.5px;
+      color: #cbd5e1;
+      font-weight: 500;
+      white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      white-space: nowrap;
-      max-width: 180px;
+    }
+    .variant-row:hover .variant-title {
+      color: #ffffff;
+    }
+
+    .variant-side {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .variant-tag {
+      font-size: 10.5px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-dim);
+      font-weight: 500;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .variant-date {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      color: var(--text-dim);
+    }
+
+    /* Tag badges */
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: auto;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .tech-tag {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 8px;
+      border-radius: 5px;
+      background: rgba(15, 23, 42, 0.6);
+      color: #94a3b8;
+      border: 1px solid rgba(255, 255, 255, 0.04);
     }
 
     /* Empty state */
     .no-results {
       grid-column: 1 / -1;
       text-align: center;
-      padding: 60px 20px;
+      padding: 70px 20px;
       background: rgba(17, 24, 39, 0.4);
       border: 1px dashed var(--surface-border);
       border-radius: var(--radius-xl);
@@ -525,9 +611,9 @@
       display: none;
     }
     .no-results svg {
-      width: 44px;
-      height: 44px;
-      margin-bottom: 12px;
+      width: 48px;
+      height: 48px;
+      margin-bottom: 14px;
       opacity: 0.5;
     }
 
@@ -552,11 +638,6 @@
     footer a:hover {
       color: #ffffff;
     }
-
-    .quick-jump {
-      display: flex;
-      gap: 16px;
-    }
   </style>
 </head>
 <body>
@@ -565,31 +646,37 @@
   <div class="container">
     <!-- Header -->
     <header>
-      <div class="badge-pill">
-        <span class="pulse-dot"></span>
-        <span>Viz Projects Hub · 本地可视化工程索引</span>
+      <div class="header-top">
+        <div class="badge-pill">
+          <span class="pulse-dot"></span>
+          <span>Viz Hub · 本地可视化工程全景导航</span>
+        </div>
+        <div class="header-meta">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>按修改日期由新至旧排序 · 自动置顶 v2 / 优化版</span>
+        </div>
       </div>
       <h1 class="hero-title">可视化项目导航中心</h1>
       <p class="hero-desc">
-        涵盖三维高程地理导览、古城风味图谱、大模型风格量化评估实验室、前端图表工程技术辨析及业务建模演示体系，共汇集 16 项主题工程与 28 套交互页面。
+        完整收录工程目录下全部 29 个独立 HTML 交互页面与 9 大核心主题模块，涵盖地理高程、古城风味图谱、大模型风格评估矩阵、图表范式辨析及业务建模培训大屏体系。
       </p>
 
       <div class="stats-row">
         <div class="stat-chip">
-          <span class="label">主题板块</span>
-          <span class="num">5</span>
-        </div>
-        <div class="stat-chip">
           <span class="label">核心工程</span>
-          <span class="num" id="total-projects">16</span>
+          <span class="num">9 个主题系列</span>
         </div>
         <div class="stat-chip">
-          <span class="label">全量 HTML 页面</span>
-          <span class="num">28</span>
+          <span class="label">HTML 页面覆盖率</span>
+          <span class="num">29 / 29 (100%)</span>
+        </div>
+        <div class="stat-chip">
+          <span class="label">排序机制</span>
+          <span class="num">时间倒序 (v2 优先)</span>
         </div>
         <div class="stat-chip">
           <span class="label">技术栈涵盖</span>
-          <span class="num">Three.js / ECharts / D3 / Observable / SVG</span>
+          <span class="num">Three.js / ECharts / D3 / Observable / SVG 拓扑</span>
         </div>
       </div>
     </header>
@@ -604,21 +691,21 @@
             <rect width="7" height="7" x="14" y="14" rx="1"/>
             <rect width="7" height="7" x="3" y="14" rx="1"/>
           </svg>
-          全部项目
-        </button>
-        <button class="tab-btn" data-filter="geography">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
-            <circle cx="12" cy="10" r="3"/>
-          </svg>
-          地理与文旅
+          全部项目 (9)
         </button>
         <button class="tab-btn" data-filter="culinary">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/>
             <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
           </svg>
-          美食与风味
+          美食与风味 (2)
+        </button>
+        <button class="tab-btn" data-filter="geography">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          地理与文旅 (3)
         </button>
         <button class="tab-btn" data-filter="theory">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -626,7 +713,7 @@
             <polyline points="2 17 12 22 22 17"/>
             <polyline points="2 12 12 17 22 12"/>
           </svg>
-          前沿与思辨
+          前沿与思辨 (2)
         </button>
         <button class="tab-btn" data-filter="ai-lab">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -634,18 +721,18 @@
             <rect width="6" height="6" x="9" y="9" rx="1"/>
             <path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/>
           </svg>
-          AI 评估实验室
+          AI 实验室 (1)
         </button>
         <button class="tab-btn" data-filter="slides">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-5 5 5"/>
           </svg>
-          建模与演示
+          建模与演示 (1)
         </button>
       </div>
 
       <div class="search-box">
-        <input type="text" id="searchInput" class="search-input" placeholder="输入名称、标签或技术栈实时过滤...">
+        <input type="text" id="searchInput" class="search-input" placeholder="输入名称、标签或页面路径实时检索...">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="8"/>
           <path d="m21 21-4.3-4.3"/>
@@ -653,525 +740,639 @@
       </div>
     </div>
 
-    <!-- MAIN CONTENT SECTIONS -->
+    <!-- MAIN PROJECTS GRID (Sorted strictly by Recency & v2 Priority) -->
+    <div class="projects-grid" id="projectsGrid">
 
-    <!-- 1. 地理与文旅探索 -->
-    <section class="section-wrap" data-category="geography" id="sec-geography">
-      <div class="section-header">
-        <div class="section-title-wrap">
-          <div class="section-icon-badge">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
-              <circle cx="12" cy="10" r="3"/>
-            </svg>
-          </div>
-          <h2 class="section-title">地理与文旅探索</h2>
-          <span class="section-subtitle">Geographic Exploration & Tourism</span>
-        </div>
-        <span class="section-count">3 个主题</span>
-      </div>
-
-      <div class="cards-grid">
-        <!-- 连城 3D 地图 -->
-        <div class="viz-card" data-title="福建·连城 3D 旅行导览 liancheng Three.js 3D地形 漫游" data-cat="geography">
-          <div class="card-top">
-            <a href="liancheng-3d-map/index.html" class="card-title-link">
-              <span>福建·连城 3D 旅行导览</span>
-              <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
-            </a>
-            <span class="category-tag">3D 导览</span>
-          </div>
-          <p class="card-desc">基于真实高程数据的福建连城三维交互地图，支持冠豸山景区漫游、航拍视角切换与关键地标空间信息可视化。</p>
-          <div class="card-tags">
-            <span class="tech-tag">Three.js</span>
-            <span class="tech-tag">3D 高程模型</span>
-            <span class="tech-tag">相机运镜</span>
-            <span class="tech-tag">景区导览</span>
-          </div>
-          <div class="card-actions">
-            <div class="path-badge" title="liancheng-3d-map/index.html">liancheng-3d-map/</div>
-            <a href="liancheng-3d-map/index.html" class="btn-launch">
-              <span>打开主页面</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-            </a>
-          </div>
+      <!-- 1. 半城烟火半城仙 · 泉州美食图鉴 (2026-10-06) -->
+      <div class="project-card" data-category="culinary" data-search="半城烟火半城仙 泉州美食图鉴 quanzhou-food-atlas v2 美食卡片 瀑布流 世遗 古城寻味">
+        <div class="card-meta-bar">
+          <span class="badge-category">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+            美食与风味
+          </span>
+          <span class="time-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            2026-10-06
+          </span>
         </div>
 
-        <!-- 世界之巅 -->
-        <div class="viz-card" data-title="世界之巅 十大高峰 七大洲最高峰 world-peaks 珠穆朗玛 ECharts" data-cat="geography">
-          <div class="card-top">
-            <a href="world-peaks/world-peaks.html" class="card-title-link">
-              <span>世界之巅 · 十大高峰与七大洲之巅</span>
-              <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
-            </a>
-            <span class="category-tag">地理高程</span>
-          </div>
-          <p class="card-desc">全景解构全球 8000 米级雪山与各大洲最高峰的海拔落差、地理坐标与攀登路线。内置多套主题视图。</p>
-          <div class="card-tags">
-            <span class="tech-tag">ECharts</span>
-            <span class="tech-tag">高程矩阵</span>
-            <span class="tech-tag">地理极值</span>
-          </div>
-          <div class="variants-group" style="margin-bottom: 14px;">
-            <span class="variant-label">其他视图:</span>
-            <a href="world-peaks/world-peaks-dsh.html" class="variant-link" title="星夜远征深色版">星夜远征版</a>
-            <a href="world-peaks/world-peaks-workbuddy-kimi.html" class="variant-link" title="Kimi版本1">Kimi 版 1</a>
-            <a href="world-peaks/world-peaks-workbuddy-kimi-2.html" class="variant-link" title="Kimi版本2">Kimi 版 2</a>
-          </div>
-          <div class="card-actions">
-            <div class="path-badge" title="world-peaks/world-peaks.html">world-peaks/</div>
-            <a href="world-peaks/world-peaks.html" class="btn-launch">
-              <span>探索世界之巅</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-            </a>
-          </div>
-        </div>
-
-        <!-- 高铁动车路线图 -->
-        <div class="viz-card" data-title="高铁动车路线图 闽西 厦门 冠豸山 rail-route-viz 铁路路网" data-cat="geography">
-          <div class="card-top">
-            <a href="rail-route-viz/rail-workbuddy/index.html" class="card-title-link">
-              <span>高铁动车站点与路线图 (闽西/厦门)</span>
-              <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
-            </a>
-            <span class="category-tag">交通拓扑</span>
-          </div>
-          <p class="card-desc">厦门 / 厦门北至冠豸山站高铁车次分布、沿途站点拓扑及耗时比对可视化探索。</p>
-          <div class="card-tags">
-            <span class="tech-tag">SVG 拓扑</span>
-            <span class="tech-tag">铁路交通网</span>
-            <span class="tech-tag">时刻表分析</span>
-          </div>
-          <div class="variants-group" style="margin-bottom: 14px;">
-            <span class="variant-label">拓展资源:</span>
-            <a href="rail-route-viz/rail-doubao/web/rail-map.html" class="variant-link" title="铁路网络全景图">路线全景图</a>
-            <a href="rail-route-viz/rail-doubao/高铁动车路线图可视化平台设计方案.html" class="variant-link" title="系统设计方案文档">设计方案</a>
-          </div>
-          <div class="card-actions">
-            <div class="path-badge" title="rail-route-viz/rail-workbuddy/index.html">rail-route-viz/</div>
-            <a href="rail-route-viz/rail-workbuddy/index.html" class="btn-launch">
-              <span>查看路线图</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-            </a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 2. 美食文化与图鉴 -->
-    <section class="section-wrap" data-category="culinary" id="sec-culinary">
-      <div class="section-header">
-        <div class="section-title-wrap">
-          <div class="section-icon-badge" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.25); color: #34d399;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
-            </svg>
-          </div>
-          <h2 class="section-title">美食文化与图鉴</h2>
-          <span class="section-subtitle">Culinary Heritage & Food Atlas</span>
-        </div>
-        <span class="section-count">3 个主题</span>
-      </div>
-
-      <div class="cards-grid">
-        <!-- 刺桐食肆全景仪 v2 -->
-        <div class="viz-card" data-title="刺桐食肆全景仪 泉州美食图鉴 v2 fujian-food-capital-v2 闽南小吃 风味雷达" data-cat="culinary">
-          <div class="card-top">
-            <a href="fujian-food-capital-v2/index.html" class="card-title-link">
-              <span>刺桐食肆全景仪 · 泉州美食图鉴 v2</span>
-              <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
-            </a>
-            <span class="category-tag">升级版</span>
-          </div>
-          <p class="card-desc">新一代古城风味图谱，融合世遗文化地标、老字号名铺、多维风味特征雷达与交互式寻味导览。</p>
-          <div class="card-tags">
-            <span class="tech-tag">风味雷达</span>
-            <span class="tech-tag">交互地图</span>
-            <span class="tech-tag">地标分类</span>
-            <span class="tech-tag">世遗文化</span>
-          </div>
-          <div class="card-actions">
-            <div class="path-badge" title="fujian-food-capital-v2/index.html">fujian-food-capital-v2/</div>
-            <a href="fujian-food-capital-v2/index.html" class="btn-launch">
-              <span>进入全景仪</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-            </a>
-          </div>
-        </div>
-
-        <!-- 福建美食之都 泉州全景 -->
-        <div class="viz-card" data-title="值得专程前往的福建美食之都 泉州全景美食图谱 fujian-food-capital" data-cat="culinary">
-          <div class="card-top">
-            <a href="fujian-food-capital/index.html" class="card-title-link">
-              <span>值得专程前往的福建美食之都 · 泉州全景</span>
-              <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
-            </a>
-            <span class="category-tag">全景图谱</span>
-          </div>
-          <p class="card-desc">系统梳理泉州各片区地标小吃，建立从面线糊、肉粽到姜母鸭的完整舌尖风味体系与深度推荐。</p>
-          <div class="card-tags">
-            <span class="tech-tag">信息图谱</span>
-            <span class="tech-tag">传统老店</span>
-            <span class="tech-tag">风味矩阵</span>
-          </div>
-          <div class="card-actions">
-            <div class="path-badge" title="fujian-food-capital/index.html">fujian-food-capital/</div>
-            <a href="fujian-food-capital/index.html" class="btn-launch">
-              <span>浏览美食图谱</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-            </a>
-          </div>
-        </div>
-
-        <!-- 半城烟火半城仙 -->
-        <div class="viz-card" data-title="半城烟火半城仙 泉州美食图鉴 quanzhou-food-atlas" data-cat="culinary">
-          <div class="card-top">
-            <a href="quanzhou-food-atlas/index.html" class="card-title-link">
+        <!-- 优先入口：v2 -->
+        <div class="primary-entry-box">
+          <div class="primary-title-row">
+            <a href="quanzhou-food-atlas/v2.html" class="primary-link">
               <span>半城烟火半城仙 · 泉州美食图鉴</span>
-              <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+              <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
             </a>
-            <span class="category-tag">慢调图鉴</span>
+            <span class="priority-badge v2">最新 v2 优先</span>
           </div>
-          <p class="card-desc">以“半城烟火半城仙”为主线，带您穿街走巷寻访地道古早味，支持菜品风味筛选与店铺定位。</p>
-          <div class="card-tags">
-            <span class="tech-tag">卡片瀑布</span>
-            <span class="tech-tag">图文寻味</span>
-            <span class="tech-tag">烟火索引</span>
-          </div>
-          <div class="variants-group" style="margin-bottom: 14px;">
-            <span class="variant-label">备用版本:</span>
-            <a href="quanzhou-food-atlas/v2.html" class="variant-link" title="图鉴 v2 迭代版">图鉴 v2 优化版</a>
-          </div>
-          <div class="card-actions">
-            <div class="path-badge" title="quanzhou-food-atlas/index.html">quanzhou-food-atlas/</div>
-            <a href="quanzhou-food-atlas/index.html" class="btn-launch">
-              <span>寻味泉州</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          <p class="primary-desc">以“半城烟火半城仙”为主线的古城慢调美食索引，v2 版重构了界面排版、美食卡片瀑布流与精细检索体验。</p>
+          <div class="primary-footer">
+            <span class="path-code" title="quanzhou-food-atlas/v2.html">quanzhou-food-atlas/v2.html</span>
+            <a href="quanzhou-food-atlas/v2.html" class="btn-launch-primary">
+              <span>立即体验 v2</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
             </a>
           </div>
         </div>
-      </div>
-    </section>
 
-    <!-- 3. 可视化前沿与思辨 -->
-    <section class="section-wrap" data-category="theory" id="sec-theory">
-      <div class="section-header">
-        <div class="section-title-wrap">
-          <div class="section-icon-badge" style="background: rgba(6, 182, 212, 0.15); border-color: rgba(6, 182, 212, 0.25); color: #22d3ee;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="12 2 2 7 12 12 22 7 12 2"/>
-              <polyline points="2 17 12 22 22 17"/>
-              <polyline points="2 12 12 17 22 12"/>
-            </svg>
+        <!-- 其他版本列表 -->
+        <div class="variants-section">
+          <div class="variants-header">
+            <span>其他版本 (1)</span>
+            <span>修改时间</span>
           </div>
-          <h2 class="section-title">可视化前沿与思辨</h2>
-          <span class="section-subtitle">Visualization Paradigms & Thoughts</span>
+          <div class="variants-list">
+            <a href="quanzhou-food-atlas/index.html" class="variant-row" title="quanzhou-food-atlas/index.html">
+              <div class="variant-info">
+                <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <span class="variant-title">半城烟火半城仙 · 泉州美食图鉴 (初始版)</span>
+              </div>
+              <div class="variant-side">
+                <span class="variant-tag">v1 基础版</span>
+                <span class="variant-date">10-02</span>
+              </div>
+            </a>
+          </div>
         </div>
-        <span class="section-count">2 个主题</span>
+
+        <div class="card-tags">
+          <span class="tech-tag">卡片瀑布流</span>
+          <span class="tech-tag">古城寻味</span>
+          <span class="tech-tag">世遗烟火</span>
+          <span class="tech-tag">特色小吃</span>
+        </div>
       </div>
 
-      <div class="cards-grid">
-        <!-- 前端可视化技术全景与范式辨析 -->
-        <div class="viz-card" data-title="前端可视化技术全景与范式辨析 ECharts D3.js Observable Plot viz_tech 图表选型" data-cat="theory">
-          <div class="card-top">
-            <a href="viz_tech/index.html" class="card-title-link">
+      <!-- 2. 刺桐食肆全景仪 · 泉州美食图鉴 (2026-10-02) -->
+      <div class="project-card" data-category="culinary" data-search="刺桐食肆全景仪 泉州美食图鉴 v2 fujian-food-capital-v2 fujian-food-capital 值得专程前往的福建美食之都 风味雷达 老字号">
+        <div class="card-meta-bar">
+          <span class="badge-category">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+            美食与风味
+          </span>
+          <span class="time-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            2026-10-02
+          </span>
+        </div>
+
+        <!-- 优先入口：v2 -->
+        <div class="primary-entry-box">
+          <div class="primary-title-row">
+            <a href="fujian-food-capital-v2/index.html" class="primary-link">
+              <span>刺桐食肆全景仪 · 泉州美食图鉴 v2</span>
+              <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+            </a>
+            <span class="priority-badge v2">最新 v2 优先</span>
+          </div>
+          <p class="primary-desc">新一代古城全景风味仪，融合世遗文化地标、老字号名铺、多维风味特征雷达与动态时令寻味地图。</p>
+          <div class="primary-footer">
+            <span class="path-code" title="fujian-food-capital-v2/index.html">fujian-food-capital-v2/index.html</span>
+            <a href="fujian-food-capital-v2/index.html" class="btn-launch-primary">
+              <span>打开全景仪 v2</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- 其他版本列表 -->
+        <div class="variants-section">
+          <div class="variants-header">
+            <span>其他版本 (1)</span>
+            <span>修改时间</span>
+          </div>
+          <div class="variants-list">
+            <a href="fujian-food-capital/index.html" class="variant-row" title="fujian-food-capital/index.html">
+              <div class="variant-info">
+                <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <span class="variant-title">值得专程前往的福建美食之都 · 泉州全景美食图谱</span>
+              </div>
+              <div class="variant-side">
+                <span class="variant-tag">v1 全景图谱</span>
+                <span class="variant-date">10-02</span>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <div class="card-tags">
+          <span class="tech-tag">风味多维雷达</span>
+          <span class="tech-tag">全景图谱</span>
+          <span class="tech-tag">老字号名录</span>
+          <span class="tech-tag">时令寻味</span>
+        </div>
+      </div>
+
+      <!-- 3. 高铁动车路线图与路网平台 (2026-09-23) -->
+      <div class="project-card" data-category="geography" data-search="高铁动车路线图 铁路路网 rail-route-viz rail-doubao rail-workbuddy 厦门 冠豸山 拓扑 铁路方案 路线图模板">
+        <div class="card-meta-bar">
+          <span class="badge-category">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            地理与文旅
+          </span>
+          <span class="time-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            2026-09-23
+          </span>
+        </div>
+
+        <!-- 优先入口：最新独立 Web 版 -->
+        <div class="primary-entry-box">
+          <div class="primary-title-row">
+            <a href="rail-route-viz/rail-doubao/web/rail-map.html" class="primary-link">
+              <span>高铁动车路线图 (全路网 Web 版)</span>
+              <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+            </a>
+            <span class="priority-badge">最新 Web 版</span>
+          </div>
+          <p class="primary-desc">全国高铁动车网络全景路线图，支持车次线路拓扑、沿线关键站点高亮、交互缩放与线路搜索。</p>
+          <div class="primary-footer">
+            <span class="path-code" title="rail-route-viz/rail-doubao/web/rail-map.html">rail-doubao/web/rail-map.html</span>
+            <a href="rail-route-viz/rail-doubao/web/rail-map.html" class="btn-launch-primary">
+              <span>探索全景路网</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- 其他版本与关联页面 (共3个) -->
+        <div class="variants-section">
+          <div class="variants-header">
+            <span>其他版本与设计文档 (3)</span>
+            <span>修改时间</span>
+          </div>
+          <div class="variants-list">
+            <a href="rail-route-viz/rail-workbuddy/index.html" class="variant-row" title="rail-route-viz/rail-workbuddy/index.html">
+              <div class="variant-info">
+                <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <span class="variant-title">厦门 / 厦门北 / 冠豸山(南) — 动车站点路线图</span>
+              </div>
+              <div class="variant-side">
+                <span class="variant-tag">闽西/厦门版</span>
+                <span class="variant-date">09-22</span>
+              </div>
+            </a>
+            <a href="rail-route-viz/rail-doubao/web/高铁动车路线图.template.html" class="variant-row" title="rail-route-viz/rail-doubao/web/高铁动车路线图.template.html">
+              <div class="variant-info">
+                <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <span class="variant-title">高铁动车路线图 · 动态渲染模板</span>
+              </div>
+              <div class="variant-side">
+                <span class="variant-tag">HTML 模板</span>
+                <span class="variant-date">09-23</span>
+              </div>
+            </a>
+            <a href="rail-route-viz/rail-doubao/高铁动车路线图可视化平台设计方案.html" class="variant-row" title="rail-route-viz/rail-doubao/高铁动车路线图可视化平台设计方案.html">
+              <div class="variant-info">
+                <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <span class="variant-title">高铁动车路线图可视化平台 · 完整设计方案</span>
+              </div>
+              <div class="variant-side">
+                <span class="variant-tag">设计方案</span>
+                <span class="variant-date">09-22</span>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <div class="card-tags">
+          <span class="tech-tag">SVG 拓扑</span>
+          <span class="tech-tag">铁路交通网</span>
+          <span class="tech-tag">时刻表分析</span>
+          <span class="tech-tag">设计方案</span>
+        </div>
+      </div>
+
+      <!-- 4. 福建·连城 3D 旅行导览 (2026-09-18) -->
+      <div class="project-card" data-category="geography" data-search="福建 连城 3D 旅行导览 liancheng-3d-map Three.js 冠豸山 3D高程 运镜">
+        <div class="card-meta-bar">
+          <span class="badge-category">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            地理与文旅
+          </span>
+          <span class="time-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            2026-09-18
+          </span>
+        </div>
+
+        <div class="primary-entry-box">
+          <div class="primary-title-row">
+            <a href="liancheng-3d-map/index.html" class="primary-link">
+              <span>福建·连城 3D 旅行导览</span>
+              <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+            </a>
+            <span class="priority-badge">3D 交互导览</span>
+          </div>
+          <p class="primary-desc">基于真实高程数据的福建连城三维地形交互地图，支持冠豸山景区沉浸漫游、航拍运镜与关键文旅地标可视化。</p>
+          <div class="primary-footer">
+            <span class="path-code" title="liancheng-3d-map/index.html">liancheng-3d-map/index.html</span>
+            <a href="liancheng-3d-map/index.html" class="btn-launch-primary">
+              <span>开启 3D 漫游</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="card-tags">
+          <span class="tech-tag">Three.js</span>
+          <span class="tech-tag">真实高程地形</span>
+          <span class="tech-tag">冠豸山漫游</span>
+          <span class="tech-tag">空间运镜</span>
+        </div>
+      </div>
+
+      <!-- 5. 前端可视化技术全景与范式辨析 (2026-09-16) -->
+      <div class="project-card" data-category="theory" data-search="前端可视化技术全景与范式辨析 viz_tech ECharts D3.js Observable Plot 图形语法 选型辨析">
+        <div class="card-meta-bar">
+          <span class="badge-category">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+            前沿与思辨
+          </span>
+          <span class="time-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            2026-09-16
+          </span>
+        </div>
+
+        <div class="primary-entry-box">
+          <div class="primary-title-row">
+            <a href="viz_tech/index.html" class="primary-link">
               <span>前端可视化技术全景与范式辨析</span>
-              <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+              <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
             </a>
-            <span class="category-tag">深度研报</span>
+            <span class="priority-badge">技术全景</span>
           </div>
-          <p class="card-desc">对比 ECharts、D3.js 与 Observable Plot 的图形语法架构、声明式与命令式范式差异及企业级场景选型权衡。</p>
-          <div class="card-tags">
-            <span class="tech-tag">ECharts</span>
-            <span class="tech-tag">D3.js</span>
-            <span class="tech-tag">Observable Plot</span>
-            <span class="tech-tag">架构全景</span>
-          </div>
-          <div class="card-actions">
-            <div class="path-badge" title="viz_tech/index.html">viz_tech/</div>
-            <a href="viz_tech/index.html" class="btn-launch">
-              <span>研读技术全景</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          <p class="primary-desc">深度对比 ECharts、D3.js 与 Observable Plot 的图形语法架构、声明式与命令式范式差异及企业级场景选型权衡。</p>
+          <div class="primary-footer">
+            <span class="path-code" title="viz_tech/index.html">viz_tech/index.html</span>
+            <a href="viz_tech/index.html" class="btn-launch-primary">
+              <span>研读技术研报</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
             </a>
           </div>
         </div>
 
-        <!-- 数据可视化为何未能成为大众文本 -->
-        <div class="viz-card" data-title="数据可视化为何未能成为大众文本 媒介思辨 认知带宽 读图门槛 viz_as_language cards" data-cat="theory">
-          <div class="card-top">
-            <a href="viz_as_language/index.html" class="card-title-link">
-              <span>数据可视化为何未能成为大众文本</span>
-              <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
-            </a>
-            <span class="category-tag">理论辨析</span>
-          </div>
-          <p class="card-desc">深层剖析“图表作为媒介”的认知摩擦力、叙事受限度与大众化困境，附配套核心论点精炼卡片。</p>
-          <div class="card-tags">
-            <span class="tech-tag">媒介理论</span>
-            <span class="tech-tag">叙事可视化</span>
-            <span class="tech-tag">认知门槛</span>
-          </div>
-          <div class="variants-group" style="margin-bottom: 14px;">
-            <span class="variant-label">配套卡片:</span>
-            <a href="viz_as_language/cards.html" class="variant-link" title="核心论点知识卡片">知识卡片浏览</a>
-          </div>
-          <div class="card-actions">
-            <div class="path-badge" title="viz_as_language/index.html">viz_as_language/</div>
-            <a href="viz_as_language/index.html" class="btn-launch">
-              <span>阅读长文辨析</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-            </a>
-          </div>
+        <div class="card-tags">
+          <span class="tech-tag">ECharts</span>
+          <span class="tech-tag">D3.js</span>
+          <span class="tech-tag">Observable Plot</span>
+          <span class="tech-tag">图形语法</span>
+          <span class="tech-tag">选型雷达</span>
         </div>
       </div>
-    </section>
 
-    <!-- 4. AI 评估与风格指纹实验室 -->
-    <section class="section-wrap" data-category="ai-lab" id="sec-ai-lab">
-      <div class="section-header">
-        <div class="section-title-wrap">
-          <div class="section-icon-badge" style="background: rgba(244, 63, 94, 0.15); border-color: rgba(244, 63, 94, 0.25); color: #fb7185;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect width="16" height="16" x="4" y="4" rx="2"/>
-              <rect width="6" height="6" x="9" y="9" rx="1"/>
-              <path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/>
-            </svg>
-          </div>
-          <h2 class="section-title">AI 评估与风格指纹实验室</h2>
-          <span class="section-subtitle">AI Fingerprint & Evaluation Lab</span>
-        </div>
-        <span class="section-count">5 个主题</span>
-      </div>
-
-      <div class="cards-grid">
-        <!-- 好莱坞“众神山庄”：8大AI图文解构与盲测矩阵 -->
-        <div class="viz-card" data-title="好莱坞 众神山庄 8大AI图文解构 盲测矩阵 Gemini版 hollywood-ai-eval-matrix-gemini" data-cat="ai-lab">
-          <div class="card-top">
-            <a href="hollywood/ai-analysis-lab/hollywood-ai-eval-matrix-gemini.html" class="card-title-link">
-              <span>好莱坞“众神山庄”：8大AI盲测矩阵</span>
-              <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
-            </a>
-            <span class="category-tag">Gemini 矩阵</span>
-          </div>
-          <p class="card-desc">汇集 8 家顶尖大语言模型在好莱坞众神山庄案中的深度文本，并通过 5 份独立 AI 专家评估进行双盲打分矩阵解构。</p>
-          <div class="card-tags">
-            <span class="tech-tag">双盲评测</span>
-            <span class="tech-tag">8 模型横评</span>
-            <span class="tech-tag">多维矩阵</span>
-            <span class="tech-tag">交互雷达</span>
-          </div>
-          <div class="card-actions">
-            <div class="path-badge" title="hollywood/ai-analysis-lab/hollywood-ai-eval-matrix-gemini.html">hollywood/</div>
-            <a href="hollywood/ai-analysis-lab/hollywood-ai-eval-matrix-gemini.html" class="btn-launch">
-              <span>进入盲测矩阵</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-            </a>
-          </div>
+      <!-- 6. 业务建模与培训演示系列 (2026-09-11) -->
+      <div class="project-card" data-category="slides" data-search="业务建模与数据分析培训演示 slide business-model 两种思维三个模型六步法 业务建模与SQL实战 拖拽式SQL模型 零基础培训 开班动员 大屏演示版 v2">
+        <div class="card-meta-bar">
+          <span class="badge-category">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-5 5 5"/></svg>
+            建模与演示
+          </span>
+          <span class="time-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            2026-09-11
+          </span>
         </div>
 
-        <!-- AI 分析 AI — 五份答卷的比较研究 -->
-        <div class="viz-card" data-title="AI 分析 AI 五份答卷的比较研究 ai-style-dna-lab-db Meta分析" data-cat="ai-lab">
-          <div class="card-top">
-            <a href="hollywood/ai-analysis-lab/ai-style-dna-lab-db.html" class="card-title-link">
-              <span>AI 分析 AI — 五份答卷的比较研究</span>
-              <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+        <!-- 优先入口：大屏演示版 -->
+        <div class="primary-entry-box">
+          <div class="primary-title-row">
+            <a href="slide/business-model_workbuddy_20260910/两种思维三个模型六步法_大屏演示版.html" class="primary-link">
+              <span>两种思维 · 三个模型 · 六步走通 (大屏版)</span>
+              <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
             </a>
-            <span class="category-tag">比较研究</span>
+            <span class="priority-badge">大屏旗舰版</span>
           </div>
-          <p class="card-desc">以“AI 评 AI”为研究视角，深度比较 5 个分析实例的评价尺度、逻辑严谨度与模型倾向性。</p>
-          <div class="card-tags">
-            <span class="tech-tag">元分析 (Meta)</span>
-            <span class="tech-tag">跨模型对标</span>
-            <span class="tech-tag">评价图谱</span>
-          </div>
-          <div class="card-actions">
-            <div class="path-badge" title="hollywood/ai-analysis-lab/ai-style-dna-lab-db.html">hollywood/</div>
-            <a href="hollywood/ai-analysis-lab/ai-style-dna-lab-db.html" class="btn-launch">
-              <span>查看比较研究</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-            </a>
-          </div>
-        </div>
-
-        <!-- 8 份 AI 回复的风格 DNA -->
-        <div class="viz-card" data-title="8 份 AI 回复的风格 DNA 交叉汇总 eight-ai-style-dna-db 风格基因" data-cat="ai-lab">
-          <div class="card-top">
-            <a href="hollywood/ai-analysis-lab/eight-ai-style-dna-db.html" class="card-title-link">
-              <span>8 份 AI 回复的风格 DNA · 交叉汇总</span>
-              <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
-            </a>
-            <span class="category-tag">风格 DNA</span>
-          </div>
-          <p class="card-desc">从修辞丰富度、论点颗粒度、思辨纵深度等多项特征维度提取并量化 8 款 AI 生成内容的风格指纹。</p>
-          <div class="card-tags">
-            <span class="tech-tag">风格雷达</span>
-            <span class="tech-tag">特征量化</span>
-            <span class="tech-tag">DNA 聚类</span>
-          </div>
-          <div class="card-actions">
-            <div class="path-badge" title="hollywood/ai-analysis-lab/eight-ai-style-dna-db.html">hollywood/</div>
-            <a href="hollywood/ai-analysis-lab/eight-ai-style-dna-db.html" class="btn-launch">
-              <span>探索 DNA 汇总</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-            </a>
-          </div>
-        </div>
-
-        <!-- 好莱坞“众神山庄”· 八答风格归因图鉴 -->
-        <div class="viz-card" data-title="好莱坞 众神山庄 八答风格归因图鉴 attribution-wbd 归因看板" data-cat="ai-lab">
-          <div class="card-top">
-            <a href="hollywood/ai-analysis-lab/attribution-wbd.html" class="card-title-link">
-              <span>众神山庄 · 八答风格归因图鉴</span>
-              <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
-            </a>
-            <span class="category-tag">归因图鉴</span>
-          </div>
-          <p class="card-desc">多维拆解生成式文本的论证骨架、意象选用倾向与表达语气，提供结构化归因分析看板。</p>
-          <div class="card-tags">
-            <span class="tech-tag">归因拆解</span>
-            <span class="tech-tag">论证脉络</span>
-            <span class="tech-tag">语感看板</span>
-          </div>
-          <div class="card-actions">
-            <div class="path-badge" title="hollywood/ai-analysis-lab/attribution-wbd.html">hollywood/</div>
-            <a href="hollywood/ai-analysis-lab/attribution-wbd.html" class="btn-launch">
-              <span>查看归因看板</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-            </a>
-          </div>
-        </div>
-
-        <!-- 众神山庄 · 风格指纹实验室 (Qwen版) -->
-        <div class="viz-card" data-title="众神山庄 风格指纹实验室 Qwen版 style-fingerprint-lab-qwen 通义千问" data-cat="ai-lab">
-          <div class="card-top">
-            <a href="hollywood/ai-analysis-lab/style-fingerprint-lab-qwen.html" class="card-title-link">
-              <span>众神山庄 · 风格指纹实验室 (Qwen版)</span>
-              <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
-            </a>
-            <span class="category-tag">Qwen 实验室</span>
-          </div>
-          <p class="card-desc">以通义千问分析模型为主轴的风格量化实验室，支持交互式特征权重调节与模型指纹聚类对比。</p>
-          <div class="card-tags">
-            <span class="tech-tag">Qwen 分析</span>
-            <span class="tech-tag">交互指纹</span>
-            <span class="tech-tag">权重调节</span>
-          </div>
-          <div class="card-actions">
-            <div class="path-badge" title="hollywood/ai-analysis-lab/style-fingerprint-lab-qwen.html">hollywood/</div>
-            <a href="hollywood/ai-analysis-lab/style-fingerprint-lab-qwen.html" class="btn-launch">
-              <span>进入实验室</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-            </a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 5. 业务建模与培训演示 -->
-    <section class="section-wrap" data-category="slides" id="sec-slides">
-      <div class="section-header">
-        <div class="section-title-wrap">
-          <div class="section-icon-badge" style="background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.25); color: #fbbf24;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-5 5 5"/>
-            </svg>
-          </div>
-          <h2 class="section-title">业务建模与培训演示</h2>
-          <span class="section-subtitle">Business Modeling & Slide Deck</span>
-        </div>
-        <span class="section-count">3 个主题</span>
-      </div>
-
-      <div class="cards-grid">
-        <!-- 两种思维 · 三个模型 · 六步走通（大屏版） -->
-        <div class="viz-card" data-title="两种思维 三个模型 六步走通 大屏演示版 零基础培训演示 slide business-model" data-cat="slides">
-          <div class="card-top">
-            <a href="slide/business-model_workbuddy_20260910/两种思维三个模型六步法_大屏演示版.html" class="card-title-link">
-              <span>两种思维 · 三个模型 · 六步走通</span>
-              <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
-            </a>
-            <span class="category-tag">大屏演示版</span>
-          </div>
-          <p class="card-desc">专为投屏演讲设计的高清大屏版 PPT：体系化梳理业务思维到数据模型构建的完整闭环，图表动效流畅。</p>
-          <div class="card-tags">
-            <span class="tech-tag">演示大屏</span>
-            <span class="tech-tag">建模思维</span>
-            <span class="tech-tag">六步法</span>
-            <span class="tech-tag">交互翻页</span>
-          </div>
-          <div class="variants-group" style="margin-bottom: 14px;">
-            <span class="variant-label">其他演示版本:</span>
-            <a href="slide/business-model_workbuddy_20260910/两种思维三个模型六步法_零基础培训演示.html" class="variant-link" title="标准演示版">标准演示版</a>
-            <a href="slide/business-model_workbuddy_20260910/两种思维三个模型六步法_零基础培训演示_大屏版.html" class="variant-link" title="大屏增强版 2">大屏增强版 2</a>
-          </div>
-          <div class="card-actions">
-            <div class="path-badge" title="slide/business-model_workbuddy_20260910/两种思维三个模型六步法_大屏演示版.html">slide/business-model/</div>
-            <a href="slide/business-model_workbuddy_20260910/两种思维三个模型六步法_大屏演示版.html" class="btn-launch">
+          <p class="primary-desc">专为高清投屏演说设计的大屏交互 PPT，体系化呈现从业务问题分解到事实表与指标模型的实操闭环。</p>
+          <div class="primary-footer">
+            <span class="path-code" title="slide/business-model_workbuddy_20260910/两种思维三个模型六步法_大屏演示版.html">slide/business-model/...大屏演示版.html</span>
+            <a href="slide/business-model_workbuddy_20260910/两种思维三个模型六步法_大屏演示版.html" class="btn-launch-primary">
               <span>全屏播放课件</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
             </a>
           </div>
         </div>
 
-        <!-- 业务建模与 SQL 实战 -->
-        <div class="viz-card" data-title="业务建模与 SQL 实战 业务到数据模型 零基础 SQL 学员的破局之道 gemini 课件演示" data-cat="slides">
-          <div class="card-top">
-            <a href="slide/business-model_workbuddy_20260910/业务建模与SQL实战_课件演示_gemini.html" class="card-title-link">
-              <span>业务建模与 SQL 实战 · 课件演示</span>
-              <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+        <!-- 关联全量版本 (共7个页面，全部直接可点) -->
+        <div class="variants-section">
+          <div class="variants-header">
+            <span>系列课件与大屏矩阵 (7)</span>
+            <span>修改时间</span>
+          </div>
+          <div class="variants-list">
+            <a href="slide/business-model_workbuddy_20260910/两种思维三个模型六步法_零基础培训演示_大屏版.html" class="variant-row" title="slide/business-model_workbuddy_20260910/两种思维三个模型六步法_零基础培训演示_大屏版.html">
+              <div class="variant-info">
+                <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <span class="variant-title">两种思维三个模型六步法 (大屏演示版 2)</span>
+              </div>
+              <div class="variant-side">
+                <span class="variant-tag">大屏版 2</span>
+                <span class="variant-date">09-11</span>
+              </div>
             </a>
-            <span class="category-tag">实战课件</span>
-          </div>
-          <p class="card-desc">针对零基础学员的破局之道：将业务口径拆解为星型模型与核心 SQL 查询，建立工程化数据思维。</p>
-          <div class="card-tags">
-            <span class="tech-tag">SQL 教学</span>
-            <span class="tech-tag">数据模型</span>
-            <span class="tech-tag">实战案例</span>
-          </div>
-          <div class="variants-group" style="margin-bottom: 14px;">
-            <span class="variant-label">大屏版本:</span>
-            <a href="slide/business-model_workbuddy_20260910/业务建模与SQL实战_大屏演示版_gemini.html" class="variant-link" title="大屏演示版">大屏演示版</a>
-          </div>
-          <div class="card-actions">
-            <div class="path-badge" title="slide/business-model_workbuddy_20260910/业务建模与SQL实战_课件演示_gemini.html">slide/business-model/</div>
-            <a href="slide/business-model_workbuddy_20260910/业务建模与SQL实战_课件演示_gemini.html" class="btn-launch">
-              <span>开启实战课件</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            <a href="slide/business-model_workbuddy_20260910/业务建模与SQL实战_大屏演示版_gemini.html" class="variant-row" title="slide/business-model_workbuddy_20260910/业务建模与SQL实战_大屏演示版_gemini.html">
+              <div class="variant-info">
+                <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <span class="variant-title">业务建模与 SQL 实战 (Gemini 大屏演示版)</span>
+              </div>
+              <div class="variant-side">
+                <span class="variant-tag">大屏演示</span>
+                <span class="variant-date">09-11</span>
+              </div>
+            </a>
+            <a href="slide/business-model_workbuddy_20260910/业务建模与SQL实战_课件演示_gemini.html" class="variant-row" title="slide/business-model_workbuddy_20260910/业务建模与SQL实战_课件演示_gemini.html">
+              <div class="variant-info">
+                <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <span class="variant-title">业务建模与 SQL 实战 (Gemini 课件标准版)</span>
+              </div>
+              <div class="variant-side">
+                <span class="variant-tag">标准课件</span>
+                <span class="variant-date">09-11</span>
+              </div>
+            </a>
+            <a href="slide/business-model_workbuddy_20260910/两种思维三个模型六步法_零基础培训演示.html" class="variant-row" title="slide/business-model_workbuddy_20260910/两种思维三个模型六步法_零基础培训演示.html">
+              <div class="variant-info">
+                <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <span class="variant-title">两种思维三个模型六步法 (零基础培训演示)</span>
+              </div>
+              <div class="variant-side">
+                <span class="variant-tag">培训标准版</span>
+                <span class="variant-date">09-11</span>
+              </div>
+            </a>
+            <a href="slide/business-model_workbuddy_20260910/业务到拖拽式SQL模型的6步法_零基础培训版_v2.html" class="variant-row" title="slide/business-model_workbuddy_20260910/业务到拖拽式SQL模型的6步法_零基础培训版_v2.html">
+              <div class="variant-info">
+                <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <span class="variant-title">业务 → 拖拽式 SQL 模型：零基础 6 步法</span>
+              </div>
+              <div class="variant-side">
+                <span class="variant-tag">最新 v2 版</span>
+                <span class="variant-date">09-11</span>
+              </div>
+            </a>
+            <a href="slide/business-model_workbuddy_20260910/业务到拖拽式SQL模型的6步法_零基础培训版.html" class="variant-row" title="slide/business-model_workbuddy_20260910/业务到拖拽式SQL模型的6步法_零基础培训版.html">
+              <div class="variant-info">
+                <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <span class="variant-title">业务 → 拖拽式 SQL 模型：零基础 6 步法 (初始版)</span>
+              </div>
+              <div class="variant-side">
+                <span class="variant-tag">初始版 v1</span>
+                <span class="variant-date">09-10</span>
+              </div>
+            </a>
+            <a href="slide/business-model_workbuddy_20260910/20260910.html" class="variant-row" title="slide/business-model_workbuddy_20260910/20260910.html">
+              <div class="variant-info">
+                <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <span class="variant-title">数据分析和建模培训班 · 开班动员</span>
+              </div>
+              <div class="variant-side">
+                <span class="variant-tag">开班动员</span>
+                <span class="variant-date">09-10</span>
+              </div>
             </a>
           </div>
         </div>
 
-        <!-- 业务 → 拖拽式 SQL 模型的 6 步法 -->
-        <div class="viz-card" data-title="业务 拖拽式 SQL 模型的 6 步法 零基础培训版 v2 20260910 开班动员" data-cat="slides">
-          <div class="card-top">
-            <a href="slide/business-model_workbuddy_20260910/业务到拖拽式SQL模型的6步法_零基础培训版_v2.html" class="card-title-link">
-              <span>业务 → 拖拽式 SQL 模型：零基础 6 步法</span>
-              <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
-            </a>
-            <span class="category-tag">方法论</span>
-          </div>
-          <p class="card-desc">指导业务分析师告别手写复杂 SQL，通过自服务 BI 拖拽式操作实现复杂指标计算与沉淀。</p>
-          <div class="card-tags">
-            <span class="tech-tag">自服务 BI</span>
-            <span class="tech-tag">指标沉淀</span>
-            <span class="tech-tag">6 步实操</span>
-          </div>
-          <div class="variants-group" style="margin-bottom: 14px;">
-            <span class="variant-label">历史文件:</span>
-            <a href="slide/business-model_workbuddy_20260910/业务到拖拽式SQL模型的6步法_零基础培训版.html" class="variant-link" title="第一版课件">初始版 v1</a>
-            <a href="slide/business-model_workbuddy_20260910/20260910.html" class="variant-link" title="培训开班动员">开班动员简报</a>
-          </div>
-          <div class="card-actions">
-            <div class="path-badge" title="slide/business-model_workbuddy_20260910/业务到拖拽式SQL模型的6步法_零基础培训版_v2.html">slide/business-model/</div>
-            <a href="slide/business-model_workbuddy_20260910/业务到拖拽式SQL模型的6步法_零基础培训版_v2.html" class="btn-launch">
-              <span>浏览 6 步法</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-            </a>
-          </div>
+        <div class="card-tags">
+          <span class="tech-tag">自服务 BI</span>
+          <span class="tech-tag">拖拽建模</span>
+          <span class="tech-tag">SQL 实战</span>
+          <span class="tech-tag">交互幻灯片</span>
         </div>
       </div>
-    </section>
+
+      <!-- 7. 好莱坞“众神山庄”AI 评估实验室 (2026-09-10) -->
+      <div class="project-card" data-category="ai-lab" data-search="好莱坞 众神山庄 AI 评估 风格指纹 实验室 hollywood ai-analysis-lab 盲测矩阵 Gemini版 归因图鉴 Qwen 风格DNA 比较研究">
+        <div class="card-meta-bar">
+          <span class="badge-category">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>
+            AI 实验室
+          </span>
+          <span class="time-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            2026-09-10
+          </span>
+        </div>
+
+        <!-- 优先入口：Gemini 盲测矩阵 -->
+        <div class="primary-entry-box">
+          <div class="primary-title-row">
+            <a href="hollywood/ai-analysis-lab/hollywood-ai-eval-matrix-gemini.html" class="primary-link">
+              <span>好莱坞“众神山庄”：8大AI盲测矩阵</span>
+              <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+            </a>
+            <span class="priority-badge">最新矩阵版</span>
+          </div>
+          <p class="primary-desc">汇集 8 家顶尖大语言模型在好莱坞众神山庄命题下的输出，并通过 5 份独立 AI 专家评估展开双盲打分多维解构。</p>
+          <div class="primary-footer">
+            <span class="path-code" title="hollywood/ai-analysis-lab/hollywood-ai-eval-matrix-gemini.html">hollywood/.../hollywood-ai-eval-matrix-gemini.html</span>
+            <a href="hollywood/ai-analysis-lab/hollywood-ai-eval-matrix-gemini.html" class="btn-launch-primary">
+              <span>探索盲测矩阵</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- 其他4份独立实验室页面 -->
+        <div class="variants-section">
+          <div class="variants-header">
+            <span>其他分析实验室 (4)</span>
+            <span>修改时间</span>
+          </div>
+          <div class="variants-list">
+            <a href="hollywood/ai-analysis-lab/attribution-wbd.html" class="variant-row" title="hollywood/ai-analysis-lab/attribution-wbd.html">
+              <div class="variant-info">
+                <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <span class="variant-title">好莱坞"众神山庄" · 八答风格归因图鉴</span>
+              </div>
+              <div class="variant-side">
+                <span class="variant-tag">归因图鉴</span>
+                <span class="variant-date">09-06</span>
+              </div>
+            </a>
+            <a href="hollywood/ai-analysis-lab/style-fingerprint-lab-qwen.html" class="variant-row" title="hollywood/ai-analysis-lab/style-fingerprint-lab-qwen.html">
+              <div class="variant-info">
+                <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <span class="variant-title">众神山庄 · 风格指纹实验室 (Qwen版)</span>
+              </div>
+              <div class="variant-side">
+                <span class="variant-tag">Qwen 实验室</span>
+                <span class="variant-date">09-06</span>
+              </div>
+            </a>
+            <a href="hollywood/ai-analysis-lab/eight-ai-style-dna-db.html" class="variant-row" title="hollywood/ai-analysis-lab/eight-ai-style-dna-db.html">
+              <div class="variant-info">
+                <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <span class="variant-title">8 份 AI 回复的风格 DNA — 交叉汇总</span>
+              </div>
+              <div class="variant-side">
+                <span class="variant-tag">DNA 汇总</span>
+                <span class="variant-date">09-06</span>
+              </div>
+            </a>
+            <a href="hollywood/ai-analysis-lab/ai-style-dna-lab-db.html" class="variant-row" title="hollywood/ai-analysis-lab/ai-style-dna-lab-db.html">
+              <div class="variant-info">
+                <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <span class="variant-title">AI 分析 AI — 五份答卷的比较研究</span>
+              </div>
+              <div class="variant-side">
+                <span class="variant-tag">比较研究</span>
+                <span class="variant-date">09-06</span>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <div class="card-tags">
+          <span class="tech-tag">双盲评测</span>
+          <span class="tech-tag">多模型横评</span>
+          <span class="tech-tag">特征量化</span>
+          <span class="tech-tag">雷达矩阵</span>
+        </div>
+      </div>
+
+      <!-- 8. 世界之巅 · 十大高峰与七大洲之巅 (2026-08-29) -->
+      <div class="project-card" data-category="geography" data-search="世界之巅 十大高峰 七大洲最高峰 world-peaks 珠穆朗玛 星夜远征 Kimi ECharts 高程矩阵">
+        <div class="card-meta-bar">
+          <span class="badge-category">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            地理与文旅
+          </span>
+          <span class="time-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            2026-08-29
+          </span>
+        </div>
+
+        <!-- 优先入口：星夜远征深色高精版 -->
+        <div class="primary-entry-box">
+          <div class="primary-title-row">
+            <a href="world-peaks/world-peaks-dsh.html" class="primary-link">
+              <span>世界之巅 · 星夜远征版 (深色视觉优化)</span>
+              <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+            </a>
+            <span class="priority-badge">深色视觉推荐</span>
+          </div>
+          <p class="primary-desc">全景解构全球 8000 米级极高山峰与各大洲最高峰的海拔高程、气候与攀登路线，采用沉浸星夜深色配色。</p>
+          <div class="primary-footer">
+            <span class="path-code" title="world-peaks/world-peaks-dsh.html">world-peaks/world-peaks-dsh.html</span>
+            <a href="world-peaks/world-peaks-dsh.html" class="btn-launch-primary">
+              <span>探索星夜之巅</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- 其他3套版本 (含Kimi 2最新版、Kimi 1与基础版) -->
+        <div class="variants-section">
+          <div class="variants-header">
+            <span>其他版本 (3)</span>
+            <span>修改时间</span>
+          </div>
+          <div class="variants-list">
+            <a href="world-peaks/world-peaks-workbuddy-kimi-2.html" class="variant-row" title="world-peaks/world-peaks-workbuddy-kimi-2.html">
+              <div class="variant-info">
+                <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <span class="variant-title">世界之巅 · Kimi 定制版 2</span>
+              </div>
+              <div class="variant-side">
+                <span class="variant-tag">Kimi 版 2</span>
+                <span class="variant-date">08-29</span>
+              </div>
+            </a>
+            <a href="world-peaks/world-peaks-workbuddy-kimi.html" class="variant-row" title="world-peaks/world-peaks-workbuddy-kimi.html">
+              <div class="variant-info">
+                <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <span class="variant-title">世界之巅 · Kimi 定制版 1</span>
+              </div>
+              <div class="variant-side">
+                <span class="variant-tag">Kimi 版 1</span>
+                <span class="variant-date">08-03</span>
+              </div>
+            </a>
+            <a href="world-peaks/world-peaks.html" class="variant-row" title="world-peaks/world-peaks.html">
+              <div class="variant-info">
+                <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <span class="variant-title">世界之巅 · 初始基础版</span>
+              </div>
+              <div class="variant-side">
+                <span class="variant-tag">基础版</span>
+                <span class="variant-date">08-03</span>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <div class="card-tags">
+          <span class="tech-tag">ECharts</span>
+          <span class="tech-tag">山峰高程</span>
+          <span class="tech-tag">星夜深色</span>
+          <span class="tech-tag">攀登路线</span>
+        </div>
+      </div>
+
+      <!-- 9. 数据可视化为何未能成为大众文本 (2026-08-29) -->
+      <div class="project-card" data-category="theory" data-search="数据可视化为何未能成为大众文本 媒介思辨 认知带宽 读图门槛 viz_as_language cards 知识卡片">
+        <div class="card-meta-bar">
+          <span class="badge-category">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+            前沿与思辨
+          </span>
+          <span class="time-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            2026-08-29
+          </span>
+        </div>
+
+        <!-- 优先入口：完整论述长文 -->
+        <div class="primary-entry-box">
+          <div class="primary-title-row">
+            <a href="viz_as_language/index.html" class="primary-link">
+              <span>数据可视化为何未能成为大众文本</span>
+              <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+            </a>
+            <span class="priority-badge">完整长文</span>
+          </div>
+          <p class="primary-desc">深入辨析“图表作为媒介”的认知带宽、传播摩擦力与大众化困境的理论思辨长文。</p>
+          <div class="primary-footer">
+            <span class="path-code" title="viz_as_language/index.html">viz_as_language/index.html</span>
+            <a href="viz_as_language/index.html" class="btn-launch-primary">
+              <span>阅读长文辨析</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- 配套卡片页面 -->
+        <div class="variants-section">
+          <div class="variants-header">
+            <span>配套卡片 (1)</span>
+            <span>修改时间</span>
+          </div>
+          <div class="variants-list">
+            <a href="viz_as_language/cards.html" class="variant-row" title="viz_as_language/cards.html">
+              <div class="variant-info">
+                <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <span class="variant-title">数据可视化为何未能成为大众文本 — 知识卡片</span>
+              </div>
+              <div class="variant-side">
+                <span class="variant-tag">知识卡片</span>
+                <span class="variant-date">08-25</span>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <div class="card-tags">
+          <span class="tech-tag">媒介理论</span>
+          <span class="tech-tag">叙事可视化</span>
+          <span class="tech-tag">认知摩擦力</span>
+          <span class="tech-tag">知识卡片</span>
+        </div>
+      </div>
+
+    </div>
 
     <!-- Empty State for Search Filter -->
     <div id="noResults" class="no-results">
@@ -1180,28 +1381,24 @@
         <path d="m21 21-4.3-4.3"/>
         <path d="m14 8-6 6"/><path d="m8 8 6 6"/>
       </svg>
-      <p style="font-size: 1.1rem; font-weight: 600; color: #cbd5e1; margin-bottom: 6px;">未匹配到相关可视化项目</p>
-      <p style="font-size: 0.9rem;">请尝试使用其他关键词，或点击“全部项目”筛选重置。</p>
+      <p style="font-size: 1.1rem; font-weight: 600; color: #cbd5e1; margin-bottom: 6px;">未匹配到相关页面或项目</p>
+      <p style="font-size: 0.9rem;">请尝试使用其他关键字，或切换上方分类标签重置筛选。</p>
     </div>
 
     <!-- Footer -->
     <footer>
       <div>
-        <span>Viz Exploration Hub · 根目录快速索引</span>
+        <span>Viz Hub · 项目根目录全景导航 · 100% 页面完整覆盖</span>
       </div>
-      <div class="quick-jump">
-        <a href="#sec-geography">地理文旅</a>
-        <a href="#sec-culinary">美食图鉴</a>
-        <a href="#sec-theory">前沿思辨</a>
-        <a href="#sec-ai-lab">AI 实验室</a>
-        <a href="#sec-slides">建模演示</a>
+      <div>
+        <span>共收录 9 个工程模块 · 29 套交互页面</span>
       </div>
     </footer>
   </div>
 
   <script>
     // Spotlight glow effect following mouse
-    document.querySelectorAll('.viz-card').forEach(card => {
+    document.querySelectorAll('.project-card').forEach(card => {
       card.addEventListener('mousemove', e => {
         const rect = card.getBoundingClientRect();
         const x = e.clientX - rect.left;
@@ -1214,52 +1411,37 @@
     // Filtering & Search Logic
     const searchInput = document.getElementById('searchInput');
     const tabBtns = document.querySelectorAll('.tab-btn');
-    const sections = document.querySelectorAll('.section-wrap');
-    const cards = document.querySelectorAll('.viz-card');
+    const cards = document.querySelectorAll('.project-card');
     const noResults = document.getElementById('noResults');
 
     let currentCategory = 'all';
 
     function updateVisibility() {
       const query = searchInput.value.trim().toLowerCase();
-      let totalVisibleCards = 0;
+      let totalVisible = 0;
 
-      sections.forEach(section => {
-        const sectionCat = section.getAttribute('data-category');
-        const isCatMatch = (currentCategory === 'all' || currentCategory === sectionCat);
+      cards.forEach(card => {
+        const category = card.getAttribute('data-category');
+        const isCatMatch = (currentCategory === 'all' || currentCategory === category);
 
-        let sectionVisibleCards = 0;
-        const sectionCards = section.querySelectorAll('.viz-card');
+        const searchText = (card.getAttribute('data-search') + ' ' + card.innerText).toLowerCase();
+        const matchesSearch = !query || searchText.includes(query);
 
-        sectionCards.forEach(card => {
-          const title = card.getAttribute('data-title').toLowerCase();
-          const matchesSearch = !query || title.includes(query);
-          const isVisible = isCatMatch && matchesSearch;
-
-          if (isVisible) {
-            card.style.display = 'flex';
-            sectionVisibleCards++;
-            totalVisibleCards++;
-          } else {
-            card.style.display = 'none';
-          }
-        });
-
-        if (sectionVisibleCards > 0) {
-          section.style.display = 'block';
+        if (isCatMatch && matchesSearch) {
+          card.style.display = 'flex';
+          totalVisible++;
         } else {
-          section.style.display = 'none';
+          card.style.display = 'none';
         }
       });
 
-      if (totalVisibleCards === 0) {
+      if (totalVisible === 0) {
         noResults.style.display = 'block';
       } else {
         noResults.style.display = 'none';
       }
     }
 
-    // Category Tab Click
     tabBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         tabBtns.forEach(b => b.classList.remove('active'));
@@ -1269,12 +1451,10 @@
       });
     });
 
-    // Search Input change
     searchInput.addEventListener('input', () => {
       updateVisibility();
     });
 
-    // Keyboard shortcut '/' to search
     window.addEventListener('keydown', (e) => {
       if (e.key === '/' && document.activeElement !== searchInput) {
         e.preventDefault();
