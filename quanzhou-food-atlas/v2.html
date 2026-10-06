@@ -252,12 +252,99 @@ main{position:relative;z-index:2}
 
 /* ============ 模块五：坐标 ============ */
 .coord-stage{position:relative;width:100%;aspect-ratio:900/620;background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:var(--shadow)}
-.coord-stage svg{position:absolute;inset:0;width:100%;height:100%}
+.coord-stage svg{position:absolute;inset:0;width:100%;height:100%;display:block}
 .cdot{cursor:pointer}
-.cdot circle{transition:.25s;transform-box:fill-box;transform-origin:center}
-.cdot:hover circle{transform:scale(1.5)}
-.cdot text{font-size:10.5px;font-family:var(--serif);fill:var(--ink-2)}
+.cdot .cdot-hit{fill:transparent;cursor:pointer;pointer-events:all}
+.cdot .cdot-core{
+  transition:stroke-width .2s ease, filter .2s ease, opacity .2s ease;
+}
+.cdot:hover .cdot-core{
+  stroke:#fff;
+  stroke-width:2.8px;
+  filter:drop-shadow(0 2px 7px rgba(0,0,0,.32));
+  opacity:1 !important;
+}
+.cdot text{
+  font-size:11px;
+  font-family:var(--serif);
+  fill:var(--ink-2);
+  paint-order:stroke fill;
+  stroke:rgba(255,255,255,.96);
+  stroke-width:3.6px;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  pointer-events:none;
+  transition:fill .2s ease, font-weight .2s ease;
+}
+.cdot:hover text{
+  fill:var(--brick);
+  font-weight:600;
+}
+.cdot .cdot-lead{
+  pointer-events:none;
+  transition:stroke-opacity .2s, stroke-width .2s;
+}
+.cdot:hover .cdot-lead{
+  stroke-opacity:.85 !important;
+  stroke-width:1.5px;
+}
 .cdot.off{opacity:.12}
+.coord-tip{
+  position:absolute;
+  pointer-events:none;
+  z-index:20;
+  width:230px;
+  background:rgba(255,255,255,.96);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  border:1px solid rgba(168,53,42,.22);
+  border-radius:12px;
+  padding:10px 14px;
+  box-shadow:0 10px 28px -6px rgba(43,38,34,.22);
+  opacity:0;
+  transform:translateY(6px);
+  transition:opacity .18s ease, transform .18s ease;
+  font-family:var(--sans);
+}
+.coord-tip.on{
+  opacity:1;
+  transform:translateY(0);
+}
+.coord-tip .tip-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:4px;
+}
+.coord-tip .tip-name{
+  font-family:var(--serif);
+  font-size:15px;
+  font-weight:700;
+  color:var(--brick);
+  letter-spacing:.02em;
+}
+.coord-tip .tip-tag{
+  font-size:10.5px;
+  padding:2px 7px;
+  border-radius:4px;
+  font-weight:500;
+  white-space:nowrap;
+}
+.coord-tip .tip-sub{
+  font-size:11.5px;
+  color:var(--ink-2);
+  margin-bottom:6px;
+  line-height:1.4;
+}
+.coord-tip .tip-meta{
+  display:flex;
+  justify-content:space-between;
+  font-size:10.5px;
+  color:var(--ink-3);
+  border-top:1px dashed var(--line);
+  padding-top:5px;
+}
 .coord-legend{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-top:22px}
 .lgd{display:flex;align-items:center;gap:9px;padding:7px 11px;border-radius:9px;border:1px solid transparent;font-size:12.5px;transition:.25s;cursor:pointer}
 .lgd:hover{background:rgba(43,38,34,.05)}
@@ -479,7 +566,10 @@ footer{border-top:1px solid var(--line);padding:44px 28px 56px;background:var(--
         <h2>食物坐标</h2>
         <p>52 味落在「山 ↔ 海」与「咸 ↔ 甜」之间。横轴是食材的来源方向，纵轴是味型刻度；点越大，推荐店家越多。</p>
       </div>
-      <div class="coord-stage rv"><svg id="coordSvg" viewBox="0 0 900 620"></svg></div>
+      <div class="coord-stage rv">
+        <svg id="coordSvg" viewBox="0 0 900 620"></svg>
+        <div id="coordTip" class="coord-tip" aria-hidden="true"></div>
+      </div>
       <div class="coord-legend" id="coordLegend"></div>
     </div>
   </section>
@@ -870,22 +960,80 @@ const CH_OF = Object.fromEntries(CHAPTERS.map((c,i)=>[c.n,{...c,color:CHC[i],idx
 const ATT_LABEL = {local:"本地力荐",old:"老字号",hidden:"隐世小店",night:"夜宵摊",tourist:"游客巨头",top:"标杆名店"};
 const ATT_COLOR = {local:"#2F6E7A",old:"#B98A2F",hidden:"#6B6157",night:"#202A28",tourist:"#A8352A",top:"#7E2419"};
 
-const SWEET = {"甜":.88,"半甜咸":.60,"酸甜":.74,"辛鲜":.18,"咸":.12};
-function seaScore(f){
-  if(f.cat==="海鲜") return .93;
-  if(/海|鱼|蟹|鳗|蚵|螺|章鱼|土笋|鲨|蛎|虾|蟳|鲳|紫菜/.test(f.n+f.k)) return .78;
-  if(f.cat==="甜汤") return .28;
-  if(f.cat==="糕粿") return .34;
-  if(f.cat==="硬菜"||f.cat==="卤味") return .30;
-  if(f.cat==="炸物") return .58;
-  if(f.cat==="小吃") return .60;
-  return .50;
-}
-const hash = s => { let h=0; for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))|0; return Math.abs(h); };
-FOODS.forEach((f,i)=>{
-  f.x = Math.min(.97, Math.max(.05, seaScore(f) + ((hash(f.n)%7)-3)*.022));
-  f.y = Math.min(.95, Math.max(.05, (SWEET[f.ts] ?? .5) + ((hash(f.n+"s")%5)-2)*.02));
-  f.w = 1 + Math.min(f.shops.length,6)*.9;
+const COORD_MAP = {
+  // 01 主食碳水
+  "面线糊": [0.46, 0.18],
+  "卤面": [0.38, 0.24],
+  "咸饭": [0.35, 0.18],
+  "萝卜饭": [0.44, 0.22],
+  "壶仔饭": [0.52, 0.25],
+  "烧肉粽": [0.36, 0.34],
+  "地瓜粥": [0.10, 0.62],
+  "地瓜粉团": [0.40, 0.14],
+  "牛肉面": [0.36, 0.28],
+
+  // 02 汤羹
+  "猪血汤": [0.10, 0.10],
+  "大骨汤": [0.18, 0.06],
+  "牛肉羹·牛肉汤": [0.28, 0.16],
+  "牛肉拳头母": [0.48, 0.12],
+  "三鲜羹": [0.65, 0.14],
+  "猪肉羹·马加羹": [0.60, 0.25],
+
+  // 03 肉食与硬菜 / 卤味
+  "姜母鸭": [0.08, 0.26],
+  "卤大肠头·糯米鸭血": [0.16, 0.20],
+  "闽式牛排": [0.24, 0.30],
+  "灌肠": [0.14, 0.14],
+  "捆蹄": [0.12, 0.38],
+  "卤料·烧酒配": [0.56, 0.20],
+
+  // 04 炸物
+  "炸枣": [0.22, 0.56],
+  "菜粿": [0.20, 0.24],
+  "醋肉": [0.16, 0.32],
+  "鸡卷": [0.28, 0.38],
+  "街头炸物小摊": [0.32, 0.36],
+
+  // 05 市井小吃
+  "润饼菜": [0.38, 0.50],
+  "菜头酸": [0.12, 0.46],
+  "芋圆": [0.26, 0.52],
+  "松茸包": [0.46, 0.38],
+  "紫菜鳗鱼卷": [0.78, 0.28],
+
+  // 06 海鲜生猛
+  "蚵仔煎": [0.76, 0.30],
+  "土笋冻": [0.92, 0.16],
+  "白灼小章鱼": [0.95, 0.09],
+  "咖喱鲨鱼皮": [0.88, 0.28],
+  "炣鲳鱼": [0.94, 0.18],
+  "花生酱炒钉螺": [0.84, 0.38],
+  "桂花蟹": [0.86, 0.24],
+  "葱烧河鳗": [0.74, 0.42],
+
+  // 07 甜汤与糖水
+  "芋泥": [0.18, 0.62],
+  "八宝芋泥": [0.28, 0.65],
+  "花生汤": [0.14, 0.86],
+  "元宵圆": [0.25, 0.82],
+  "汤圆": [0.20, 0.76],
+  "四果汤": [0.68, 0.90],
+
+  // 08 传统糕粿
+  "碗糕": [0.12, 0.70],
+  "糯米粿": [0.16, 0.76],
+  "麦夹粿·菜包": [0.24, 0.46],
+  "甜粿": [0.15, 0.92],
+  "满煎糕": [0.24, 0.70],
+  "麻粩·贡糖": [0.20, 0.88],
+  "桔红糕·蒜蓉枝·蜜饯·绿豆糕": [0.08, 0.80]
+};
+FOODS.forEach(f=>{
+  const c = COORD_MAP[f.n] || [0.5, 0.5];
+  f.x = c[0];
+  f.y = c[1];
+  f.w = 1 + Math.min(f.shops.length, 6) * 0.9;
 });
 
 /* ==================== 通用：燕尾脊 / 平滑路径 ==================== */
@@ -1241,13 +1389,198 @@ function drawRoute(i){
 }
 
 /* ==================== 05 坐标 ==================== */
-let coordCh=null;
+let coordCh = null;
+let coordLayoutCache = null;
+
+function computeCoordLayout(){
+  const W=900, H=620, L=86, R=34, T=30, B=58;
+  const px = v => L + v * (W - L - R);
+  const py = v => H - B - v * (H - T - B);
+
+  let dots = FOODS.map(f => {
+    const cx = px(f.x);
+    const cy = py(f.y);
+    const rad = 6 + f.w * 1.5;
+    let disp = f.n;
+    if (f.n === "桔红糕·蒜蓉枝·蜜饯·绿豆糕") disp = "桔红糕·蒜蓉枝等";
+    else if (f.n === "街头炸物小摊") disp = "街头炸物";
+    else if (f.n === "卤大肠头·糯米鸭血") disp = "卤大肠头·鸭血";
+    return {
+      food: f,
+      name: f.n,
+      disp,
+      cx, cy, ox: cx, oy: cy,
+      rad
+    };
+  });
+
+  // 物理微调：保证任意两点间距 >= 38px
+  const minDotDist = 38;
+  for (let it = 0; it < 50; it++) {
+    for (let i = 0; i < dots.length; i++) {
+      for (let j = i + 1; j < dots.length; j++) {
+        let dx = dots[i].cx - dots[j].cx;
+        let dy = dots[i].cy - dots[j].cy;
+        let d = Math.hypot(dx, dy);
+        const req = Math.max(minDotDist, dots[i].rad + dots[j].rad + 15);
+        if (d < req) {
+          if (d < 0.001) { dx = (i % 3 - 1) || 1; dy = ((i + j) % 3 - 1) || 1; d = Math.hypot(dx, dy); }
+          const push = (req - d) / 2;
+          const nx = dx / d, ny = dy / d;
+          dots[i].cx += nx * push * 0.8;
+          dots[i].cy += ny * push * 0.8;
+          dots[j].cx -= nx * push * 0.8;
+          dots[j].cy -= ny * push * 0.8;
+        }
+      }
+    }
+    for (const dot of dots) {
+      dot.cx += (dot.ox - dot.cx) * 0.02;
+      dot.cy += (dot.oy - dot.cy) * 0.02;
+      dot.cx = Math.max(L + dot.rad + 8, Math.min(W - R - dot.rad - 8, dot.cx));
+      dot.cy = Math.max(T + dot.rad + 8, Math.min(H - B - dot.rad - 8, dot.cy));
+    }
+  }
+
+  // 计算局部空白引力方向向量
+  dots.forEach(d => {
+    let vx = 0, vy = 0;
+    dots.forEach(o => {
+      if (o === d) return;
+      const dx = d.cx - o.cx, dy = d.cy - o.cy;
+      const dist = Math.hypot(dx, dy);
+      if (dist < 150 && dist > 0) {
+        const w = 1 / (dist * dist);
+        vx += dx * w;
+        vy += dy * w;
+      }
+    });
+    d.vx = vx;
+    d.vy = vy;
+  });
+
+  // 按推荐店铺数排序，核心美食优先获得最佳位置
+  dots.sort((a,b) => b.food.shops.length - a.food.shops.length);
+
+  const placed = [];
+  dots.forEach(d => {
+    const w = d.disp.length * 11 + 4;
+    const h = 13;
+    let preferRight = d.vx >= 0;
+    if (d.cx + d.rad + w + 10 > W - R) preferRight = false;
+    if (d.cx - d.rad - w - 10 < L) preferRight = true;
+
+    const rightX = d.cx + d.rad + 6;
+    const leftX = d.cx - d.rad - w - 6;
+
+    let best = null, minPenalty = Infinity;
+    const candidates = [];
+
+    const xOptions = preferRight ? [rightX, leftX] : [leftX, rightX];
+    for (const x of xOptions) {
+      for (const dy of [0, -6, 6, -12, 12, -18, 18, -26, 26, -34, 34, -44, 44, -54, 54]) {
+        candidates.push({ x, y: d.cy - 6 + dy, w, h, dot: d });
+      }
+    }
+    for (const dy of [-d.rad - h - 5, d.rad + 5]) {
+      for (const dx of [-w/2, -w + 4, 0]) {
+        candidates.push({ x: d.cx + dx, y: d.cy + dy, w, h, dot: d });
+      }
+    }
+
+    for (const c of candidates) {
+      if (c.x < L + 2 || c.x + c.w > W - R - 2 || c.y < T + 2 || c.y + c.h > H - B - 2) continue;
+      let penalty = 0;
+      // 避免与已有文本重叠
+      for (const p of placed) {
+        const ox = Math.max(0, Math.min(c.x + c.w, p.x + p.w) - Math.max(c.x, p.x));
+        const oy = Math.max(0, Math.min(c.y + c.h, p.y + p.h) - Math.max(c.y, p.y));
+        if (ox > 0 && oy > 0) penalty += ox * oy * 1000;
+      }
+      // 严禁遮盖任何圆点
+      for (const other of dots) {
+        if (other.name === d.name) continue;
+        const nx = Math.max(c.x, Math.min(other.cx, c.x + c.w));
+        const ny = Math.max(c.y, Math.min(other.cy, c.y + c.h));
+        const dist = Math.hypot(other.cx - nx, other.cy - ny);
+        if (dist < other.rad + 3) {
+          penalty += 1e7;
+        }
+      }
+      // 距离本圆点中心距离代价
+      const distToCenter = Math.hypot(c.x + c.w/2 - d.cx, c.y + c.h/2 - d.cy);
+      penalty += distToCenter * 1.2;
+      if ((preferRight && c.x < d.cx) || (!preferRight && c.x > d.cx)) {
+        penalty += 12;
+      }
+
+      if (penalty < minPenalty) {
+        minPenalty = penalty;
+        best = c;
+      }
+    }
+
+    const chosen = best || { x: rightX, y: d.cy - 6, w, h, dot: d };
+    placed.push(chosen);
+    d.lx = chosen.x;
+    d.ly = chosen.y + 10;
+    d.lw = w;
+    d.lh = h;
+    d.needsLine = Math.hypot(chosen.x + w/2 - d.cx, chosen.y + h/2 - d.cy) > (d.rad + 20);
+  });
+
+  return dots;
+}
+
+function showCoordTip(f, cx, cy){
+  const tip = document.getElementById("coordTip");
+  const stage = document.querySelector(".coord-stage");
+  if(!tip || !stage) return;
+  const stageW = stage.clientWidth, stageH = stage.clientHeight;
+  const rx = stageW / 900, ry = stageH / 620;
+  const tx = cx * rx, ty = cy * ry;
+  const ch = CH_OF[f.ch] || {t:"风味章节", color:"#A8352A"};
+
+  tip.innerHTML = `
+    <div class="tip-head">
+      <span class="tip-name">${f.n}</span>
+      <span class="tip-tag" style="color:${ch.color};background:${ch.color}18">${f.cat} · ${f.ts}</span>
+    </div>
+    <div class="tip-sub">${f.s}</div>
+    <div class="tip-meta">
+      <span>坐标: 山海 ${(f.x * 100).toFixed(0)}% / 咸甜 ${(f.y * 100).toFixed(0)}%</span>
+      <span>${f.shops.length} 家精选推荐</span>
+    </div>
+  `;
+
+  const tipW = 230;
+  let posX = tx + 14;
+  if(posX + tipW > stageW - 12){
+    posX = tx - tipW - 14;
+  }
+  let posY = ty - 28;
+  if(posY < 10) posY = 10;
+  if(posY > stageH - 95) posY = stageH - 95;
+
+  tip.style.left = posX + "px";
+  tip.style.top = posY + "px";
+  tip.classList.add("on");
+}
+
+function hideCoordTip(){
+  const tip = document.getElementById("coordTip");
+  if(tip) tip.classList.remove("on");
+}
+
 function renderCoords(){
-  const W=900,H=620,L=86,R=34,T=30,B=58;
+  const W=900, H=620, L=86, R=34, T=30, B=58;
   const px=v=>L+v*(W-L-R), py=v=>H-B-v*(H-T-B);
   const svg=document.getElementById("coordSvg");
+  if(!coordLayoutCache) coordLayoutCache = computeCoordLayout();
+  const dots = coordLayoutCache;
+
   let g=`<rect width="${W}" height="${H}" fill="#fff"/>`;
-  // 象限
+  // 象限底色
   g+=`<rect x="${L}" y="${T}" width="${(W-L-R)/2}" height="${(H-T-B)/2}" fill="#F5F0E6" opacity=".7"/>
       <rect x="${L+(W-L-R)/2}" y="${T+(H-T-B)/2}" width="${(W-L-R)/2}" height="${(H-T-B)/2}" fill="#F5F0E6" opacity=".7"/>`;
   for(let i=1;i<4;i++){
@@ -1266,31 +1599,59 @@ function renderCoords(){
       <text x="${W-R-18}" y="${T+22}" font-size="12" fill="#B98A2F" opacity=".8" text-anchor="end">海味 · 甜</text>
       <text x="${L+18}" y="${H-B-14}" font-size="12" fill="#B98A2F" opacity=".8">山野 · 咸</text>
       <text x="${W-R-18}" y="${H-B-14}" font-size="12" fill="#B98A2F" opacity=".8" text-anchor="end">海味 · 咸</text>`;
-  // 散点（标签避让）
-  const list=[...FOODS].sort((a,b)=>a.y-b.y);
-  const placed=[];
-  const hit=r=>placed.some(p=>!(r.x+r.w<p.x||p.x+p.w<r.x||r.y+r.h<p.y||p.y+p.h<r.y));
-  list.forEach(f=>{
-    const cx=px(f.x), cy=py(f.y), col=CH_OF[f.ch]?CH_OF[f.ch].color:"#A8352A";
-    const off=coordCh&&f.ch!==coordCh;
-    const rad=6+f.w*1.5;
-    let lx=cx+rad+5, ly=cy+4, w=f.n.length*11+2, h=13;
-    if(lx+w>W-R-4){ lx=cx-w-rad-8; }
-    let ok=false;
-    for(const dy of [0,-13,13,-26,26,-39,39,52,-52]){
-      let ty=ly+dy;
-      if(ty-9<T+8 || ty+4>H-B-6) continue;
-      const r2={x:lx,y:ty-9,w,h};
-      if(!hit(r2)){ ly=ty; placed.push(r2); ok=true; break; }
+
+  // 渲染美食圆点与无遮挡标签
+  dots.forEach(d=>{
+    const f = d.food;
+    const col = CH_OF[f.ch] ? CH_OF[f.ch].color : "#A8352A";
+    const off = coordCh && f.ch !== coordCh;
+    const cx = d.cx, cy = d.cy, rad = d.rad;
+    const lx = d.lx, ly = d.ly, lw = d.lw, lh = d.lh;
+
+    // 连续包围盒命中区域：覆盖圆点、文字以及两者过渡区
+    const minX = Math.min(cx - rad - 7, lx - 4);
+    const minY = Math.min(cy - rad - 7, ly - 12);
+    const maxX = Math.max(cx + rad + 7, lx + lw + 4);
+    const maxY = Math.max(cy + rad + 7, ly + 6);
+    const hw = maxX - minX, hh = maxY - minY;
+
+    let subHtml = "";
+    // 若标签因避让被推开，绘制高雅辅助虚线引线
+    if (d.needsLine) {
+      const lineEndX = lx > cx ? lx : lx + lw;
+      subHtml += `<line class="cdot-lead" x1="${cx.toFixed(1)}" y1="${cy.toFixed(1)}" x2="${lineEndX.toFixed(1)}" y2="${(ly - 3).toFixed(1)}" stroke="${col}" stroke-opacity="${off ? .15 : .42}" stroke-width="1" stroke-dasharray="2,2"/>`;
     }
-    if(!ok){ ly=Math.max(T+10,Math.min(H-B-8,ly)); placed.push({x:lx,y:ly-9,w,h}); }
-    g+=`<g class="cdot${off?" off":""}" data-food="${f.n}">
-      <circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${rad.toFixed(1)}" fill="${col}" opacity="${off?.16:.72}" stroke="#fff" stroke-width="1.2"/>
-      <text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" ${off?'opacity=".2"':''}>${f.n}</text>
-    </g>`;
+    // 透明复合热区
+    subHtml += `<rect class="cdot-hit" x="${minX.toFixed(1)}" y="${minY.toFixed(1)}" width="${hw.toFixed(1)}" height="${hh.toFixed(1)}" rx="6"/>`;
+    // 核心圆点
+    subHtml += `<circle class="cdot-core" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${rad.toFixed(1)}" fill="${col}" opacity="${off ? .16 : .85}" stroke="#fff" stroke-width="1.5" pointer-events="none"/>`;
+    // 白描边文字标签
+    subHtml += `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" ${off ? 'opacity=".2"' : ''}>${d.disp}</text>`;
+
+    g += `<g class="cdot${off ? " off" : ""}" data-food="${f.n}">${subHtml}</g>`;
   });
-  svg.innerHTML=g;
-  svg.querySelectorAll(".cdot").forEach(el=>el.onclick=()=>openFood(el.dataset.food));
+
+  svg.innerHTML = g;
+
+  // 绑定交互：鼠标精准悬停置顶、浮动提示、点击打开详情
+  svg.querySelectorAll(".cdot").forEach(el=>{
+    const name = el.dataset.food;
+    const item = dots.find(d => d.name === name);
+    if (!item) return;
+    el.addEventListener("mouseenter", ()=>{
+      svg.appendChild(el); // 置顶至最上图层
+      showCoordTip(item.food, item.cx, item.cy);
+    });
+    el.addEventListener("mouseleave", hideCoordTip);
+    el.addEventListener("click", ()=>{
+      hideCoordTip();
+      openFood(name);
+    });
+  });
+
+  svg.addEventListener("mouseleave", hideCoordTip);
+
+  // 图例
   document.getElementById("coordLegend").innerHTML=CHAPTERS.map((c,i)=>`
     <div class="lgd${coordCh===c.n?" on":""}" data-c="${c.n}">
       <i style="background:${CHC[i]}"></i>${c.n} ${c.t}<em>${c.foods.length} 味</em>
