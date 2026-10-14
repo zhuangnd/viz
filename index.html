@@ -1,20 +1,36 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Viz Gallery · 数据可视化全景导航中心</title>
+  <title>Viz Gallery · 数据可视化导航</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    // Immediately set theme to avoid flashing (default to light)
+    (function() {
+      const saved = localStorage.getItem('viz_theme');
+      if (saved === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
   <style>
     :root {
+      /* Dark Theme (Default) */
       --bg: #0b0f19;
       --bg-subtle: #111827;
       --surface: rgba(17, 24, 39, 0.72);
       --surface-hover: rgba(30, 41, 59, 0.88);
       --surface-border: rgba(255, 255, 255, 0.08);
       --surface-border-hover: rgba(99, 102, 241, 0.45);
+      --box-inner-bg: rgba(15, 23, 42, 0.72);
+      --box-inner-hover: rgba(20, 30, 55, 0.88);
+      --box-inner-border: rgba(99, 102, 241, 0.25);
+      --box-inner-border-hover: rgba(99, 102, 241, 0.5);
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --text-dim: #64748b;
@@ -24,10 +40,63 @@
       --emerald: #10b981;
       --amber: #f59e0b;
       --rose: #f43f5e;
+      --control-bg: rgba(15, 23, 42, 0.85);
+      --card-sub-bg: rgba(11, 15, 25, 0.55);
+      --card-sub-hover: rgba(99, 102, 241, 0.12);
+      --card-sub-border: rgba(255, 255, 255, 0.04);
+      --radial-1: rgba(99, 102, 241, 0.14);
+      --radial-2: rgba(6, 182, 212, 0.12);
+      --radial-3: rgba(244, 63, 94, 0.08);
+      --grid-line: rgba(255, 255, 255, 0.02);
+      --card-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.5), 0 0 24px rgba(99, 102, 241, 0.15);
+      --bar-shadow: 0 12px 32px rgba(0, 0, 0, 0.38);
+      --tag-bg: rgba(15, 23, 42, 0.65);
+      --tag-border: rgba(255, 255, 255, 0.05);
+      --hero-grad-start: #ffffff;
+      --hero-grad-mid: #cbd5e1;
+      --hero-grad-end: #94a3b8;
+
       --radius-xl: 18px;
       --radius-lg: 12px;
       --radius-sm: 8px;
       --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    [data-theme="light"] {
+      --bg: #f8fafc;
+      --bg-subtle: #f1f5f9;
+      --surface: rgba(255, 255, 255, 0.82);
+      --surface-hover: rgba(255, 255, 255, 0.98);
+      --surface-border: rgba(226, 232, 240, 0.95);
+      --surface-border-hover: rgba(99, 102, 241, 0.45);
+      --box-inner-bg: rgba(248, 250, 252, 0.92);
+      --box-inner-hover: rgba(241, 245, 249, 0.98);
+      --box-inner-border: rgba(99, 102, 241, 0.22);
+      --box-inner-border-hover: rgba(99, 102, 241, 0.45);
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-dim: #94a3b8;
+      --accent: #4f46e5;
+      --accent-glow: rgba(79, 70, 229, 0.15);
+      --cyan: #0284c7;
+      --emerald: #059669;
+      --amber: #d97706;
+      --rose: #e11d48;
+      --control-bg: rgba(255, 255, 255, 0.92);
+      --card-sub-bg: rgba(241, 245, 249, 0.7);
+      --card-sub-hover: rgba(238, 242, 255, 0.9);
+      --card-sub-border: rgba(226, 232, 240, 0.85);
+      --radial-1: rgba(99, 102, 241, 0.08);
+      --radial-2: rgba(6, 182, 212, 0.07);
+      --radial-3: rgba(244, 63, 94, 0.04);
+      --grid-line: rgba(15, 23, 42, 0.03);
+      --card-shadow: 0 14px 30px -8px rgba(15, 23, 42, 0.08), 0 0 16px rgba(99, 102, 241, 0.06);
+      --bar-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+      --tag-bg: rgba(241, 245, 249, 0.85);
+      --tag-border: rgba(203, 213, 225, 0.7);
+      --hero-grad-start: #0f172a;
+      --hero-grad-mid: #334155;
+      --hero-grad-end: #64748b;
     }
 
     * {
@@ -44,10 +113,11 @@
       overflow-x: hidden;
       line-height: 1.6;
       background-image: 
-        radial-gradient(circle at 12% 12%, rgba(99, 102, 241, 0.14) 0%, transparent 40%),
-        radial-gradient(circle at 88% 20%, rgba(6, 182, 212, 0.12) 0%, transparent 45%),
-        radial-gradient(circle at 50% 85%, rgba(244, 63, 94, 0.08) 0%, transparent 50%);
+        radial-gradient(circle at 12% 12%, var(--radial-1) 0%, transparent 40%),
+        radial-gradient(circle at 88% 20%, var(--radial-2) 0%, transparent 45%),
+        radial-gradient(circle at 50% 85%, var(--radial-3) 0%, transparent 50%);
       background-attachment: fixed;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
 
     .bg-grid {
@@ -55,8 +125,8 @@
       top: 0; left: 0; right: 0; bottom: 0;
       background-size: 38px 38px;
       background-image: 
-        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
       pointer-events: none;
       z-index: 0;
     }
@@ -64,108 +134,75 @@
     .container {
       max-width: 1400px;
       margin: 0 auto;
-      padding: 40px 28px 100px;
+      padding: 36px 28px 100px;
       position: relative;
       z-index: 1;
     }
 
-    /* Header */
+    /* Header - Simplified & Focused */
     header {
-      padding: 16px 0 36px;
-      border-bottom: 1px solid var(--surface-border);
-      margin-bottom: 32px;
+      padding: 8px 0 24px;
+      margin-bottom: 24px;
     }
 
-    .header-top {
+    .header-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      flex-wrap: wrap;
       gap: 16px;
-      margin-bottom: 16px;
-    }
-
-    .badge-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 14px;
-      background: rgba(99, 102, 241, 0.12);
-      border: 1px solid rgba(99, 102, 241, 0.3);
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 500;
-      color: #a5b4fc;
-      backdrop-filter: blur(8px);
-    }
-    .badge-pill .pulse-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #818cf8;
-      box-shadow: 0 0 8px #818cf8;
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.35; transform: scale(0.8); }
-    }
-
-    .header-meta {
-      font-size: 12.5px;
-      color: var(--text-dim);
-      font-family: 'JetBrains Mono', monospace;
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
 
     .hero-title {
-      font-size: clamp(2.2rem, 3.8vw, 3.3rem);
+      font-size: clamp(1.8rem, 3.2vw, 2.5rem);
       font-weight: 800;
-      letter-spacing: -0.03em;
-      line-height: 1.15;
-      margin-bottom: 12px;
-      background: linear-gradient(135deg, #ffffff 35%, #cbd5e1 70%, #94a3b8 100%);
+      letter-spacing: -0.025em;
+      line-height: 1.2;
+      background: linear-gradient(135deg, var(--hero-grad-start) 35%, var(--hero-grad-mid) 70%, var(--hero-grad-end) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
-    .hero-desc {
-      font-size: 1.05rem;
-      color: var(--text-muted);
-      max-width: 860px;
-      line-height: 1.65;
-    }
-
-    /* Stats bar */
-    .stats-row {
+    .header-actions {
       display: flex;
-      flex-wrap: wrap;
+      align-items: center;
       gap: 12px;
-      margin-top: 24px;
+      flex-shrink: 0;
     }
 
-    .stat-chip {
+    /* Theme Toggle Button */
+    .theme-toggle-btn {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
-      padding: 8px 16px;
-      background: rgba(17, 24, 39, 0.6);
+      gap: 7px;
+      padding: 7px 14px;
+      background: var(--surface);
       border: 1px solid var(--surface-border);
       border-radius: var(--radius-sm);
+      color: var(--text-muted);
       font-size: 13px;
-      backdrop-filter: blur(10px);
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      backdrop-filter: blur(8px);
     }
-    .stat-chip .num {
-      font-family: 'JetBrains Mono', monospace;
-      font-weight: 700;
-      color: #f1f5f9;
-      font-size: 14.5px;
+    .theme-toggle-btn:hover {
+      color: var(--text-main);
+      border-color: var(--accent);
+      background: var(--surface-hover);
     }
-    .stat-chip .label {
-      color: var(--text-dim);
+    .theme-toggle-btn svg {
+      width: 15px;
+      height: 15px;
+      transition: transform 0.3s ease;
     }
+    .theme-toggle-btn:hover svg {
+      transform: rotate(20deg);
+    }
+
+    .icon-moon { display: none; }
+    .icon-sun { display: inline-block; }
+    [data-theme="light"] .icon-moon { display: inline-block; }
+    [data-theme="light"] .icon-sun { display: none; }
 
     /* Control Toolbar */
     .control-bar {
@@ -178,13 +215,14 @@
       justify-content: space-between;
       gap: 16px;
       padding: 12px 18px;
-      background: rgba(15, 23, 42, 0.85);
+      background: var(--control-bg);
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
       border: 1px solid var(--surface-border);
       border-radius: var(--radius-lg);
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.38);
-      margin-bottom: 36px;
+      box-shadow: var(--bar-shadow);
+      margin-bottom: 34px;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
     }
 
     .filter-tabs {
@@ -209,19 +247,19 @@
       user-select: none;
     }
     .tab-btn:hover {
-      color: #ffffff;
-      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      background: rgba(99, 102, 241, 0.08);
     }
     .tab-btn.active {
       color: #ffffff;
-      background: rgba(99, 102, 241, 0.18);
-      border-color: rgba(99, 102, 241, 0.4);
-      box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
+      background: #4f46e5;
+      border-color: #4f46e5;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.28);
     }
     .tab-btn svg {
       width: 15px;
       height: 15px;
-      opacity: 0.85;
+      opacity: 0.9;
     }
 
     .search-box {
@@ -244,10 +282,10 @@
     .search-input {
       width: 100%;
       padding: 8px 14px 8px 36px;
-      background: rgba(11, 15, 25, 0.7);
+      background: var(--card-sub-bg);
       border: 1px solid var(--surface-border);
       border-radius: var(--radius-sm);
-      color: #ffffff;
+      color: var(--text-main);
       font-size: 13px;
       font-family: inherit;
       outline: none;
@@ -258,8 +296,8 @@
     }
     .search-input:focus {
       border-color: var(--accent);
-      background: rgba(11, 15, 25, 0.95);
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+      background: var(--surface-hover);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
     }
     .search-input:focus + svg {
       color: var(--accent);
@@ -268,7 +306,7 @@
     /* Grid Layout */
     .projects-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(430px, 1fr));
       gap: 24px;
     }
 
@@ -304,7 +342,7 @@
       position: absolute;
       inset: 0;
       border-radius: inherit;
-      background: radial-gradient(420px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(99, 102, 241, 0.09), transparent 45%);
+      background: radial-gradient(420px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(99, 102, 241, 0.08), transparent 45%);
       pointer-events: none;
       opacity: 0;
       transition: opacity 0.4s ease;
@@ -317,7 +355,7 @@
     .project-card:hover {
       transform: translateY(-4px);
       border-color: var(--surface-border-hover);
-      box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.5), 0 0 24px rgba(99, 102, 241, 0.15);
+      box-shadow: var(--card-shadow);
       background: var(--surface-hover);
     }
 
@@ -340,9 +378,9 @@
       letter-spacing: 0.04em;
       padding: 3px 8px;
       border-radius: 5px;
-      background: rgba(255, 255, 255, 0.05);
-      color: #94a3b8;
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: var(--card-sub-bg);
+      color: var(--text-muted);
+      border: 1px solid var(--surface-border);
     }
     .badge-category svg {
       width: 12px;
@@ -365,8 +403,8 @@
 
     /* Primary Entry Area */
     .primary-entry-box {
-      background: rgba(15, 23, 42, 0.7);
-      border: 1px solid rgba(99, 102, 241, 0.25);
+      background: var(--box-inner-bg);
+      border: 1px solid var(--box-inner-border);
       border-radius: var(--radius-lg);
       padding: 18px;
       margin-bottom: 16px;
@@ -374,9 +412,9 @@
       transition: var(--transition);
     }
     .primary-entry-box:hover {
-      background: rgba(20, 30, 55, 0.85);
-      border-color: rgba(99, 102, 241, 0.5);
-      box-shadow: 0 4px 18px rgba(99, 102, 241, 0.15);
+      background: var(--box-inner-hover);
+      border-color: var(--box-inner-border-hover);
+      box-shadow: 0 4px 18px rgba(99, 102, 241, 0.12);
     }
 
     .primary-title-row {
@@ -390,7 +428,7 @@
     .primary-link {
       font-size: 1.15rem;
       font-weight: 700;
-      color: #ffffff;
+      color: var(--text-main);
       text-decoration: none;
       line-height: 1.35;
       display: inline-flex;
@@ -399,7 +437,7 @@
       transition: color 0.2s;
     }
     .primary-link:hover {
-      color: #818cf8;
+      color: var(--accent);
     }
     .primary-link svg.arrow-icon {
       width: 17px;
@@ -412,7 +450,7 @@
     .primary-entry-box:hover .primary-link svg.arrow-icon {
       opacity: 1;
       transform: translate(2px, -2px);
-      color: #818cf8;
+      color: var(--accent);
     }
 
     .priority-badge {
@@ -423,15 +461,21 @@
       font-weight: 700;
       padding: 3px 8px;
       border-radius: 5px;
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(16, 185, 129, 0.2));
-      border: 1px solid rgba(99, 102, 241, 0.45);
-      color: #a5b4fc;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.22), rgba(16, 185, 129, 0.18));
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      color: #6366f1;
       white-space: nowrap;
       flex-shrink: 0;
     }
+    [data-theme="dark"] .priority-badge {
+      color: #a5b4fc;
+    }
     .priority-badge.v2 {
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(6, 182, 212, 0.2));
-      border-color: rgba(16, 185, 129, 0.5);
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.22), rgba(6, 182, 212, 0.18));
+      border-color: rgba(16, 185, 129, 0.45);
+      color: #059669;
+    }
+    [data-theme="dark"] .priority-badge.v2 {
       color: #6ee7b7;
     }
 
@@ -448,7 +492,7 @@
       justify-content: space-between;
       gap: 12px;
       padding-top: 10px;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      border-top: 1px solid var(--surface-border);
     }
 
     .path-code {
@@ -458,7 +502,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      max-width: 250px;
+      max-width: 260px;
     }
 
     .btn-launch-primary {
@@ -478,7 +522,7 @@
     }
     .btn-launch-primary:hover {
       background: #6366f1;
-      box-shadow: 0 6px 18px rgba(99, 102, 241, 0.5);
+      box-shadow: 0 6px 18px rgba(99, 102, 241, 0.45);
       transform: translateY(-1px);
     }
     .btn-launch-primary svg {
@@ -518,15 +562,15 @@
       justify-content: space-between;
       gap: 10px;
       padding: 7px 10px;
-      background: rgba(11, 15, 25, 0.5);
-      border: 1px solid rgba(255, 255, 255, 0.04);
+      background: var(--card-sub-bg);
+      border: 1px solid var(--card-sub-border);
       border-radius: 6px;
       transition: var(--transition);
       text-decoration: none;
     }
     .variant-row:hover {
-      background: rgba(99, 102, 241, 0.12);
-      border-color: rgba(99, 102, 241, 0.3);
+      background: var(--card-sub-hover);
+      border-color: var(--box-inner-border);
       transform: translateX(3px);
     }
 
@@ -543,19 +587,19 @@
       flex-shrink: 0;
     }
     .variant-row:hover .variant-info svg.sub-icon {
-      color: #818cf8;
+      color: var(--accent);
     }
 
     .variant-title {
       font-size: 12.5px;
-      color: #cbd5e1;
+      color: var(--text-muted);
       font-weight: 500;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .variant-row:hover .variant-title {
-      color: #ffffff;
+      color: var(--text-main);
     }
 
     .variant-side {
@@ -569,10 +613,10 @@
       font-size: 10.5px;
       padding: 2px 6px;
       border-radius: 4px;
-      background: rgba(255, 255, 255, 0.04);
+      background: var(--surface);
       color: var(--text-dim);
       font-weight: 500;
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--surface-border);
     }
     .variant-date {
       font-family: 'JetBrains Mono', monospace;
@@ -587,16 +631,16 @@
       gap: 6px;
       margin-top: auto;
       padding-top: 14px;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      border-top: 1px solid var(--surface-border);
     }
     .tech-tag {
       font-size: 11px;
       font-weight: 500;
       padding: 3px 8px;
       border-radius: 5px;
-      background: rgba(15, 23, 42, 0.6);
-      color: #94a3b8;
-      border: 1px solid rgba(255, 255, 255, 0.04);
+      background: var(--tag-bg);
+      color: var(--text-muted);
+      border: 1px solid var(--tag-border);
     }
 
     /* Empty state */
@@ -604,7 +648,7 @@
       grid-column: 1 / -1;
       text-align: center;
       padding: 70px 20px;
-      background: rgba(17, 24, 39, 0.4);
+      background: var(--surface);
       border: 1px dashed var(--surface-border);
       border-radius: var(--radius-xl);
       color: var(--text-dim);
@@ -619,24 +663,13 @@
 
     /* Footer */
     footer {
-      margin-top: 60px;
-      padding-top: 32px;
+      margin-top: 50px;
+      padding-top: 24px;
       border-top: 1px solid var(--surface-border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      text-align: center;
       color: var(--text-dim);
-      font-size: 13px;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-    footer a {
-      color: var(--text-muted);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-    footer a:hover {
-      color: #ffffff;
+      font-size: 12.5px;
+      font-family: 'JetBrains Mono', monospace;
     }
   </style>
 </head>
@@ -646,37 +679,19 @@
   <div class="container">
     <!-- Header -->
     <header>
-      <div class="header-top">
-        <div class="badge-pill">
-          <span class="pulse-dot"></span>
-          <span>Viz Hub · 本地可视化工程全景导航</span>
-        </div>
-        <div class="header-meta">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          <span>按修改日期由新至旧排序 · 自动置顶 v2 / 优化版</span>
-        </div>
-      </div>
-      <h1 class="hero-title">可视化项目导航中心</h1>
-      <p class="hero-desc">
-        完整收录工程目录下全部 29 个独立 HTML 交互页面与 9 大核心主题模块，涵盖地理高程、古城风味图谱、大模型风格评估矩阵、图表范式辨析及业务建模培训大屏体系。
-      </p>
-
-      <div class="stats-row">
-        <div class="stat-chip">
-          <span class="label">核心工程</span>
-          <span class="num">9 个主题系列</span>
-        </div>
-        <div class="stat-chip">
-          <span class="label">HTML 页面覆盖率</span>
-          <span class="num">29 / 29 (100%)</span>
-        </div>
-        <div class="stat-chip">
-          <span class="label">排序机制</span>
-          <span class="num">时间倒序 (v2 优先)</span>
-        </div>
-        <div class="stat-chip">
-          <span class="label">技术栈涵盖</span>
-          <span class="num">Three.js / ECharts / D3 / Observable / SVG 拓扑</span>
+      <div class="header-bar">
+        <h1 class="hero-title">可视化项目导航</h1>
+        <div class="header-actions">
+          <button id="themeToggleBtn" class="theme-toggle-btn" title="切换浅色/深色模式">
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+            </svg>
+            <span id="themeToggleText">深色模式</span>
+          </button>
         </div>
       </div>
     </header>
@@ -691,7 +706,14 @@
             <rect width="7" height="7" x="14" y="14" rx="1"/>
             <rect width="7" height="7" x="3" y="14" rx="1"/>
           </svg>
-          全部项目 (9)
+          全部项目 (10)
+        </button>
+        <button class="tab-btn" data-filter="geography">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          地理与文旅 (4)
         </button>
         <button class="tab-btn" data-filter="culinary">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -699,13 +721,6 @@
             <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
           </svg>
           美食与风味 (2)
-        </button>
-        <button class="tab-btn" data-filter="geography">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
-            <circle cx="12" cy="10" r="3"/>
-          </svg>
-          地理与文旅 (3)
         </button>
         <button class="tab-btn" data-filter="theory">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -740,10 +755,140 @@
       </div>
     </div>
 
-    <!-- MAIN PROJECTS GRID (Sorted strictly by Recency & v2 Priority) -->
+    <!-- MAIN PROJECTS GRID (Sorted strictly by Recency & v3/v2 Priority) -->
     <div class="projects-grid" id="projectsGrid">
 
-      <!-- 1. 半城烟火半城仙 · 泉州美食图鉴 (2026-10-06) -->
+      <!-- 1. 日本深度自助旅行（15–20日）空间交互导览系统 (2026-10-14) -->
+      <div class="project-card" data-category="geography" data-search="日本深度自助旅行 空间交互导览系统 japan-travel-guide v3 v2 argon 浮世绘 富岳三十六景 D3剖面 Leaflet 自驾新政 避坑指南 文学寻踪 兼六园 上高地">
+        <div class="card-meta-bar">
+          <span class="badge-category">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            地理与文旅
+          </span>
+          <span class="time-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            2026-10-14
+          </span>
+        </div>
+
+        <!-- 优先入口：v3 旗舰版 -->
+        <div class="primary-entry-box">
+          <div class="primary-title-row">
+            <a href="japan-travel-guide/v3.html" class="primary-link">
+              <span>日本深度自由行终极交互导览 (v3 旗舰版)</span>
+              <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+            </a>
+            <span class="priority-badge v2">最新 v3 旗舰</span>
+          </div>
+          <p class="primary-desc">终极集大成交互导览：立足官方地理与文化脉络，集成富岳三十六景浮世绘大师溯源线、D3.js 实时高程探针联动、2026 入境新政与严格自驾合规检索。</p>
+          <div class="primary-footer">
+            <span class="path-code" title="japan-travel-guide/v3.html">japan-travel-guide/v3.html</span>
+            <a href="japan-travel-guide/v3.html" class="btn-launch-primary">
+              <span>开启旗舰导览</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- 其他版本与探索矩阵 (4个独立版本) -->
+        <div class="variants-section">
+          <div class="variants-header">
+            <span>其他版本与探索矩阵 (4)</span>
+            <span>修改时间</span>
+          </div>
+          <div class="variants-list">
+            <a href="japan-travel-guide/japan_deep_travel_interactive_guide_argon-v2.html" class="variant-row" title="japan-travel-guide/japan_deep_travel_interactive_guide_argon-v2.html">
+              <div class="variant-info">
+                <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <span class="variant-title">Argon-v2 文学深潜版 (43/57分屏 & D3剖面)</span>
+              </div>
+              <div class="variant-side">
+                <span class="variant-tag">Argon-v2</span>
+                <span class="variant-date">10-14</span>
+              </div>
+            </a>
+            <a href="japan-travel-guide/japan_deep_travel_interactive_guide_argon.html" class="variant-row" title="japan-travel-guide/japan_deep_travel_interactive_guide_argon.html">
+              <div class="variant-info">
+                <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <span class="variant-title">Argon-v1 探索走廊版 (6大走廊与文学寻踪)</span>
+              </div>
+              <div class="variant-side">
+                <span class="variant-tag">Argon-v1</span>
+                <span class="variant-date">10-14</span>
+              </div>
+            </a>
+            <a href="japan-travel-guide/v2.html" class="variant-row" title="japan-travel-guide/v2.html">
+              <div class="variant-info">
+                <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <span class="variant-title">日本深度自由行全景导览平台 (v2 抽屉联动版)</span>
+              </div>
+              <div class="variant-side">
+                <span class="variant-tag">v2 全景版</span>
+                <span class="variant-date">10-14</span>
+              </div>
+            </a>
+            <a href="japan-travel-guide/index.html" class="variant-row" title="japan-travel-guide/index.html">
+              <div class="variant-info">
+                <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <span class="variant-title">日本深度自由行可视化导览 (v1 经典和纸版)</span>
+              </div>
+              <div class="variant-side">
+                <span class="variant-tag">v1 经典版</span>
+                <span class="variant-date">10-14</span>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <div class="card-tags">
+          <span class="tech-tag">D3.js 高程探针</span>
+          <span class="tech-tag">Leaflet 空间交互</span>
+          <span class="tech-tag">多源底图容灾</span>
+          <span class="tech-tag">富岳三十六景</span>
+          <span class="tech-tag">自驾合规检视</span>
+        </div>
+      </div>
+
+      <!-- 2. 福建·连城 3D 旅行导览 (2026-10-10) -->
+      <div class="project-card" data-category="geography" data-search="福建 连城 3D 旅行导览 liancheng-3d-map Three.js 冠豸山 3D高程 运镜 景区导览">
+        <div class="card-meta-bar">
+          <span class="badge-category">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            地理与文旅
+          </span>
+          <span class="time-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            2026-10-10
+          </span>
+        </div>
+
+        <div class="primary-entry-box">
+          <div class="primary-title-row">
+            <a href="liancheng-3d-map/index.html" class="primary-link">
+              <span>福建·连城 3D 旅行导览</span>
+              <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+            </a>
+            <span class="priority-badge">3D 交互导览</span>
+          </div>
+          <p class="primary-desc">基于真实高程数据的福建连城三维地形交互地图，支持冠豸山景区沉浸漫游、航拍运镜与关键文旅地标可视化。</p>
+          <div class="primary-footer">
+            <span class="path-code" title="liancheng-3d-map/index.html">liancheng-3d-map/index.html</span>
+            <a href="liancheng-3d-map/index.html" class="btn-launch-primary">
+              <span>开启 3D 漫游</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="card-tags">
+          <span class="tech-tag">Three.js</span>
+          <span class="tech-tag">真实高程地形</span>
+          <span class="tech-tag">冠豸山漫游</span>
+          <span class="tech-tag">空间运镜</span>
+        </div>
+      </div>
+
+      <!-- 3. 半城烟火半城仙 · 泉州美食图鉴 (2026-10-06) -->
       <div class="project-card" data-category="culinary" data-search="半城烟火半城仙 泉州美食图鉴 quanzhou-food-atlas v2 美食卡片 瀑布流 世遗 古城寻味">
         <div class="card-meta-bar">
           <span class="badge-category">
@@ -803,7 +948,7 @@
         </div>
       </div>
 
-      <!-- 2. 刺桐食肆全景仪 · 泉州美食图鉴 (2026-10-02) -->
+      <!-- 4. 刺桐食肆全景仪 · 泉州美食图鉴 (2026-10-02) -->
       <div class="project-card" data-category="culinary" data-search="刺桐食肆全景仪 泉州美食图鉴 v2 fujian-food-capital-v2 fujian-food-capital 值得专程前往的福建美食之都 风味雷达 老字号">
         <div class="card-meta-bar">
           <span class="badge-category">
@@ -863,7 +1008,7 @@
         </div>
       </div>
 
-      <!-- 3. 高铁动车路线图与路网平台 (2026-09-23) -->
+      <!-- 5. 高铁动车路线图与路网平台 (2026-09-23) -->
       <div class="project-card" data-category="geography" data-search="高铁动车路线图 铁路路网 rail-route-viz rail-doubao rail-workbuddy 厦门 冠豸山 拓扑 铁路方案 路线图模板">
         <div class="card-meta-bar">
           <span class="badge-category">
@@ -943,46 +1088,7 @@
         </div>
       </div>
 
-      <!-- 4. 福建·连城 3D 旅行导览 (2026-09-18) -->
-      <div class="project-card" data-category="geography" data-search="福建 连城 3D 旅行导览 liancheng-3d-map Three.js 冠豸山 3D高程 运镜">
-        <div class="card-meta-bar">
-          <span class="badge-category">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-            地理与文旅
-          </span>
-          <span class="time-badge">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            2026-09-18
-          </span>
-        </div>
-
-        <div class="primary-entry-box">
-          <div class="primary-title-row">
-            <a href="liancheng-3d-map/index.html" class="primary-link">
-              <span>福建·连城 3D 旅行导览</span>
-              <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
-            </a>
-            <span class="priority-badge">3D 交互导览</span>
-          </div>
-          <p class="primary-desc">基于真实高程数据的福建连城三维地形交互地图，支持冠豸山景区沉浸漫游、航拍运镜与关键文旅地标可视化。</p>
-          <div class="primary-footer">
-            <span class="path-code" title="liancheng-3d-map/index.html">liancheng-3d-map/index.html</span>
-            <a href="liancheng-3d-map/index.html" class="btn-launch-primary">
-              <span>开启 3D 漫游</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-            </a>
-          </div>
-        </div>
-
-        <div class="card-tags">
-          <span class="tech-tag">Three.js</span>
-          <span class="tech-tag">真实高程地形</span>
-          <span class="tech-tag">冠豸山漫游</span>
-          <span class="tech-tag">空间运镜</span>
-        </div>
-      </div>
-
-      <!-- 5. 前端可视化技术全景与范式辨析 (2026-09-16) -->
+      <!-- 6. 前端可视化技术全景与范式辨析 (2026-09-16) -->
       <div class="project-card" data-category="theory" data-search="前端可视化技术全景与范式辨析 viz_tech ECharts D3.js Observable Plot 图形语法 选型辨析">
         <div class="card-meta-bar">
           <span class="badge-category">
@@ -1022,7 +1128,7 @@
         </div>
       </div>
 
-      <!-- 6. 业务建模与培训演示系列 (2026-09-11) -->
+      <!-- 7. 业务建模与培训演示系列 (2026-09-11) -->
       <div class="project-card" data-category="slides" data-search="业务建模与数据分析培训演示 slide business-model 两种思维三个模型六步法 业务建模与SQL实战 拖拽式SQL模型 零基础培训 开班动员 大屏演示版 v2">
         <div class="card-meta-bar">
           <span class="badge-category">
@@ -1142,7 +1248,7 @@
         </div>
       </div>
 
-      <!-- 7. 好莱坞“众神山庄”AI 评估实验室 (2026-09-10) -->
+      <!-- 8. 好莱坞“众神山庄”AI 评估实验室 (2026-09-10) -->
       <div class="project-card" data-category="ai-lab" data-search="好莱坞 众神山庄 AI 评估 风格指纹 实验室 hollywood ai-analysis-lab 盲测矩阵 Gemini版 归因图鉴 Qwen 风格DNA 比较研究">
         <div class="card-meta-bar">
           <span class="badge-category">
@@ -1232,7 +1338,7 @@
         </div>
       </div>
 
-      <!-- 8. 世界之巅 · 十大高峰与七大洲之巅 (2026-08-29) -->
+      <!-- 9. 世界之巅 · 十大高峰与七大洲之巅 (2026-08-29) -->
       <div class="project-card" data-category="geography" data-search="世界之巅 十大高峰 七大洲最高峰 world-peaks 珠穆朗玛 星夜远征 Kimi ECharts 高程矩阵">
         <div class="card-meta-bar">
           <span class="badge-category">
@@ -1312,7 +1418,7 @@
         </div>
       </div>
 
-      <!-- 9. 数据可视化为何未能成为大众文本 (2026-08-29) -->
+      <!-- 10. 数据可视化为何未能成为大众文本 (2026-08-29) -->
       <div class="project-card" data-category="theory" data-search="数据可视化为何未能成为大众文本 媒介思辨 认知带宽 读图门槛 viz_as_language cards 知识卡片">
         <div class="card-meta-bar">
           <span class="badge-category">
@@ -1381,18 +1487,13 @@
         <path d="m21 21-4.3-4.3"/>
         <path d="m14 8-6 6"/><path d="m8 8 6 6"/>
       </svg>
-      <p style="font-size: 1.1rem; font-weight: 600; color: #cbd5e1; margin-bottom: 6px;">未匹配到相关页面或项目</p>
+      <p style="font-size: 1.1rem; font-weight: 600; color: var(--text-main); margin-bottom: 6px;">未匹配到相关页面或项目</p>
       <p style="font-size: 0.9rem;">请尝试使用其他关键字，或切换上方分类标签重置筛选。</p>
     </div>
 
     <!-- Footer -->
     <footer>
-      <div>
-        <span>Viz Hub · 项目根目录全景导航 · 100% 页面完整覆盖</span>
-      </div>
-      <div>
-        <span>共收录 9 个工程模块 · 29 套交互页面</span>
-      </div>
+      <span>Viz Hub · 10 个可视化主题工程 · 34 套独立交互页面</span>
     </footer>
   </div>
 
@@ -1407,6 +1508,30 @@
         card.style.setProperty('--mouse-y', `${y}px`);
       });
     });
+
+    // Theme toggle logic
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const themeToggleText = document.getElementById('themeToggleText');
+
+    function updateThemeBtnText(theme) {
+      if (themeToggleText) {
+        themeToggleText.textContent = theme === 'light' ? '深色模式' : '浅色模式';
+      }
+    }
+
+    // Set initial button text based on current applied theme
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    updateThemeBtnText(currentTheme);
+
+    if (themeToggleBtn) {
+      themeToggleBtn.addEventListener('click', () => {
+        const activeTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        const nextTheme = activeTheme === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', nextTheme);
+        localStorage.setItem('viz_theme', nextTheme);
+        updateThemeBtnText(nextTheme);
+      });
+    }
 
     // Filtering & Search Logic
     const searchInput = document.getElementById('searchInput');
