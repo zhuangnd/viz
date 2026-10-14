@@ -1,0 +1,1733 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>日本深度自由行（15–20日）可视化交互导览 · 官方与本土视角</title>
+  <meta name="description" content="面向首次赴日中国大陆旅行者的15-20日深度自由行交互导览。覆盖最新签证指引、自驾合规警示、信越北陆/奥羽东北/山阳山阴三大陆线、食宿规划及动态预算测算器。">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --navy-900: #0b1329;
+      --navy-800: #13203f;
+      --navy-700: #1e3158;
+      --navy-100: #e2e8f0;
+      --vermilion: #dc2626;
+      --vermilion-soft: #fef2f2;
+      --vermilion-border: #fecaca;
+      --pine: #0d9488;
+      --pine-soft: #f0fdfa;
+      --pine-border: #99f6e4;
+      --indigo: #2563eb;
+      --indigo-soft: #eff6ff;
+      --indigo-border: #bfdbfe;
+      --amber: #d97706;
+      --amber-soft: #fffbeb;
+      --amber-border: #fde68a;
+      --washi: #f8fafc;
+      --washi-card: #ffffff;
+      --slate-800: #1e293b;
+      --slate-600: #475569;
+      --slate-400: #94a3b8;
+      --slate-200: #e2e8f0;
+      --slate-100: #f1f5f9;
+      --font-serif: "Noto Serif SC", "Source Han Serif SC", STSong, serif;
+      --font-sans: "Noto Sans SC", system-ui, -apple-system, sans-serif;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.08);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--washi);
+      color: var(--slate-800);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* SVG Icon utility */
+    .icon {
+      display: inline-block;
+      width: 1.15em;
+      height: 1.15em;
+      stroke-width: 2;
+      stroke: currentColor;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      vertical-align: -0.18em;
+    }
+    .icon-lg {
+      width: 1.5em;
+      height: 1.5em;
+    }
+
+    /* Top Navigation Bar */
+    header {
+      background: var(--navy-900);
+      color: #ffffff;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      box-shadow: var(--shadow-md);
+    }
+    .nav-container {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      background: var(--vermilion);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-family: var(--font-serif);
+      font-weight: 900;
+      font-size: 1.25rem;
+      box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
+    }
+    .brand-titles h1 {
+      font-family: var(--font-serif);
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .brand-titles p {
+      font-size: 0.75rem;
+      color: var(--slate-400);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .route-selector {
+      display: inline-flex;
+      background: var(--navy-800);
+      padding: 3px;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .route-btn {
+      padding: 0.4rem 0.85rem;
+      font-size: 0.825rem;
+      font-weight: 500;
+      border: none;
+      background: transparent;
+      color: var(--slate-400);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.2s ease;
+    }
+    .route-btn.active {
+      background: #ffffff;
+      color: var(--navy-900);
+      font-weight: 600;
+      box-shadow: var(--shadow-sm);
+    }
+    .route-btn[data-route="route-a"].active { color: var(--vermilion); }
+    .route-btn[data-route="route-b"].active { color: var(--pine); }
+    .route-btn[data-route="route-c"].active { color: var(--indigo); }
+
+    .season-toggle {
+      display: inline-flex;
+      background: var(--navy-800);
+      padding: 3px;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .season-btn {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.825rem;
+      border: none;
+      background: transparent;
+      color: var(--slate-400);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.2s ease;
+    }
+    .season-btn.active {
+      background: #ffffff;
+      color: var(--navy-900);
+      font-weight: 600;
+    }
+
+    .btn-pill {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #ffffff;
+      padding: 0.45rem 0.85rem;
+      border-radius: var(--radius-md);
+      font-size: 0.825rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: background 0.2s ease;
+    }
+    .btn-pill:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    .btn-pill.danger {
+      background: rgba(220, 38, 38, 0.2);
+      border-color: rgba(220, 38, 38, 0.5);
+      color: #fca5a5;
+    }
+    .btn-pill.danger:hover {
+      background: rgba(220, 38, 38, 0.35);
+      color: #ffffff;
+    }
+
+    /* Notice Banner for Legal & Visa */
+    .top-alert {
+      background: #fef2f2;
+      border-bottom: 1px solid #fecaca;
+      padding: 0.6rem 1.25rem;
+      font-size: 0.825rem;
+      color: #991b1b;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .top-alert-content {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .top-alert strong {
+      font-weight: 700;
+    }
+    .top-alert a {
+      color: #b91c1c;
+      text-decoration: underline;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    /* Main Workspace Layout */
+    .app-main {
+      max-width: 1600px;
+      margin: 1.25rem auto;
+      padding: 0 1.25rem;
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    /* Map Box */
+    .map-column {
+      position: sticky;
+      top: 5rem;
+      background: var(--washi-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--slate-200);
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .map-header {
+      padding: 0.85rem 1.25rem;
+      background: #ffffff;
+      border-bottom: 1px solid var(--slate-200);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+    .map-title {
+      font-family: var(--font-serif);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--slate-800);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .map-legend {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.75rem;
+      color: var(--slate-600);
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    #map {
+      width: 100%;
+      height: 520px;
+      background: #e5e7eb;
+      z-index: 1;
+    }
+    .map-footer {
+      padding: 0.75rem 1.25rem;
+      background: var(--slate-100);
+      border-top: 1px solid var(--slate-200);
+      font-size: 0.75rem;
+      color: var(--slate-600);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Itinerary & Content Column */
+    .content-column {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* Route Overview Card */
+    .route-card {
+      background: var(--washi-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--slate-200);
+      box-shadow: var(--shadow-sm);
+      padding: 1.5rem;
+      border-left: 6px solid var(--vermilion);
+      transition: border-color 0.3s ease;
+    }
+    .route-card.route-a { border-left-color: var(--vermilion); }
+    .route-card.route-b { border-left-color: var(--pine); }
+    .route-card.route-c { border-left-color: var(--indigo); }
+
+    .route-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.2rem 0.55rem;
+      border-radius: var(--radius-sm);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .route-card.route-a .route-badge { background: var(--vermilion-soft); color: var(--vermilion); border: 1px solid var(--vermilion-border); }
+    .route-card.route-b .route-badge { background: var(--pine-soft); color: var(--pine); border: 1px solid var(--pine-border); }
+    .route-card.route-c .route-badge { background: var(--indigo-soft); color: var(--indigo); border: 1px solid var(--indigo-border); }
+
+    .route-card h2 {
+      font-family: var(--font-serif);
+      font-size: 1.35rem;
+      color: var(--slate-800);
+      margin-bottom: 0.5rem;
+    }
+    .route-card p.route-summary {
+      font-size: 0.9rem;
+      color: var(--slate-600);
+      margin-bottom: 1rem;
+    }
+
+    .route-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px dashed var(--slate-200);
+    }
+    .meta-item {
+      display: flex;
+      flex-direction: column;
+    }
+    .meta-label {
+      font-size: 0.725rem;
+      color: var(--slate-400);
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .meta-val {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--slate-800);
+      margin-top: 0.15rem;
+    }
+
+    /* Seasonal Guidance Box */
+    .seasonal-box {
+      background: var(--amber-soft);
+      border: 1px solid var(--amber-border);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      color: #92400e;
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+    }
+    .seasonal-box h4 {
+      font-size: 0.875rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+      color: #78350f;
+    }
+
+    /* Itinerary Days List */
+    .itinerary-section {
+      background: var(--washi-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--slate-200);
+      box-shadow: var(--shadow-sm);
+      padding: 1.5rem;
+    }
+    .section-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .section-title-row h3 {
+      font-family: var(--font-serif);
+      font-size: 1.2rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .itinerary-filter-hint {
+      font-size: 0.775rem;
+      color: var(--slate-400);
+    }
+
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      position: relative;
+    }
+    .day-card {
+      border: 1px solid var(--slate-200);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      background: #ffffff;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .day-card:hover {
+      border-color: var(--slate-400);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+    .day-card.active-day {
+      border-color: var(--slate-800);
+      box-shadow: 0 0 0 1px var(--slate-800);
+      background: #f8fafc;
+    }
+    .day-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+    .day-number {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: var(--radius-sm);
+      background: var(--slate-100);
+      color: var(--slate-800);
+      letter-spacing: 0.5px;
+    }
+    .day-transit-badge {
+      font-size: 0.725rem;
+      color: var(--indigo);
+      background: var(--indigo-soft);
+      border: 1px solid var(--indigo-border);
+      padding: 0.15rem 0.5rem;
+      border-radius: var(--radius-sm);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .day-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--slate-800);
+      margin-bottom: 0.35rem;
+    }
+    .day-desc {
+      font-size: 0.825rem;
+      color: var(--slate-600);
+      margin-bottom: 0.65rem;
+      line-height: 1.55;
+    }
+    .day-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .tag {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: var(--radius-sm);
+      background: var(--slate-100);
+      color: var(--slate-600);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .tag.heritage { background: #fef3c7; color: #92400e; }
+    .tag.nature { background: #dcfce7; color: #166534; }
+    .tag.food { background: #fee2e2; color: #991b1b; }
+    .tag.onsen { background: #e0e7ff; color: #3730a3; }
+
+    /* Interactive Calculator & Guide Sections Below */
+    .full-width-section {
+      max-width: 1600px;
+      margin: 2rem auto;
+      padding: 0 1.25rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 1024px) {
+      .app-main { grid-template-columns: 1fr; }
+      .map-column { position: relative; top: 0; }
+      #map { height: 380px; }
+      .full-width-section { grid-template-columns: 1fr; }
+    }
+
+    .feature-card {
+      background: var(--washi-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--slate-200);
+      box-shadow: var(--shadow-sm);
+      padding: 1.5rem;
+    }
+    .feature-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+      border-bottom: 1px solid var(--slate-100);
+      padding-bottom: 0.75rem;
+    }
+    .feature-card-header h3 {
+      font-family: var(--font-serif);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--slate-800);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Calculator Styles */
+    .calc-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .control-group label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--slate-800);
+      margin-bottom: 0.4rem;
+    }
+    .control-group label span {
+      color: var(--indigo);
+      font-weight: 700;
+    }
+    .slider-input {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--slate-200);
+      outline: none;
+      -webkit-appearance: none;
+    }
+    .slider-input::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--navy-900);
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+    }
+    .segmented-control {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+    }
+    .seg-btn {
+      padding: 0.6rem 0.5rem;
+      font-size: 0.8rem;
+      text-align: center;
+      border: 1px solid var(--slate-200);
+      border-radius: var(--radius-sm);
+      background: #ffffff;
+      color: var(--slate-600);
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .seg-btn.active {
+      background: var(--navy-900);
+      color: #ffffff;
+      border-color: var(--navy-900);
+      font-weight: 600;
+    }
+
+    .calc-result-box {
+      background: var(--navy-900);
+      color: #ffffff;
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .total-display {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+      padding-bottom: 0.75rem;
+    }
+    .total-display .label {
+      font-size: 0.8rem;
+      color: var(--slate-400);
+    }
+    .total-display .value {
+      font-family: var(--font-serif);
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #38bdf8;
+    }
+    .total-display .value small {
+      font-size: 0.85rem;
+      color: var(--slate-400);
+      margin-left: 0.35rem;
+      font-family: var(--font-sans);
+    }
+
+    .breakdown-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+    .breakdown-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.775rem;
+      color: var(--slate-400);
+      margin-bottom: 0.2rem;
+    }
+    .breakdown-row span:last-child {
+      color: #ffffff;
+      font-weight: 600;
+    }
+    .prog-track {
+      height: 5px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .prog-fill {
+      height: 100%;
+      background: #38bdf8;
+      border-radius: 3px;
+    }
+
+    /* Modal / Drawer */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+    }
+    .modal-overlay.open {
+      display: flex;
+    }
+    .modal-dialog {
+      background: #ffffff;
+      width: 100%;
+      max-width: 720px;
+      max-height: 90vh;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: modalFadeIn 0.25s ease-out;
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .modal-header {
+      padding: 1.25rem 1.5rem;
+      background: var(--navy-900);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-header h3 {
+      font-family: var(--font-serif);
+      font-size: 1.15rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--slate-400);
+      cursor: pointer;
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s;
+    }
+    .modal-close:hover { color: #ffffff; }
+    .modal-body {
+      padding: 1.5rem;
+      overflow-y: auto;
+      font-size: 0.875rem;
+      color: var(--slate-800);
+      line-height: 1.7;
+    }
+    .rule-card {
+      border: 1px solid var(--slate-200);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      margin-bottom: 1rem;
+      background: var(--slate-100);
+    }
+    .rule-card.danger {
+      border-color: #fecaca;
+      background: #fef2f2;
+    }
+    .rule-card.warning {
+      border-color: #fde68a;
+      background: #fffbeb;
+    }
+    .rule-card.info {
+      border-color: #bfdbfe;
+      background: #eff6ff;
+    }
+    .rule-card h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .rule-card.danger h4 { color: #991b1b; }
+    .rule-card.warning h4 { color: #92400e; }
+    .rule-card.info h4 { color: #1e40af; }
+
+    /* Footer */
+    footer {
+      background: var(--navy-900);
+      color: var(--slate-400);
+      padding: 2.5rem 1.25rem;
+      margin-top: 3rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      font-size: 0.825rem;
+    }
+    .footer-inner {
+      max-width: 1600px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .footer-links {
+      display: flex;
+      gap: 1.25rem;
+    }
+    .footer-links a {
+      color: var(--slate-400);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover {
+      color: #ffffff;
+    }
+
+    /* Leaflet custom popup */
+    .leaflet-popup-content-wrapper {
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      padding: 0.25rem;
+    }
+    .custom-popup {
+      font-family: var(--font-sans);
+      font-size: 0.825rem;
+      color: var(--slate-800);
+    }
+    .custom-popup h4 {
+      font-family: var(--font-serif);
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 0.2rem;
+      color: var(--navy-900);
+    }
+    .custom-popup p {
+      color: var(--slate-600);
+      margin-bottom: 0.35rem;
+      line-height: 1.4;
+    }
+    .custom-popup .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      padding: 0.1rem 0.35rem;
+      background: var(--slate-100);
+      border-radius: 4px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Sticky Navigation -->
+  <header>
+    <div class="nav-container">
+      <div class="brand-group">
+        <div class="brand-mark">日</div>
+        <div class="brand-titles">
+          <h1>日本深度自由行 · 官方可视化导览</h1>
+          <p>15–20日精细化规划 · 告别滤镜与营销 · 原生文化与自然</p>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <!-- Route Switcher -->
+        <div class="route-selector" role="tablist" aria-label="路线选择">
+          <button class="route-btn active" data-route="route-a">
+            <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+            路线 A: 信越北陆 (17日)
+          </button>
+          <button class="route-btn" data-route="route-b">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            路线 B: 奥羽陆奥 (16日)
+          </button>
+          <button class="route-btn" data-route="route-c">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+            路线 C: 山阳山阴 (16日)
+          </button>
+        </div>
+
+        <!-- Season Switcher -->
+        <div class="season-toggle" role="tablist" aria-label="出行时段选择">
+          <button class="season-btn active" data-season="winter">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            1–2月 冬雪与秘汤
+          </button>
+          <button class="season-btn" data-season="autumn">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+            9–10月 早秋与自然
+          </button>
+        </div>
+
+        <!-- Compliance & Tips Buttons -->
+        <button class="btn-pill danger" id="btn-open-rules">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          签证与自驾红线警示
+        </button>
+        <button class="btn-pill" id="btn-open-tips">
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          食住在地锦囊
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Legal & Visa Warning Bar -->
+  <div class="top-alert">
+    <div class="top-alert-content">
+      <svg class="icon" viewBox="0 0 24 24"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div>
+        <strong>首次访日重中之重：</strong>
+        中国大陆驾照在日自驾属<strong>无证驾驶刑事违法</strong>（日本仅认可1949日内瓦公约IDP）；行程达15–20天必须办理<strong>30天单次签证或多次签证</strong>，15天单次签证将导致逾期滞留！
+        <a id="alert-link-rules">查看法规与签证对照说明</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main View: Interactive Map + Timeline Itinerary -->
+  <main class="app-main">
+    
+    <!-- Left Column: Map -->
+    <div class="map-column">
+      <div class="map-header">
+        <div class="map-title">
+          <svg class="icon" viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+          <span id="map-route-title">信越·北陆·古道海波与加贺物语 路径示意</span>
+        </div>
+        <div class="map-legend">
+          <div class="legend-item">
+            <span class="legend-dot" style="background: var(--vermilion);"></span>
+            <span>新干线枢纽</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot" style="background: #2563eb;"></span>
+            <span>经典文化节点</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="map"></div>
+
+      <div class="map-footer">
+        <div>
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          点击地图标记点可快速定位日程卡片；支持双指缩放与平移查看地理地貌。
+        </div>
+        <button id="btn-reset-map" style="font-size: 0.725rem; color: var(--navy-900); font-weight: 600; background: none; border: none; cursor: pointer;">
+          重置全局视野
+        </button>
+      </div>
+    </div>
+
+    <!-- Right Column: Itinerary Details -->
+    <div class="content-column">
+      
+      <!-- Route Overview Card -->
+      <section class="route-card route-a" id="route-overview-card">
+        <div class="route-badge" id="route-badge-text">路线 A · 本州中央山脉至日本海</div>
+        <h2 id="route-name">信越·北陆·古道海波与加贺物语</h2>
+        <p class="route-summary" id="route-desc">
+          穿越本州中央山脉脊梁，自太平洋水域通达日本海。串联高原洋风文化、国宝木造天守、世界遗产五箇山合掌集落、加贺百万石工艺以及关西千年名刹。
+        </p>
+
+        <div class="route-meta-grid">
+          <div class="meta-item">
+            <span class="meta-label">
+              <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              总计建议天数
+            </span>
+            <span class="meta-val" id="route-days-val">17 天</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">
+              <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+              推荐铁路通票
+            </span>
+            <span class="meta-val" id="route-pass-val">北陆拱形铁路周游券 (7日)</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">
+              <svg class="icon" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+              核心交通骨干
+            </span>
+            <span class="meta-val" id="route-transit-val">北陆新干线 + 雷鸟特急</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              起讫城市
+            </span>
+            <span class="meta-val" id="route-ports-val">东京入境 / 大阪关西离境</span>
+          </div>
+        </div>
+
+        <!-- Seasonal Advice Box -->
+        <div class="seasonal-box" id="season-advice-box">
+          <svg class="icon icon-lg" viewBox="0 0 24 24" style="flex-shrink: 0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <div>
+            <h4 id="season-advice-title">1–2月 冬季适行亮点与行前建议</h4>
+            <p id="season-advice-text">
+              本线路在信越与北陆地区将进入豪雪地带，地狱谷雪猴泡汤、兼六园雪吊挂（雪吊り）及五箇山雪景极富诗意；也是越前雪蟹、寒鰤鱼肉质最肥美的时令。注意：上高地冬季封山（11月中至次年4月中不开放），行程已自动调换为安昙野与松本城冬日线路。
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Day by Day Timeline -->
+      <section class="itinerary-section">
+        <div class="section-title-row">
+          <h3>
+            <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            每日逐日精细行程安排
+          </h3>
+          <span class="itinerary-filter-hint">点击任意卡片可在地图上快速定位该日节点</span>
+        </div>
+
+        <div class="timeline" id="timeline-container">
+          <!-- Dynamically populated by JS -->
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Interactive Budget Calculator & Features Grid -->
+  <section class="full-width-section">
+    
+    <!-- Feature 1: Budget Calculator -->
+    <div class="feature-card">
+      <div class="feature-card-header">
+        <h3>
+          <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          15–20日 动态预算测算器 (单人)
+        </h3>
+        <span style="font-size: 0.75rem; color: var(--slate-400);">实时汇率参考: 100円 ≈ 4.9元</span>
+      </div>
+
+      <div class="calc-controls">
+        <div class="control-group">
+          <label>
+            <span>旅行总时长</span>
+            <span id="calc-days-label">17 天</span>
+          </label>
+          <input type="range" class="slider-input" id="calc-days-slider" min="15" max="20" value="17" step="1">
+        </div>
+
+        <div class="control-group">
+          <label>出行消费模式</label>
+          <div class="segmented-control" id="calc-style-control">
+            <button class="seg-btn" data-style="budget">经济背包型</button>
+            <button class="seg-btn active" data-style="standard">经典舒适型</button>
+            <button class="seg-btn" data-style="premium">品质深度型</button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label>
+            <span>传统温泉旅馆体验晚数 (一泊二食会席)</span>
+            <span id="calc-ryokan-label">2 晚</span>
+          </label>
+          <input type="range" class="slider-input" id="calc-ryokan-slider" min="0" max="4" value="2" step="1">
+        </div>
+      </div>
+
+      <div class="calc-result-box">
+        <div class="total-display">
+          <div>
+            <div class="label">预估单人全部花费</div>
+            <div style="font-size: 0.75rem; color: var(--slate-400); margin-top: 2px;">含机票/签证/通票/住宿/餐饮/杂费</div>
+          </div>
+          <div class="value" id="calc-total-rmb">
+            ¥23,600 <small id="calc-total-jpy">≈ 481,000円</small>
+          </div>
+        </div>
+
+        <div class="breakdown-bars">
+          <div>
+            <div class="breakdown-row">
+              <span>往返机票 (中日全服务直飞/含行李)</span>
+              <span id="b-flight">¥4,000</span>
+            </div>
+            <div class="prog-track"><div class="prog-fill" id="bar-flight" style="width: 17%;"></div></div>
+          </div>
+          <div>
+            <div class="breakdown-row">
+              <span>城际铁道通票与市内交通 (JR Pass+IC卡)</span>
+              <span id="b-transit">¥2,800</span>
+            </div>
+            <div class="prog-track"><div class="prog-fill" id="bar-transit" style="width: 12%;"></div></div>
+          </div>
+          <div>
+            <div class="breakdown-row">
+              <span>全程住宿费用 (舒适商务+温泉名宿)</span>
+              <span id="b-hotel">¥9,800</span>
+            </div>
+            <div class="prog-track"><div class="prog-fill" id="bar-hotel" style="width: 41%;"></div></div>
+          </div>
+          <div>
+            <div class="breakdown-row">
+              <span>日常餐食与风味料理 (含午市定食与居酒屋)</span>
+              <span id="b-food">¥5,500</span>
+            </div>
+            <div class="prog-track"><div class="prog-fill" id="bar-food" style="width: 23%;"></div></div>
+          </div>
+          <div>
+            <div class="breakdown-row">
+              <span>签证、保险、门票见学与现金备用</span>
+              <span id="b-misc">¥1,500</span>
+            </div>
+            <div class="prog-track"><div class="prog-fill" id="bar-misc" style="width: 7%;"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature 2: Core Practical Wisdom -->
+    <div class="feature-card">
+      <div class="feature-card-header">
+        <h3>
+          <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          初次访日核心操作避坑速览
+        </h3>
+        <span style="font-size: 0.75rem; color: var(--slate-400);">日本观光厅权威指引</span>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 0.85rem; font-size: 0.85rem;">
+        <div class="rule-card danger" style="margin-bottom: 0;">
+          <h4>
+            <svg class="icon" viewBox="0 0 24 24"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            严禁国内“翻译件”在日租车自驾
+          </h4>
+          <p>中国大陆未加入1949年日内瓦道路公约，所有网络售卖的翻译件在日本均被定性为<strong>无照驾驶（最高拘役并留底遣返）</strong>。日本轨道交通极其发达准时，请全程选用新干线、JR特急与区域观光巴士。</p>
+        </div>
+
+        <div class="rule-card warning" style="margin-bottom: 0;">
+          <h4>
+            <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            15–20日行程的签证类型核验
+          </h4>
+          <p>普通单次签证停留期为<strong>15天以内</strong>。若计划停留16-20天，递签时务必申请<strong>30天单次签证</strong>或<strong>三年/五年多次往返签</strong>（单次可停留30天），否则将在出境时被认定为逾期非法滞留。</p>
+        </div>
+
+        <div class="rule-card info" style="margin-bottom: 0;">
+          <h4>
+            <svg class="icon" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            交通 IC 卡免实体开卡秘籍
+          </h4>
+          <p>iPhone 用户在“钱包”内点击“+”添加交通卡，直接选择 <strong>Suica 或 PASMO</strong>，使用 Apple Pay 银联/Visa 即可秒充，免去排队买实体卡与退卡押金烦恼。安卓或无兼容设备可在羽田/成田/关西机场购买专供游客的 Welcome Suica 或 ICOCA。</p>
+        </div>
+
+        <div class="rule-card info" style="margin-bottom: 0;">
+          <h4>
+            <svg class="icon" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            大件行李跨城寄送（黑猫宅急便）
+          </h4>
+          <p>在换乘频繁的城市间，可在酒店前台办理“宅急便（Yamato Transport）”，将 28 寸大行李箱次日寄达下一目的地酒店，费用仅约 1,800–2,500 日元/件，免去拖箱挤新干线的疲惫。</p>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Legal & Visa Rules Modal -->
+  <div class="modal-overlay" id="modal-rules">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>
+          <svg class="icon" viewBox="0 0 24 24"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          签证资质要求与在日驾驶法律红线
+        </h3>
+        <button class="modal-close" data-close="modal-rules">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="rule-card danger">
+          <h4>【红线警示】关于自驾租车与驾驶资格</h4>
+          <p>1. 日本道路交通法严格遵循《1949年日内瓦道路交通公约》。<strong>中国大陆驾驶证及国内任何电商平台售卖的“国际驾照翻译认证件 (KRP/KIDA等)”在日本完全无效</strong>。</p>
+          <p>2. 持上述无效证件在日驾驶，一旦发生事故或警察临检，将直接按<strong>“无免許運転（无照驾驶犯罪）”</strong>立案，面临最高3年监禁或50万日元罚金，保险公司全额拒绝理赔，并列入出入境黑名单。</p>
+          <p>3. <strong>唯一合法在日驾驶途径</strong>：持有缔约国/地区（如中国香港、中国澳门、英国、美国、加拿大、澳大利亚等）官方签发的正式IDP；或持有中国台湾地区驾照配合JAF官方日文译本。</p>
+        </div>
+
+        <div class="rule-card warning">
+          <h4>【签证办理】领区划分与停留期核心要求</h4>
+          <p>1. <strong>不可个人直接递签</strong>：日本外务省规定，所有中国大陆因私旅游签证必须经由使领馆指定的特许旅行社审核并代送。</p>
+          <p>2. <strong>停留期匹配</strong>：标准单次赴日旅游签证通常只批复<strong>15天停留期</strong>。如果您的出行计划为15-20天，必须在递签前明确申请<strong>“30天单次旅游签证”</strong>或<strong>“三年/五年多次往返签（单次停留30天）”</strong>，并在代办机构提交涵盖16-20天周期的真实往返机票预订单与酒店行程表。</p>
+          <p>3. <strong>高校极简免流水政策</strong>：教育部直属高校在读生或毕业3年内本科/硕士毕业生，无需提供资产流水即可办理单次签证（通常为15天版本，若需30天仍需按常规资产审核）。</p>
+          <p>4. <strong>电子签证（eVisa）</strong>：单次签证目前全面实行电子签，入境海关核验时必须使用移动设备连网实时展示官方动态网页，截图及复印纸一律无效。</p>
+        </div>
+
+        <div class="rule-card info">
+          <h4>【现金使用】不可替代的现金准备</h4>
+          <p>日本虽然大部分百货、便利店、新干线支持信用卡及移动支付（微信/支付宝），但以下场景<strong>必须使用日元现金</strong>：老字号拉面及荞麦面食券机、神社御朱印初穗料、投币式洗衣机（Coin Laundry）、地方线路短途巴士投币箱。建议随身携带 30,000–50,000 日元现金备用。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Food & Lodging Tips Modal -->
+  <div class="modal-overlay" id="modal-tips">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>
+          <svg class="icon" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+          食住在地智慧与高性价比攻略
+        </h3>
+        <button class="modal-close" data-close="modal-tips">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="rule-card info">
+          <h4>【住】商务酒店与温泉旅馆的最佳配比</h4>
+          <p><strong>黄金组合</strong>：全程16-18晚中，<strong>80%晚数选择优质商务连锁酒店</strong>，精选 <strong>2–3 晚入住传统温泉旅馆</strong>。</p>
+          <p>1. <strong>Dormy Inn 连锁酒店</strong>：强烈推荐。大多数分馆自带天然温泉大浴场与桑拿，每晚 21:30–23:00 免费供应清爽的“夜鸣拉面（酱油荞麦面）”，早餐融入地方特产，人均每晚仅需 7,000–12,000 日元。</p>
+          <p>2. <strong>Toyoko Inn（东横INN）/ Super Hotel</strong>：经济托底首选，全员免费含早，价格常年平稳在 5,500–8,500 日元。</p>
+          <p>3. <strong>温泉旅馆</strong>：避开每晚连住。温泉旅馆的“一泊二食（会席料理）”分量极大且仪式感重，连续食用胃肠负担大且预算昂贵。在长野、乳头温泉或山代温泉等核心节点精选体验即可。</p>
+        </div>
+
+        <div class="rule-card info">
+          <h4>【食】地道、美味且经济的美食法则</h4>
+          <p>1. <strong>精明利用“午间定食（Lunch Special）”</strong>：日本诸多高档料理店（和牛烧肉、割烹、鳗鱼饭），晚餐人均常达 10,000 日元以上，但其周中午市推出的限定定食仅需 1,000–1,800 日元，品质毫不妥协。</p>
+          <p>2. <strong>市民生鲜市场食堂</strong>：如金泽近江町市场、青森古川市场（Nokkedon 自选手撕海鲜丼）、鸟取贺露港。清晨直接品尝刚上岸的天然海味，性价比远超观光区餐厅。</p>
+          <p>3. <strong>百货地下食品街（Depachika）晚间打折</strong>：每晚 19:00 至 20:00，大丸、伊势丹、高岛屋等百货地下街的高级和牛便当、新鲜刺身、炸物会贴上 20%–50% 的“Time Sale（タイムセール）”折扣签。</p>
+          <p>4. <strong>高阶本土回转寿司</strong>：避开千篇一律的廉价连锁，认准日本老饕钟爱的“根室花丸”、“銚子丸”、“金泽まいもん寿司”，人均 2,000–3,500 日元即可享受媲美板前手握的鲜度与品质。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-inner">
+      <div>
+        <strong>日本深度自由行可视化导览（15–20日）</strong> · 面向首次访日旅行者设计<br>
+        数据标准遵循日本国家旅游局（JNTO）、东日本旅客铁道（JR East）、西日本旅客铁道（JR West）与日本外务省最新公告。
+      </div>
+      <div class="footer-links">
+        <a href="JAPAN_INDEPENDENT_TRAVEL_GUIDE.md" target="_blank">完整攻略 Markdown 原文</a>
+        <a href="WEB_DESIGN_PROPOSAL.md" target="_blank">网页设计方案规格</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  
+  <script>
+    // ==========================================
+    // DATA STORE: 3 Classic Routes & Metadata
+    // ==========================================
+    const routesData = {
+      'route-a': {
+        id: 'route-a',
+        name: '信越·北陆·古道海波与加贺物语',
+        badge: '路线 A · 本州中央山脉至日本海',
+        color: '#dc2626',
+        days: 17,
+        pass: '北陆拱形铁路周游券 (7日) + 浓飞巴士',
+        transit: '北陆新干线 + 雷鸟特急 + 浓飞巴士',
+        ports: '东京入境 / 大阪关西离境',
+        desc: '穿越本州中央山脉脊梁，自太平洋水域通达日本海。串联高原洋风近代文化、国宝木造松本城、世界遗产五箇山合掌集落、加贺百万石工艺以及关西千年古刹。',
+        winterAdvice: {
+          title: '1–2月 冬季适行亮点与行前建议',
+          text: '信越与北陆将进入壮丽豪雪期，兼六园雪吊挂、五箇山合掌造雪景与地狱谷雪猴泡汤绝美非凡；此时也是越前雪蟹、寒鰤鱼最肥美的季节。注意：上高地冬季闭山封路（11月中至4月中不开放），行程已智能调换为安昙野与松本城冬日线路。'
+        },
+        autumnAdvice: {
+          title: '9–10月 早秋适行亮点与行前建议',
+          text: '信越山岳与北陆秋意渐浓。9月下旬至10月中旬为日本阿尔卑斯圣地“上高地”与立山黑部初染红叶的黄金期，大正池与河童桥倒映彩林极佳；小布施町正值丹波栗采收与新米上市，气候干爽舒适，徒步体感绝佳。'
+        },
+        stops: [
+          { name: '东京 (Tokyo)', lat: 35.6812, lng: 139.7671, desc: '旅程起点，下町历史与谷中银座散步。' },
+          { name: '轻井泽 (Karuizawa)', lat: 36.3418, lng: 138.6353, desc: '浅间山麓高原避暑地，明治洋风近代建筑。' },
+          { name: '小布施 / 长野 (Nagano)', lat: 36.6513, lng: 138.1811, desc: '葛饰北斋晚年肉笔画圣地、国宝善光寺。' },
+          { name: '松本 / 上高地 (Matsumoto)', lat: 36.2380, lng: 137.9720, desc: '国宝松本城五重六层黑白木造天守。' },
+          { name: '五箇山 / 飞驒高山 (Gokayama)', lat: 36.2566, lng: 136.9066, desc: '世界文化遗产原始茅草合掌村落。' },
+          { name: '金泽 (Kanazawa)', lat: 36.5613, lng: 136.6562, desc: '加贺百万石文化、三大名园兼六园、21世纪美术馆。' },
+          { name: '福井 / 永平寺 (Fukui)', lat: 36.0652, lng: 136.2216, desc: '曹洞宗大本山永平寺深山古杉、东寻坊海蚀崖。' },
+          { name: '京都 (Kyoto)', lat: 35.0116, lng: 135.7681, desc: '南禅寺水路阁、三十三间堂、嵯峨野竹林深处。' },
+          { name: '大阪 (Osaka)', lat: 34.6937, lng: 135.5023, desc: '水都漫步、关西机场出境完成环线。' }
+        ],
+        itinerary: [
+          { day: 1, title: '抵达东京（成田/羽田机场）', transit: '京成Skyliner / 成田特急', desc: '落地后在机场激活eSIM/移动WiFi，使用iPhone Apple Wallet即刻开通交通卡（或兑换实体卡），入住上野或东京站周边连锁酒店。', tags: ['入境准备', '交通卡绑定'] },
+          { day: 2, title: '东京下町历史与国立博物馆', transit: 'JR山手线 + 步行', desc: '漫步谷中银座老街、根津神社乙女千本鸟居；下午参访上野东京国立博物馆（日本最高级别文物典藏）。', tags: ['下町文化', '国宝鉴赏'], heritage: true },
+          { day: 3, title: '东京 ── 北陆新干线 ── 轻井泽', transit: '北陆新干线 (约1小时10分)', desc: '乘坐北陆新干线直达高原名胜轻井泽。参观旧轻井泽银座通、星野榆树街小镇与高原教会。宿轻井泽或小诸。', tags: ['新干线', '高原近代史'] },
+          { day: 4, title: '轻井泽 ── 小布施 ── 长野善光寺', transit: '信浓铁道 + 长野电铁', desc: '前往栗之乡小布施町，参拜北斋馆（葛饰北斋真迹）；午后参拜无分宗派的根本道场——国宝善光寺。宿长野。', tags: ['浮世绘', '国宝善光寺'], heritage: true },
+          { day: 5, title: '长野 ── 地狱谷野猿 / 国宝松本城', transit: 'JR特急信浓号 (Shinano)', desc: '1-2月前往地狱谷看野生雪猴泡天然温泉；9-10月乘特急直达松本，登上日本现存最古老的五重六层木造天守——国宝松本城。宿松本。', tags: ['国宝天守', '地热自然'], onsen: true },
+          { day: 6, title: '松本 ── 上高地（秋季） / 安昙野（冬季）', transit: '地方铁路 + 专用公车', desc: '9-10月深入日本阿尔卑斯圣地“上高地”，大正池徒步至河童桥；冬季封山期游览安昙野大王山葵农场与美术馆群。宿松本。', tags: ['阿尔卑斯', '自然徒步'], nature: true },
+          { day: 7, title: '松本 ── 浓飞巴士 ── 飞驒高山', transit: '浓飞特急巴士 (穿越阿尔卑斯)', desc: '翻越中央阿尔卑斯山脉抵达飞驒高山，漫步三町通传统木结构街区，晚间品尝飞驒牛朴叶味噌烧。宿高山。', tags: ['传统建造物群', '飞驒牛'], food: true },
+          { day: 8, title: '飞驒高山 ── 五箇山合掌集落 ── 金泽', transit: '高速世界遗产巴士', desc: '避开过度拥挤的白川乡主村，前往更为原始幽静的五箇山相仓合掌造村落；午后抵达北陆工艺名都金泽。宿金泽。', tags: ['世界文化遗产', '合掌造'], heritage: true },
+          { day: 9, title: '金泽：近江町朝市与兼六园名胜', transit: '金泽城下町周游巴士', desc: '清晨近江町市场享用时令生鲜盖饭；漫步日本三大名园之首“兼六园”及金泽21世纪美术馆。宿金泽。', tags: ['三大名园', '近江町海鲜'], food: true },
+          { day: 10, title: '金泽：武家屋敷与传统茶屋街', transit: '市内步行 / 租借自行车', desc: '探访长町武家屋敷泥墙窄巷、东茶屋街加贺金箔与友禅染工艺工坊。晚间品尝加贺传统关东煮。宿金泽。', tags: ['武家文化', '传统工艺'] },
+          { day: 11, title: '金泽 ── 福井 ── 永平寺禅修净土', transit: '北陆新干线/特急 + 京福巴士', desc: '乘车前往福井，探访日本曹洞宗大本山永平寺（770年深山古杉古刹，道元禅师开创之禅宗道场）；傍晚至东寻坊安山岩海崖。宿芦原温泉。', tags: ['禅宗古刹', '露天温泉'], onsen: true },
+          { day: 12, title: '福井 ── JR 特急雷鸟号 ── 古都京都', transit: 'JR特急 Thunderbird (约1.5小时)', desc: '列车沿琵琶湖西岸疾驰抵达京都。下午参拜三十三间堂，近距离瞻仰1001尊平安时代木造观音立像。宿京都。', tags: ['三十三间堂', '琵琶湖风景'], heritage: true },
+          { day: 13, title: '京都：南禅寺水路阁与哲学之道', transit: '京都地下铁 + 步行', desc: '避开人潮汹涌的清水寺主道，漫步南禅寺方丈庭园、明治时代红砖水路阁，沿疏水小径行至慈照寺银阁寺。宿京都。', tags: ['禅寺枯山水', '近代工业遗产'] },
+          { day: 14, title: '京都：嵯峨野幽竹与奥嵯峨古刹', transit: 'JR嵯峨野线 + 步行', desc: '避开渡月桥喧嚣商业街，探寻常寂光寺、化野念佛寺竹林古道深处，品尝地道汤豆腐料理。宿京都。', tags: ['竹林小径', '精进料理'], food: true },
+          { day: 15, title: '京都 ── 宇治平等院 ── 奈良 ── 大阪', transit: 'JR奈良线 + 近铁', desc: '清晨参拜宇治平等院凤凰堂（国宝藤原建筑与净土庭园）；下午前往奈良东大寺二月堂俯瞰大和盆地；傍晚抵大阪。宿大阪。', tags: ['国宝建筑', '宇治抹茶'], heritage: true },
+          { day: 16, title: '大阪：水都建筑与生活肌理巡礼', transit: '大阪地下铁', desc: '漫步中之岛大阪市中央公会堂与美术馆周边水畔，探访市民菜市场木津批发市场，梅田天际线夜景。宿大阪。', tags: ['水都建筑', '生活肌理'] },
+          { day: 17, title: '大阪关西国际机场（KIX） ── 返程', transit: 'JR关西特急 Haruka (约50分)', desc: '乘坐特急Haruka直通关西机场，办理出境手续，满载文化记忆启程归国。', tags: ['完满返程'] }
+        ]
+      },
+      'route-b': {
+        id: 'route-b',
+        name: '陆奥奥羽·风土诗情与秘汤原野',
+        badge: '路线 B · 日本东北六县山海大巡礼',
+        color: '#0d9488',
+        days: 16,
+        pass: 'JR东日本铁路周游券 (东北地区 5日)',
+        transit: '东北新干线 + 秋田新干线 + 地方特急',
+        ports: '东京往返 (成田/羽田起降)',
+        desc: '日本自然风貌最为开阔、传统保留最为纯正的陆奥奥羽巡礼。重温松尾芭蕉《奥之细道》文学足迹、中尊寺金色堂佛教理想国、日本最顶级雪见秘汤群与奥入濑自然。',
+        winterAdvice: {
+          title: '1–2月 冬季适行亮点与行前建议',
+          text: '日本本州冬季雪景天花板！藏王连峰树冰“雪怪”奇观、大正浪漫银山温泉夜景、乳头温泉乡鹤之汤雪中天然温泉风吕。注意：东北冬季气温常在零下5度以下，需备防水防滑雪靴与加厚防风衣物，并留意新干线暴雪降速预警。'
+        },
+        autumnAdvice: {
+          title: '9–10月 早秋适行亮点与行前建议',
+          text: '本州最早迎来红叶盛宴的区域。八幡平与十和田湖、奥入濑溪流在10月中下旬层林尽染，红叶与湍急清流交织成绝美长卷；角馆武家屋敷黑板木墙映衬红枫，气候清凉干燥，徒步极其舒适。'
+        },
+        stops: [
+          { name: '东京 (Tokyo)', lat: 35.6812, lng: 139.7671, desc: '起点枢纽，乘东北新干线北上。' },
+          { name: '会津若松 (Aizu-Wakamatsu)', lat: 37.4950, lng: 139.9298, desc: '会津武士之乡、红瓦鹤之城与大内宿。' },
+          { name: '山形 / 藏王 (Yamagata)', lat: 38.2554, lng: 140.3396, desc: '宝珠山立石寺山寺、藏王树冰秘汤。' },
+          { name: '仙台 / 松岛 (Sendai)', lat: 38.2682, lng: 140.8694, desc: '杜之都仙台、日本三景之一松岛湾。' },
+          { name: '平泉 (Hiraizumi)', lat: 38.9950, lng: 141.1130, desc: '世界文化遗产中尊寺金色堂、奥州藤原净土。' },
+          { name: '角馆 (Kakunodate)', lat: 39.5960, lng: 140.5606, desc: '陆奥小京都、江户时代武家屋敷通。' },
+          { name: '田泽湖 / 乳头温泉 (Nyuto)', lat: 39.7997, lng: 140.7891, desc: '日本最深高山湖、300年茅草秘汤鹤之汤。' },
+          { name: '青森 (Aomori)', lat: 40.8244, lng: 140.7400, desc: '青森县立美术馆、古川市场Nokkedon。' },
+          { name: '奥入濑溪流 (Oirase)', lat: 40.5489, lng: 140.9427, desc: '日本顶级自然溪流步道、十和田湖。' },
+          { name: '弘前 (Hirosaki)', lat: 40.6031, lng: 140.4641, desc: '弘前城现存天守、大正近代洋馆建筑。' }
+        ],
+        itinerary: [
+          { day: 1, title: '抵达东京 ── 东北新干线 ── 会津若松', transit: '东北新干线 + 磐越西线', desc: '抵东京后换乘新干线经郡山直抵会津盆地。入住会津若松。', tags: ['东北大门', '盆地风土'] },
+          { day: 2, title: '会津若松城 ── 大内宿茅草屋聚落', transit: '会津铁道 + 猿游号巴士', desc: '参观日本唯一的红瓦天守“鹤之城”；下午前往江户时代旧会津西街道茅草屋顶宿场“大内宿”。宿会津若松。', tags: ['江户宿场', '红瓦天守'], heritage: true },
+          { day: 3, title: '会津 ── JR 只见线绝景 ── 山形', transit: 'JR 只见线体验列车 + 奥羽本线', desc: '上午体验穿行于峡谷溪桥间的秘境铁道只见线；下午乘车北上进入山形盆地。宿山形市。', tags: ['只见线', '秘境铁道'], nature: true },
+          { day: 4, title: '山形 ── 宝珠山立石寺 ── 藏王温泉', transit: 'JR 仙山线 + 藏王巴士', desc: '攀登千级石阶至松尾芭蕉吟咏之“山寺”五大堂远眺群峰；下午登藏王温泉体验强酸性白浊秘汤。宿藏王。', tags: ['奥之细道', '硫磺秘汤'], onsen: true },
+          { day: 5, title: '藏王 ── 银山温泉风情 ── 杜之都仙台', transit: '路线巴士 + 东北新干线', desc: '造访大正时代木造旅馆林立的银山温泉街；傍晚抵仙台品尝名物炭烤牛舌定食。宿仙台。', tags: ['大正浪漫', '仙台牛舌'], food: true },
+          { day: 6, title: '仙台 ── 日本三景松岛 ── 盐灶海鲜市场', transit: 'JR 仙石线', desc: '探访瑞严寺与五大堂，漫步松岛湾松林海风；至盐灶海鲜市场品尝天然蓝鳍金枪鱼刺身。宿仙台。', tags: ['日本三景', '港町生鲜'], food: true },
+          { day: 7, title: '仙台 ── 平泉中尊寺金色堂 ── 盛冈', transit: '东北新干线 + JR东北本线', desc: '参拜世界文化遗产平泉中尊寺金色堂与毛越寺净土庭园；傍晚抵达爵士咖啡馆聚集的盛冈市。宿盛冈。', tags: ['世界遗产', '平安净土'], heritage: true },
+          { day: 8, title: '盛冈 ── 秋田新干线小町号 ── 角馆', transit: '秋田新干线 Komachi (约50分)', desc: '列车穿行奥羽山脉抵“陆奥小京都”角馆，漫步角馆武家屋敷通青柳家与石黑家武士宅邸。宿角馆。', tags: ['秋田新干线', '武家屋敷'], heritage: true },
+          { day: 9, title: '角馆 ── 田泽湖 ── 秘汤乳头温泉乡', transit: '羽后交通巴士', desc: '环游日本最深高山湖田泽湖；深入八幡平国家公园腹地“乳头温泉乡鹤之汤”，入住茅草屋顶百年老铺。宿鹤之汤。', tags: ['秘汤守护会', '混浴露天'], onsen: true },
+          { day: 10, title: '乳头温泉 ── 八幡平高原 ── 青森市', transit: '观光巴士 + 奥羽本线', desc: '翻越八幡平高原，乘车进入陆奥最北端的青森市。入住青森港湾周边。', tags: ['高原分水岭', '青森港'] },
+          { day: 11, title: '青森：奈良美智艺术与古川市场自选丼', transit: '市内巴士 / 步行', desc: '青森县立美术馆瞻仰巨型雕塑《青森犬》；古川市场购买食券体验独一无二的“Nokkedon”盖饭。宿青森。', tags: ['青森犬', '海鲜自选丼'], food: true },
+          { day: 12, title: '青森 ── 奥入濑溪流 ── 十和田湖畔', transit: 'JR 路线巴士 (约2小时)', desc: '沿奥入濑溪流清流瀑布群徒步9公里（云井之泷、铫子大泷）；傍晚抵达平静蔚蓝的十和田湖。宿湖畔旅馆。', tags: ['自然名胜', '奥入濑溪流'], nature: true },
+          { day: 13, title: '十和田湖 ── 津轻弘前城与洋馆群', transit: '路线巴士 + 弘南铁道', desc: '探访津轻藩核心弘前城天守与藤田纪念庭园，品尝弘前名产手工苹果派。宿弘前。', tags: ['现存天守', '津轻风土'] },
+          { day: 14, title: '弘前 ── 五能线海景列车体验 ── 青森', transit: 'JR 观光列车 Resort 白神号', desc: '乘坐全景观光列车，欣赏日本海汹涌波涛拍打礁石与白神山地壮阔山影。宿弘前或青森。', tags: ['五能线', '海景列车'], nature: true },
+          { day: 15, title: '青森 ── 东北新干线 Hayabusa ── 返回东京', transit: '东北新干线最高速 320km/h (约3小时)', desc: '搭乘隼号（Hayabusa）新干线疾速直达东京站，自由选购伴手礼。宿东京站周边。', tags: ['疾速新干线', '东京夜色'] },
+          { day: 16, title: '东京国际机场 ── 返程离境', transit: '机场特急直通列车', desc: '整理满载的乡土工艺与物产，前往成田/羽田机场办理值机返程。', tags: ['顺利出境'] }
+        ]
+      },
+      'route-c': {
+        id: 'route-c',
+        name: '山阳山阴·古代神话与濑户内静海',
+        badge: '路线 C · 本州西端阴阳山海双璧',
+        color: '#2563eb',
+        days: 16,
+        pass: 'JR西日本 山阳&山阴地区铁路周游券 (7日)',
+        transit: '山阳新干线 (含Nozomi) + 特急超级白兔号',
+        ports: '大阪关西机场往返',
+        desc: '深度漫游本州最西部。山阳一侧为气候温润晴朗的濑户内海艺术与海运文化；山阴一侧面向日本海，保留着日本古代建国神话起点、出云古国风土、足立美术馆第一庭园与广袤鸟取砂丘。',
+        winterAdvice: {
+          title: '1–2月 冬季适行亮点与行前建议',
+          text: '本州西端气候相对温和少极寒。山阴沿海适逢日本顶级“松叶蟹”捕捞解禁巅峰，鸟取与境港可大啖鲜甜蟹肉；出云大社冬日云雾缭绕更显神圣。此季节濑户内海降水极少，晴空万里。'
+        },
+        autumnAdvice: {
+          title: '9–10月 早秋适行亮点与行前建议',
+          text: '极力推荐的黄金游览期！濑户内海初秋微风拂面、少雨清爽，极为适合在尾道与生口岛骑行“岛波海道”跨海大桥；鸟取砂丘初秋海风形成连绵风纹，夕阳沉入日本海景色壮绝。'
+        },
+        stops: [
+          { name: '大阪关西 (KIX)', lat: 34.4347, lng: 135.2441, desc: '入境起点，启用山阳山阴周游券。' },
+          { name: '冈山 / 仓敷 (Okayama/Kurashiki)', lat: 34.6617, lng: 133.9350, desc: '晴天之国后乐园、仓敷美观地区白壁町家。' },
+          { name: '尾道 / 岛波海道 (Onomichi)', lat: 34.4091, lng: 133.2048, desc: '坡道文学之城、濑户内跨海自行车圣地。' },
+          { name: '广岛 / 宫岛 (Miyajima)', lat: 34.2960, lng: 132.3199, desc: '海上鸟居严岛神社、弥山原始林。' },
+          { name: '萩市 (Hagi)', lat: 34.4103, lng: 131.3991, desc: '明治维新发祥地、松下村塾与武家白壁街。' },
+          { name: '出云大社 (Izumo)', lat: 35.3670, lng: 132.7550, desc: '古代神话之国、日本最大巨型注连绳神乐殿。' },
+          { name: '松江 (Matsue)', lat: 35.4723, lng: 133.0505, desc: '水都国宝松江城、宍道湖日落百景。' },
+          { name: '安来 / 境港 (Adachi/Sakaiminato)', lat: 35.3780, lng: 133.2250, desc: '足立美术馆日本第一枯山水庭园、松叶蟹港。' },
+          { name: '鸟取砂丘 (Tottori)', lat: 35.5011, lng: 134.2351, desc: '山阴海岸地质公园、狂澜日本海与金黄沙丘。' },
+          { name: '姬路 (Himeji)', lat: 34.8394, lng: 134.6939, desc: '世界文化遗产、日本第一名城姬路城。' },
+          { name: '大阪 (Osaka)', lat: 34.6937, lng: 135.5023, desc: '关西商都巡游与关西机场离境。' }
+        ],
+        itinerary: [
+          { day: 1, title: '抵达大阪关西机场 ── 新干线至冈山', transit: '关西特急 Haruka + 山阳新干线', desc: '落地后激活山阳山阴周游券，乘新干线约45分钟直达“晴天之国”冈山。宿冈山。', tags: ['新干线直达', '冈山城下'] },
+          { day: 2, title: '冈山后乐园 ── 仓敷美观地区', transit: 'JR 山阳本线 (约15分)', desc: '上午游览日本三大名园之一后乐园；下午漫步仓敷川畔柳树白壁土藏群与大原美术馆。宿仓敷。', tags: ['后乐园', '仓敷白壁'], heritage: true },
+          { day: 3, title: '仓敷 ── 尾道（坡道文学与猫之细道）', transit: 'JR 山阳本线', desc: '前往濑户内咽喉尾道，登千光寺山俯瞰水道全景，穿行于林芙美子创作的石阶小巷。宿尾道。', tags: ['文学古道', '濑户内水道'] },
+          { day: 4, title: '尾道 ── 岛波海道单车慢游 ── 耕三寺', transit: '租借公路车 / 岛际轮渡', desc: '踏上连接本州与四国的跨海自行车桥，游览生口岛耕三寺与“未来心之丘”大理石艺术园。宿生口岛或尾道。', tags: ['海岛骑行', '跨海大桥'], nature: true },
+          { day: 5, title: '尾道 ── 广岛 ── 日本三景宫岛严岛神社', transit: '山阳新干线 + JR渡轮', desc: '前往宫岛参拜世界文化遗产严岛神社（涨潮时伫立于海上的朱红大鸟居），登弥山远眺群岛。宿宫岛或广岛。', tags: ['世界遗产', '海上鸟居'], heritage: true },
+          { day: 6, title: '广岛和平纪念公园 ── 正宗广岛烧', transit: '广岛广电有轨电车', desc: '参观原爆圆顶馆与和平纪念资料馆；中午品尝层次丰富的正宗广岛风味御好烧。宿广岛。', tags: ['和平遗产', '地道广岛烧'], food: true },
+          { day: 7, title: '广岛 ── 穿越中国山脉 ── 萩市（山口县）', transit: '新干线新山口转特急巴士', desc: '抵达明治维新发源地萩市。全城完好保留江户时代城下町格局、松下村塾与武家泥墙夏柑树。宿萩市。', tags: ['明治维新', '城下町'] },
+          { day: 8, title: '萩市城下町 ── 青海岛奇岩 ── 长门温泉', transit: 'JR 山阴本线 / 路线巴士', desc: '游览萩城遗迹与木造老街；午后前往海上阿尔卑斯青海岛；傍晚入住长门汤本温泉街。宿长门。', tags: ['地质公园', '长门古汤'], onsen: true },
+          { day: 9, title: '长门 ── 山阴本线 ── 神话之国出云大社', transit: 'JR 山阴本线特急 Matsukaze', desc: '乘列车沿日本海进入出云国。参拜出云大社（神乐殿悬挂全日本最大巨型注连绳），品尝割子荞麦面。宿出云或玉造温泉。', tags: ['日本神话', '出云荞麦'], food: true },
+          { day: 10, title: '出云 ── 水都松江 ── 国宝松江城与宍道湖', transit: '一畑电车 / JR', desc: '参观日本现存十二天守之一“国宝松江城”，乘坐堀川游览船；傍晚在宍道湖畔欣赏夕阳绝景。宿松江。', tags: ['国宝天守', '宍道湖夕阳'], heritage: true },
+          { day: 11, title: '松江 ── 足立美术馆 ── 境港海鲜港町', transit: 'JR 伯备线 / 免费接驳巴士', desc: '参观连续二十余年蝉联日本第一庭园的“足立美术馆”借景山水；下午至境港市品尝冬季松叶蟹/海鲜。宿皆生温泉。', tags: ['第一庭园', '松叶蟹'], food: true },
+          { day: 12, title: '境港 ── 山阴海岸地质公园 鸟取砂丘', transit: 'JR 山阴本线快速列车', desc: '探访东西长16公里的鸟取砂丘，在狂澜日本海畔感受大自然风纹沙丘起伏；参观砂之美术馆。宿鸟取。', tags: ['鸟取砂丘', '地质奇观'], nature: true },
+          { day: 13, title: '鸟取民艺街 ── 特急超级白兔号 ── 姬路', transit: '特急 Super Hakuto (智头急行)', desc: '参观鸟取民艺馆器物美学；午后搭乘特急翻越山峦抵达姬路，参拜世界遗产“白鹭城”姬路城。宿姬路。', tags: ['特急列车', '世界遗产姬路城'], heritage: true },
+          { day: 14, title: '姬路 ── 神户港口风情 ── 大阪', transit: 'JR 山阳本线新快速', desc: '漫步神户北野异人馆与旧居留地，感受港口近代开放文化，品尝神户和牛铁板烧；傍晚抵大阪。宿大阪。', tags: ['神户开港', '神户牛肉'], food: true },
+          { day: 15, title: '大阪：市民生鲜市场与采购休整', transit: '大阪地下铁', desc: '探访木津批发市场，在梅田及中之岛散步采购，整理归国行李。宿大阪。', tags: ['市场生鲜', '伴手礼采购'] },
+          { day: 16, title: '大阪关西国际机场 ── 返程离境', transit: 'JR 关西特急 Haruka', desc: '从大阪天王寺/新大阪搭乘Haruka直达机场，顺利办理出境返航。', tags: ['关西离境'] }
+        ]
+      }
+    };
+
+    // ==========================================
+    // LEAFLET MAP INITIALIZATION & LOGIC
+    // ==========================================
+    let map = null;
+    let currentPolyline = null;
+    let currentMarkers = [];
+    let currentRouteId = 'route-a';
+    let currentSeason = 'winter';
+
+    function initMap() {
+      // Base center: Central Japan
+      map = L.map('map', {
+        center: [36.2048, 138.2529],
+        zoom: 6,
+        zoomControl: true,
+        attributionControl: false
+      });
+
+      // CartoDB Voyager / Positron clean map tiles (reliable, beautiful, free)
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        maxZoom: 18,
+        subdomains: 'abcd'
+      }).addTo(map);
+
+      // Add clean attribution
+      L.control.attribution({ position: 'bottomright', prefix: '© OpenStreetMap contributors, © CARTO' }).addTo(map);
+
+      renderRouteOnMap(currentRouteId);
+    }
+
+    function renderRouteOnMap(routeId) {
+      const data = routesData[routeId];
+      if (!data) return;
+
+      // Clear existing markers and lines
+      if (currentPolyline) {
+        map.removeLayer(currentPolyline);
+      }
+      currentMarkers.forEach(m => map.removeLayer(m));
+      currentMarkers = [];
+
+      const latlngs = data.stops.map(s => [s.lat, s.lng]);
+
+      // Draw route line
+      currentPolyline = L.polyline(latlngs, {
+        color: data.color,
+        weight: 4.5,
+        opacity: 0.85,
+        dashArray: '8, 8',
+        lineCap: 'round',
+        lineJoin: 'round'
+      }).addTo(map);
+
+      // Create custom SVG markers
+      data.stops.forEach((stop, idx) => {
+        const isHub = idx === 0 || idx === data.stops.length - 1;
+        const iconHtml = `
+          <div style="
+            width: ${isHub ? 26 : 20}px;
+            height: ${isHub ? 26 : 20}px;
+            background: #ffffff;
+            border: 3px solid ${data.color};
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: ${data.color};
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+          ">${idx + 1}</div>
+        `;
+
+        const customIcon = L.divIcon({
+          html: iconHtml,
+          className: 'custom-div-icon',
+          iconSize: [isHub ? 26 : 20, isHub ? 26 : 20],
+          iconAnchor: [isHub ? 13 : 10, isHub ? 13 : 10]
+        });
+
+        const marker = L.marker([stop.lat, stop.lng], { icon: customIcon }).addTo(map);
+        
+        marker.bindPopup(`
+          <div class="custom-popup">
+            <h4>${idx + 1}. ${stop.name}</h4>
+            <p>${stop.desc}</p>
+            <span class="badge" style="color: ${data.color}; border: 1px solid ${data.color};">路线节点</span>
+          </div>
+        `);
+
+        marker.on('click', () => {
+          highlightDayByStopIndex(idx);
+        });
+
+        currentMarkers.push(marker);
+      });
+
+      // Fit map bounds to polyline
+      map.fitBounds(currentPolyline.getBounds(), { padding: [40, 40] });
+    }
+
+    function highlightDayByStopIndex(stopIndex) {
+      const cards = document.querySelectorAll('.day-card');
+      if (cards && cards[stopIndex]) {
+        cards.forEach(c => c.classList.remove('active-day'));
+        cards[stopIndex].classList.add('active-day');
+        cards[stopIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    // ==========================================
+    // UI RENDERING: Route & Itinerary
+    // ==========================================
+    function renderRouteDetails(routeId) {
+      const data = routesData[routeId];
+      if (!data) return;
+
+      currentRouteId = routeId;
+
+      // Update Map Title
+      document.getElementById('map-route-title').innerText = `${data.name} 路径导览`;
+
+      // Update Card Meta
+      const card = document.getElementById('route-overview-card');
+      card.className = `route-card ${routeId}`;
+      document.getElementById('route-badge-text').innerText = data.badge;
+      document.getElementById('route-name').innerText = data.name;
+      document.getElementById('route-desc').innerText = data.desc;
+      document.getElementById('route-days-val').innerText = `${data.days} 天`;
+      document.getElementById('route-pass-val').innerText = data.pass;
+      document.getElementById('route-transit-val').innerText = data.transit;
+      document.getElementById('route-ports-val').innerText = data.ports;
+
+      // Update Season Guidance
+      updateSeasonAdvice();
+
+      // Render Day Cards
+      const container = document.getElementById('timeline-container');
+      container.innerHTML = '';
+
+      data.itinerary.forEach((item, i) => {
+        const dayCard = document.createElement('div');
+        dayCard.className = `day-card ${i === 0 ? 'active-day' : ''}`;
+        dayCard.setAttribute('data-day', item.day);
+
+        let tagHtml = item.tags.map(t => `<span class="tag">${t}</span>`).join('');
+        if (item.heritage) tagHtml += `<span class="tag heritage">世界文化遗产/国宝</span>`;
+        if (item.nature) tagHtml += `<span class="tag nature">自然名胜</span>`;
+        if (item.food) tagHtml += `<span class="tag food">地道风味</span>`;
+        if (item.onsen) tagHtml += `<span class="tag onsen">天然温泉</span>`;
+
+        dayCard.innerHTML = `
+          <div class="day-header">
+            <span class="day-number">DAY ${item.day < 10 ? '0' + item.day : item.day}</span>
+            <span class="day-transit-badge">
+              <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+              ${item.transit}
+            </span>
+          </div>
+          <div class="day-title">${item.title}</div>
+          <div class="day-desc">${item.desc}</div>
+          <div class="day-tags">${tagHtml}</div>
+        `;
+
+        dayCard.addEventListener('click', () => {
+          document.querySelectorAll('.day-card').forEach(c => c.classList.remove('active-day'));
+          dayCard.classList.add('active-day');
+
+          // Pan map to associated stop if exists
+          if (currentMarkers[i]) {
+            map.panTo(currentMarkers[i].getLatLng());
+            currentMarkers[i].openPopup();
+          }
+        });
+
+        container.appendChild(dayCard);
+      });
+
+      // Update Map View
+      renderRouteOnMap(routeId);
+    }
+
+    function updateSeasonAdvice() {
+      const data = routesData[currentRouteId];
+      const box = document.getElementById('season-advice-box');
+      const title = document.getElementById('season-advice-title');
+      const text = document.getElementById('season-advice-text');
+
+      if (currentSeason === 'winter') {
+        title.innerText = data.winterAdvice.title;
+        text.innerText = data.winterAdvice.text;
+      } else {
+        title.innerText = data.autumnAdvice.title;
+        text.innerText = data.autumnAdvice.text;
+      }
+    }
+
+    // ==========================================
+    // DYNAMIC BUDGET CALCULATOR LOGIC
+    // ==========================================
+    const budgetFactors = {
+      budget: {
+        flight: 2400,
+        passBase: 1800,
+        hotelPerNight: 400,
+        ryokanSurcharge: 600,
+        foodPerDay: 220,
+        misc: 800
+      },
+      standard: {
+        flight: 4000,
+        passBase: 2800,
+        hotelPerNight: 650,
+        ryokanSurcharge: 1400,
+        foodPerDay: 380,
+        misc: 1500
+      },
+      premium: {
+        flight: 6800,
+        passBase: 4200,
+        hotelPerNight: 1200,
+        ryokanSurcharge: 2800,
+        foodPerDay: 680,
+        misc: 2800
+      }
+    };
+
+    function updateBudgetCalculator() {
+      const days = parseInt(document.getElementById('calc-days-slider').value, 10);
+      const ryokanNights = parseInt(document.getElementById('calc-ryokan-slider').value, 10);
+      const activeStyleBtn = document.querySelector('#calc-style-control .seg-btn.active');
+      const style = activeStyleBtn ? activeStyleBtn.getAttribute('data-style') : 'standard';
+
+      document.getElementById('calc-days-label').innerText = `${days} 天`;
+      document.getElementById('calc-ryokan-label').innerText = `${ryokanNights} 晚`;
+
+      const cfg = budgetFactors[style];
+
+      const flightCost = cfg.flight;
+      const transitCost = cfg.passBase + Math.round((days - 15) * 50);
+      const normalNights = Math.max(0, (days - 1) - ryokanNights);
+      const hotelCost = (normalNights * cfg.hotelPerNight) + (ryokanNights * (cfg.hotelPerNight + cfg.ryokanSurcharge));
+      const foodCost = days * cfg.foodPerDay;
+      const miscCost = cfg.misc;
+
+      const totalRmb = flightCost + transitCost + hotelCost + foodCost + miscCost;
+      const totalJpy = Math.round(totalRmb / 0.049);
+
+      // Render numbers
+      document.getElementById('calc-total-rmb').innerHTML = `¥${totalRmb.toLocaleString()} <small id="calc-total-jpy">≈ ${totalJpy.toLocaleString()}円</small>`;
+      document.getElementById('b-flight').innerText = `¥${flightCost.toLocaleString()}`;
+      document.getElementById('b-transit').innerText = `¥${transitCost.toLocaleString()}`;
+      document.getElementById('b-hotel').innerText = `¥${hotelCost.toLocaleString()}`;
+      document.getElementById('b-food').innerText = `¥${foodCost.toLocaleString()}`;
+      document.getElementById('b-misc').innerText = `¥${miscCost.toLocaleString()}`;
+
+      // Render proportional bars
+      document.getElementById('bar-flight').style.width = `${Math.round((flightCost / totalRmb) * 100)}%`;
+      document.getElementById('bar-transit').style.width = `${Math.round((transitCost / totalRmb) * 100)}%`;
+      document.getElementById('bar-hotel').style.width = `${Math.round((hotelCost / totalRmb) * 100)}%`;
+      document.getElementById('bar-food').style.width = `${Math.round((foodCost / totalRmb) * 100)}%`;
+      document.getElementById('bar-misc').style.width = `${Math.round((miscCost / totalRmb) * 100)}%`;
+    }
+
+    // ==========================================
+    // MODAL DIALOGS & EVENT BINDINGS
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initialize map
+      initMap();
+      renderRouteDetails('route-a');
+      updateBudgetCalculator();
+
+      // Route Selector Buttons
+      document.querySelectorAll('.route-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.route-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const route = btn.getAttribute('data-route');
+          renderRouteDetails(route);
+        });
+      });
+
+      // Season Selector Buttons
+      document.querySelectorAll('.season-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.season-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentSeason = btn.getAttribute('data-season');
+          updateSeasonAdvice();
+        });
+      });
+
+      // Reset Map Button
+      document.getElementById('btn-reset-map').addEventListener('click', () => {
+        if (currentPolyline) {
+          map.fitBounds(currentPolyline.getBounds(), { padding: [40, 40] });
+        }
+      });
+
+      // Calculator Sliders
+      document.getElementById('calc-days-slider').addEventListener('input', updateBudgetCalculator);
+      document.getElementById('calc-ryokan-slider').addEventListener('input', updateBudgetCalculator);
+      document.querySelectorAll('#calc-style-control .seg-btn').forEach(b => {
+        b.addEventListener('click', () => {
+          document.querySelectorAll('#calc-style-control .seg-btn').forEach(item => item.classList.remove('active'));
+          b.classList.add('active');
+          updateBudgetCalculator();
+        });
+      });
+
+      // Modals
+      const modalRules = document.getElementById('modal-rules');
+      const modalTips = document.getElementById('modal-tips');
+
+      function openModal(modal) { modal.classList.add('open'); }
+      function closeModal(modal) { modal.classList.remove('open'); }
+
+      document.getElementById('btn-open-rules').addEventListener('click', () => openModal(modalRules));
+      document.getElementById('alert-link-rules').addEventListener('click', () => openModal(modalRules));
+      document.getElementById('btn-open-tips').addEventListener('click', () => openModal(modalTips));
+
+      document.querySelectorAll('.modal-close').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetId = btn.getAttribute('data-close');
+          const target = document.getElementById(targetId);
+          if (target) closeModal(target);
+        });
+      });
+
+      document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', (e) => {
+          if (e.target === overlay) closeModal(overlay);
+        });
+      });
+    });
+  </script>
+</body>
+</html>
