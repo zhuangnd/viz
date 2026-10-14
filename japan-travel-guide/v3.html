@@ -1,0 +1,2936 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>日本 15–20 日深度自助旅行终极交互导览系统 | Editorial Cartography v3 旗舰版</title>
+<!-- Leaflet CSS & JS (Multi-CDN fallback ready, zero API key required) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<!-- D3.js v7 -->
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  :root {
+    --bg-paper: #F8F6F0;
+    --bg-card: #FFFFFF;
+    --bg-subtle: #EFECE4;
+    --ink-primary: #141619;
+    --ink-secondary: #4A5056;
+    --ink-muted: #7C8288;
+    --border-line: #DCD7C9;
+    --theme-r1: #264653;
+    --theme-r2: #BC4749;
+    --theme-r3: #386641;
+    --active-theme: #3D5A80;
+    --accent-gold: #C88A32;
+    --font-serif: "Songti SC", "Noto Serif SC", "SimSun", "Yu Mincho", Georgia, serif;
+    --font-sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, Menlo, monospace;
+  }
+
+  [data-dark="true"] {
+    --bg-paper: #141619;
+    --bg-card: #1E2126;
+    --bg-subtle: #282C33;
+    --ink-primary: #F2EFE9;
+    --ink-secondary: #B8B5AD;
+    --ink-muted: #7A7F87;
+    --border-line: #323740;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background-color: var(--bg-paper);
+    color: var(--ink-primary);
+    font-family: var(--font-sans);
+    line-height: 1.6;
+    overflow-x: hidden;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  /* Top Global Header */
+  .global-header {
+    position: sticky;
+    top: 0;
+    z-index: 1200;
+    background: var(--bg-paper);
+    border-bottom: 1px solid var(--border-line);
+    padding: 0.65rem 1.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    backdrop-filter: blur(8px);
+  }
+
+  .brand-block {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+  }
+
+  .brand-title {
+    font-family: var(--font-serif);
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: var(--ink-primary);
+  }
+
+  .brand-sub {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--ink-muted);
+    border: 1px solid var(--border-line);
+    padding: 0.1rem 0.45rem;
+    border-radius: 3px;
+  }
+
+  .header-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .route-tabs {
+    display: inline-flex;
+    background: var(--bg-subtle);
+    padding: 0.2rem;
+    border-radius: 6px;
+    border: 1px solid var(--border-line);
+  }
+
+  .route-tab {
+    border: none;
+    background: transparent;
+    color: var(--ink-secondary);
+    padding: 0.38rem 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .route-tab .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .route-tab.active {
+    background: var(--active-theme);
+    color: #FFFFFF;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+  }
+
+  .mode-switch {
+    display: inline-flex;
+    background: var(--bg-subtle);
+    padding: 0.2rem;
+    border-radius: 6px;
+    border: 1px solid var(--border-line);
+  }
+
+  .mode-btn {
+    border: none;
+    background: transparent;
+    color: var(--ink-secondary);
+    padding: 0.38rem 0.7rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+
+  .mode-btn.active {
+    background: var(--ink-primary);
+    color: var(--bg-paper);
+  }
+
+  .utility-btns {
+    display: flex;
+    gap: 0.4rem;
+  }
+
+  .btn-util {
+    border: 1px solid var(--border-line);
+    background: var(--bg-card);
+    color: var(--ink-primary);
+    padding: 0.38rem 0.68rem;
+    font-size: 0.76rem;
+    font-weight: 600;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: var(--font-sans);
+  }
+
+  .btn-util:hover {
+    border-color: var(--active-theme);
+    color: var(--active-theme);
+  }
+
+  /* Main Split Layout */
+  .app-shell {
+    display: grid;
+    grid-template-columns: 43% 57%;
+    min-height: calc(100vh - 57px);
+  }
+
+  /* Left Column: Narrative & Tools */
+  .narrative-col {
+    border-right: 1px solid var(--border-line);
+    padding: 1.5rem 1.5rem 4rem 1.5rem;
+    overflow-y: auto;
+  }
+
+  /* Route Hero Banner */
+  .route-hero {
+    border-left: 4px solid var(--active-theme);
+    padding-left: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .route-tag {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--active-theme);
+    font-weight: 700;
+  }
+
+  .route-name {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    margin: 0.25rem 0 0.4rem 0;
+    line-height: 1.3;
+  }
+
+  .route-desc {
+    font-size: 0.88rem;
+    color: var(--ink-secondary);
+  }
+
+  /* KPI Grid */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.65rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .kpi-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-line);
+    padding: 0.7rem 0.75rem;
+    border-radius: 6px;
+  }
+
+  .kpi-label {
+    font-size: 0.7rem;
+    color: var(--ink-muted);
+    display: block;
+  }
+
+  .kpi-val {
+    font-family: var(--font-mono);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--ink-primary);
+    margin-top: 0.15rem;
+    display: block;
+  }
+
+  /* Sub-navigation Drawer Tabs (Itinerary / Budget Sandbox / Visa Guide) */
+  .panel-switcher {
+    display: flex;
+    border-bottom: 1px solid var(--border-line);
+    margin-bottom: 1.15rem;
+    gap: 1.25rem;
+  }
+
+  .panel-tab {
+    border: none;
+    background: none;
+    padding: 0.5rem 0;
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: var(--ink-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+  }
+
+  .panel-tab.active {
+    color: var(--active-theme);
+    border-bottom-color: var(--active-theme);
+  }
+
+  /* Phenology Filter Bar */
+  .season-bar {
+    background: var(--bg-card);
+    border: 1px solid var(--border-line);
+    border-radius: 6px;
+    padding: 0.65rem 0.85rem;
+    margin-bottom: 1.15rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .season-label {
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: var(--ink-secondary);
+  }
+
+  .month-pills {
+    display: flex;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+  }
+
+  .month-pill {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    padding: 0.18rem 0.42rem;
+    border: 1px solid var(--border-line);
+    background: var(--bg-paper);
+    color: var(--ink-secondary);
+    border-radius: 3px;
+    cursor: pointer;
+  }
+
+  .month-pill.recommended {
+    border-color: var(--active-theme);
+    background: var(--active-theme);
+    color: #fff;
+    font-weight: 700;
+  }
+
+  /* Day Itinerary Cards */
+  .day-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+
+  .day-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-line);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+
+  .day-card:hover {
+    border-color: var(--active-theme);
+    transform: translateY(-1px);
+  }
+
+  .day-card.active {
+    border-left: 5px solid var(--active-theme);
+    border-color: var(--active-theme);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.07);
+  }
+
+  .day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.45rem;
+  }
+
+  .day-badge {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: var(--active-theme);
+    color: #fff;
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+  }
+
+  .day-elev-tag {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--ink-muted);
+  }
+
+  .day-title {
+    font-family: var(--font-serif);
+    font-size: 1.08rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    color: var(--ink-primary);
+  }
+
+  .day-Exp {
+    font-size: 0.84rem;
+    color: var(--ink-secondary);
+    margin-bottom: 0.75rem;
+  }
+
+  /* Transport Box inside Day Card */
+  .transport-box {
+    background: var(--bg-subtle);
+    border-radius: 5px;
+    padding: 0.6rem 0.75rem;
+    margin-bottom: 0.65rem;
+    font-size: 0.8rem;
+    border-left: 3px solid var(--accent-gold);
+  }
+
+  .transport-box .t-head {
+    font-weight: 700;
+    color: var(--ink-primary);
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .transport-box .t-alert {
+    color: #B23A22;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    font-weight: 600;
+  }
+
+  [data-dark="true"] .transport-box .t-alert {
+    color: #F28B76;
+  }
+
+  .meta-footer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    padding-top: 0.55rem;
+    border-top: 1px dashed var(--border-line);
+    font-size: 0.76rem;
+    color: var(--ink-secondary);
+  }
+
+  .meta-item strong {
+    color: var(--ink-primary);
+  }
+
+  .tabelog-pill {
+    font-family: var(--font-mono);
+    background: #FFF3D6;
+    color: #9C6500;
+    padding: 0.05rem 0.35rem;
+    border-radius: 3px;
+    font-size: 0.68rem;
+    font-weight: 700;
+  }
+
+  /* Right Column: Sticky Map & Elevation Canvas */
+  .viewport-col {
+    position: sticky;
+    top: 57px;
+    height: calc(100vh - 57px);
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-subtle);
+  }
+
+  .map-wrapper {
+    position: relative;
+    flex: 1;
+    width: 100%;
+    min-height: 320px;
+  }
+
+  #map-canvas {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    background: #CBD2D9;
+  }
+
+  /* Floating Map Controls */
+  .map-overlay-top {
+    position: absolute;
+    top: 12px;
+    left: 52px;
+    right: 12px;
+    z-index: 800;
+    display: flex;
+    justify-content: space-between;
+    pointer-events: none;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .map-chip {
+    pointer-events: auto;
+    background: var(--bg-card);
+    border: 1px solid var(--border-line);
+    padding: 0.4rem 0.7rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .tile-select {
+    font-size: 0.75rem;
+    background: var(--bg-paper);
+    color: var(--ink-primary);
+    border: 1px solid var(--border-line);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  /* D3 Elevation Dock */
+  .elevation-dock {
+    height: 195px;
+    background: var(--bg-card);
+    border-top: 1px solid var(--border-line);
+    padding: 0.6rem 1rem 0.4rem 1rem;
+    display: flex;
+    flex-direction: column;
+    z-index: 900;
+  }
+
+  .dock-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.2rem;
+  }
+
+  .dock-title {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--ink-secondary);
+  }
+
+  .probe-readout {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: var(--active-theme);
+    font-weight: 700;
+  }
+
+  #elevation-svg {
+    width: 100%;
+    flex: 1;
+    overflow: visible;
+  }
+
+  /* Budget Sandbox Section */
+  .sandbox-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border-line);
+    border-radius: 8px;
+    padding: 1.15rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .slider-group {
+    margin-bottom: 0.9rem;
+  }
+
+  .slider-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+  }
+
+  .slider-header span.mono {
+    font-family: var(--font-mono);
+    color: var(--active-theme);
+  }
+
+  input[type="range"] {
+    width: 100%;
+    accent-color: var(--active-theme);
+    cursor: pointer;
+  }
+
+  .budget-breakdown-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+    margin-top: 1rem;
+  }
+
+  .budget-breakdown-table th,
+  .budget-breakdown-table td {
+    padding: 0.55rem 0.5rem;
+    border-bottom: 1px solid var(--border-line);
+    text-align: left;
+  }
+
+  .budget-breakdown-table td.num {
+    font-family: var(--font-mono);
+    text-align: right;
+    font-weight: 600;
+  }
+
+  /* Modal Overlay (IDP Check & Visa Export) */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 18, 22, 0.65);
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  .modal-backdrop.open {
+    display: flex;
+  }
+
+  .modal-card {
+    background: var(--bg-card);
+    color: var(--ink-primary);
+    border: 1px solid var(--border-line);
+    max-width: 680px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+  }
+
+  .modal-title {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+    border-bottom: 2px solid var(--active-theme);
+    padding-bottom: 0.45rem;
+  }
+
+  .visa-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.76rem;
+    margin: 0.85rem 0;
+  }
+
+  .visa-table th, .visa-table td {
+    border: 1px solid var(--border-line);
+    padding: 0.45rem;
+  }
+
+  .visa-table th {
+    background: var(--bg-subtle);
+  }
+
+
+  /* Version Matrix & Utility Modals */
+  .version-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 1rem 0;
+  }
+  .version-item {
+    background: var(--bg-paper);
+    border: 1px solid var(--border-line);
+    border-radius: 6px;
+    padding: 0.85rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.85rem;
+    transition: all 0.2s ease;
+  }
+  .version-item:hover {
+    border-color: var(--active-theme);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .version-item.current {
+    border-color: var(--active-theme);
+    background: var(--bg-card);
+    box-shadow: 0 0 0 1px var(--active-theme);
+  }
+  .v-title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+  .v-badge {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0.12rem 0.45rem;
+    border-radius: 3px;
+    background: var(--active-theme);
+    color: #fff;
+    white-space: nowrap;
+  }
+  .v-badge.badge-outline {
+    background: transparent;
+    border: 1px solid var(--border-line);
+    color: var(--ink-secondary);
+  }
+  .v-badge.badge-active {
+    background: #2A9D8F;
+    color: #fff;
+  }
+  .v-desc {
+    font-size: 0.78rem;
+    color: var(--ink-secondary);
+    line-height: 1.45;
+  }
+  .v-btn-go {
+    border: 1px solid var(--border-line);
+    background: var(--bg-card);
+    color: var(--ink-primary);
+    padding: 0.35rem 0.65rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  .v-btn-go:hover {
+    background: var(--active-theme);
+    color: #fff;
+    border-color: var(--active-theme);
+  }
+  .checklist-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+  }
+  @media (max-width: 600px) {
+    .checklist-grid { grid-template-columns: 1fr; }
+  }
+  .checklist-card {
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-line);
+    border-radius: 6px;
+    padding: 0.75rem;
+  }
+  .checklist-card h4 {
+    font-size: 0.82rem;
+    margin-bottom: 0.4rem;
+    color: var(--ink-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .checklist-card ul {
+    list-style: none;
+    padding: 0;
+    font-size: 0.76rem;
+    color: var(--ink-secondary);
+    line-height: 1.6;
+  }
+  .checklist-card ul li {
+    position: relative;
+    padding-left: 1rem;
+    margin-bottom: 0.2rem;
+  }
+  .checklist-card ul li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--active-theme);
+    font-weight: bold;
+  }
+  .hotline-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-line);
+    border-radius: 6px;
+    padding: 0.85rem;
+    margin-bottom: 0.65rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .hotline-num {
+    font-family: var(--font-mono);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--active-theme);
+  }
+
+  /* Custom Map Marker Styling */
+  .custom-day-marker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 11px;
+    color: #FFFFFF;
+    border: 2px solid #FFFFFF;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+    transition: transform 0.2s ease;
+  }
+
+  .custom-day-marker.active-marker {
+    transform: scale(1.32);
+    border-color: #FFD166;
+    z-index: 999 !important;
+  }
+
+  /* Responsive Mobile Layout */
+  @media (max-width: 980px) {
+    .app-shell {
+      grid-template-columns: 1fr;
+    }
+    .viewport-col {
+      position: relative;
+      top: 0;
+      height: 62vh;
+      order: -1;
+    }
+    .narrative-col {
+      border-right: none;
+      padding: 1rem;
+    }
+    .kpi-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media print {
+    .global-header, .viewport-col, .panel-switcher, .season-bar {
+      display: none !important;
+    }
+    .app-shell {
+      display: block;
+    }
+    .narrative-col {
+      width: 100%;
+      border: none;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- Top Global Control Header -->
+<header class="global-header">
+  <div class="brand-block">
+    <span class="brand-title">日本深度自助游·空间导览系统</span>
+    <span class="brand-sub">2026 FLAGSHIP v3</span>
+  </div>
+
+  <div class="header-controls">
+    <!-- Route Switcher (3 Classic Geo-Cultural + 3 Haruki Murakami Literary Routes) -->
+    <div class="route-tabs" role="tablist" style="flex-wrap:wrap;gap:2px;">
+      <button class="route-tab active" onclick="switchRoute('r1')" id="tab-r1" title="本州脊梁与千年古道：东京博物馆集群、浮世绘富岳三十六景、信越北陆与关西名刹">
+        <span class="dot" style="background:#264653"></span>经典一：东京北斋·本州阿尔卑斯 (18D)
+      </button>
+      <button class="route-tab" onclick="switchRoute('r2')" id="tab-r2" title="山阴神话海岸与濑户内海">
+        <span class="dot" style="background:#BC4749"></span>经典二：山阴四国 (17D)
+      </button>
+      <button class="route-tab" onclick="switchRoute('r3')" id="tab-r3" title="奥羽山脉与北国秘汤">
+        <span class="dot" style="background:#386641"></span>经典三：东北秘汤 (16D)
+      </button>
+      <button class="route-tab" onclick="switchRoute('r4')" id="tab-r4" title="村上春树：北海道《寻羊冒险记》《舞！舞！舞！》">
+        <span class="dot" style="background:#3D5A80"></span>文学四：村上春树·北海道寻羊 (16D)
+      </button>
+      <button class="route-tab" onclick="switchRoute('r5')" id="tab-r5" title="村上春树：阪神与四国《海边的卡夫卡》">
+        <span class="dot" style="background:#1B4332"></span>文学五：村上春树·四国卡夫卡 (16D)
+      </button>
+      <button class="route-tab" onclick="switchRoute('r6')" id="tab-r6" title="村上春树：东京《1Q84》与箱根《刺杀骑士团长》">
+        <span class="dot" style="background:#6D4C41"></span>文学六：村上春树·东京骑士团长 (15D)
+      </button>
+    </div>
+
+    <!-- Dual Transport Mode Switcher -->
+    <div class="mode-switch">
+      <button class="mode-btn active" id="mode-public" onclick="setTransportMode('public')">模式A: 公共交通+eBike</button>
+      <button class="mode-btn" id="mode-drive" onclick="setTransportMode('drive')">模式B: 合规租车自驾</button>
+    </div>
+
+    <!-- Utility Buttons with SVG Icons -->
+    <div class="utility-btns">
+      <button class="btn-util" onclick="openVersionModal()" title="查看已汇聚的5个导览网页版本矩阵" style="border-color:var(--active-theme);font-weight:700;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:text-bottom;margin-right:3px;"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>版本导览矩阵
+      </button>
+      <button class="btn-util" onclick="openChecklistModal()" title="行前必备证件、资金、电器与常备药清单">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:text-bottom;margin-right:3px;"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>行前备忘
+      </button>
+      <button class="btn-util" onclick="openHotlinesModal()" title="日本观光厅多语种热线、医疗救援与驻日使领馆">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:text-bottom;margin-right:3px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>紧急热线
+      </button>
+      <button class="btn-util" onclick="openVisaModal()" title="生成日本领事馆标准格式送签滞在予定表">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:text-bottom;margin-right:3px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>送签行程表
+      </button>
+      <button class="btn-util" onclick="toggleDarkMode()" id="dark-btn" title="切换和纸明亮 / 暗色山岳深色模式">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:text-bottom;margin-right:3px;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>暗色山岳模式
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Main Split Container -->
+<main class="app-shell">
+  <!-- Left Column: Narrative, Budget Sandbox & Visa Guide -->
+  <section class="narrative-col">
+    <div class="route-hero" id="route-hero">
+      <span class="route-tag" id="hero-tag">ROUTE 01 · TOKYO CULTURE, HOKUSAI UKIYO-E, CENTRAL ALPS & HOKURIKU CRAFTS</span>
+      <h1 class="route-name" id="hero-title">本州脊梁与千年古道：东京博物馆集群、浮世绘《富岳三十六景》、信越北陆加贺物语与关西名刹纵贯线</h1>
+      <p class="route-desc" id="hero-desc">东京(HND/NRT)进 / 大阪关西(KIX)出 · 溯源浮世绘大师葛饰北斋《富岳三十六景》灵感线，串联东京国立博物馆与墨田北斋馆、信州小布施晚年肉笔画圣地、国宝松本城天守、阿尔卑斯上高地、五箇山合掌造、加贺百万石工艺与关西千年名刹。</p>
+    </div>
+
+    <!-- KPI Summary -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <span class="kpi-label">标准行程周期</span>
+        <span class="kpi-val" id="kpi-days">18 日 / 17 晚</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">最高海拔宿点/垭口</span>
+        <span class="kpi-val" id="kpi-elev">1,505 m</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">古道徒步/骑行精华</span>
+        <span class="kpi-val" id="kpi-trail">38.5 km</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">18日全包人均预估</span>
+        <span class="kpi-val" id="kpi-cost">¥19,480 RMB</span>
+      </div>
+    </div>
+
+    <!-- Sub-Navigation Tabs -->
+    <div class="panel-switcher">
+      <button class="panel-tab active" onclick="switchSubPanel('itinerary')" id="ptab-itinerary">每日空间轨迹与食宿拆解</button>
+      <button class="panel-tab" onclick="switchSubPanel('budget')" id="ptab-budget">动态预算精算沙盒 (D3)</button>
+      <button class="panel-tab" onclick="switchSubPanel('visa')" id="ptab-visa">2026 签证与驾照法规铁律</button>
+    </div>
+
+    <!-- PANEL 1: ITINERARY -->
+    <div id="panel-itinerary">
+      <div class="season-bar">
+        <span class="season-label">最佳季节物候热力锚点（深色为黄金月份）：</span>
+        <div class="month-pills" id="month-pills"></div>
+      </div>
+      <div class="day-list" id="day-list-container"></div>
+    </div>
+
+    <!-- PANEL 2: BUDGET SANDBOX -->
+    <div id="panel-budget" style="display:none;">
+      <div class="sandbox-box">
+        <h3 style="font-family:var(--font-serif);margin-bottom:0.85rem;">15–20 日自助游动态成本精算模型</h3>
+        
+        <div class="slider-group">
+          <div class="slider-header">
+            <span>同行分摊人数（影响租车与包车计程车分摊）</span>
+            <span class="mono" id="val-pax">2 人同行</span>
+          </div>
+          <input type="range" min="1" max="4" value="2" id="slider-pax" oninput="updateBudgetModel()">
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-header">
+            <span>行程总天数（16天以上请务必申办30天eVISA或多次签）</span>
+            <span class="mono" id="val-days">18 天</span>
+          </div>
+          <input type="range" min="15" max="20" value="18" id="slider-days" oninput="updateBudgetModel()">
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-header">
+            <span>食宿舒适度档次（古民家青旅 / 温泉商务御三家 / 秘汤一泊二食）</span>
+            <span class="mono" id="val-tier">经济实惠深度档</span>
+          </div>
+          <input type="range" min="1" max="3" value="1" id="slider-tier" oninput="updateBudgetModel()">
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-header">
+            <span>汇率基准（100 日元兑人民币）</span>
+            <span class="mono" id="val-fx">4.80 RMB</span>
+          </div>
+          <input type="range" min="4.4" max="5.4" step="0.05" value="4.8" id="slider-fx" oninput="updateBudgetModel()">
+        </div>
+
+        <!-- D3 Stacked Horizontal Comparison Bar -->
+        <div style="margin-top:1.1rem;">
+          <div style="font-size:0.76rem;font-weight:700;color:var(--ink-secondary);margin-bottom:0.4rem;">
+            分项支出结构对比（上：模式A 公共交通 vs 下：模式B 合规自驾 | 单位：元人民币/人）
+          </div>
+          <svg id="budget-d3-svg" width="100%" height="135"></svg>
+        </div>
+
+        <table class="budget-breakdown-table" id="budget-table"></table>
+      </div>
+    </div>
+
+    <!-- PANEL 3: VISA & TRAFFIC RULES -->
+    <div id="panel-visa" style="display:none;">
+      <div class="sandbox-box">
+        <h3 style="font-family:var(--font-serif);margin-bottom:0.65rem;border-left:3px solid var(--active-theme);padding-left:0.5rem;">一、15–20 日行程签证关键预警与 2026 入境新规</h3>
+        <p style="font-size:0.84rem;color:var(--ink-secondary);margin-bottom:0.75rem;">
+          中国大陆赴日单次旅游电子签（eVISA）常规签发停留期仅为 <strong>15 天</strong>。若选择本导览系统的 <strong>16 至 20 天</strong> 深度大环线，送签时务必向指定代办机构申请 <strong>30 天单次签证</strong>（须提供完整覆盖日期的机票预订单与日文《滞在予定表》），或申请 <strong>三年/五年多次签证</strong>（单次分别允许停留 30 天 / 90 天）。
+        </p>
+        <div style="background:var(--bg-subtle);padding:0.75rem;border-radius:6px;font-size:0.8rem;margin-bottom:0.9rem;border-left:3px solid #BC4749;">
+          <strong>eVISA 在线验真准则：</strong> 在国内机场值机与抵达日本入境审查时，<strong>必须在手机联网环境下登录官方系统展示带有动态防伪倒计时的 Visa Issuance Notice 页面</strong>。任何截屏图片、离线 PDF 或非官方打印件均会被拒绝值机。
+        </div>
+        <div style="background:var(--bg-subtle);padding:0.75rem;border-radius:6px;font-size:0.8rem;margin-bottom:1rem;border-left:3px solid var(--active-theme);">
+          <strong>Visit Japan Web (VJW) 统一申报二维码：</strong> 2026 年起入境审查（外国人入国记录）与海关申报（携带品申告）已合并为<strong>单一二次元代码 (QR Code)</strong>。请于起飞前至少 6 小时在 VJW 官网填妥申报，截屏保存单一 QR 码即可在羽田、成田、关西、中部等国际机场电子闸机秒速通关。
+        </div>
+
+        <h3 style="font-family:var(--font-serif);margin-bottom:0.65rem;border-left:3px solid #BC4749;padding-left:0.5rem;">二、日本自驾法规红线与导航检索核心机制</h3>
+        <p style="font-size:0.84rem;color:var(--ink-secondary);margin-bottom:0.75rem;">
+          日本道路交通法严格遵循 <strong>《1949 年日内瓦道路交通公约》</strong>，对驾驶资格审查极为严苛：
+        </p>
+        <ul style="font-size:0.82rem;color:var(--ink-secondary);padding-left:1.2rem;line-height:1.75;margin-bottom:0.85rem;">
+          <li><strong>中国大陆驾照法律地位：</strong> 中国大陆非日内瓦公约缔约方，大陆驾照及其公证件、翻译件、国内平台自制的所谓“国际驾照认证件”在全日本<strong>均不具备任何法律效力</strong>，持此类证件租车属违法驾驶，触犯日本《道路交通法》第64条（最高可处3年以下徒刑或50万日元罚金并直接遣返驱逐出境）。</li>
+          <li><strong>合法自驾唯一途径：</strong> 驾驶员必须出示<strong>香港/澳门/美国/加拿大/英国/澳洲等公约国正式驾照 + 1949 年格式正本纸质 IDP</strong>（或台湾驾照+JAF官方日文译本）。</li>
+          <li><strong>车载 GPS 专用检索工具：</strong> 本系统每日节点均标注了高精度的 <strong>MapCode (8–10位地标编码)</strong> 及目的地 <strong>固定电话号码 (TEL)</strong>。日本原厂车载中控均内置 Denso/Panasonic 导航系统，直接输入 MapCode 或 TEL 是最准确且无需拼写日文地名的检索方式。</li>
+          <li><strong>公共交通方案全覆盖：</strong> 无合法 IDP 的旅行者请直接使用 <strong>“模式A: 公共交通+eBike”</strong>。全线已精准匹配新干线、特急雷鸟/信浓/飞驒号、地方长途观光巴士及车站电助力单车（Docomo Bike Share / Hello Cycling）无缝衔接。</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Right Column: Sticky Interactive Map + D3 Elevation Profile -->
+  <aside class="viewport-col">
+    <div class="map-wrapper">
+      <div class="map-overlay-top">
+        <div class="map-chip">
+          <span>底图引擎：</span>
+          <select class="tile-select" id="tile-selector" onchange="switchBaseTile(this.value)">
+            <option value="carto" selected>CARTO 高清人文图 (Voyager · 内置密钥)</option>
+            <option value="carto_positron">CARTO 极简浅灰图 (Positron · 高对比度)</option>
+            <option value="gsi">日本国土地理院 (GSI) 官方标准图</option>
+            <option value="gsi_pale">日本国土地理院 (GSI) 淡彩地形图</option>
+            <option value="osm">OpenStreetMap 全球开源底图 (免Key容灾)</option>
+          </select>
+          <button class="btn-util" style="padding:0.18rem 0.45rem;font-size:0.7rem;margin-left:4px;" onclick="openCartoKeyModal()" title="自定义底图API Key配置">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><circle cx="7.5" cy="15.5" r="5.5"></circle><path d="m21 2-9.6 9.6"></path><path d="m15.5 7.5 3 3L22 7l-3-3"></path></svg> 密钥
+          </button>
+        </div>
+        <div class="map-chip">
+          <button class="btn-util" style="padding:0.2rem 0.5rem;font-size:0.72rem;" onclick="resetMapBounds()">全览路线轨迹</button>
+        </div>
+      </div>
+      <div id="map-canvas"></div>
+    </div>
+
+    <!-- Bottom D3 Elevation Profile & Interactive Probe -->
+    <div class="elevation-dock">
+      <div class="dock-header">
+        <span class="dock-title">海拔高程剖面与地形起伏联动图 (点击或滑动探针定位宿场节点)</span>
+        <span class="probe-readout" id="probe-readout">当前聚焦：D1 名古屋·犬山城 (海拔 55m)</span>
+      </div>
+      <svg id="elevation-svg"></svg>
+    </div>
+  </aside>
+</main>
+
+<!-- Modal: Visa Itinerary Table & IDP Notice -->
+<div class="modal-backdrop" id="modal-backdrop" onclick="if(event.target===this)closeModal()">
+  <div class="modal-card" id="modal-content"></div>
+</div>
+
+<script>
+// ============================================================================
+// 1. COMPLETE GEOSPATIAL & ITINERARY DATASET (3 ROUTES, DUAL TRANSPORT MODES)
+// ============================================================================
+const ROUTES_DATA = {
+  r1: {
+    id: "r1",
+    tag: "ROUTE 01 · TOKYO CULTURE, HOKUSAI UKIYO-E, CENTRAL ALPS & HOKURIKU CRAFTS",
+    title: "本州脊梁与千年古道：东京博物馆集群、浮世绘《富岳三十六景》、信越北陆加贺物语与关西名刹纵贯线",
+    desc: "东京(HND/NRT)进 / 大阪关西(KIX)出 · 溯源浮世绘大师葛饰北斋《富岳三十六景》灵感线，串联东京国立博物馆与墨田北斋馆、信州小布施晚年肉笔画圣地、国宝松本城天守、阿尔卑斯上高地、五箇山合掌造、加贺百万石工艺与关西千年名刹。",
+    color: "#264653",
+    daysText: "18 日 / 17 晚",
+    maxElev: "1,505 m (上高地梓川)",
+    trailKm: "42.0 km",
+    baseCostRMB: 19800,
+    bestMonths: [4, 5, 6, 9, 10, 11],
+    nodes: [
+      {
+        day: "D1–D2",
+        name: "东京：下町历史遗存、东京国立博物馆与墨田北斋美术馆（《富岳三十六景》诞生之源）",
+        pref: "东京都",
+        lat: 35.7188, lng: 139.7765,
+        elev: 24, distKm: 0,
+        exp: "【溯源浮世绘与国宝鉴赏】落地东京。漫步谷中银座老街与根津神社千本鸟居；参访上野【东京国立博物馆】（本馆及法隆寺宝物馆，日本最高规格文物典藏）；下午前往墨田区【墨田北斋美术馆】（妹岛和世设计建筑，葛饰北斋诞生地），瞻仰《富岳三十六景·神奈川冲浪里》与《凯风快晴（红富士）》早期珍罕原版拓印，追溯江户平民艺术巅峰。",
+        public: {
+          line: "成田特急N'EX / 京成Skyliner直达市区 + 都营大江户线(两国站)/JR山手线(上野站)",
+          costJPY: 3200,
+          alert: "成田机场出关后在JR东日本旅行服务中心兑换周游券；东京国立博物馆建议预留3小时；墨田北斋馆周一休馆。"
+        },
+        drive: {
+          line: "首都高速都心环线(C1) → 上野线 → 停靠上野公园地下停车场",
+          costJPY: 1950,
+          mapCode: "738 884*77",
+          alert: "东京市区道路复杂狭窄，停车费用极高，首日强烈建议使用公共交通及地下铁通票。"
+        },
+        food: "浅草 并木薮荞麦（百年老铺鸭南蛮荞麦，Tabelog 3.78） & 谷中银座 招财猫今川烧",
+        tabelog: "3.78",
+        stay: "上野 Dormy Inn 徒步圈 / 东京站丸之内大都会酒店 (人均 9,500 JPY)",
+        stayTel: "03-3211-2233"
+      },
+      {
+        day: "D3–D4",
+        name: "浅间山麓：轻井泽高原洋风近代史与《富岳三十六景·轻井泽》山岳记忆",
+        pref: "长野县 (北佐久郡)",
+        lat: 36.3418, lng: 138.6353,
+        elev: 940, distKm: 145,
+        exp: "【对应《富岳三十六景·信州浅间山》】乘坐北陆新干线直达高原名胜轻井泽。对照北斋浮世绘中浅间山火山喷烟意象与中山道驿站旅情；探访旧轻井泽银座通、星野榆树街小镇与近代建筑大师之作；漫步云场池，感受高原落叶松林初秋红叶与冬雪的极致空灵。",
+        public: {
+          line: "JR北陆新干线 Asama号(东京至轻井泽仅1小时10分) + 西武高原观光巴士",
+          costJPY: 5490,
+          alert: "北陆拱形铁路周游券(Hokuriku Arch Pass)全额覆盖北陆新干线普通车指定席；轻井泽站南口可免费接驳星野区域。"
+        },
+        drive: {
+          line: "关越自动车道（藤冈JCT） → 上信越自动车道（碓冰轻井泽IC出） → 国道18号",
+          costJPY: 4100,
+          mapCode: "292 645 831*25",
+          alert: "碓冰峠山道坡度大、弯道急；11月至次年4月出车务必配齐防滑雪胎。"
+        },
+        food: "轻井泽 川上庵（名物核桃酱冷蘸荞麦面，Tabelog 3.65） & 泽村SAWAMURA欧式烘焙",
+        tabelog: "3.65",
+        stay: "轻井泽 虹夕诺雅 / 星野 BEB5 轻井泽 (人均 11,800 JPY)",
+        stayTel: "0267-45-6000"
+      },
+      {
+        day: "D5–D6",
+        name: "栗之乡小布施：葛饰北斋晚年肉笔画圣地（北斋馆·岩松院八方睨之凤凰图） → 国宝善光寺",
+        pref: "长野县 (小布施町/长野市)",
+        lat: 36.6958, lng: 138.3142,
+        elev: 360, distKm: 215,
+        exp: "【全线核心艺术圣地】探访信州“栗之町”小布施。葛饰北斋83岁高龄受豪商高井鸿山资助隐居于此，创作出晚年肉笔画巅峰。参访【北斋馆】（珍藏祭屋台《怒涛图·男浪女浪》天花板真迹）；漫步至古刹【岩松院】，仰望本堂21块榻榻米巨大的北斋绝笔天井画《八方睨之凤皇图》（历经170余年矿物颜料依旧艳丽惊人，无论站立殿内任何角落，凤凰利目皆凝视观者）；午后参拜根本道场【国宝善光寺】体验“戒坛巡礼”（于绝对黑暗的地下回廊中摸索极乐之锁）。",
+        public: {
+          line: "信浓铁道(轻井泽至长野) + 长野电铁特急Yukemuri号(长野至小布施站) + 善光寺门前巴士",
+          costJPY: 2850,
+          alert: "长野电铁特急展望席无需额外加价，先到先得；岩松院凤凰图讲解每15分钟一场，内部禁止摄影。"
+        },
+        drive: {
+          line: "上信越自动车道（信州中野IC出） → 国道403号北斋小道直达小布施町",
+          costJPY: 1650,
+          mapCode: "248 107 432*14",
+          alert: "小布施老街保存有传统“栗之小径”，车辆需停放于外围町营停车场后步行入内。"
+        },
+        food: "小布施堂 栗蒸羊羹与秋季限定朱雀栗子泥（Tabelog 3.72） & 善光寺门前 八幡屋礒五郎七味唐辛子",
+        tabelog: "3.72",
+        stay: "小布施 桝一客殿（古酿酒厂改建精品和宿） / 长野 大都会酒店 (人均 8,900 JPY)",
+        stayTel: "026-247-2111"
+      },
+      {
+        day: "D7–D8",
+        name: "国宝松本城（五重木造天守） → 安昙野山葵田 → 北阿尔卑斯上高地梓川（神之降临地）",
+        pref: "长野县 (松本市/安昙野)",
+        lat: 36.2380, lng: 137.9720,
+        elev: 1505, distKm: 295,
+        exp: "参访日本现存最古老五重六层木造天守【国宝松本城】，在黑漆白灰之间品读战国防御智慧；北上安昙野清泉涌水保护区，在黑泽明电影《梦》取景地【大王山葵农场】看古朴水车转动；深入北阿尔卑斯圣地【上高地】（梓川清流、大正池枯木林与穗高连峰倒影），在河童桥听落叶松林风声（1–2月封山期调整为地狱谷野猿公苑雪猴泡汤与美原高原雪原漫步）。",
+        public: {
+          line: "JR篠之井线特急Shinano至松本；换乘Alpico电铁至新岛岛站，转专用环保登山巴士至上高地",
+          costJPY: 4750,
+          alert: "上高地属国家公园核心保护区，禁止任何外来私家车驶入；大正池下车徒步至河童桥单程约1小时。"
+        },
+        drive: {
+          line: "长野自动车道（松本IC出） → 国道158号至泽渡（Sawando）停车场换乘穿梭接驳车",
+          costJPY: 2100,
+          mapCode: "405 281 723*66",
+          alert: "自驾车辆必须停靠在泽渡停车场，往返穿梭巴士票价 2,400 JPY/人。"
+        },
+        food: "松本 山贼烧（酥脆香蒜炸鸡排） & 安昙野 现磨现擦生山葵冷手打十割荞麦面",
+        tabelog: "3.68",
+        stay: "上高地 帝国酒店（秋季） / 松本 扉温泉 明神馆（冬季雪见露天） (人均 14,500 JPY)",
+        stayTel: "0263-31-2000"
+      },
+      {
+        day: "D9–D10",
+        name: "木曾路江户宿场（妻笼宿·马笼宿古道） → 飞驒高山三町通老街",
+        pref: "长野县 / 岐阜县",
+        lat: 35.5781, lng: 137.5684,
+        elev: 580, distKm: 390,
+        exp: "踏上江户五街道之一的【中山道·木曾路】，徒步妻笼宿至马笼宿约8公里的森林石板古道，保留江户时代的黑色木格窗与水车；午后穿越安房山脉隧道抵达飞驒高山，漫步“上三之町”传统建造物群保护区，触摸江户官府“高山阵屋”四百年杉木柱梁。",
+        public: {
+          line: "JR中央本线特急至中津川站，转浓飞木曾巴士；前往高山转JR高山本线特急Hida号",
+          costJPY: 5200,
+          alert: "妻笼至马笼古道徒步约需2.5–3小时，可在观光案内所办理行李异地托运送达服务。"
+        },
+        drive: {
+          line: "国道19号木曾古道快速路 → 国道158号安房岭收费隧道直通飞驒高山",
+          costJPY: 1800,
+          mapCode: "191 195 210*33",
+          alert: "安房岭隧道长达4.3公里，出隧道后气温骤降，冬季路面易有暗冰。"
+        },
+        food: "飞驒高山 坂口屋 飞驒牛握寿司（Tabelog 3.66） & 朴叶味噌炭火和牛烧肉",
+        tabelog: "3.66",
+        stay: "飞驒高山 本阵平野屋 花兆庵 / 高山樱庵 (人均 9,800 JPY)",
+        stayTel: "0577-34-1234"
+      },
+      {
+        day: "D11–D12",
+        name: "世界文化遗产【五箇山·相仓合掌集落】 → 加贺工艺名都金泽（兼六园·21世纪美术馆）",
+        pref: "富山县 / 石川县",
+        lat: 36.5613, lng: 136.6562,
+        elev: 210, distKm: 485,
+        exp: "避开白川乡喧嚣商业人流，深入富山县深山更为原始静谧的【五箇山相仓合掌村】，参访60度陡峭茅草屋顶与江户手抄和纸作坊；午后直抵加贺百万石文化之都【金泽】，漫步日本三大名园之首“兼六园”（秋季红叶、冬季宏伟雪吊挂），对比妹岛和世设计的“金泽21世纪美术馆”泳池装置；夜游东茶屋街加贺友禅染与金箔工坊。",
+        public: {
+          line: "高山站搭乘浓飞/北铁世界遗产巴士至五箇山相仓口，后直抵金泽站东口",
+          costJPY: 3900,
+          alert: "世界遗产巴士需提前在浓飞巴士官网预约指定席，旺季座位紧俏。"
+        },
+        drive: {
+          line: "东海北陆自动车道（五箇山IC出） → 白川乡IC → 北陆自动车道（金泽西IC）",
+          costJPY: 2450,
+          mapCode: "41 529 184*22",
+          alert: "五箇山村落内道路狭窄，请依指示停入村口公营停车场并缴付保存协力金。"
+        },
+        food: "金泽 近江町市场 山さん寿司 海鲜丼（Tabelog 3.74） & 加贺传统车麸关东煮",
+        tabelog: "3.74",
+        stay: "金泽 日航酒店 / 金泽 白草庵 和室旅馆 (人均 8,500 JPY)",
+        stayTel: "076-234-1111"
+      },
+      {
+        day: "D13–D14",
+        name: "越前禅宗大本山永平寺 → 芦原温泉 → 东寻坊安山岩海蚀崖",
+        pref: "福井县",
+        lat: 36.0652, lng: 136.2216,
+        elev: 125, distKm: 565,
+        exp: "乘北陆新干线至福井，深入大正元年杉树遮天蔽日的日本曹洞宗大本山【永平寺】（770年道元禅师清修圣地，漫步伞松阁欣赏昭和名家156幅花鸟草木天井画）；傍晚前往日本海狂澜激荡的【东寻坊】辉石安山岩柱状节理海蚀崖，听滔天海浪与海鸥啼鸣。",
+        public: {
+          line: "北陆新干线至福井站，换乘京福巴士特急永平寺线；转越前铁道至芦原温泉",
+          costJPY: 3100,
+          alert: "永平寺内须脱鞋换穿拖鞋，木质走廊极凉，建议自备厚保暖袜子。"
+        },
+        drive: {
+          line: "北陆自动车道（福井北IC出） → 国道364号永平寺溪谷 → 越前海岸线",
+          costJPY: 1750,
+          mapCode: "63 658 310*15",
+          alert: "东寻坊海蚀崖边缘无防护栏，海风强劲，拍照注意脚下湿滑岩面。"
+        },
+        food: "越前 越前蟹（冬令松叶蟹极致刺身/蒸蟹） & 越前萝卜泥冷荞麦面（Oroshi Soba）",
+        tabelog: "3.69",
+        stay: "芦原温泉 灰屋（Haiya）传统茶室风旅馆 (人均 13,500 JPY)",
+        stayTel: "0776-78-5555"
+      },
+      {
+        day: "D15–D16",
+        name: "古都京都：三十三间堂（千尊观音群雕） → 南禅寺水路阁 → 宇治平等院凤凰堂",
+        pref: "京都府",
+        lat: 35.0116, lng: 135.7681,
+        elev: 55, distKm: 690,
+        exp: "乘坐特急雷鸟号沿琵琶湖西岸南下抵达京都。参拜【三十三间堂】瞻仰长达120米正殿内整齐排列的1001尊平安时代国宝木造千手观音立像与风神雷神像；避开拥挤清水寺，漫步【南禅寺】方丈枯山水与明治时代古红砖【水路阁】；前往宇治参拜【平等院凤凰堂】（10日元硬币图案建筑原型，藤原赖通建造的净土宗池泉舟游式名园）。",
+        public: {
+          line: "JR特急雷鸟号(Thunderbird)直达京都站；京阪电车与JR奈良线覆盖宇治",
+          costJPY: 4400,
+          alert: "三十三间堂堂内严禁拍照，建议租借官方语音导览深入理解平安雕刻精髓。"
+        },
+        drive: {
+          line: "名神高速（京都东IC出），建议停放酒店车库后选用地下铁与步行",
+          costJPY: 2800,
+          mapCode: "7 618 412*08",
+          alert: "京都古城区路窄单行道多且车位昂贵，市区游览推荐地下铁+Bus一日券。"
+        },
+        food: "京都 南禅寺 顺正 汤豆腐（Tabelog 3.63） & 宇治 中村藤吉 本店生茶冻抹茶芭菲",
+        tabelog: "3.63",
+        stay: "京都 八条口 大和ROYNET酒店 / 岚山 渡月亭 (人均 9,800 JPY)",
+        stayTel: "075-693-0011"
+      },
+      {
+        day: "D17–D18",
+        name: "大阪水都漫步（中之岛近代建筑·木津批发市场） → 关西国际机场(KIX)返航",
+        pref: "大阪府",
+        lat: 34.6937, lng: 135.5023,
+        elev: 10, distKm: 765,
+        exp: "漫步水都大阪核心【中之岛】，欣赏红砖造大阪市中央公会堂（冈田信一郎设计）与中之岛美术馆；清晨至市民生鲜后厨房【木津批发市场】享用新鲜海鲜盖饭，采购关西传统昆布与伴手礼；下午搭乘JR关西空港特急 Haruka号直达机场，顺利出境返程。",
+        public: {
+          line: "大阪Osaka Metro地下铁御堂筋线 + JR关西特急 Haruka号(35分钟直达关西机场)",
+          costJPY: 2850,
+          alert: "Haruka特急建议提前在JR西日本订票系统绑定IC卡，可享外国人特惠折扣票。"
+        },
+        drive: {
+          line: "阪神高速1号环状线 → 阪神高速4号湾岸线至关西国际机场联络桥还车",
+          costJPY: 2150,
+          mapCode: "1 285 419*50",
+          alert: "机场跨海大桥在强台风天气可能临时管制封闭，返程请预留至少3.5小时提前量。"
+        },
+        food: "大阪 黑门/木津市场 炭火烤河豚定食 & 福太郎 正宗大阪烧/葱油烧",
+        tabelog: "3.71",
+        stay: "大阪 难波辉盛阁国际公寓 / 温暖的家 (当日返程) (人均 8,800 JPY)",
+        stayTel: "06-6635-7111"
+      }
+    ]
+  },
+  r2: {
+    id: "r2",
+    tag: "ROUTE 02 · SAN'IN MYTH COAST, SHIMANAMI & SHIKOKU KARST",
+    title: "山阴神话海岸与濑户内海群岛：出云古国、石见银山、岛波海道与四国秘境环线",
+    desc: "冈山/关西进出大环线 · 探索《古事记》出云神话海岸、16世纪世界白银矿山、岛波海道跨海骑行与四国喀斯特云端草原。",
+    color: "#BC4749",
+    daysText: "17 日 / 16 晚",
+    maxElev: "1,400 m (四国喀斯特)",
+    trailKm: "52.0 km (含跳岛骑行)",
+    baseCostRMB: 18650,
+    bestMonths: [3, 4, 5, 6, 9, 10, 11],
+    nodes: [
+      {
+        day: "D1–D2",
+        name: "仓敷美观 → 备中松山城 → 吹屋故乡赤铜老街",
+        pref: "冈山县",
+        lat: 34.8087, lng: 133.6221,
+        elev: 430, distKm: 0,
+        exp: "清晨漫步无游客的仓敷川白壁柳岸与大原美术馆；北上吉备高原探访日本唯一现存山城天守【备中松山城】与赤铜色石州瓦矿山町【吹屋】。",
+        public: {
+          line: "JR伯备线至备中高梁站 + 观光案内所拼车计程车 (定额包车)",
+          costJPY: 4200,
+          alert: "高梁市观光案内所提供前往备中松山城与吹屋老街的定额拼车计程车（人均约2,200日元），需提前1天网上预约。"
+        },
+        drive: {
+          line: "冈山提车 → 冈山自动车道（贺阳IC） → 县道85号吹屋街道",
+          costJPY: 3100,
+          mapCode: "276 412 508*22",
+          alert: "备中松山城5合目停车场换乘10分钟登城专车。"
+        },
+        food: "仓敷 名代炸猪排 (Demi-Katsu Don) & 濑户内海鲜散寿司",
+        tabelog: "3.59",
+        stay: "仓敷 Dormy Inn 阿智之汤 / 有邻庵古民家 (人均 7,200 JPY)",
+        stayTel: "086-426-5489"
+      },
+      {
+        day: "D3–D5",
+        name: "松江城堀川 → 足立美术馆 → 出云大社 → 日御碕灯塔",
+        pref: "岛根县",
+        lat: 35.4018, lng: 132.6854,
+        elev: 45, distKm: 165,
+        exp: "乘小舟环游国宝【松江城】护城河；观摩连续二十年日本第一的【足立美术馆】枯山水庭园；参拜神道最高规格的【出云大社】巨型注连绳，徒步至日本海玄武岩断崖上的日御碕灯塔。",
+        public: {
+          line: "JR特急 Yakumo（八云号）+ 一畑电铁（宍道湖畔百年电车）",
+          costJPY: 6800,
+          alert: "安来站出口有足立美术馆免费往返接驳巴士（每30分钟一班）；启用『JR山阴&冈山地区周游券』极划算。"
+        },
+        drive: {
+          line: "米子自动车道 → 山阴自动车道（松江玉造IC → 出云IC）",
+          costJPY: 4200,
+          mapCode: "163 241 667*14",
+          alert: "日御碕海岸公路紧贴日本海悬崖，傍晚日落时分风景壮丽。"
+        },
+        food: "出云 羽根屋 三层割子荞麦面 (Warigo Soba) & 宍道湖大和蚬汤",
+        tabelog: "3.66",
+        stay: "松江 御宿野乃温泉酒店 / 出云佳水苑 (人均 8,200 JPY)",
+        stayTel: "0852-24-5489"
+      },
+      {
+        day: "D6–D7",
+        name: "石见银山（大森武家町·龙源寺间步） → 温泉津温泉",
+        pref: "岛根县",
+        lat: 35.1056, lng: 132.4408,
+        elev: 185, distKm: 245,
+        exp: "骑电动单车深入16世纪占全球白银产量三分之一的世界遗产【石见银山】（大森町武家屋敷与古代手凿矿道龙源寺间步）；夜宿原生态银山运银古港【温泉津温泉】，在龙御前神社看震撼的石见夜神乐。",
+        public: {
+          line: "JR山阴本线至大田市站 + 石见交通巴士 + 银山e-Bike",
+          costJPY: 3500,
+          alert: "石见银山矿道距离老街约2.3公里缓上坡，务必在『河村租车行』租借电动助力自行车。"
+        },
+        drive: {
+          line: "山阴自动车道（大田中央·三瓶山IC） → 石见银山世界遗产中心停车场",
+          costJPY: 1200,
+          mapCode: "332 518 092*41",
+          alert: "大森老街及矿道禁止外来私家车驶入，须停在遗产中心换乘电动单车或当地路线巴士。"
+        },
+        food: "大森町 群言堂古民家咖啡 乡土野菜饭 & 温泉津奉行饭",
+        tabelog: "3.49",
+        stay: "温泉津温泉 辉云庄 / 旅馆ますや (人均 8,900 JPY)",
+        stayTel: "0855-65-2008"
+      },
+      {
+        day: "D8–D9",
+        name: "津和野（山阴小京都） → 萩城城下町（明治维新源流）",
+        pref: "岛根县 / 山口县",
+        lat: 34.4141, lng: 131.3911,
+        elev: 60, distKm: 390,
+        exp: "漫步鲤鱼游弋的【津和野】殿町水渠与太皷谷稻成神社千本鸟居；西行至毛利长州藩大本营【萩（Hagi）】，在保存完好的江户武家土墙巷弄、松下村塾与夏蜜柑果园间骑行。",
+        public: {
+          line: "JR山阴本线特急 Super Oki + 防长巴士（津和野直达萩市）",
+          costJPY: 5400,
+          alert: "萩市八丁大门旁可租借单车（500日元/日），整个城下町地势平坦，是最适合单车漫游的古都。"
+        },
+        drive: {
+          line: "国道9号穿行中国山地（益田 → 津和野） → 县道11号抵萩市",
+          costJPY: 0,
+          mapCode: "256 184 312*77",
+          alert: "全线为免费高等级国道，车流极少，沿阿武川峡谷风光秀丽。"
+        },
+        food: "萩市 割烹千代 甘鲷鱼定食 & 见兰牛烤肉饭",
+        tabelog: "3.56",
+        stay: "萩本阵温泉旅馆 / 萩城三之丸北门屋敷 (人均 8,500 JPY)",
+        stayTel: "0838-22-5252"
+      },
+      {
+        day: "D10–D12",
+        name: "竹原老街 → 尾道坂道 → 岛波海道跨海骑行（生口岛·大三岛）",
+        pref: "广岛县 / 爱媛县",
+        lat: 34.2483, lng: 133.0044,
+        elev: 75, distKm: 610,
+        exp: "经安艺小京都【竹原】抵坂道与渡船之城【尾道】；租车或骑行跨越被誉为全球最美水上单车道的【岛波海道】，探访大三岛【大山祇神社】（集全日本八成国宝甲胄刀剑的武神总本社）与伊东丰雄建筑博物馆。",
+        public: {
+          line: "JR吴线/山阳本线至尾道 + 尾道渡船 + 岛波海道单车/高速巴士",
+          costJPY: 6200,
+          alert: "尾道港『Shimanami Rent-a-Cycle』可异地还车，行李可通过佐川急便当日从尾道直寄松山道后酒店。"
+        },
+        drive: {
+          line: "山阳道尾道IC → 西濑户自动车道（岛波海道跨海大桥群）",
+          costJPY: 4800,
+          mapCode: "406 812 553*19",
+          alert: "大三岛IC下高速即达大山祇神社；来岛海峡大桥设有中途停车观景台（来岛海峡SA）。"
+        },
+        food: "尾道 朱华园/东珍康 小鱼干背脂拉面 & 大三岛 大渔海鲜丼",
+        tabelog: "3.64",
+        stay: "尾道 U2 单车主题酒店 / 大三岛 富士见园 (人均 8,600 JPY)",
+        stayTel: "0848-21-0550"
+      },
+      {
+        day: "D13–D15",
+        name: "松山道后温泉 → 内子座 → 四国喀斯特 → 祖谷溪秘境",
+        pref: "爱媛县 / 高知县 / 德岛县",
+        lat: 33.8581, lng: 133.8962,
+        elev: 1400, distKm: 795,
+        exp: "浸泡修缮完成的【道后温泉本馆】；探访木蜡商贸镇【内子町】与1916年木造歌舞伎剧场【内子座】；穿越海拔1400米的云端草甸【四国喀斯特】；深入日本三大秘境【祖谷溪】（藤桥与落合传统集落）。",
+        public: {
+          line: "JR予赞线至内子 + JR土赞线特急南风号至大步危站 + 四国交通巴士",
+          costJPY: 7900,
+          alert: "公共交通无法直接横穿四国喀斯特山脊，模式A游客从松山经内子乘JR经多度津直达大步危进入祖谷溪。"
+        },
+        drive: {
+          line: "松山道内子五十崎IC → 国道33号 → 天狗高原（四国喀斯特） → 国道439号抵祖谷",
+          costJPY: 2800,
+          mapCode: "769 214 883*51",
+          alert: "四国喀斯特天狗高原至姬鹤平段视野震撼；进入奥祖谷段道路较窄，会车时善用待避所（待避所）。"
+        },
+        food: "松山 宇和岛生鲷鱼饭 (Tai-meshi) & 祖谷 手打太切荞麦面与烤岩鱼",
+        tabelog: "3.61",
+        stay: "新祖谷温泉 蔓桥酒店（乘缆车泡天空露天温泉）(人均 11,500 JPY)",
+        stayTel: "0883-87-2171"
+      },
+      {
+        day: "D16–D17",
+        name: "金刀比罗宫 → 濑户内海丰岛美术馆 → 濑户大桥返冈山",
+        pref: "香川县 / 冈山县",
+        lat: 34.4671, lng: 134.0842,
+        elev: 521, distKm: 960,
+        exp: "拾级 1368 阶参拜海上守护神【金刀比罗宫】与圆山应举障壁画；从高松港乘快船登【丰岛】，在唐柜梯田与水滴形丰岛美术馆静坐听风；最后跨越濑户大桥返回冈山/关西。",
+        public: {
+          line: "JR土赞线/高松琴平电铁 + 丰岛高速船 + JR快速 Marine Liner 跨海",
+          costJPY: 5600,
+          alert: "丰岛美术馆实行全预约制，出发前务必在『Setouchi Triennale / Benesse Art Site』官网锁定入场时段。"
+        },
+        drive: {
+          line: "高松道善通寺IC → 高松港停车场（乘船往返丰岛） → 濑户中央自动车道还车",
+          costJPY: 6100,
+          mapCode: "77 552 109*82",
+          alert: "不建议开车上丰岛（渡轮运车贵且岛上租电动单车更自由），将车停在高松港Sunport地下车库即可。"
+        },
+        food: "香川 须崎食料品店/山越乌冬 手擀赞岐釜玉乌冬 (仅450日元!)",
+        tabelog: "3.91",
+        stay: "高松 皇家花园酒店 / 冈山格兰比亚酒店 (人均 7,800 JPY)",
+        stayTel: "087-823-2222"
+      }
+    ]
+  },
+
+  r3: {
+    id: "r3",
+    tag: "ROUTE 03 · TOHOKU SANRIKU TRAIL, OIRASE & JOMON SITES",
+    title: "奥羽山脉与北国秘汤：三陆潮风步道、奥入濑溪流、白神山地与出羽三山巡礼",
+    desc: "仙台/东京进出 · 追随松尾芭蕉《奥之细道》，深入远野物语民俗盆地、三陆断崖海岸、乳白色千人混浴秘汤与五千年绳文遗迹。",
+    color: "#386641",
+    daysText: "16 日 / 15 晚",
+    maxElev: "1,040 m (八甲田·酸汤)",
+    trailKm: "44.0 km",
+    baseCostRMB: 18200,
+    bestMonths: [5, 6, 7, 8, 9, 10],
+    nodes: [
+      {
+        day: "D1–D3",
+        name: "仙台盐釜鱼市 → 平泉中尊寺 → 远野物语民俗盆地",
+        pref: "宫城县 / 岩手县",
+        lat: 39.3275, lng: 141.5332,
+        elev: 275, distKm: 0,
+        exp: "清晨在东北最大金枪鱼港【盐釜水产仲卸市场】自选海鲜丼；北上世界遗产【平泉】（中尊寺金色堂与毛越寺净土庭园）；转入柳田国男《远野物语》故乡【远野盆地】，骑行探访南部曲屋古农家与河童渊。",
+        public: {
+          line: "东北新干线 + JR东北本线/釜石线 + 远野观光案内所e-Bike",
+          costJPY: 6800,
+          alert: "启用『JR东日本东北地区周游券 (5日或10日)』，新干线Hayabusa号全线指定席与JR巴士均可免费预约。"
+        },
+        drive: {
+          line: "仙台提车 → 东北自动车道（平泉前泽IC） → 釜石自动车道（远野IC）",
+          costJPY: 4200,
+          mapCode: "167 312 409*33",
+          alert: "远野千叶家曲屋及传承园均配有大型免费停车场。"
+        },
+        food: "盐釜市场 自制特选金枪鱼海鲜丼 & 远野 铁锅烤羊肉 (Jingisukan)",
+        tabelog: "3.58",
+        stay: "远野 あえりあ远野 / 仙台 御宿野乃温泉酒店 (人均 7,600 JPY)",
+        stayTel: "0198-60-1700"
+      },
+      {
+        day: "D4–D5",
+        name: "三陆复兴国立公园（净土之滨·北山崎） → 八户陆奥潮风步道",
+        pref: "岩手县 / 青森县",
+        lat: 40.0021, lng: 141.9365,
+        elev: 200, distKm: 185,
+        exp: "乘三陆铁道纵贯太平洋锯齿海岸，泛舟宫古【净土之滨】白色流纹岩奇石湾，登临【北山崎】200米海蚀巨崖；抵八户徒步《国家地理》盛赞的【陆奥潮风步道】种差海岸天然草甸段。",
+        public: {
+          line: "三陆铁道リアス线（宫古→久慈海岸景观列车）+ JR八户线",
+          costJPY: 4950,
+          alert: "八户『八食中心（Hasshoku Center）』可现买扇贝、北寄贝与海胆，在七厘村炭火现烤（炭火席费仅400日元）。"
+        },
+        drive: {
+          line: "宫古盛冈横断道路 → 三陆沿岸道路（宫古 → 普代北山崎 → 八户是川IC，全线免费高速!）",
+          costJPY: 0,
+          mapCode: "458 712 301*18",
+          alert: "复兴工程新建成的『三陆沿岸道路』绝大部分路段免收过路费，隧道桥梁平顺，自驾性价比极高。"
+        },
+        food: "宫古 瓶装生海胆盖饭 (Bin-don) & 八食中心 七厘村炭火烧海鲜",
+        tabelog: "3.63",
+        stay: "宫古 净土之滨公园酒店 / 八户 Dormy Inn (人均 7,900 JPY)",
+        stayTel: "0178-22-5489"
+      },
+      {
+        day: "D6–D8",
+        name: "奥入濑溪流 14km 全程徒步 → 十和田湖 → 八甲田山·酸汤温泉",
+        pref: "青森县",
+        lat: 40.6483, lng: 140.8517,
+        elev: 925, distKm: 310,
+        exp: "在烧山寄送行李，轻装徒步 14km 【奥入濑溪流】苔藓森林与阿修罗激流至十和田湖子之口；次日攀登八甲田山高山田代湿原，连住三百年历史的全柏木造千人风吕秘汤【酸汤温泉（汤治部）】。",
+        public: {
+          line: "JR东北巴士『湖号（Mizuumi-go）』八户/青森往返十和田湖",
+          costJPY: 5800,
+          alert: "持 JR 东日本东北周游券可免费无限次乘坐 JR 东北巴士奥入濑全线；石户至子之口设有行李当日托运服务。"
+        },
+        drive: {
+          line: "八户 → 国道102号（奥入濑溪流并走段） → 国道103号八甲田山雪回廊线",
+          costJPY: 0,
+          mapCode: "704 251 442*66",
+          alert: "自驾者可将车停在终点子之口，乘早班JR巴士回到石户，顺流徒步走回子之口取车前往酸汤温泉。"
+        },
+        food: "十和田 姬鳟鱼刺身定食 & 酸汤温泉 鬼面庵八甲田山菜荞麦面",
+        tabelog: "3.53",
+        stay: "八甲田 酸汤温泉旅馆（汤治部一泊二食仅 9,500 JPY!）",
+        stayTel: "017-738-6400"
+      },
+      {
+        day: "D9–D10",
+        name: "三内丸山绳文遗址 → 弘前城 → 白神山地（十二湖·青池）",
+        pref: "青森县 / 秋田县",
+        lat: 40.5562, lng: 139.9694,
+        elev: 250, distKm: 445,
+        exp: "考察距今 5500 年的世界遗产【三内丸山绳文巨型聚落遗址】与津轻藩【弘前城】；搭乘日本海绝景列车五能线，深入世界自然遗产【白神山地】原始山毛榉林与幻境般的钴蓝色【青池】。",
+        public: {
+          line: "JR奥羽本线 + JR五能线『Resort白神号』观光列车 + 弘南巴士十二湖线",
+          costJPY: 5400,
+          alert: "五能线『Resort白神号』全车指定席，紧贴日本海礁石行驶，车内有津轻三味线现场演奏与传统说书。"
+        },
+        drive: {
+          line: "青森 → 国道7号弘前 → 鯵泽 → 国道101号日本海日落大道 → 十二湖森之物产馆",
+          costJPY: 800,
+          mapCode: "675 318 229*44",
+          alert: "十二湖奥十二湖停车场步行至青池仅需10分钟，林间步道平坦舒适。"
+        },
+        food: "弘前 法式苹果派与津轻乡土伊嘎面 & 深浦 金枪鱼石烧定食",
+        tabelog: "3.57",
+        stay: "黄金崎不老不死温泉（海边日落露天风吕）/ 能代镇酒店 (人均 8,800 JPY)",
+        stayTel: "0173-74-3500"
+      },
+      {
+        day: "D11–D13",
+        name: "角馆武家屋敷 → 田泽湖 → 乳头温泉乡（七汤秘汤巡礼）",
+        pref: "秋田县",
+        lat: 39.8051, lng: 140.7902,
+        elev: 730, distKm: 635,
+        exp: "漫步陆奥小京都【角馆】黑色板垣武家屋敷（青柳家、石黑家）；途经日本最深琉璃色湖泊【田泽湖】；深入驹岳山麓的秘汤圣地【乳头温泉乡】，持《汤巡帖》乘森林小巴泡遍鹤之汤、妙乃汤等七座百年乳白色硫磺泉。",
+        public: {
+          line: "秋田新干线 Komachi号 + 羽后交通乳头线巴士 + 温泉乡汤巡号接驳车",
+          costJPY: 6900,
+          alert: "乳头温泉乡『鹤之汤』提前半年开放电话/官网预约，若未订到住宿，可住妙乃汤或大釜温泉并持汤巡帖日归泡鹤之汤。"
+        },
+        drive: {
+          line: "秋田自动车道 → 国道46号 → 国道341号 → 县道194号乳头山岳线",
+          costJPY: 2400,
+          mapCode: "433 652 118*27",
+          alert: "通往鹤之汤的最后2.5公里为森林砂石路，慢速通行即可，各温泉宿门口均设专属免费车位。"
+        },
+        food: "角馆 比内地鸡亲子丼 & 乳头温泉 芋之子汁（山芋菌菇味噌锅）与烤米棒",
+        tabelog: "3.68",
+        stay: "乳头温泉乡 鹤之汤本阵 / 大釜温泉 / 妙乃汤 (人均 11,500 JPY)",
+        stayTel: "0187-46-2139"
+      },
+      {
+        day: "D14–D16",
+        name: "出羽三山（羽黑山杉并木） → 山寺（立石寺） → 东京/仙台返程",
+        pref: "山形县 / 宫城县",
+        lat: 38.3129, lng: 140.4368,
+        elev: 495, distKm: 880,
+        exp: "徒步修验道圣地【羽黑山】2446级石阶与树龄五百年的巨杉参道，参拜国宝羽黑山五重塔，在斋馆品尝山伏精进料理；登临松尾芭蕉名句“闲寂古池、蝉鸣渗入岩石”诞生地【山寺（立石寺）】悬崖五大堂，乘新干线返程。",
+        public: {
+          line: "JR羽越本线至鹤冈 + 庄内巴士羽黑山线 + JR仙山线至山寺站 + 山形新干线",
+          costJPY: 11200,
+          alert: "山寺站出站过桥即达登山口，车站售票处及桥头商店均可寄存大件行李（500日元）。"
+        },
+        drive: {
+          line: "日本海东北道（鹤冈西IC） → 月山道路 → 山形自动车道（山形北IC） → 仙台还车",
+          costJPY: 4900,
+          mapCode: "62 419 773*15",
+          alert: "羽黑山游客可停在随神门停车场走完一圈，或直接驾车经收费道路抵山顶后再下行参拜五重塔。"
+        },
+        food: "羽黑山斋馆 传统精进料理 & 山形 牛肉芋煮锅与手打板荞麦面",
+        tabelog: "3.65",
+        stay: "鹤冈 SUIDEN TERRASSE（坂茂设计水田酒店）/ 山形大都会酒店 (人均 9,200 JPY)",
+        stayTel: "0235-25-7424"
+      }
+    ]
+  }  ,
+  r4: {
+    id: "r4",
+    tag: "ROUTE 04 · MURAKAMI HARUKI: HOKKAIDO WILD SHEEP CHASE & DANCE DANCE DANCE",
+    title: "【村上春树·北海道】北国荒原与牧羊巡礼：《寻羊冒险记》《舞！舞！舞！》与〈UFO降落在钏路〉纵贯线",
+    desc: "新千岁(CTS)进 / 钏路(KUH)出 · 深入札幌『海豚宾馆』街区、小樽旧仓库、十二瀑町真实原型【美深町仁宇布高地牧场】、稚内极北与钏路湿原。",
+    color: "#3D5A80",
+    daysText: "16 日 / 15 晚",
+    maxElev: "680 m (美深·仁宇布高地)",
+    trailKm: "36.0 km",
+    baseCostRMB: 20600,
+    bestMonths: [5, 6, 7, 8, 9, 10],
+    nodes: [
+      {
+        day: "D1–D3",
+        name: "札幌（薄野·植物园·『海豚宾馆』原型区） → 小樽石造仓库群",
+        pref: "北海道 (道央)",
+        lat: 43.0618, lng: 141.3545,
+        elev: 28, distKm: 0,
+        exp: "【对应《寻羊冒险记》《舞！舞！舞！》】在札幌中岛公园与旧道厅周边寻访小说中阴郁古怪的『海豚宾馆』演变为玻璃幕墙『海豚大厦』的都市空间隐喻；漫步北海道大学植物园冷杉林；乘函馆本线貼石狩湾海岸赴【小樽】，在主人公重返北国散步的北运河石造仓库与旧手宫线铁轨间听海浪。",
+        public: {
+          line: "JR快速 Airport号（新千岁→札幌→小樽）+ 札幌市电",
+          costJPY: 4280,
+          alert: "启用『JR北海道铁路周游券 (7日或10日)』，新千岁至小樽、旭川、稚内及网走的特急指定席均可直接覆盖。"
+        },
+        drive: {
+          line: "新千岁机场提车 → 道央自动车道 → 札樽自动车道（小樽IC）",
+          costJPY: 3150,
+          mapCode: "493 690 412*55",
+          alert: "札幌薄野夜晚单行道多，建议停入酒店立体车库后步行前往老派黑胶爵士喫茶店『Bossa』。"
+        },
+        food: "札幌 成吉思汗达摩炭火烤羊肉 & 小樽 伊势鮨/政寿司 虾夷前握寿司",
+        tabelog: "3.74",
+        stay: "札幌 中岛公园 船舶花园酒店 / 小樽 OMO5 古建筑改造酒店 (人均 8,200 JPY)",
+        stayTel: "011-513-0700"
+      },
+      {
+        day: "D4–D5",
+        name: "旭川 → 盐狩峠 → 士别（绵羊与云之丘·黑面羊牧场）",
+        pref: "北海道 (道北)",
+        lat: 44.1785, lng: 142.3921,
+        elev: 310, distKm: 195,
+        exp: "【对应《寻羊冒险记》】乘宗谷本线北上，翻越天盐川与石狩川分水岭【盐狩峠】（三浦绫子文学馆与落叶松林）；抵达北海道缅羊养殖核心地【士别】，在『羊与云之丘』观察萨福克黑面羊群与北海道明治拓荒期的牧羊史料，与小说中『背上有星形斑纹的羊』形成鲜活历史互文。",
+        public: {
+          line: "JR宗谷本线 特急宗谷号(Soya) / 萨罗别兹号(Sarobetsu) + 士别市内计程车",
+          costJPY: 6400,
+          alert: "宗谷本线特急班次每日仅3班，务必提前在 Ekinet 锁定指定席；士别站距绵羊之丘约10分钟车程。"
+        },
+        drive: {
+          line: "道央自动车道（比布JCT → 士别剑渊IC） → 国道40号",
+          costJPY: 4400,
+          mapCode: "558 286 114*28",
+          alert: "道北路段笔直宽阔，注意防范野生虾夷鹿（Ezo-shika）傍晚横穿公路。"
+        },
+        food: "旭川 梅光轩/蜂屋 猪骨鱼介双汤酱油拉面 & 士别 萨福克高地羔羊肉排",
+        tabelog: "3.62",
+        stay: "士别 Grand Hotel / 羊与云之丘 牧场山庄 (人均 7,800 JPY)",
+        stayTel: "0165-23-1234"
+      },
+      {
+        day: "D6–D8",
+        name: "【十二瀑町真实原型】美深町 → 仁宇布高地（松山东农场·雨雾之瀑）",
+        pref: "北海道 (中川郡美深町)",
+        lat: 44.5714, lng: 142.5789,
+        elev: 680, distKm: 265,
+        exp: "【全线核心文学圣地：《寻羊冒险记》终极现场】深入村上春树笔下『十二瀑町（Junitaki-cho）』的真实地理原型——【美深町（Bifuka）】。沿旧国铁美幸线废弃路基进入深山高地聚落【仁宇布（Niupu）】，造访小说中『老鼠』山顶别墅与美军牧场原型【松山东农场（松山农场）】，徒步冷杉原生林深处的【雨雾之瀑】与【女神之瀑】，亲历大雪封山前的绝对孤寂。",
+        public: {
+          line: "JR宗谷本线至美深站 + 美深町营需求巴士（仁宇布线，仅200日元!）",
+          costJPY: 2200,
+          alert: "美深町前往仁宇布的需求巴士（デマンドバス）需提前一天电话请酒店前台协助预约；在仁宇布可骑乘旧国铁美幸线『トロッコ王国』自走式铁道矿车。"
+        },
+        drive: {
+          line: "国道40号至美深 → 转北海道道49号（美深雄武线）盘山21公里直达仁宇布高地",
+          costJPY: 0,
+          mapCode: "849 312 605*77",
+          alert: "道道49号正是小说中『羊博士』与主人公乘吉普车盘旋上山的山路原型，冬季积雪深厚，5-10月绿野与红叶极美。"
+        },
+        food: "美深 井上食堂 咖喱乌冬 & 松山农场 现挤低温杀菌羊奶与高地奶酪",
+        tabelog: "3.46",
+        stay: "美深温泉 びふかアイランド / 仁宇布 ファームイン・トント牧场木屋 (人均 8,600 JPY)",
+        stayTel: "01656-2-3939"
+      },
+      {
+        day: "D9–D10",
+        name: "音威子府（黑荞麦面传说） → 稚内（北防波堤穹顶·宗谷丘陵）",
+        pref: "北海道 (道北极点)",
+        lat: 45.5231, lng: 141.9366,
+        elev: 165, distKm: 425,
+        exp: "【对应《世界尽头与冷酷仙境》意象】途经北海道最小村【音威子府】与天盐川大回环；直抵日本最北端【稚内】，在古罗马柱廊风格的北防波堤穹顶听狂风呼啸，徒步【宗谷丘陵】周冰河波状草原与白色贝壳之道，远眺海面上的萨哈林岛（库页岛）与利尻岳火山。",
+        public: {
+          line: "JR宗谷本线直达日本最北端车站『稚内站』+ 宗谷巴士宗谷岬线",
+          costJPY: 5800,
+          alert: "稚内站内设有日本最北端铁道止冲挡纪念碑；宗谷丘陵白色之路徒步约需2小时，注意防风保暖。"
+        },
+        drive: {
+          line: "国道40号沿天盐川北上 → 丰富绕道 → 国道238号宗谷岬",
+          costJPY: 0,
+          mapCode: "998 552 301*12",
+          alert: "从稚内前往猿拂村的『Esanuka 直线道路（エサヌカ線）』长达16公里无一根电线杆，宛如驶向世界尽头。"
+        },
+        food: "稚内 车屋·源氏 八爪鱼涮涮锅 (Tako Shabu) & 宗谷海胆盖饭",
+        tabelog: "3.59",
+        stay: "稚内 Dormy Inn 天然温泉天北之汤 (人均 8,400 JPY)",
+        stayTel: "0162-24-5489"
+      },
+      {
+        day: "D11–D13",
+        name: "鄂霍次克海岸（网走·能取岬） → 摩周湖（雾之火山口） → 屈斜路湖",
+        pref: "北海道 (道东)",
+        lat: 43.5708, lng: 144.5316,
+        elev: 550, distKm: 735,
+        exp: "沿苍茫的鄂霍次克海岸南下，登临突出于海面的【能取岬】黑色悬崖；穿行知床斜里进入阿寒摩周国立公园，俯瞰无任何河流注入流出的高透明度火山口湖【摩周湖】与【硫磺山】喷气孔，在屈斜路湖畔挖开沙滩浸泡野溪砂汤。",
+        public: {
+          line: "宗谷/北纹巴士沿海接驳 + JR钏网本线（网走→知床斜里→川汤温泉→摩周）",
+          costJPY: 7900,
+          alert: "摩周站前有阿寒巴士定期开往摩周湖第一展望台（约25分钟）与硫磺山。"
+        },
+        drive: {
+          line: "国道238号鄂霍次克海线 → 网走 → 国道391号 → 道道52号摩周湖线",
+          costJPY: 0,
+          mapCode: "613 781 409*44",
+          alert: "连接美幌峠与屈斜路湖的国道243号视野极其辽阔，是俯瞰破火山口全貌的绝佳机位。"
+        },
+        food: "网走 鄂霍次克流冰盐拉面 & 摩周 弟子屈手打十割荞麦面",
+        tabelog: "3.56",
+        stay: "川汤温泉 忍冬之宿 / 屈斜路王子酒店 (人均 9,200 JPY)",
+        stayTel: "015-483-2611"
+      },
+      {
+        day: "D14–D16",
+        name: "【〈UFO降落在钏路〉现场】钏路湿原 → 币舞桥海雾 → 厚岸威士忌海湾 → 返程",
+        pref: "北海道 (钏路·厚岸)",
+        lat: 42.9849, lng: 144.3814,
+        elev: 45, distKm: 865,
+        exp: "【对应《神的孩子全跳舞》之〈UFO降落在钏路〉】走入小村逃离东京后的北国终点：在黄昏海雾弥漫的【钏路港币舞桥】与渔人码头驻足；乘湿原慢车深入日本最大泥炭湿地【钏路湿原】（细冈展望台俯瞰蛇行河道）；东行至寒流交汇的【厚岸湾】，品尝全年肥美的厚岸生蚝与泥炭烟熏威士忌，由钏路机场飞返东京。",
+        public: {
+          line: "JR钏网本线『钏路湿原Norokko号』+ JR根室本线（花咲线：钏路→厚岸）",
+          costJPY: 4200,
+          alert: "花咲线（钏路至厚岸段）列车紧贴悬崖与湿原入海口行驶，被铁道迷奉为日本最美海岸支线之一。"
+        },
+        drive: {
+          line: "国道391号抵钏路 → 国道44号 → 道道123号北太平洋海岸线（厚岸） → 钏路机场还车",
+          costJPY: 0,
+          mapCode: "149 256 811*32",
+          alert: "钏路和商市场地下设有1小时免费观光停车场；钏路机场还车点距航站楼仅步行3分钟。"
+        },
+        food: "钏路 炉端烧老铺（炼瓦/婆娑罗）炭烤花鱼 & 厚岸 牡蛎卫门生蚝桶蒸",
+        tabelog: "3.67",
+        stay: "钏路 La Vista 天然温泉币舞之汤 (Dormy Inn系高阶海景馆, 人均 8,800 JPY)",
+        stayTel: "0154-31-5489"
+      }
+    ]
+  },
+
+  r5: {
+    id: "r5",
+    tag: "ROUTE 05 · MURAKAMI HARUKI: KAFKA ON THE SHORE & HANSHIN ROOTS",
+    title: "【村上春树·四国与阪神】隐喻迷宫与少年海滩：《海边的卡夫卡》《听风的歌》关西至四国文学深潜线",
+    desc: "大阪关西(KIX)进出环线 · 串联村上文学原乡芦屋·香栌园滨、京都北山『阿美寮』森林、高松『甲村图书馆』、多度津猫街与四国深山云之上木造图书馆。",
+    color: "#1B4332",
+    daysText: "16 日 / 15 晚",
+    maxElev: "720 m (四国梼原·森林迷宫)",
+    trailKm: "34.0 km",
+    baseCostRMB: 18900,
+    bestMonths: [3, 4, 5, 6, 9, 10, 11],
+    nodes: [
+      {
+        day: "D1–D3",
+        name: "神户三宫爵士街 → 芦屋川 → 西宫（夙川松林·香栌园滨沙滩）",
+        pref: "兵库县 (阪神间)",
+        lat: 34.7258, lng: 135.3236,
+        elev: 18, distKm: 0,
+        exp: "【对应《听风的歌》《1973年的弹珠玩具》《海边的卡夫卡》】村上春树文学宇宙的真正起点：在西宫【香栌园滨】防波堤与沙滩漫步（卡夫卡卧室那幅『海边少年油画』的原型海滩）；沿【夙川公园】与【芦屋川】走过村上少年时代常去的芦屋市立图书馆与猿猴笼遗迹；夜晚在神户三宫北野坂推开百年黑胶爵士吧的大门。",
+        public: {
+          line: "阪神电铁本线（香栌园站·芦屋站各站停车）+ 阪急神户线（夙川站）",
+          costJPY: 2600,
+          alert: "强烈推荐购买『阪神电铁一日券』慢行，从香栌园站南口出站沿夙川步行8分钟即达海边防波堤。"
+        },
+        drive: {
+          line: "阪神高速3号神户线（芦屋出口） → 国道43号滨手干线",
+          costJPY: 1900,
+          mapCode: "29 514 882*16",
+          alert: "阪神间铁道极其密集，建议D1-D5全程使用电车，D6前往淡路岛与四国时再于三宫提车。"
+        },
+        food: "神户元町 老铺洋食屋 炸牛肉饼 & 三宫『Sone (ソネ)』现场爵士酒吧威士忌",
+        tabelog: "3.68",
+        stay: "神户三宫 大和Roynet Premier / 芦屋竹园旅馆 (人均 7,900 JPY)",
+        stayTel: "078-334-7200"
+      },
+      {
+        day: "D4–D5",
+        name: "京都左京区（吉田山·鸭川出町柳） → 北山杉林（鞍马·大原）",
+        pref: "京都府",
+        lat: 35.1167, lng: 135.7712,
+        elev: 410, distKm: 75,
+        exp: "【对应《挪威的森林》】避开祗园游客潮，在京都大学【吉田山】林间步道与出町柳鸭川跳石散步；乘叡山电铁穿行枫叶隧道进入京都北山深谷【鞍马与芹生峠周边】，在笔直参天的北山杉木林与溪谷雾气中，体会渡边探望直子与玲子时『阿美寮』与世隔绝的山间疗养院氛围。",
+        public: {
+          line: "京阪电车（淀屋桥→出町柳）+ 叡山电铁鞍马线全景列车『Kirara』",
+          costJPY: 3100,
+          alert: "从鞍马寺西门徒步翻越木根道（木の根道）至贵船神社约需1.5小时，林间清幽静谧。"
+        },
+        drive: {
+          line: "名神高速京都南IC → 鸭川通 → 国道367号（若狭街道大原·朽木线）",
+          costJPY: 2400,
+          mapCode: "7 882 315*44",
+          alert: "鞍马与贵船山路极窄，自驾者请将车停在宝池站（Takaragaike）换乘叡山电铁进山。"
+        },
+        food: "出町柳 豆饼老铺 & 贵船/鞍马 山菜汤豆腐定食",
+        tabelog: "3.64",
+        stay: "京都 梅小路 花传抄温泉酒店 / 左京区古町家旅舍 (人均 8,800 JPY)",
+        stayTel: "075-353-9000"
+      },
+      {
+        day: "D6–D8",
+        name: "跨越鸣门海峡 → 高松（栗林公园·香川县厅舍·屋岛海景）",
+        pref: "香川县",
+        lat: 34.3428, lng: 134.0466,
+        elev: 292, distKm: 285,
+        exp: "【对应《海边的卡夫卡》核心舞台】像15岁的田村卡夫卡一样乘坐高速大巴（或跨海列车）踏上四国【高松】！探访丹下健三设计的现代主义建筑杰作【香川县厅舍东馆】与栗林公园周边和洋折衷庭园，重构小说中『甲村纪念图书馆』静谧的阅读长廊；傍晚登临【屋岛】山顶狮之灵严展望台，俯瞰卡夫卡与佐伯女士凝望过的濑户内海落日。",
+        public: {
+          line: "神户三宫至高松高速巴士（经明石海峡大桥，还原小说路线!）+ 高松琴平电铁",
+          costJPY: 5200,
+          alert: "《海边的卡夫卡》中卡夫卡与中田老人均是经由跨海大桥进入高松，乘高速巴士过明石与鸣门双大桥极具代入感。"
+        },
+        drive: {
+          line: "神户淡路鸣门自动车道（经淡路岛服务区摩天轮） → 高松自动车道",
+          costJPY: 5800,
+          mapCode: "60 606 411*25",
+          alert: "淡路岛SA与鸣门公园千叠敷正是小说中货车司机星野带中田老人吹海风吃午饭的真实地点。"
+        },
+        food: "高松 手打十段乌冬傻瓜一代 (Baka Ichidai 黄油黑椒釜玉乌冬) & 一鹤骨付鸟",
+        tabelog: "3.78",
+        stay: "高松 Dormy Inn 栗林公园前天然温泉 (人均 7,400 JPY)",
+        stayTel: "087-832-5489"
+      },
+      {
+        day: "D9–D10",
+        name: "丸龟（猪熊弦一郎现代美术馆图书馆） → 琴平 → 多度津猫之古街",
+        pref: "香川县",
+        lat: 34.2704, lng: 133.7547,
+        elev: 65, distKm: 335,
+        exp: "在丸龟站旁谷口吉生设计的【MIMOCA现代美术馆】图书室静坐阅读，感受大岛先生工作的文学空间；乘琴电前往【琴平】参拜金刀比罗宫书院；转入濑户内海运老港【多度津（Tadotsu）】本通古街，在午后空无一人的木造格子窗巷弄中偶遇晒太阳的猫咪，仿佛听见中田老人与猫交谈。",
+        public: {
+          line: "JR予赞线（高松→丸龟→多度津）+ 琴电琴平线复古电车",
+          costJPY: 2900,
+          alert: "启用『四国铁路周游券 (All Shikoku Rail Pass)』可一票通乘四国JR全线及高松琴平电铁、伊予铁道。"
+        },
+        drive: {
+          line: "国道11号 → 县道33号丸龟琴平线 → 多度津港海岸线",
+          costJPY: 0,
+          mapCode: "77 312 664*19",
+          alert: "丸龟市立地下停车场凭美术馆门票可享2小时免费停车。"
+        },
+        food: "琴平 虎屋乌冬（百年木造老铺）& 灸馒头",
+        tabelog: "3.58",
+        stay: "琴平 御宿敷岛馆 (共立Resort系古风温泉宿, 人均 9,800 JPY)",
+        stayTel: "0877-58-8005"
+      },
+      {
+        day: "D11–D13",
+        name: "高知桂滨 → 仁淀川原生溪谷 → 梼原町（森林迷宫与云之上木造图书馆）",
+        pref: "高知县",
+        lat: 33.3911, lng: 132.9261,
+        elev: 720, distKm: 495,
+        exp: "【对应《海边的卡夫卡》深山森林与异界小镇】南下太平洋岸【高知】（星野与中田寻找入口石的驻留地）；随后逆流深入『仁淀蓝』安居溪谷与海拔700米的四国深山高地【梼原町（Yusuhara）】——这里被茂密柳杉原生林环抱，既是小说中大岛先生深山木屋与森林迷宫的地理投射，更拥有隈研吾以千根杉木榫卯构筑的绝美【云之上图书馆】。",
+        public: {
+          line: "JR土赞线特急南风号至高知/须崎站 + 高知高陵交通巴士（须崎→梼原）",
+          costJPY: 6800,
+          alert: "须崎站开往梼原町的路线巴士每日班次有限，建议衔接上午 9:40 或午后 13:50 班次，沿途尽览四国喀斯特山麓。"
+        },
+        drive: {
+          line: "高知自动车道（须崎东IC） → 国道197号（津野·梼原高原景观线）",
+          costJPY: 2600,
+          mapCode: "642 118 509*33",
+          alert: "国道197号现已打通高规格隧道，路况极佳；云之上图书馆门口即设免费停车场。"
+        },
+        food: "高知 弘人市场 明神丸稻草烈火炙烤鲣鱼 (Katsuo Tataki) & 梼原 山间野味雉鸡锅",
+        tabelog: "3.71",
+        stay: "梼原 云之上酒店别馆 Marche / 高知 城西馆 (人均 8,900 JPY)",
+        stayTel: "0889-65-1288"
+      },
+      {
+        day: "D14–D16",
+        name: "内子木蜡老街 → 大洲卧龙山庄 → 松山道后 → 关西返程",
+        pref: "爱媛县 / 大阪府",
+        lat: 33.5097, lng: 132.5469,
+        elev: 145, distKm: 675,
+        exp: "从梼原下山进入伊予盆地，探访【大洲】肱川悬崖上的数寄屋茶室建筑极品【卧龙山庄】与内子町白壁老街；在松山乘坐少爷列车泡道后温泉，最后经濑户内海返回关西国际机场。",
+        public: {
+          line: "JR予赞线至伊予大洲/内子/松山 + 特急潮风号(Shiokaze)返冈山转新干线",
+          costJPY: 9600,
+          alert: "松山站与冈山站之间特急潮风号每小时一班，在冈山站同层换乘新干线至新大阪转Haruka直抵关空。"
+        },
+        drive: {
+          line: "国道197号 → 国道56号大洲·内子 → 松山自动车道 → 濑户大桥返关西还车",
+          costJPY: 6900,
+          mapCode: "365 441 208*62",
+          alert: "卧龙山庄游览车位位于大洲城下町观光驿站（免费停车）。"
+        },
+        food: "大洲 油屋 炭火鲷鱼煲仔饭 & 内子 现做木棉豆腐怀石",
+        tabelog: "3.63",
+        stay: "大洲 NIPPONIA 城下町古民家分散型酒店 / 松山 御宿野乃 (人均 9,200 JPY)",
+        stayTel: "089-911-5489"
+      }
+    ]
+  },
+
+  r6: {
+    id: "r6",
+    tag: "ROUTE 06 · MURAKAMI HARUKI: TOKYO 1Q84, JAZZ & KILLING COMMENDATORE",
+    title: "【村上春树·东京与箱根伊豆】爵士黑胶、1Q84首都高阶梯与《刺杀骑士团长》山海慢行线",
+    desc: "东京羽田/成田进出 · 深度串联早稻田神田川、千駄谷神宫球场、三轩茶屋首都高、世田谷寻猫小径、逗子海岸与箱根仙石原『骑士团长』山顶别墅区。",
+    color: "#6D4C41",
+    daysText: "15 日 / 14 晚",
+    maxElev: "865 m (箱根外轮山·仙石原)",
+    trailKm: "32.0 km",
+    baseCostRMB: 19200,
+    bestMonths: [3, 4, 5, 6, 9, 10, 11, 12],
+    nodes: [
+      {
+        day: "D1–D3",
+        name: "早稻田（神田川·村上春树图书馆） → 神保町古书街 → 千駄谷（神宫球场与Peter Cat旧址）",
+        pref: "东京都 (新宿·千代田)",
+        lat: 35.7091, lng: 139.7193,
+        elev: 32, distKm: 0,
+        exp: "【对应《挪威的森林》与作家诞生原点】在早稻田大学探访隈研吾改造的【早稻田大学国际文学馆（村上春树图书馆）】（复刻村上书房与Peter Cat钢琴）；沿渡边与直子走过的【神田川】都电荒川线漫步至饭田桥与【神保町古书街】；午后前往【千駄谷】与明治神宫棒球场外野草席——1978年4月1日村上在此看棒球赛时突发灵感提笔写下《听风的歌》。",
+        public: {
+          line: "东京Metro东西线（早稻田站）+ 都营荒川线路面电车 + JR总武线（千駄谷站）",
+          costJPY: 2400,
+          alert: "早稻田大学『村上春树图书馆』免费入馆但需提前在官网预约时段，馆内地下一楼『橙子猫咖啡馆』由学生自主运营。"
+        },
+        drive: {
+          line: "东京市区D1–D8强烈建议全程使用轨道交通与步行，D9在小田原站提车进入箱根与伊豆",
+          costJPY: 0,
+          mapCode: "768 412 119*33",
+          alert: "东京核心区停车费高达每小时800-1200日元，地铁72小时券（仅1,500日元）是最佳选择。"
+        },
+        food: "早稻田 百年鳗鱼饭老铺『伊豆荣/肥前屋』& 神保町 欧风咖喱 Bondy",
+        tabelog: "3.76",
+        stay: "新宿 庭之酒店 (Hotel Niwa Tokyo 神保町水道桥，静谧和风庭园, 人均 9,200 JPY)",
+        stayTel: "03-3293-0028"
+      },
+      {
+        day: "D4–D6",
+        name: "三轩茶屋（首都高3号线） → 世田谷（砧公园·猫之巷弄） → 高圆寺 → 国分寺",
+        pref: "东京都 (世田谷·杉并·西郊)",
+        lat: 35.6436, lng: 139.6712,
+        elev: 48, distKm: 35,
+        exp: "【对应《1Q84》《奇鸟行状录》《发条鸟年代记》】在【三轩茶屋】池尻大桥段仰望首都高速3号涩谷线的隔音壁与紧急阶梯（青豆走下计程车踏入1Q84世界的入口）；乘世田谷线复古两节电车深入【世田谷住宅区】与砧公园，体验冈田亨走过的水道局小巷与午后光影；傍晚赴【高圆寺】（天吾与青豆凝望双月的小公园）及【国分寺】（村上第一家爵士吧旧址）听黑胶。",
+        public: {
+          line: "东急田园都市线/世田谷线（一日券380日元）+ JR中央线快速（高圆寺·吉祥寺·国分寺）",
+          costJPY: 2800,
+          alert: "三轩茶屋胡萝卜塔（Carrot Tower）26楼设有免费展望厅，可俯瞰首都高速3号线穿过世田谷屋顶的震撼弧线。"
+        },
+        drive: {
+          line: "若体验小说场景：乘计程车走首都高速3号涩谷线（用木JCT → 三轩茶屋出口）",
+          costJPY: 2200,
+          mapCode: "502 118 441*22",
+          alert: "严禁行人攀爬高速公路太平梯，在三轩茶屋高架下步道即可近距离观察结构。"
+        },
+        food: "吉祥寺/国分寺 手工汉堡排与意大利面（致敬村上男主角日常料理）& 地下爵士喫茶 Dug",
+        tabelog: "3.65",
+        stay: "涩谷 Stream Excel / 吉祥寺 东急REI酒店 (人均 8,900 JPY)",
+        stayTel: "0422-47-0109"
+      },
+      {
+        day: "D7–D8",
+        name: "南青山（爵士蓝调与青山灵园） → 镰仓 → 逗子·叶山海岸",
+        pref: "东京都 / 神奈川县",
+        lat: 35.2891, lng: 139.5742,
+        elev: 25, distKm: 95,
+        exp: "【对应《国境以南 太阳以西》《舞！舞！舞！》】漫步【南青山】骨董通与根津美术馆竹林（小说男主角始经营高雅酒吧Robin's Nest的街区）；乘横须贺线南下相模湾，避开拥挤的江之电打卡点，前往村上春树曾长居并每天晨跑的【逗子（Zushi）与叶山（Hayama）】森户海岸，在礁石神社旁远眺海上裕次郎灯塔与富士山。",
+        public: {
+          line: "东京Metro银座线/半藏门线（表参道）+ JR湘南新宿线/横须贺线直达逗子站 + 京急巴士",
+          costJPY: 3100,
+          alert: "逗子站购买『叶山女子旅切符（男女皆可用，约3,580日元）』，包往返车票、巴士无限次乘车、海景餐厅正餐及伴手礼，性价比极高！"
+        },
+        drive: {
+          line: "首都高速湾岸线 → 横滨横须贺道路（逗子IC） → 叶山海岸国道134号",
+          costJPY: 2800,
+          mapCode: "86 214 553*11",
+          alert: "叶山县立近代美术馆紧邻一色海岸，步道直通沙滩，停车便利。"
+        },
+        food: "叶山 日影茶屋（三百年古建筑怀石午间便当）& 逗子 吻仔鱼生鱼盖饭",
+        tabelog: "3.69",
+        stay: "逗子 湘南国际村 / 镰仓 大船 大和Roynet酒店 (人均 8,100 JPY)",
+        stayTel: "0467-42-6600"
+      },
+      {
+        day: "D9–D11",
+        name: "小田原（城下町与海风） → 箱根仙石原·桃源台（《刺杀骑士团长》画室山谷）",
+        pref: "神奈川县",
+        lat: 35.2442, lng: 139.0068,
+        elev: 865, distKm: 165,
+        exp: "【对应《刺杀骑士团长》核心现场】在【小田原】探访小说中男主角下山采购画具、与免色先生会面的海滨城下町；随后盘山进入海拔800米的【箱根仙石原与桃源台外轮山高地】——这片芒草摇曳、冷杉密布、一边俯瞰芦之湖一边遥望相模湾的幽静别墅区，正是小说中雨田具彦旧宅、杂木林古庙与地底石室的真实空间模型。",
+        public: {
+          line: "JR东海道本线至小田原 + 箱根登山铁道 + 箱根登山巴士仙石原线（箱根周游券全包）",
+          costJPY: 6100,
+          alert: "仙石原『箱根湿生花园』与『POLA美术馆』林间步道完美还原了小说中男主角散步的冷杉与山毛榉山林。"
+        },
+        drive: {
+          line: "小田原站西口提车（驾驶朱红色或深灰两厢车!）→ 箱根新道 → 芦之湖Skyline山脊景观道",
+          costJPY: 1800,
+          mapCode: "57 341 612*88",
+          alert: "《刺杀骑士团长》中大量篇幅描写从仙石原山顶开车下山至小田原站的山道驾驶质感，芦之湖Skyline沿途设有『三国峠』绝景停车点。"
+        },
+        food: "小田原 早川渔港 炸竹荚鱼定食 & 箱根仙石原 相原精肉店纹章烤牛肉与山药荞麦面",
+        tabelog: "3.61",
+        stay: "箱根仙石原 品之木一之汤（塔之泽/仙石原平价老铺秘汤, 人均 9,800 JPY）",
+        stayTel: "0460-85-5331"
+      },
+      {
+        day: "D12–D14",
+        name: "伊豆半岛纵贯（修善寺竹林·旧天城隧道苔藓古道·下田白滨海岸）",
+        pref: "静冈县",
+        lat: 34.6789, lng: 138.9453,
+        elev: 710, distKm: 285,
+        exp: "沿伊豆山脊南下至千年古汤【修善寺】（桂川竹林与独钴之汤）；徒步穿越1905年石砌的【旧天城隧道】与净莲瀑布山毛榉原生林；抵达伊豆最南端【下田港】，在黑船来航的佩里之路柳岸、白滨神社红色海边鸟居与爪木崎柱状节理断崖间，感受东京都市之外的海洋澄澈感。",
+        public: {
+          line: "东海巴士（三岛→修善寺→河津天城越线）+ 伊豆急行线（河津→伊豆急下田全景列车）",
+          costJPY: 5900,
+          alert: "购买『东海巴士全线2日/3日周游券』可无限次搭乘修善寺经天城峠至河津七瀑的全部山间巴士。"
+        },
+        drive: {
+          line: "箱根峠 → 伊豆Skyline山脊公路 → 国道414号（河津七瀑360度回旋桥） → 下田",
+          costJPY: 1600,
+          mapCode: "452 119 804*52",
+          alert: "河津七瀑回旋桥（Kawazu-Nanadaru Loop Bridge）高45米、双层720度盘旋下降，是日本土木工程与自驾奇观。"
+        },
+        food: "下田 渔港金目鲷红烧定食 (Kinmedai Nitsuke) & 修善寺 生山葵黑米荞麦面",
+        tabelog: "3.64",
+        stay: "下田 大和馆海景温泉 / 修善寺 汤回廊菊屋 (人均 9,600 JPY)",
+        stayTel: "0558-22-1000"
+      },
+      {
+        day: "D15",
+        name: "热海（MOA美术馆相模湾绝景） → 小田原/品川 → 东京羽田/成田返程",
+        pref: "静冈县 / 东京都",
+        lat: 35.1092, lng: 139.0754,
+        elev: 250, distKm: 375,
+        exp: "沿东伊豆绝壁海岸线北上【热海】，探访山顶俯瞰相模湾蔚蓝海平面的【MOA美术馆】（尾形光琳国宝屏风与能乐堂）；午后在小田原还车（或由热海乘新干线），38分钟直抵东京品川站，从容衔接羽田或成田国际航班返程。",
+        public: {
+          line: "伊豆急行/JR伊东线至热海站 + 东海道新干线 Kodama号至品川转京急线",
+          costJPY: 5800,
+          alert: "热海站前巴士8分钟直达MOA美术馆入口，乘7段长扶梯穿过万花筒穹顶直抵海景大厅。"
+        },
+        drive: {
+          line: "国道135号东伊豆海岸线 → 真鹤道路 → 小田原站西口还车（换乘新干线赴机场）",
+          costJPY: 1200,
+          mapCode: "116 322 709*18",
+          alert: "MOA美术馆配备300个免费观光停车位，自驾停靠极其便利。"
+        },
+        food: "热海 围炉茶屋 干物炭火烧午间定食 & 热海布丁",
+        tabelog: "3.58",
+        stay: "温暖的家 (当日返程)",
+        stayTel: "N/A"
+      }
+    ]
+  }
+};
+
+// ============================================================================
+// 2. STATE MANAGEMENT & LEAFLET MAP INITIALIZATION
+// ============================================================================
+let currentRouteKey = "r1";
+let currentTransportMode = "public"; // 'public' | 'drive'
+let activeNodeIndex = 0;
+let mapInstance = null;
+let baseTileLayer = null;
+let routePolyline = null;
+let routeDecoratorLine = null;
+let markersArray = [];
+let hasConfirmedIDP = false;
+let currentCartoKey = "cb1_4jug_1_dbb7506275049777c6a92fee";
+
+function getTileSources(key) {
+  const kParam = key ? `?key=${key}` : "";
+  return {
+    carto: {
+      url: `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png${kParam}`,
+      attr: "&copy; OpenStreetMap contributors &copy; CARTO"
+    },
+    carto_positron: {
+      url: `https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png${kParam}`,
+      attr: "&copy; OpenStreetMap contributors &copy; CARTO"
+    },
+    gsi: {
+      url: "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png",
+      attr: "&copy; 国土地理院 (GSI Japan Standard Map)"
+    },
+    gsi_pale: {
+      url: "https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png",
+      attr: "&copy; 国土地理院 (GSI Japan Pale Topo)"
+    },
+    osm: {
+      url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+      attr: "&copy; OpenStreetMap contributors"
+    }
+  };
+}
+
+let TILE_SOURCES = getTileSources(currentCartoKey);
+
+function initMap() {
+  mapInstance = L.map("map-canvas", {
+    center: [35.7, 138.2],
+    zoom: 7,
+    zoomControl: true
+  });
+
+  // Default to CARTO Voyager with built-in API Key, fallback to OSM if unavailable
+  switchBaseTile("carto");
+  renderRouteAll();
+}
+
+function switchBaseTile(sourceKey) {
+  const src = TILE_SOURCES[sourceKey] || TILE_SOURCES.osm;
+  if (baseTileLayer) {
+    mapInstance.removeLayer(baseTileLayer);
+  }
+  baseTileLayer = L.tileLayer(src.url, {
+    attribution: src.attr,
+    maxZoom: 18
+  });
+
+  // Fallback handler if a tile fails
+  baseTileLayer.on("tileerror", function() {
+    if (sourceKey !== "osm") {
+      console.warn("Primary tile failed, falling back to OpenStreetMap.");
+    }
+  });
+
+  baseTileLayer.addTo(mapInstance);
+}
+
+// ============================================================================
+// 3. RENDER ROUTE, DAY CARDS, MAP MARKERS & D3 ELEVATION PROFILE
+// ============================================================================
+function switchRoute(routeKey) {
+  currentRouteKey = routeKey;
+  activeNodeIndex = 0;
+  const route = ROUTES_DATA[routeKey];
+
+  // Update CSS Theme Variable
+  document.documentElement.style.setProperty("--active-theme", route.color);
+
+  // Update Route Tabs
+  document.querySelectorAll(".route-tab").forEach(btn => btn.classList.remove("active"));
+  document.getElementById("tab-" + routeKey).classList.add("active");
+
+  renderRouteAll();
+}
+
+function setTransportMode(mode) {
+  if (mode === "drive" && !hasConfirmedIDP) {
+    openIDPWarningModal();
+    return;
+  }
+  currentTransportMode = mode;
+  document.getElementById("mode-public").classList.toggle("active", mode === "public");
+  document.getElementById("mode-drive").classList.toggle("active", mode === "drive");
+  renderDayCards();
+  drawMapRouteGeometry();
+  updateBudgetModel();
+}
+
+function renderRouteAll() {
+  const route = ROUTES_DATA[currentRouteKey];
+
+  // Update Hero & KPI
+  document.getElementById("hero-tag").textContent = route.tag;
+  document.getElementById("hero-title").textContent = route.title;
+  document.getElementById("hero-desc").textContent = route.desc;
+  document.getElementById("kpi-days").textContent = route.daysText;
+  document.getElementById("kpi-elev").textContent = route.maxElev;
+  document.getElementById("kpi-trail").textContent = route.trailKm;
+
+  // Render Season Pills
+  const monthContainer = document.getElementById("month-pills");
+  monthContainer.innerHTML = "";
+  for (let m = 1; m <= 12; m++) {
+    const span = document.createElement("span");
+    span.className = "month-pill" + (route.bestMonths.includes(m) ? " recommended" : "");
+    span.textContent = m + "月";
+    monthContainer.appendChild(span);
+  }
+
+  renderDayCards();
+  drawMapRouteGeometry();
+  resetMapBounds();
+  drawElevationProfile();
+  updateBudgetModel();
+}
+
+function renderDayCards() {
+  const route = ROUTES_DATA[currentRouteKey];
+  const container = document.getElementById("day-list-container");
+  container.innerHTML = "";
+
+  route.nodes.forEach((node, idx) => {
+    const card = document.createElement("article");
+    card.className = "day-card" + (idx === activeNodeIndex ? " active" : "");
+    card.id = "day-card-" + idx;
+    card.onclick = () => focusNode(idx, true);
+
+    const tData = currentTransportMode === "public" ? node.public : node.drive;
+    const modeLabel = currentTransportMode === "public"
+      ? `[模式A 公共交通] 预计交通费: ¥${tData.costJPY.toLocaleString()} JPY`
+      : `[模式B 合规自驾] 高速费: ¥${tData.costJPY.toLocaleString()} JPY | MapCode: ${tData.mapCode}`;
+
+    card.innerHTML = `
+      <div class="day-header">
+        <span class="day-badge">${node.day} · ${node.pref}</span>
+        <span class="day-elev-tag">海拔 ${node.elev}m · 累计里程 ${node.distKm}km</span>
+      </div>
+      <h3 class="day-title">${node.name}</h3>
+      <p class="day-Exp">${node.exp}</p>
+      <div class="transport-box">
+        <div class="t-head">
+          <span>${tData.line}</span>
+        </div>
+        <div style="font-family:var(--font-mono);font-size:0.73rem;color:var(--ink-secondary);">${modeLabel}</div>
+        <div class="t-alert">▸ 实操要领：${tData.alert}</div>
+      </div>
+      <div class="meta-footer">
+        <div class="meta-item">
+          <strong>在地风物：</strong>${node.food} <span class="tabelog-pill">Tabelog ${node.tabelog}</span>
+        </div>
+        <div class="meta-item">
+          <strong>高性价比宿点：</strong>${node.stay}
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function drawMapRouteGeometry() {
+  const route = ROUTES_DATA[currentRouteKey];
+  if (routePolyline) mapInstance.removeLayer(routePolyline);
+  if (routeDecoratorLine) mapInstance.removeLayer(routeDecoratorLine);
+  markersArray.forEach(m => mapInstance.removeLayer(m));
+  markersArray = [];
+
+  const latlngs = route.nodes.map(n => [n.lat, n.lng]);
+
+  // Base shadow line
+  routeDecoratorLine = L.polyline(latlngs, {
+    color: "#FFFFFF",
+    weight: 7,
+    opacity: 0.85
+  }).addTo(mapInstance);
+
+  // Main semantic line (solid for drive, dashed rail style for public transit)
+  routePolyline = L.polyline(latlngs, {
+    color: route.color,
+    weight: 4,
+    opacity: 0.95,
+    dashArray: currentTransportMode === "public" ? "8, 6" : null
+  }).addTo(mapInstance);
+
+  // Add Interactive Numbered Markers
+  route.nodes.forEach((node, idx) => {
+    const iconHtml = `<div class="custom-day-marker ${idx === activeNodeIndex ? 'active-marker' : ''}" 
+      style="background:${route.color};width:28px;height:28px;">${idx + 1}</div>`;
+
+    const customIcon = L.divIcon({
+      html: iconHtml,
+      className: "",
+      iconSize: [28, 28],
+      iconAnchor: [14, 14]
+    });
+
+    const marker = L.marker([node.lat, node.lng], { icon: customIcon }).addTo(mapInstance);
+    const tInfo = currentTransportMode === "public" ? node.public.line : `MapCode: ${node.drive.mapCode}`;
+
+    marker.bindPopup(`
+      <div style="font-family:sans-serif;min-width:210px;">
+        <div style="font-size:11px;font-weight:700;color:${route.color};">${node.day} | 海拔 ${node.elev}m</div>
+        <div style="font-size:14px;font-weight:700;margin:3px 0;">${node.name}</div>
+        <div style="font-size:12px;color:#555;margin-bottom:5px;">${tInfo}</div>
+        <div style="font-size:11px;background:#F4F1EA;padding:4px 6px;border-radius:4px;">
+          <strong>风味推荐：</strong>${node.food} <span style="color:#C88A32;font-weight:700;">Tabelog ${node.tabelog}</span>
+        </div>
+      </div>
+    `);
+
+    marker.on("click", () => focusNode(idx, false));
+    markersArray.push(marker);
+  });
+}
+
+function resetMapBounds() {
+  if (!routePolyline) return;
+  mapInstance.fitBounds(routePolyline.getBounds(), { padding: [38, 38] });
+}
+
+function focusNode(idx, panMap = true) {
+  activeNodeIndex = idx;
+  const route = ROUTES_DATA[currentRouteKey];
+  const node = route.nodes[idx];
+
+  // Highlight Card
+  document.querySelectorAll(".day-card").forEach((c, i) => {
+    c.classList.toggle("active", i === idx);
+  });
+
+  if (!panMap) {
+    const cardEl = document.getElementById("day-card-" + idx);
+    if (cardEl) cardEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  // Update Marker & FlyTo
+  drawMapRouteGeometry();
+  if (panMap && mapInstance) {
+    mapInstance.flyTo([node.lat, node.lng], 9, { duration: 0.85 });
+  }
+  markersArray[idx].openPopup();
+
+  // Update Elevation Probe Readout
+  document.getElementById("probe-readout").textContent =
+    `当前聚焦：${node.day} ${node.name.split("→")[0].trim()} (海拔 ${node.elev}m · 里程 ${node.distKm}km)`;
+
+  drawElevationProfile();
+}
+
+// ============================================================================
+// 4. D3.JS INTERACTIVE ELEVATION PROFILE CHART
+// ============================================================================
+function drawElevationProfile() {
+  const route = ROUTES_DATA[currentRouteKey];
+  const svg = d3.select("#elevation-svg");
+  svg.selectAll("*").remove();
+
+  const nodeEl = svg.node();
+  if (!nodeEl) return;
+  const width = nodeEl.clientWidth || 560;
+  const height = nodeEl.clientHeight || 135;
+  const margin = { top: 16, right: 24, bottom: 26, left: 44 };
+  const innerW = width - margin.left - margin.right;
+  const innerH = height - margin.top - margin.bottom;
+
+  const data = route.nodes;
+  const xScale = d3.scaleLinear()
+    .domain([0, d3.max(data, d => d.distKm)])
+    .range([0, innerW]);
+
+  const yScale = d3.scaleLinear()
+    .domain([0, Math.max(1600, d3.max(data, d => d.elev) * 1.15)])
+    .range([innerH, 0]);
+
+  const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+  // Gradient Definition
+  const defs = svg.append("defs");
+  const grad = defs.append("linearGradient")
+    .attr("id", "elev-grad")
+    .attr("x1", "0%").attr("y1", "0%")
+    .attr("x2", "0%").attr("y2", "100%");
+  grad.append("stop").attr("offset", "0%").attr("stop-color", route.color).attr("stop-opacity", 0.55);
+  grad.append("stop").attr("offset", "100%").attr("stop-color", route.color).attr("stop-opacity", 0.05);
+
+  // Grid lines
+  g.append("g")
+    .attr("class", "grid")
+    .call(d3.axisLeft(yScale).ticks(4).tickSize(-innerW).tickFormat(d => d + "m"))
+    .call(g => g.select(".domain").remove())
+    .call(g => g.selectAll("line").attr("stroke", "var(--border-line)").attr("stroke-dasharray", "3,3"))
+    .call(g => g.selectAll("text").attr("fill", "var(--ink-muted)").style("font-family", "var(--font-mono)").style("font-size", "10px"));
+
+  // X Axis
+  g.append("g")
+    .attr("transform", `translate(0,${innerH})`)
+    .call(d3.axisBottom(xScale).ticks(6).tickFormat(d => d + " km"))
+    .call(g => g.select(".domain").attr("stroke", "var(--border-line)"))
+    .call(g => g.selectAll("text").attr("fill", "var(--ink-muted)").style("font-family", "var(--font-mono)").style("font-size", "10px"));
+
+  // Smooth Area & Line
+  const areaGen = d3.area()
+    .x(d => xScale(d.distKm))
+    .y0(innerH)
+    .y1(d => yScale(d.elev))
+    .curve(d3.curveMonotoneX);
+
+  const lineGen = d3.line()
+    .x(d => xScale(d.distKm))
+    .y(d => yScale(d.elev))
+    .curve(d3.curveMonotoneX);
+
+  g.append("path")
+    .datum(data)
+    .attr("fill", "url(#elev-grad)")
+    .attr("d", areaGen);
+
+  g.append("path")
+    .datum(data)
+    .attr("fill", "none")
+    .attr("stroke", route.color)
+    .attr("stroke-width", 2.5)
+    .attr("d", lineGen);
+
+  // Active Vertical Guide Line
+  const activeDatum = data[activeNodeIndex];
+  if (activeDatum) {
+    g.append("line")
+      .attr("x1", xScale(activeDatum.distKm))
+      .attr("x2", xScale(activeDatum.distKm))
+      .attr("y1", 0)
+      .attr("y2", innerH)
+      .attr("stroke", "#C88A32")
+      .attr("stroke-width", 2)
+      .attr("stroke-dasharray", "4,2");
+  }
+
+  // Interactive Node Circles
+  const nodesG = g.selectAll(".elev-node")
+    .data(data)
+    .enter()
+    .append("g")
+    .style("cursor", "pointer")
+    .on("click", (event, d) => {
+      const idx = data.indexOf(d);
+      focusNode(idx, true);
+    });
+
+  nodesG.append("circle")
+    .attr("cx", d => xScale(d.distKm))
+    .attr("cy", d => yScale(d.elev))
+    .attr("r", (d, i) => i === activeNodeIndex ? 7 : 4.5)
+    .attr("fill", (d, i) => i === activeNodeIndex ? "#FFD166" : route.color)
+    .attr("stroke", "#FFFFFF")
+    .attr("stroke-width", 2);
+
+  nodesG.append("text")
+    .attr("x", d => xScale(d.distKm))
+    .attr("y", d => yScale(d.elev) - 9)
+    .attr("text-anchor", "middle")
+    .attr("fill", "var(--ink-primary)")
+    .style("font-family", "var(--font-mono)")
+    .style("font-size", "10px")
+    .style("font-weight", "700")
+    .text(d => d.day);
+}
+
+// ============================================================================
+// 5. D3.JS REACTIVE BUDGET SANDBOX MODEL
+// ============================================================================
+function updateBudgetModel() {
+  const pax = parseInt(document.getElementById("slider-pax").value, 10);
+  const days = parseInt(document.getElementById("slider-days").value, 10);
+  const tier = parseInt(document.getElementById("slider-tier").value, 10);
+  const fx = parseFloat(document.getElementById("slider-fx").value);
+
+  const tierNames = {
+    1: "经济实惠深度档 (古民家/商务温泉)",
+    2: "品质进阶舒适档 (精选町家/4晚秘汤)",
+    3: "奢享文化遗产档 (百年名宿一泊二食)"
+  };
+
+  document.getElementById("val-pax").textContent = `${pax} 人同行`;
+  document.getElementById("val-days").textContent = `${days} 天 (${days - 1} 晚)`;
+  document.getElementById("val-tier").textContent = tierNames[tier];
+  document.getElementById("val-fx").textContent = `${fx.toFixed(2)} RMB`;
+
+  // Per-person JPY calculation
+  const visaFlightRMB = tier === 1 ? 3550 : (tier === 2 ? 4600 : 6200);
+  const stayPerNightJPY = tier === 1 ? 7200 : (tier === 2 ? 11500 : 21000);
+  const singleRoomMultiplier = pax === 1 ? 1.28 : 1.0;
+  const stayTotalRMB = Math.round((days - 1) * stayPerNightJPY * singleRoomMultiplier * (fx / 100));
+
+  const foodPerDayJPY = tier === 1 ? 4900 : (tier === 2 ? 7200 : 11500);
+  const foodTotalRMB = Math.round(days * foodPerDayJPY * (fx / 100));
+
+  const ticketMiscJPY = days * 1750;
+  const ticketTotalRMB = Math.round(ticketMiscJPY * (fx / 100));
+
+  // Mode A: Public Transit (Per person fixed)
+  const publicTransitJPY = days * 4750;
+  const publicTransitRMB = Math.round(publicTransitJPY * (fx / 100));
+
+  // Mode B: Self Drive (Shared among pax: rental 8200/day + toll/fuel 3800/day)
+  const driveTotalVehicleJPY = days * (8200 + 3800);
+  const drivePerPersonRMB = Math.round((driveTotalVehicleJPY / pax) * (fx / 100));
+
+  const totalPublicRMB = visaFlightRMB + stayTotalRMB + foodTotalRMB + ticketTotalRMB + publicTransitRMB;
+  const totalDriveRMB = visaFlightRMB + stayTotalRMB + foodTotalRMB + ticketTotalRMB + drivePerPersonRMB;
+
+  const activeTotal = currentTransportMode === "public" ? totalPublicRMB : totalDriveRMB;
+  document.getElementById("kpi-cost").textContent = `¥${activeTotal.toLocaleString()} RMB`;
+
+  // Render D3 Stacked Comparison Bar
+  const svg = d3.select("#budget-d3-svg");
+  svg.selectAll("*").remove();
+  const w = svg.node().clientWidth || 440;
+  const maxVal = Math.max(totalPublicRMB, totalDriveRMB) * 1.12;
+  const x = d3.scaleLinear().domain([0, maxVal]).range([0, w - 95]);
+
+  const categories = [
+    { key: "签证机票", color: "#264653", pub: visaFlightRMB, drv: visaFlightRMB },
+    { key: "日本境内交通", color: "#E76F51", pub: publicTransitRMB, drv: drivePerPersonRMB },
+    { key: "住宿费用", color: "#2A9D8F", pub: stayTotalRMB, drv: stayTotalRMB },
+    { key: "地道餐饮", color: "#E9C46A", pub: foodTotalRMB, drv: foodTotalRMB },
+    { key: "门票与行李托运", color: "#8AB17D", pub: ticketTotalRMB, drv: ticketTotalRMB }
+  ];
+
+  const rows = [
+    { label: "模式A 公交", total: totalPublicRMB, field: "pub", y: 18 },
+    { label: "模式B 自驾", total: totalDriveRMB, field: "drv", y: 68 }
+  ];
+
+  rows.forEach(r => {
+    let cumX = 0;
+    categories.forEach(cat => {
+      const segW = x(cat[r.field]);
+      svg.append("rect")
+        .attr("x", cumX)
+        .attr("y", r.y)
+        .attr("width", Math.max(0, segW - 1.5))
+        .attr("height", 28)
+        .attr("fill", cat.color)
+        .attr("rx", 3);
+      cumX += segW;
+    });
+
+    svg.append("text")
+      .attr("x", cumX + 6)
+      .attr("y", r.y + 18)
+      .attr("fill", "var(--ink-primary)")
+      .style("font-family", "var(--font-mono)")
+      .style("font-size", "11px")
+      .style("font-weight", "700")
+      .text(`${r.label}: ¥${r.total.toLocaleString()}`);
+  });
+
+  // Legend
+  let lx = 0;
+  categories.forEach(cat => {
+    svg.append("rect").attr("x", lx).attr("y", 112).attr("width", 10).attr("height", 10).attr("fill", cat.color).attr("rx", 2);
+    svg.append("text").attr("x", lx + 14).attr("y", 121).attr("fill", "var(--ink-secondary)").style("font-size", "10px").text(cat.key);
+    lx += (cat.key.length * 11 + 26);
+  });
+
+  // Render Table
+  document.getElementById("budget-table").innerHTML = `
+    <thead>
+      <tr>
+        <th>预算科目 (${days}天/${pax}人同行人均)</th>
+        <th style="text-align:right;">模式A：公共交通</th>
+        <th style="text-align:right;">模式B：合规自驾</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>1. 签证规费 + 国际开口程机票 + 保险</td><td class="num">¥${visaFlightRMB.toLocaleString()}</td><td class="num">¥${visaFlightRMB.toLocaleString()}</td></tr>
+      <tr><td>2. 日本境内交通 (周游券/巴士 vs 租车/ETC/油费分摊)</td><td class="num">¥${publicTransitRMB.toLocaleString()}</td><td class="num">¥${drivePerPersonRMB.toLocaleString()}</td></tr>
+      <tr><td>3. 住宿费用 (${days - 1}晚高分温泉商务/古民家/秘汤)</td><td class="num">¥${stayTotalRMB.toLocaleString()}</td><td class="num">¥${stayTotalRMB.toLocaleString()}</td></tr>
+      <tr><td>4. 餐饮与补给 (名店午间定食 + 市场海鲜 + 居酒屋)</td><td class="num">¥${foodTotalRMB.toLocaleString()}</td><td class="num">¥${foodTotalRMB.toLocaleString()}</td></tr>
+      <tr><td>5. 门票、美术馆、黑猫宅急便行李托运与eSIM</td><td class="num">¥${ticketTotalRMB.toLocaleString()}</td><td class="num">¥${ticketTotalRMB.toLocaleString()}</td></tr>
+      <tr style="background:var(--bg-subtle);font-weight:700;">
+        <td>人均总计 (日均约 ¥${Math.round(activeTotal / days).toLocaleString()} RMB)</td>
+        <td class="num" style="color:var(--active-theme);">¥${totalPublicRMB.toLocaleString()} RMB</td>
+        <td class="num" style="color:var(--active-theme);">¥${totalDriveRMB.toLocaleString()} RMB</td>
+      </tr>
+    </tbody>
+  `;
+}
+
+// ============================================================================
+// 6. SUB-PANEL SWITCHER, MODALS & VISA ITINERARY GENERATOR
+// ============================================================================
+function switchSubPanel(panelName) {
+  ["itinerary", "budget", "visa"].forEach(p => {
+    document.getElementById("panel-" + p).style.display = p === panelName ? "block" : "none";
+    document.getElementById("ptab-" + p).classList.toggle("active", p === panelName);
+  });
+  if (panelName === "budget") updateBudgetModel();
+}
+
+function openIDPWarningModal() {
+  const modal = document.getElementById("modal-backdrop");
+  const content = document.getElementById("modal-content");
+  content.innerHTML = `
+    <h3 class="modal-title">日本租车自驾法规合规性确认（1949 日内瓦公约）</h3>
+    <p style="font-size:0.86rem;margin-bottom:0.75rem;">
+      在切换至 <strong>模式B（合规租车自驾）</strong> 并查看每日 <code>MapCode</code> 与高速导航参数前，请务必知悉日本警察厅核心法规：
+    </p>
+    <div style="background:var(--bg-subtle);padding:0.85rem;border-radius:6px;font-size:0.82rem;margin-bottom:1rem;border-left:4px solid #BC4749;">
+      1. <strong>仅持有中国大陆驾照不可在日本租车自驾</strong>（无论是否配有公证件、翻译件或网络平台制作的KIDA小册子）。<br>
+      2. 自 <strong>2025年10月1日</strong> 起，日本外免切替（外国驾照换日本驾照）必须提交日本住民票，短期游客已无法换证。<br>
+      3. <strong>合法提车前提：</strong>您或同行驾驶人必须持有<strong>香港、澳门、美国、英国、澳洲等日内瓦公约缔约地驾照原件 + 1949格式纸质IDP原件</strong>（或台湾驾照+JAF日文译本）。
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:0.65rem;">
+      <button class="btn-util" onclick="closeModal()">返回模式A (公共交通)</button>
+      <button class="btn-util" style="background:var(--active-theme);color:#fff;" onclick="confirmIDPAndSwitch()">我已知悉法规，查看自驾路线与MapCode</button>
+    </div>
+  `;
+  modal.classList.add("open");
+}
+
+function confirmIDPAndSwitch() {
+  hasConfirmedIDP = true;
+  closeModal();
+  setTransportMode("drive");
+}
+
+
+// ============================================================================
+// 6. VERSION MATRIX & PRACTICAL TOOLKIT MODALS
+// ============================================================================
+function openVersionModal() {
+  const modal = document.getElementById("modal-backdrop");
+  const content = document.getElementById("modal-content");
+  content.innerHTML = `
+    <h3 class="modal-title">日本深度自助旅行导览系统 · 版本导览矩阵 (Version Matrix)</h3>
+    <p style="font-size:0.82rem;color:var(--ink-secondary);margin-bottom:0.85rem;">
+      本项目经多轮迭代已形成 5 套各具特色的可视化导览系统。您可以根据需要随时切换至任意历史版本或探索不同设计架构：
+    </p>
+    <div class="version-list">
+      <div class="version-item current">
+        <div>
+          <div class="v-title-row">
+            <span class="v-badge badge-active">当前版本 · v3</span>
+            <strong style="font-size:0.92rem;">v3.html (旗舰终极集大成版)</strong>
+          </div>
+          <div class="v-desc">
+            以 Argon-v2 为主体，深度吸收 v1 路线A经典文化（东京博物馆集群、浮世绘富岳三十六景溯源、信州小布施北斋晚年绝笔、松本城、五箇山合掌造等），配置 D3 实时高程探针、免Key/内置Key多源底图热切换、2026年出入境单一QR码与自驾合规预警。
+          </div>
+        </div>
+        <div>
+          <span style="font-size:0.75rem;color:#2A9D8F;font-weight:700;white-space:nowrap;">正在浏览</span>
+        </div>
+      </div>
+
+      <div class="version-item">
+        <div>
+          <div class="v-title-row">
+            <span class="v-badge">v2.html</span>
+            <strong style="font-size:0.92rem;">v2.html (全景融合与抽屉规划版)</strong>
+          </div>
+          <div class="v-desc">
+            以 index.html 为基础重构，集成底图热切换选择器、侧边抽屉式日程导览、动态预算沙盒与全景路线地图。
+          </div>
+        </div>
+        <div>
+          <a class="v-btn-go" href="v2.html">进入此版本 &rarr;</a>
+        </div>
+      </div>
+
+      <div class="version-item">
+        <div>
+          <div class="v-title-row">
+            <span class="v-badge">Argon v2</span>
+            <strong style="font-size:0.92rem;">japan_deep_travel_interactive_guide_argon-v2.html (文学深潜与黄金分屏版)</strong>
+          </div>
+          <div class="v-desc">
+            43%/57% 黄金分割双栏排版、D3.js 高程剖面探针联动、暗黑山岳夜景模式、3条经典地理文化线 + 3条村上春树文学寻踪线。
+          </div>
+        </div>
+        <div>
+          <a class="v-btn-go" href="japan_deep_travel_interactive_guide_argon-v2.html">进入此版本 &rarr;</a>
+        </div>
+      </div>
+
+      <div class="version-item">
+        <div>
+          <div class="v-title-row">
+            <span class="v-badge badge-outline">Argon v1</span>
+            <strong style="font-size:0.92rem;">japan_deep_travel_interactive_guide_argon.html (探索走廊与文学路线版)</strong>
+          </div>
+          <div class="v-desc">
+            首创融入村上春树文学地图（北海道寻羊、四国卡夫卡、东京骑士团长）与日本三大经典古道。
+          </div>
+        </div>
+        <div>
+          <a class="v-btn-go" href="japan_deep_travel_interactive_guide_argon.html">进入此版本 &rarr;</a>
+        </div>
+      </div>
+
+      <div class="version-item">
+        <div>
+          <div class="v-title-row">
+            <span class="v-badge badge-outline">v1 经典版</span>
+            <strong style="font-size:0.92rem;">index.html (原生经典关东关西与本州导览)</strong>
+          </div>
+          <div class="v-desc">
+            经典原生 Leaflet 架构，包含东京、京都、小布施葛饰北斋、兼六园等详尽人文历史解读与高分食宿指南。
+          </div>
+        </div>
+        <div>
+          <a class="v-btn-go" href="index.html">进入此版本 &rarr;</a>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-top:0.85rem;">
+      <button class="btn-util" style="background:var(--active-theme);color:#fff;" onclick="closeModal()">关闭</button>
+    </div>
+  `;
+  modal.classList.add("open");
+}
+
+function openChecklistModal() {
+  const modal = document.getElementById("modal-backdrop");
+  const content = document.getElementById("modal-content");
+  content.innerHTML = `
+    <h3 class="modal-title">日本 15–20 日深度自由行 · 行前备忘与装备核对清单</h3>
+    <div class="checklist-grid">
+      <div class="checklist-card">
+        <h4>证件与通关 (必检)</h4>
+        <ul>
+          <li>护照原件（有效期 6 个月以上，留有空白签注页）</li>
+          <li>日本电子签证 (eVISA) 联网验证页（登机前动态验证）</li>
+          <li>Visit Japan Web (VJW) 单一 QR 码（通关截屏备用）</li>
+          <li>往返机票行程单打印件、首晚/全程酒店预订单</li>
+          <li>合规国际驾照 IDP 原件（若租车自驾，大陆驾照无效）</li>
+        </ul>
+      </div>
+
+      <div class="checklist-card">
+        <h4>支付、通信与乘车</h4>
+        <ul>
+          <li>Apple Wallet 预先绑定或添加电子 Suica / ICOCA</li>
+          <li>现金储备：准备 20,000–30,000 日元纸币与硬币（小镇投币拉面机、神社纳经、投币寄存箱）</li>
+          <li>双币/多币种信用卡（Visa / Mastercard / JCB），开通境外无密支付</li>
+          <li>日本当地 Docomo/SoftBank 4G/5G eSIM 或随身 WiFi</li>
+        </ul>
+      </div>
+
+      <div class="checklist-card">
+        <h4>电器、电压与穿戴</h4>
+        <ul>
+          <li>日本电压为 100V 60Hz/50Hz，双脚扁平插头通用无需转换器</li>
+          <li>三脚接地插头（如部分笔记本电脑）须自备三转二转换头</li>
+          <li>移动电源（须随身携带，严禁托运，额定能量≤100Wh）</li>
+          <li>上高地/中山道徒步舒适防滑步行鞋、轻量防风防水冲锋衣</li>
+        </ul>
+      </div>
+
+      <div class="checklist-card">
+        <h4>健康与应急随行</h4>
+        <ul>
+          <li>个人常备药品（止泻药、感冒药、止痛药、防晕车药、创口贴）</li>
+          <li>温泉礼仪需知：大面积纹身需使用肤色防水胶贴遮盖</li>
+          <li>小型垃圾袋：日本街头极少设公用垃圾桶，须随身带回酒店分类</li>
+          <li>日本观光厅多语种热线与驻日使馆领保电话随身备存</li>
+        </ul>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-top:1rem;">
+      <button class="btn-util" style="background:var(--active-theme);color:#fff;" onclick="closeModal()">我已确认备齐</button>
+    </div>
+  `;
+  modal.classList.add("open");
+}
+
+function openHotlinesModal() {
+  const modal = document.getElementById("modal-backdrop");
+  const content = document.getElementById("modal-content");
+  content.innerHTML = `
+    <h3 class="modal-title">在日紧急求助、医疗支援与领事保护通讯录</h3>
+    <p style="font-size:0.82rem;color:var(--ink-secondary);margin-bottom:0.85rem;">
+      遇到突发伤病、自然灾害或治安事故时，可通过以下全天候官方专线获取即时支持：
+    </p>
+
+    <div class="hotline-card">
+      <div>
+        <strong style="font-size:0.88rem;">日本观光厅 24小时多语种访日热线 (Japan Visitor Hotline)</strong>
+        <p style="font-size:0.76rem;color:var(--ink-secondary);margin-top:2px;">
+          官方全天候提供中文、英文、韩文服务，覆盖意外事故、灾害通报与医疗指引。
+        </p>
+      </div>
+      <div class="hotline-num">050-3816-2720</div>
+    </div>
+
+    <div class="hotline-card">
+      <div>
+        <strong style="font-size:0.88rem;">紧急报警 (警察署 Police)</strong>
+        <p style="font-size:0.76rem;color:var(--ink-secondary);margin-top:2px;">
+          遭遇盗窃、交通事故、人身侵害时直接拨打（无需加拨区号，公用电话按红色紧急按钮免费拨打）。
+        </p>
+      </div>
+      <div class="hotline-num">110</div>
+    </div>
+
+    <div class="hotline-card">
+      <div>
+        <strong style="font-size:0.88rem;">急救送医与火警 (Ambulance / Fire)</strong>
+        <p style="font-size:0.76rem;color:var(--ink-secondary);margin-top:2px;">
+          突发急病、需要救护车救援或火灾事故时呼叫。
+        </p>
+      </div>
+      <div class="hotline-num">119</div>
+    </div>
+
+    <div class="hotline-card">
+      <div>
+        <strong style="font-size:0.88rem;">中国外交部全球领事保护与服务应急热线</strong>
+        <p style="font-size:0.76rem;color:var(--ink-secondary);margin-top:2px;">
+          海外中国公民遭遇重大变故时 24 小时全球直拨求助。
+        </p>
+      </div>
+      <div class="hotline-num">+86-10-12308</div>
+    </div>
+
+    <div class="hotline-card">
+      <div>
+        <strong style="font-size:0.88rem;">中国驻日本大使馆领事保护与协助电话</strong>
+        <p style="font-size:0.76rem;color:var(--ink-secondary);margin-top:2px;">
+          驻东京大使馆应急专线（非紧急签证业务咨询请勿拨打）。
+        </p>
+      </div>
+      <div class="hotline-num">03-6450-2195</div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;margin-top:0.85rem;">
+      <button class="btn-util" style="background:var(--active-theme);color:#fff;" onclick="closeModal()">关闭</button>
+    </div>
+  `;
+  modal.classList.add("open");
+}
+
+function openCartoKeyModal() {
+  const modal = document.getElementById("modal-backdrop");
+  const content = document.getElementById("modal-content");
+  content.innerHTML = `
+    <h3 class="modal-title">CARTO 高清人文矢量底图 API Key 设置</h3>
+    <p style="font-size:0.82rem;color:var(--ink-secondary);margin-bottom:0.75rem;">
+      系统已为您预置合法有效的 CARTO 高清底图密钥。若您有自备的 CARTO API Key，亦可在此输入更新：
+    </p>
+    <div style="margin-bottom:1rem;">
+      <label style="display:block;font-size:0.78rem;font-weight:600;margin-bottom:0.35rem;">当前使用的 API Key：</label>
+      <input type="text" id="custom-carto-key-input" value="${currentCartoKey}" 
+        style="width:100%;padding:0.45rem 0.65rem;font-family:var(--font-mono);font-size:0.82rem;border:1px solid var(--border-line);border-radius:4px;background:var(--bg-paper);color:var(--ink-primary);">
+    </div>
+    <div style="font-size:0.76rem;color:var(--ink-secondary);background:var(--bg-subtle);padding:0.65rem;border-radius:4px;margin-bottom:1rem;">
+      <strong>容灾保障机制：</strong> 若外部网络无法访问 CARTO 瓦片服务器，系统将无感降级至日本国土地理院 (GSI) 官方地图或 OpenStreetMap 全球开源瓦片。
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <button class="btn-util" onclick="resetDefaultCartoKey()">恢复系统预置 Key</button>
+      <div style="display:flex;gap:0.5rem;">
+        <button class="btn-util" onclick="closeModal()">取消</button>
+        <button class="btn-util" style="background:var(--active-theme);color:#fff;" onclick="saveCustomCartoKey()">保存并刷新底图</button>
+      </div>
+    </div>
+  `;
+  modal.classList.add("open");
+}
+
+function resetDefaultCartoKey() {
+  document.getElementById("custom-carto-key-input").value = "cb1_4jug_1_dbb7506275049777c6a92fee";
+}
+
+function saveCustomCartoKey() {
+  const inputVal = document.getElementById("custom-carto-key-input").value.trim();
+  currentCartoKey = inputVal;
+  TILE_SOURCES = getTileSources(currentCartoKey);
+  const currentSelectVal = document.getElementById("tile-selector").value;
+  switchBaseTile(currentSelectVal);
+  closeModal();
+}
+
+function openVisaModal() {
+  const route = ROUTES_DATA[currentRouteKey];
+  const modal = document.getElementById("modal-backdrop");
+  const content = document.getElementById("modal-content");
+
+  let rowsHtml = route.nodes.map(n => `
+    <tr>
+      <td style="font-family:var(--font-mono);white-space:nowrap;">${n.day}</td>
+      <td><strong>${n.name}</strong><br><span style="color:var(--ink-muted);">${n.pref} · 游览及古道体验</span></td>
+      <td>${currentTransportMode === 'public' ? n.public.line : 'レンタカー (Rental Car)'}</td>
+      <td>${n.stay.split("(")[0]}<br><span style="font-family:var(--font-mono);">TEL: ${n.stayTel}</span></td>
+    </tr>
+  `).join("");
+
+  content.innerHTML = `
+    <h3 class="modal-title">赴日签证送签专用《滞在予定表 (Schedule of Stay)》</h3>
+    <p style="font-size:0.8rem;color:var(--ink-secondary);">
+      当前路线：<strong>${route.title}</strong> | 提示：可直接使用浏览器打印（Ctrl+P / Cmd+P）另存为 PDF 提交代办社。
+    </p>
+    <table class="visa-table">
+      <thead>
+        <tr>
+          <th>年月日 (Day)</th>
+          <th>行動予定 (Activity Plan)</th>
+          <th>交通機関 (Transport)</th>
+          <th>宿泊先・連絡先 (Accommodation & Tel)</th>
+        </tr>
+      </thead>
+      <tbody>${rowsHtml}</tbody>
+    </table>
+    <div style="display:flex;justify-content:flex-end;gap:0.6rem;margin-top:0.8rem;">
+      <button class="btn-util" onclick="window.print()">打印 / 导出 PDF</button>
+      <button class="btn-util" style="background:var(--active-theme);color:#fff;" onclick="closeModal()">关闭窗口</button>
+    </div>
+  `;
+  modal.classList.add("open");
+}
+
+function closeModal() {
+  document.getElementById("modal-backdrop").classList.remove("open");
+}
+
+function toggleDarkMode() {
+  const isDark = document.documentElement.getAttribute("data-dark") === "true";
+  document.documentElement.setAttribute("data-dark", !isDark);
+  document.getElementById("dark-btn").textContent = !isDark ? "和纸浅色模式" : "暗色山岳模式";
+  drawElevationProfile();
+  updateBudgetModel();
+}
+
+window.addEventListener("resize", () => {
+  drawElevationProfile();
+  updateBudgetModel();
+});
+
+window.addEventListener("DOMContentLoaded", initMap);
+</script>
+</body>
+</html>
