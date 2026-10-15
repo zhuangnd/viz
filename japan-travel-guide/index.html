@@ -467,148 +467,158 @@
       background: var(--washi-subtle); border-color: var(--active-color); color: var(--active-color);
     }
 
+    /* Elevation Dock Toggle Button */
+    .btn-dock-toggle {
+      background: transparent; border: 1px solid var(--slate-300); border-radius: 4px;
+      padding: 1px 4px; cursor: pointer; color: var(--slate-500); display: flex; align-items: center;
+      line-height: 1; transition: all 0.15s ease;
+    }
+    .btn-dock-toggle:hover { background: var(--washi-subtle); color: var(--slate-800); }
+    .icon-chevron-dock { width: 11px; height: 11px; transition: transform 0.2s ease; }
+    .elevation-dock.collapsed .icon-chevron-dock { transform: rotate(180deg); }
+    .elevation-dock.collapsed {
+      height: 24px !important; min-height: 24px !important; max-height: 24px !important; padding: 2px 8px !important;
+    }
+    .elevation-dock.collapsed #elevation-svg {
+      display: none !important;
+    }
+
     @media (max-width: 900px) {
       html, body {
-        height: auto !important;
-        min-height: 100%;
-        overflow-x: hidden !important;
-        overflow-y: auto !important;
+        height: 100% !important;
+        overflow: hidden !important;
       }
       .global-header {
-        padding: 0 10px;
-        height: 50px;
-        max-height: 50px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 6px;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        height: 50px !important;
+        padding: 0 10px !important;
+        z-index: 1000 !important;
       }
-      .brand-group {
-        flex-shrink: 0;
-        gap: 6px;
-      }
-      .brand-seal {
-        width: 22px;
-        height: 22px;
-        font-size: 0.68rem;
-      }
-      .brand-title {
-        font-size: 0.82rem;
-        letter-spacing: 0;
-      }
-      .brand-badge {
-        display: none !important;
-      }
-      .header-center {
-        flex: 1 1 auto;
-        min-width: 0;
-        justify-content: center;
-      }
-      .header-center .mode-switch-capsule {
-        display: none !important;
-      }
-      .route-drawer-btn {
-        padding: 4px 8px;
-        font-size: 0.72rem;
-        max-width: 135px;
-        min-width: 0;
-      }
-      .route-drawer-label {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        max-width: 95px;
-      }
-      .header-right {
-        flex-shrink: 0;
-        gap: 4px;
-      }
-      .util-group .btn-util:not(.btn-visa) {
-        display: none !important;
-      }
-      .btn-visa {
-        padding: 3px 6px;
-        font-size: 0.72rem;
-      }
-      .btn-visa span {
-        display: inline !important;
-      }
-      .divider-vertical {
-        display: none !important;
-      }
+      .brand-group { flex-shrink: 0; gap: 6px; }
+      .brand-seal { width: 22px; height: 22px; font-size: 0.68rem; }
+      .brand-title { font-size: 0.82rem; letter-spacing: 0; }
+      .brand-badge { display: none !important; }
+      .header-center { flex: 1 1 auto; min-width: 0; justify-content: center; }
+      .header-center .mode-switch-capsule { display: none !important; }
+      .route-drawer-btn { padding: 4px 8px; font-size: 0.72rem; max-width: 135px; min-width: 0; }
+      .route-drawer-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 95px; }
+      .header-right { flex-shrink: 0; gap: 4px; }
+      .util-group .btn-util:not(.btn-visa) { display: none !important; }
+      .btn-visa { padding: 3px 6px; font-size: 0.72rem; }
+      .btn-visa span { display: inline !important; }
+      .divider-vertical { display: none !important; }
       .engine-group .tile-dropdown,
       .engine-group .btn-icon:not(#btn-theme-toggle),
-      .engine-group .btn-version-pill {
-        display: none !important;
-      }
+      .engine-group .btn-version-pill { display: none !important; }
 
-      /* Mobile Action Bar */
-      .mobile-action-bar {
-        display: flex !important;
-        flex-direction: column;
-        gap: 8px;
-        padding: 10px 12px 6px;
-        background: var(--washi);
-        border-bottom: 1px solid var(--slate-200);
-        order: 0;
-      }
-
-      /* App Shell becomes normal document flow */
+      /* App Shell locked in viewport */
       .app-shell {
-        position: static !important;
+        position: fixed !important;
+        top: 50px !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        height: calc(100% - 50px) !important;
+        max-height: calc(100% - 50px) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+        padding-top: 0 !important;
+      }
+
+      /* Locked Top Section: Action Bar + Viewport */
+      .mobile-action-bar {
+        order: 0 !important;
+        flex-shrink: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 6px !important;
+        padding: 6px 10px !important;
+        background: var(--washi) !important;
+        border-bottom: 1px solid var(--slate-200) !important;
+        z-index: 800 !important;
+      }
+      .mob-mode-capsule {
+        padding: 2px !important;
+      }
+      .mob-mode-btn {
+        padding: 5px 8px !important;
+        font-size: 0.72rem !important;
+      }
+      .mob-pill-btn {
+        padding: 4px 9px !important;
+        font-size: 0.7rem !important;
+      }
+
+      .viewport-col {
+        order: 1 !important;
+        flex-shrink: 0 !important;
         display: flex !important;
         flex-direction: column !important;
         height: auto !important;
-        overflow: visible !important;
-        padding-top: 50px;
-      }
-
-      /* Order of components on mobile */
-      .viewport-col {
-        order: 1 !important;
-        height: auto !important;
         min-height: auto !important;
-        padding: 10px 12px 6px !important;
-        background: transparent !important;
+        padding: 6px 10px !important;
+        background: var(--washi-subtle) !important;
+        border-bottom: 2px solid var(--slate-300) !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
+        z-index: 700 !important;
       }
       .map-wrapper {
-        height: 340px !important;
+        position: relative !important;
+        flex: none !important;
+        width: 100% !important;
+        height: 195px !important;
+        min-height: 195px !important;
+        max-height: 195px !important;
         border-radius: 8px 8px 0 0 !important;
         overflow: hidden !important;
         border: 1px solid var(--slate-300) !important;
         border-bottom: none !important;
-        box-shadow: var(--shadow-sm) !important;
       }
       #map-canvas {
         height: 100% !important;
+        min-height: 195px !important;
         width: 100% !important;
       }
       .elevation-dock {
-        height: 140px !important;
-        min-height: 140px !important;
-        max-height: 140px !important;
+        flex: none !important;
+        height: 95px !important;
+        min-height: 95px !important;
+        max-height: 95px !important;
         border-radius: 0 0 8px 8px !important;
         border: 1px solid var(--slate-300) !important;
         border-top: 1px solid var(--slate-200) !important;
         box-shadow: var(--shadow-sm) !important;
-        padding: 6px 10px 2px !important;
+        padding: 4px 8px 2px !important;
+        transition: height 0.2s ease, max-height 0.2s ease;
       }
-      #elevation-svg {
-        height: 106px !important;
-        max-height: 106px !important;
+      .dock-header {
+        height: 18px !important;
+        min-height: 18px !important;
+        line-height: 18px !important;
       }
       .dock-title {
-        font-size: 0.68rem !important;
+        font-size: 0.65rem !important;
       }
       .probe-readout {
-        font-size: 0.68rem !important;
+        font-size: 0.65rem !important;
+      }
+      #elevation-svg {
+        height: 70px !important;
+        max-height: 70px !important;
       }
 
+      /* Scrollable Bottom Section: Narrative Column */
       .narrative-col {
         order: 2 !important;
-        height: auto !important;
-        overflow: visible !important;
-        padding: 10px 12px 24px !important;
+        flex: 1 1 auto !important;
+        height: 100% !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding: 10px 12px 60px !important;
         border-right: none !important;
       }
 
@@ -626,83 +636,30 @@
         scrollbar-width: none !important;
       }
       .drawer-cat-tabs::-webkit-scrollbar { display: none; }
-      .drawer-tab {
-        flex-shrink: 0 !important;
-        white-space: nowrap !important;
-      }
-      .route-drawer-grid {
-        grid-template-columns: 1fr !important;
-        gap: 8px !important;
-      }
+      .drawer-tab { flex-shrink: 0 !important; white-space: nowrap !important; }
+      .route-drawer-grid { grid-template-columns: 1fr !important; gap: 8px !important; }
 
       /* Meta Grid, Hero & Elements on mobile */
-      .route-hero {
-        padding: 12px 14px !important;
-      }
-      .route-name {
-        font-size: 1.02rem !important;
-      }
-      .route-desc {
-        font-size: 0.76rem !important;
-      }
-      .route-meta-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 6px !important;
-      }
-      .meta-item {
-        padding: 7px 8px !important;
-      }
-      .meta-label {
-        font-size: 0.66rem !important;
-      }
-      .meta-val {
-        font-size: 0.74rem !important;
-      }
-      .month-pill {
-        font-size: 0.6rem !important;
-        padding: 2px 0 !important;
-      }
-      .seasonal-box {
-        padding: 8px 10px !important;
-      }
-      .seasonal-box h4 {
-        font-size: 0.76rem !important;
-      }
-      .seasonal-box p {
-        font-size: 0.72rem !important;
-      }
-      .panel-switcher {
-        margin-bottom: 12px !important;
-      }
-      .panel-tab {
-        font-size: 0.72rem !important;
-        padding: 6px 2px !important;
-      }
-      .day-card {
-        padding: 10px 12px !important;
-      }
-      .day-name {
-        font-size: 0.9rem !important;
-      }
-      .food-stay-block {
-        grid-template-columns: 1fr !important;
-        gap: 6px !important;
-      }
-
-      /* Modals on mobile */
-      .modal-backdrop {
-        padding: 12px !important;
-      }
-      .modal-card {
-        max-height: 90vh !important;
-      }
-      .modal-header {
-        padding: 10px 12px !important;
-      }
-      .modal-body {
-        padding: 10px 12px !important;
-        font-size: 0.76rem !important;
-      }
+      .route-hero { padding: 10px 12px !important; }
+      .route-name { font-size: 0.98rem !important; }
+      .route-desc { font-size: 0.74rem !important; }
+      .route-meta-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 6px !important; }
+      .meta-item { padding: 6px 8px !important; }
+      .meta-label { font-size: 0.66rem !important; }
+      .meta-val { font-size: 0.74rem !important; }
+      .month-pill { font-size: 0.6rem !important; padding: 2px 0 !important; }
+      .seasonal-box { padding: 8px 10px !important; }
+      .seasonal-box h4 { font-size: 0.76rem !important; }
+      .seasonal-box p { font-size: 0.72rem !important; }
+      .panel-switcher { margin-bottom: 10px !important; }
+      .panel-tab { font-size: 0.72rem !important; padding: 6px 2px !important; }
+      .day-card { padding: 10px 12px !important; }
+      .day-name { font-size: 0.9rem !important; }
+      .food-stay-block { grid-template-columns: 1fr !important; gap: 6px !important; }
+      .modal-backdrop { padding: 12px !important; }
+      .modal-card { max-height: 90vh !important; }
+      .modal-header { padding: 10px 12px !important; }
+      .modal-body { padding: 10px 12px !important; font-size: 0.76rem !important; }
     }
   </style>
 </head>
@@ -1543,9 +1500,14 @@
         <div class="dock-header">
           <span class="dock-title">
             <svg class="icon" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-            D3.js 实时地形高程剖面图 (鼠标悬停剖面可联动高亮地图站点)
+            D3.js 实时地形高程剖面图
           </span>
-          <span class="probe-readout" id="probe-readout">当前聚焦：-</span>
+          <div style="display:flex;align-items:center;gap:6px;min-width:0;flex-shrink:0;">
+            <span class="probe-readout" id="probe-readout">当前聚焦：-</span>
+            <button class="btn-dock-toggle" id="btn-dock-toggle" onclick="toggleElevationDock()" title="折叠/展开高程剖面">
+              <svg class="icon icon-chevron-dock" id="chevron-dock" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+          </div>
         </div>
         <svg id="elevation-svg"></svg>
       </div>
@@ -1828,13 +1790,19 @@
     let routePolyline = null;
     let nodeMarkers = [];
 
+    const DEFAULT_CARTO_KEY = 'cb1_4jug_1_dbb7506275049777c6a92fee';
+
+    function getCartoKey() {
+      return localStorage.getItem('carto_api_key') || DEFAULT_CARTO_KEY;
+    }
+
     const TILE_CONFIGS = {
       carto: {
-        url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+        url: `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=${getCartoKey()}`,
         attribution: '&copy; CARTO &copy; OpenStreetMap'
       },
       carto_positron: {
-        url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+        url: `https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=${getCartoKey()}`,
         attribution: '&copy; CARTO &copy; OpenStreetMap'
       },
       gsi: {
@@ -2114,7 +2082,10 @@
       const containerNode = document.getElementById('elevation-svg');
       const width = containerNode.clientWidth || 400;
       const height = containerNode.clientHeight || 119;
-      const margin = { top: 10, right: 15, bottom: 25, left: 35 };
+      const isMobile = window.innerWidth <= 900;
+      const margin = isMobile
+        ? { top: 6, right: 10, bottom: 18, left: 28 }
+        : { top: 10, right: 15, bottom: 25, left: 35 };
 
       const innerWidth = width - margin.left - margin.right;
       const innerHeight = height - margin.top - margin.bottom;
@@ -2169,20 +2140,20 @@
         .attr('d', line);
 
       // Axes
-      const xAxis = d3.axisBottom(xScale).ticks(5).tickFormat(d => d + 'km');
+      const xAxis = d3.axisBottom(xScale).ticks(isMobile ? 4 : 5).tickFormat(d => d + 'km');
       const yAxis = d3.axisLeft(yScale).ticks(3).tickFormat(d => d + 'm');
 
       g.append('g')
         .attr('transform', `translate(0, ${innerHeight})`)
         .call(xAxis)
         .attr('color', 'var(--slate-400)')
-        .attr('font-size', '9px')
+        .attr('font-size', isMobile ? '8px' : '9px')
         .attr('font-family', 'var(--font-mono)');
 
       g.append('g')
         .call(yAxis)
         .attr('color', 'var(--slate-400)')
-        .attr('font-size', '9px')
+        .attr('font-size', isMobile ? '8px' : '9px')
         .attr('font-family', 'var(--font-mono)');
 
       // Active guide vertical line
@@ -2392,10 +2363,23 @@
       const key = document.getElementById('carto-key-input').value.trim();
       if (key) {
         localStorage.setItem('carto_api_key', key);
-        TILE_CONFIGS.carto.url = `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?api_key=${key}`;
-        switchBaseTile(currentTileKey);
+      } else {
+        localStorage.removeItem('carto_api_key');
       }
+      TILE_CONFIGS.carto.url = `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=${getCartoKey()}`;
+      TILE_CONFIGS.carto_positron.url = `https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=${getCartoKey()}`;
+      switchBaseTile(currentTileKey);
       closeModal();
+    }
+
+    function toggleElevationDock() {
+      const dock = document.querySelector('.elevation-dock');
+      if (dock) {
+        dock.classList.toggle('collapsed');
+        if (map) {
+          setTimeout(() => map.invalidateSize(), 250);
+        }
+      }
     }
 
     function toggleNightTheme() {
