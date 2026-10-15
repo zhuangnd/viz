@@ -23,6 +23,7 @@ japan-travel-guide/
 │   └── japan-travel-guide-wbd.html                   # WBD 极简独立规划页面
 ├── docs/                                             # 核心文档资产
 │   ├── guides/                                       # 深度旅行指南（Markdown 详版）
+│   │   ├── JAPAN_TRAVEL_GUIDE_2026_MASTER.md         # [2026 典藏总规划] 汇聚v2-v4精髓之全景多模态大纲（全要素交通/起讫站点/Airbnb全景指南）
 │   │   ├── JAPAN_INDEPENDENT_TRAVEL_GUIDE.md         # 原始完整版 15-20日全方位自由行指南
 │   │   ├── JAPAN_DEEP_TRAVEL_GUIDE_V2.md             # v2 升级版深度指南（含文化探针与交通核算）
 │   │   ├── japan_deep_travel_guide_2026_argon.md     # 2026 Argon 文学走廊深度指南
@@ -35,6 +36,7 @@ japan-travel-guide/
 │   ├── japan_raw.geojson                             # 日本行政区划与基础轮廓 GeoJSON
 │   └── routes_v2_spec.json                           # 6 大线路完整节点与经纬度规范数据
 └── scripts/                                          # 自动化构建与数据加工脚本
+    ├── build_master_guide_md.py                      # 2026 典藏版总规划 Markdown 构建与校验脚本
     ├── build_v4_html.py                              # v4.0 WBD实践版自动化构建流水线脚本
     ├── build_v3_html.py                              # v3 旗舰版自动化组装与校验构建脚本
     ├── build_v2_html.py                              # v2 全景融合版构建流水线脚本
