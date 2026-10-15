@@ -596,7 +596,73 @@ ROUTES["t6"] = {
     "nodes": v4_routes["r6"]["nodes"]
 }
 
-# 4. Literature
+# 4. Literature (3 Long Routes from v2.html + 3 Micro-Tours from v4.html)
+ROUTES["ml1"] = {
+    "id": "ml1",
+    "cat": "literature",
+    "tag": "LITERATURE 04 · HARUKI MURAKAMI · HOKKAIDO WILDERNESS & SHEEP",
+    "title": v2_routes["r4"]["title"],
+    "shortName": v2_extras["r4"].get("shortName", "村上春树·北海道寻羊冒险"),
+    "badge": v2_extras["r4"].get("badge", "村上文学 · 18日北国荒原"),
+    "desc": v2_routes["r4"]["desc"],
+    "color": v2_routes["r4"].get("color", "#3D5A80"),
+    "daysText": "18 日 / 17 晚",
+    "maxElev": "680 m (美深町仁宇布高地)",
+    "trailKm": "95.0 km (全线高地农场与极北海岸)",
+    "baseCostRMB": 17800,
+    "pass": v2_extras["r4"]["pass"],
+    "transit": v2_extras["r4"]["transit"],
+    "ports": v2_extras["r4"]["ports"],
+    "bestMonths": [1, 2, 7, 8, 9, 10],
+    "winterAdvice": v2_extras["r4"]["winterAdvice"],
+    "autumnAdvice": v2_extras["r4"]["autumnAdvice"],
+    "nodes": v2_routes["r4"]["nodes"]
+}
+
+ROUTES["ml2"] = {
+    "id": "ml2",
+    "cat": "literature",
+    "tag": "LITERATURE 05 · HARUKI MURAKAMI · SHIKOKU KAFKA & HANSHIN",
+    "title": v2_routes["r5"]["title"],
+    "shortName": v2_extras["r5"].get("shortName", "村上春树·四国海边卡夫卡"),
+    "badge": v2_extras["r5"].get("badge", "村上文学 · 16日少年海滩"),
+    "desc": v2_routes["r5"]["desc"],
+    "color": v2_routes["r5"].get("color", "#1B4332"),
+    "daysText": "16 日 / 15 晚",
+    "maxElev": "720 m (梼原町森林迷宫与云之上)",
+    "trailKm": "68.0 km (全线海岸林道与避难所探寻)",
+    "baseCostRMB": 15200,
+    "pass": v2_extras["r5"]["pass"],
+    "transit": v2_extras["r5"]["transit"],
+    "ports": v2_extras["r5"]["ports"],
+    "bestMonths": [3, 4, 5, 9, 10, 11],
+    "winterAdvice": v2_extras["r5"]["winterAdvice"],
+    "autumnAdvice": v2_extras["r5"]["autumnAdvice"],
+    "nodes": v2_routes["r5"]["nodes"]
+}
+
+ROUTES["ml3"] = {
+    "id": "ml3",
+    "cat": "literature",
+    "tag": "LITERATURE 06 · HARUKI MURAKAMI · TOKYO, HAKONE & IZU",
+    "title": v2_routes["r6"]["title"],
+    "shortName": v2_extras["r6"].get("shortName", "村上春树·东京1Q84箱根"),
+    "badge": v2_extras["r6"].get("badge", "村上文学 · 15日山海慢行"),
+    "desc": v2_routes["r6"]["desc"],
+    "color": v2_routes["r6"].get("color", "#6D4C41"),
+    "daysText": "15 日 / 14 晚",
+    "maxElev": "865 m (箱根仙石原·桃源台画室山谷)",
+    "trailKm": "58.0 km (都会漫步与伊豆苔藓古道)",
+    "baseCostRMB": 14600,
+    "pass": v2_extras["r6"]["pass"],
+    "transit": v2_extras["r6"]["transit"],
+    "ports": v2_extras["r6"]["ports"],
+    "bestMonths": [1, 2, 3, 4, 5, 9, 10, 11, 12],
+    "winterAdvice": v2_extras["r6"]["winterAdvice"],
+    "autumnAdvice": v2_extras["r6"]["autumnAdvice"],
+    "nodes": v2_routes["r6"]["nodes"]
+}
+
 ROUTES["m1"] = {
     "id": "m1",
     "cat": "literature",
@@ -989,19 +1055,20 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
 
     /* Route Meta Grid (Replacing kpi-grid) */
     .route-meta-grid {{
-      display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 1rem;
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 1rem;
     }}
     .meta-item {{
       background: var(--washi-card); border: 1px solid var(--slate-200);
       border-radius: 7px; padding: 8px 10px; display: flex; flex-direction: column; gap: 3px;
-      box-shadow: var(--shadow-sm);
+      box-shadow: var(--shadow-sm); min-width: 0; overflow: hidden;
     }}
     .meta-label {{
-      font-size: 0.7rem; color: var(--slate-400); display: flex; align-items: center; gap: 5px; font-weight: 500;
+      font-size: 0.7rem; color: var(--slate-500); display: flex; align-items: center; gap: 5px; font-weight: 600;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
     }}
     .meta-val {{
       font-size: 0.78rem; font-weight: 700; color: var(--navy-900); font-family: var(--font-sans);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      line-height: 1.35; word-break: break-word; overflow-wrap: break-word; min-width: 0;
     }}
 
     /* Phenology Box & Seasonal Advice Box */
@@ -1048,9 +1115,16 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
     .day-card {{
       background: var(--washi-card); border: 1px solid var(--slate-200);
       border-radius: 8px; padding: 12px 14px; box-shadow: var(--shadow-sm);
-      transition: all 0.15s ease;
+      transition: all 0.2s ease; cursor: pointer; position: relative;
     }}
-    .day-card:hover {{ border-color: var(--active-color); box-shadow: var(--shadow-md); }}
+    .day-card:hover {{
+      border-color: var(--active-color); box-shadow: var(--shadow-md); transform: translateY(-1px);
+    }}
+    .day-card.active {{
+      border-left: 5px solid var(--active-color) !important;
+      background: #fcfdfe;
+      box-shadow: var(--shadow-md);
+    }}
     .day-header {{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }}
     .day-badge {{
       font-size: 0.72rem; font-family: var(--font-mono); font-weight: 700;
@@ -1129,13 +1203,28 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
 
     /* Elevation Dock */
     .elevation-dock {{
-      height: 155px; background: var(--washi-card); border-top: 1px solid var(--slate-200);
+      height: 155px; max-height: 155px; min-height: 155px; background: var(--washi-card); border-top: 1px solid var(--slate-200);
       display: flex; flex-direction: column; padding: 8px 14px 4px; z-index: 400; box-shadow: 0 -2px 6px rgba(0,0,0,0.03);
+      box-sizing: border-box; overflow: hidden; flex-shrink: 0;
     }}
-    .dock-header {{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }}
-    .dock-title {{ font-size: 0.72rem; font-weight: 700; color: var(--navy-900); display: flex; align-items: center; gap: 5px; }}
-    .probe-readout {{ font-size: 0.72rem; font-family: var(--font-mono); color: var(--active-color); font-weight: 700; }}
-    #elevation-svg {{ width: 100%; height: 120px; overflow: visible; }}
+    .dock-header {{
+      height: 22px; min-height: 22px; max-height: 22px; line-height: 22px;
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;
+      overflow: hidden; white-space: nowrap; flex-shrink: 0; box-sizing: border-box;
+    }}
+    .dock-title {{
+      font-size: 0.72rem; font-weight: 700; color: var(--navy-900); display: flex; align-items: center; gap: 5px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; min-width: 0;
+    }}
+    .probe-readout {{
+      font-size: 0.72rem; font-family: var(--font-mono); color: var(--active-color); font-weight: 700;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 0 auto; max-width: 50%;
+      text-align: right; margin-left: 8px; min-width: 0;
+    }}
+    #elevation-svg {{ width: 100%; height: 119px; max-height: 119px; overflow: visible; display: block; flex: 1 1 auto; }}
+    .visa-table {{ width: 100%; border-collapse: collapse; font-size: 0.76rem; margin-top: 8px; }}
+    .visa-table th {{ background: var(--washi-subtle); border: 1px solid var(--slate-300); padding: 8px 10px; font-weight: 700; text-align: left; }}
+    .visa-table td {{ border: 1px solid var(--slate-300); padding: 8px 10px; line-height: 1.45; }}
 
     /* Modals System */
     .modal-backdrop {{
@@ -1182,7 +1271,7 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
       <!-- Route Drawer Trigger Button -->
       <button class="route-drawer-btn" id="btn-route-drawer" onclick="toggleRouteDrawer()">
         <span class="route-drawer-dot" id="header-route-dot" style="background:#264653"></span>
-        <span class="route-drawer-label" id="header-route-label">东海道黄金三角 (18D)</span>
+        <span class="route-drawer-label" id="header-route-label">东海道黄金三角 (18D) · 共20条路线</span>
         <svg class="icon icon-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
       </button>
 
@@ -1218,6 +1307,10 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
           <svg class="icon" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
           <span>备忘</span>
         </button>
+        <button class="btn-util" onclick="openVisaModal()" title="生成日本领事馆标准格式送签《滞在予定表》">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <span>送签</span>
+        </button>
       </div>
 
       <div class="divider-vertical"></div>
@@ -1249,11 +1342,11 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
   <div class="route-drawer" id="route-drawer">
     <div class="route-drawer-header">
       <div class="drawer-cat-tabs" id="drawer-cat-tabs">
-        <button class="drawer-tab active" data-cat="all" onclick="filterDrawerCat('all')">全部路线 (17)</button>
+        <button class="drawer-tab active" data-cat="all" onclick="filterDrawerCat('all')">全部路线 (20)</button>
         <button class="drawer-tab" data-cat="framework" onclick="filterDrawerCat('framework')">落地主干框架 (3)</button>
         <button class="drawer-tab" data-cat="classic" onclick="filterDrawerCat('classic')">经典与大师长线 (5)</button>
         <button class="drawer-tab" data-cat="theme" onclick="filterDrawerCat('theme')">专题深度微循环 (6)</button>
-        <button class="drawer-tab" data-cat="literature" onclick="filterDrawerCat('literature')">村上文学寻踪 (3)</button>
+        <button class="drawer-tab" data-cat="literature" onclick="filterDrawerCat('literature')">村上文学寻踪 (6)</button>
       </div>
       <button class="drawer-close-btn" onclick="closeRouteDrawer()" title="关闭抽屉">
         <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -1508,27 +1601,75 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
   <div class="modal-backdrop" id="modal-rules" onclick="if(event.target===this)closeModal()">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 class="modal-title">2026 赴日签证与自驾法律生死红线</h3>
+        <h3 class="modal-title">签证资质要求与在日驾驶法律红线</h3>
         <button class="modal-close" onclick="closeModal()">&times;</button>
       </div>
       <div class="modal-body">
-        <h4 style="color:var(--vermilion);margin-bottom:6px;">刑事法律红线：中国大陆驾照在日驾驶真相</h4>
-        <p style="margin-bottom:12px;">
-          日本严格执行《1949 年日内瓦道路交通公约》。<strong>中国大陆驾照（含国内任何电商平台代办的“国际驾照翻译件/KIDA/IDD小册子”）在日本完全无效</strong>！
-          持上述伪证在日提车，正规租车公司一律拒绝提车；私下租借上路，一旦遇警察盘查或擦碰，直接以<strong>刑法无照驾驶罪（无免許運転）</strong>立案逮捕，面临最高 3 年监禁或 50 万日元罚金，保险全额拒赔并列入永久遣返黑名单。<br>
-          <strong>合规自驾唯一资质</strong>：持有中国香港、中国澳门、英国、美国、加拿大、澳大利亚等日内瓦公约缔约国/地区签发的正式驾照 + 对应官方核发的 <strong>1949 格式纸质 IDP 原件</strong>；或中国台湾驾照 + JAF 官方日文译本。<br>
-          <em>自 2025 年 10 月 1 日起，日本警察厅收紧外国驾照换领政策，必须提交当地《住民票》副本，短期旅游签已无法换领日本驾照。</em>
-        </p>
+        <div style="background:var(--vermilion-soft);border:1px solid var(--vermilion-border);border-left:4px solid var(--vermilion);padding:12px;border-radius:6px;margin-bottom:12px;">
+          <h4 style="color:var(--vermilion);margin-bottom:6px;font-size:0.85rem;">【自驾红线】中国大陆驾照在日无证驾驶刑事犯罪！</h4>
+          <p style="margin-bottom:6px;">1. 日本严格遵循《1949年日内瓦道路交通公约》。<strong>中国大陆驾驶证、公证书、翻译件及国内电商平台售卖的任何“国际驾照认证件 (KIDA/KRP等)”在日本均完全无效</strong>。</p>
+          <p style="margin-bottom:6px;">2. 持无效件驾车一旦临检或事故，日本警方依法按<strong>“无免許運転（无照驾驶犯罪）”</strong>立案逮捕，面临最高3年监禁或50万日元罚金，所有车辆保险直接全额拒赔，留底拘役并遣返驱逐出境。</p>
+          <p>3. <strong>合法在日驾驶唯一途径</strong>：持有缔约国/地区（中国香港、中国澳门、英美加澳等）官方核发之 1 年期 IDP 实体原件；或中国台湾驾照配 JAF 官方日文译本。</p>
+        </div>
 
-        <h4 style="color:var(--navy-900);margin-bottom:6px;">15–20 日行程签证申请与 2026 规费新政</h4>
-        <p>
-          1. <strong>停留期匹配</strong>：常规单次签默认 15 天。若行程规划为 16–20 天，<strong>切勿办理 15 天单次签</strong>（第 16 天离境按非法滞留遣返），必须向指定代办社明确申请 <strong>30 天停留期的单次电子签（eVISA）</strong>或三年/五年多次往返签证。<br>
-          2. <strong>eVISA 联网动态验真铁律</strong>：持电子签出行，值机与入境时必须在联网状态下实时登录外务省官网展示<strong>带有动态倒计时与二维码的网页</strong>，截图、PDF 或纸质打印件一律无效拒绝登机。<br>
-          3. <strong>2026 领馆规费（7月1日起执行）</strong>：单次旅游签（含 eVISA）每人 715 元人民币；三年/五年多次往返签每人 1,430 元人民币（代办服务费另计）。福建户籍归属福州领区管辖。
-        </p>
+        <div style="background:var(--amber-soft);border:1px solid var(--amber-border);border-left:4px solid var(--amber);padding:12px;border-radius:6px;margin-bottom:12px;">
+          <h4 style="color:var(--amber);margin-bottom:6px;font-size:0.85rem;">【签证办理】福州领区归属、2026新费用与停留期警示</h4>
+          <p style="margin-bottom:6px;">1. <strong>厦门属福州领区</strong>：厦门户籍及常住居民由日本国驻福州总领事馆受理，必须通过福州领区指定旅行社送签，个人无法直递。</p>
+          <p style="margin-bottom:6px;">2. <strong>2026年7月1日起新规费</strong>：单次签证使馆费已上调至 <strong>715 元</strong>，多次签证 <strong>1,430 元</strong>（代办服务费另计，切勿轻信200/400元旧价宣传）。冲绳及东北三县三年多次免收使馆规费。</p>
+          <p style="margin-bottom:6px;">3. <strong>电子签联网验真铁律</strong>：单次签证出签为电子签（PDF），入境海关核验时必须在手机联网环境下登录展示<strong>官方动态防伪倒计时页面</strong>，任何截屏或离线打印均被拒入。</p>
+          <p style="margin-bottom:6px;">4. <strong>15–20日行程停留期匹配</strong>：标准单次签仅批复 15 天停留。若行程超过 15 天，送签时务必申请 <strong>30 天单次旅游签证</strong>（提交全覆盖机票预订单与日文滞在予定表），或办理三年/五年多次往返签，切防逾期非法滞留。</p>
+          <p>5. <strong>高校学历简化通道</strong>：教育部直属全日制本科在读或毕业 3 年内，凭学信网学籍报告可免资产流水办理单次签证。</p>
+        </div>
+
+        <div style="background:var(--indigo-soft);border:1px solid var(--indigo-border);border-left:4px solid var(--indigo);padding:12px;border-radius:6px;">
+          <h4 style="color:var(--indigo);margin-bottom:6px;font-size:0.85rem;">【入境申报与免税】Visit Japan Web 与 2026 免税新政</h4>
+          <p style="margin-bottom:6px;">1. <strong>Visit Japan Web (VJW)</strong>：官方唯一域名 <code>vjw.digital.go.jp</code>，<strong>官方从未推出手机 App</strong>，切勿下载应用市场仿冒扣费软件。提前 2-3 天填好入境与海关表生成单一 QR 码截屏备用。</p>
+          <p style="margin-bottom:6px;">2. <strong>2026年11月1日起免税变更</strong>：日本免税改为<strong>机场统一退税</strong>（店内先付含税价，离境当天在机场办理消费税退款），离境当天请多预留 1 小时。</p>
+          <p>3. <strong>现金储备不可替代</strong>：日本仍是现金社会，小店、投币式洗衣机（Coin Laundry）、食券拉面机、神社纳经只收现金，单人务必备齐 20,000–30,000 日元纸币与硬币。</p>
+        </div>
       </div>
       <div class="modal-footer">
         <button class="btn-util" style="background:var(--washi-subtle);" onclick="closeModal()">我已完全知晓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1.1 Modal: IDP Legal Compliance Alert -->
+  <div class="modal-backdrop" id="modal-idp" onclick="if(event.target===this)closeModal()">
+    <div class="modal-card" style="max-width:620px;">
+      <div class="modal-header" style="background:var(--vermilion);color:#fff;">
+        <h3 class="modal-title" style="color:#fff;">
+          <svg class="icon" viewBox="0 0 24 24" style="stroke:#fff;"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          日本自驾法定驾驶资质严正警示与合规确认
+        </h3>
+        <button class="modal-close" style="color:#fff;" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="background:var(--vermilion-soft);border:1px solid var(--vermilion-border);border-left:4px solid var(--vermilion);padding:12px;border-radius:6px;margin-bottom:12px;">
+          <h4 style="color:var(--vermilion);margin-bottom:6px;font-size:0.85rem;">【刑事红线】中国大陆驾照及电商“翻译件”在日违法！</h4>
+          <p style="margin-bottom:6px;">根据日本《道路交通法》第64条与警察厅权威通告：日本仅承认缔约国依<strong>《1949年日内瓦道路交通公约》</strong>官方核发的正式“国际驾驶许可证（IDP）”，中国大陆非该公约缔约方，因此：</p>
+          <ul style="margin: 0.4rem 0 0 1.2rem; line-height: 1.6;">
+            <li>国内租车平台售卖的任何“国际驾照翻译认证件 (KRP/KIDA/KTA等)”在日本<strong>不具任何法律效力</strong>；</li>
+            <li>持无效翻译件在日驾车，一旦被日本警察临检或卷入交通事故，日本警方将依法认定为<strong>“无免許運転（无照驾驶犯罪）”</strong>；</li>
+            <li><strong>刑事后果</strong>：最高判处 3 年有期徒刑或 50 万日元罚金；所有车辆保险公司<strong>直接全额拒赔</strong>；追究全部财产赔偿责任并当场拘役、驱逐出境且长期限制再入境！</li>
+          </ul>
+        </div>
+
+        <div style="background:var(--pine-soft);border:1px solid var(--pine-border);border-left:4px solid var(--pine);padding:12px;border-radius:6px;margin-bottom:12px;">
+          <h4 style="color:var(--pine);margin-bottom:6px;font-size:0.85rem;">【合法合规条件】合法在日自驾的唯一资格途径</h4>
+          <p>1. 持有日内瓦公约缔约国/地区官方签发的<strong>正规1年期IDP纸质实体本</strong>（如中国香港驾照+正式IDP、中国澳门IDP、美英加澳官方IDP等）；<br>
+          2. 持有中国台湾地区驾照 + 台湾监理所或JAF官方认证的日文译本；<br>
+          3. 持有日本官方公安委员会颁发之正规本土“日本免许证”。</p>
+        </div>
+
+        <div style="background:var(--amber-soft);border:1px solid var(--amber-border);border-left:4px solid var(--amber);padding:12px;border-radius:6px;">
+          <h4 style="color:var(--amber);margin-bottom:6px;font-size:0.85rem;">【冬季行车警示】豪雪路段必须配备无钉雪胎（Studless）</h4>
+          <p>1–2月在北海道、东北、信越北陆等豪雪区域租车，必须在租车时提前确认加选<strong>“无钉防滑雪胎（スタッドレスタイヤ）”</strong>与 4WD 四驱车型，遇暴风雪能见度不足时严禁盲目开入盘山公路。</p>
+        </div>
+      </div>
+      <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:8px;">
+        <button class="btn-util" style="background:var(--washi-subtle);" onclick="cancelDriveMode()">返回公共交通模式（推荐）</button>
+        <button class="btn-util" style="background:var(--vermilion);color:#fff;" onclick="confirmDriveMode()">我已持有合法官方IDP，确认开启自驾模式</button>
       </div>
     </div>
   </div>
@@ -1558,27 +1699,37 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
     </div>
   </div>
 
-  <!-- 3. Modal: Stay & Airbnb -->
+  <!-- 3. Modal: Stay & Airbnb Tips -->
   <div class="modal-backdrop" id="modal-stay" onclick="if(event.target===this)closeModal()">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 class="modal-title">住宿全攻略与 Airbnb 民泊深度防坑</h3>
+        <h3 class="modal-title">食住在地智慧与高性价比攻略</h3>
         <button class="modal-close" onclick="closeModal()">&times;</button>
       </div>
       <div class="modal-body">
-        <h4 style="color:var(--navy-900);margin-bottom:6px;">日本三大住宿类型特色</h4>
-        <p style="margin-bottom:12px;">
-          1. <strong>精品温泉商务（Dormy Inn 系列）</strong>：全店天然温泉大浴场+桑拿水风吕，21:30–23:00 免费夜鸣拉面，特色乡土早餐。<br>
-          2. <strong>日式温泉旅馆（Ryokan 一泊二食）</strong>：传统纯和室榻榻米，傍晚享用极尽当季风物的怀石料理，必须在淋浴处彻底洗净身体后再入温泉池。<br>
-          3. <strong>寺庙宿坊（Shukubo）</strong>：高野山/善光寺修行僧侣亲手供养精进料理（纯植物素斋），清晨 5:30 参加晨课诵经冥想。
-        </p>
-        <h4 style="color:var(--vermilion);margin-bottom:6px;">Airbnb 民泊四大生死避坑铁律</h4>
-        <p>
-          1. <strong>查验执照编号 M</strong>：必须公示『第 MXXXXXXXX 号』，严防无证黑民泊被官方查封强制退单。<br>
+        <div style="background:var(--pine-soft);border:1px solid var(--pine-border);border-left:4px solid var(--pine);padding:12px;border-radius:6px;margin-bottom:12px;">
+          <h4 style="color:var(--pine);margin-bottom:6px;font-size:0.85rem;">【住】商务酒店与温泉旅馆的最佳配比</h4>
+          <p style="margin-bottom:6px;"><strong>黄金组合</strong>：全程16-18晚中，<strong>80%晚数选择优质商务连锁酒店</strong>，精选 <strong>2–3 晚入住传统温泉旅馆</strong>。</p>
+          <p style="margin-bottom:6px;">1. <strong>Dormy Inn 连锁酒店</strong>：强烈推荐。大多数分馆自带天然温泉大浴场与桑拿，每晚 21:30–23:00 免费供应清爽的“夜鸣拉面（酱油荞麦面）”，早餐融入地方特产，人均每晚仅需 7,000–12,000 日元。</p>
+          <p style="margin-bottom:6px;">2. <strong>Toyoko Inn（东横INN）/ Super Hotel</strong>：经济托底首选，全员免费含早，价格常年平稳在 5,500–8,500 日元。</p>
+          <p>3. <strong>温泉旅馆</strong>：避开每晚连住。温泉旅馆的“一泊二食（会席料理）”分量极大且仪式感重，连续食用胃肠负担大且预算昂贵。在长野、乳头温泉或山代温泉等核心节点精选体验即可。</p>
+        </div>
+
+        <div style="background:var(--indigo-soft);border:1px solid var(--indigo-border);border-left:4px solid var(--indigo);padding:12px;border-radius:6px;margin-bottom:12px;">
+          <h4 style="color:var(--indigo);margin-bottom:6px;font-size:0.85rem;">【食】地道、美味且经济的美食法则</h4>
+          <p style="margin-bottom:6px;">1. <strong>精明利用“午间定食（Lunch Special）”</strong>：日本诸多高档料理店（和牛烧肉、割烹、鳗鱼饭），晚餐人均常达 10,000 日元以上，但其周中午市推出的限定定食仅需 1,000–1,800 日元，品质毫不妥协。</p>
+          <p style="margin-bottom:6px;">2. <strong>市民生鲜市场食堂</strong>：如金泽近江町市场、青森古川市场（Nokkedon 自选手撕海鲜丼）、鸟取贺露港。清晨直接品尝刚上岸的天然海味，性价比远超观光区餐厅。</p>
+          <p style="margin-bottom:6px;">3. <strong>百货地下食品街（Depachika）晚间打折</strong>：每晚 19:00 至 20:00，大丸、伊势丹、高岛屋等百货地下街的高级和牛便当、新鲜刺身、炸物会贴上 20%–50% 的“Time Sale（タイムセール）”折扣签。</p>
+          <p>4. <strong>高阶本土回转寿司</strong>：避开千篇一律的廉价连锁，认准日本老饕钟爱的“根室花丸”、“銚子丸”、“金泽まいもん寿司”，人均 2,000–3,500 日元即可享受媲美板前手握的鲜度与品质。</p>
+        </div>
+
+        <div style="background:var(--washi-subtle);border:1px solid var(--slate-200);border-left:4px solid var(--slate-500);padding:12px;border-radius:6px;">
+          <h4 style="color:var(--navy-900);margin-bottom:6px;font-size:0.85rem;">【Airbnb 民泊四大生死避坑铁律】</h4>
+          <p style="margin-bottom:6px;">1. <strong>查验执照编号 M</strong>：必须公示『第 MXXXXXXXX 号』，严防无证黑民泊被官方查封强制退单。<br>
           2. <strong>严禁混装垃圾</strong>：严格按可燃、不可燃、塑料包装プラ、洗净踩扁的PET瓶分类，违规扣除 5,000–20,000 JPY 清理费。<br>
           3. <strong>晚 21:00 静音公约</strong>：木造建筑隔音极弱，晚间严禁喧哗，否则邻居极易直接报警 110。<br>
-          4. <strong>大件行李切勿直寄民宿</strong>：民泊无前台代收！行李应寄送至附近的「大和运输直营营业所自提（センター止め）」或便利店。
-        </p>
+          4. <strong>大件行李切勿直寄民宿</strong>：民泊无前台代收！行李应寄送至附近的「大和运输直营营业所自提（センター止め）」或便利店。</p>
+        </div>
       </div>
       <div class="modal-footer">
         <button class="btn-util" style="background:var(--washi-subtle);" onclick="closeModal()">关闭</button>
@@ -1590,29 +1741,52 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
   <div class="modal-backdrop" id="modal-checklist" onclick="if(event.target===this)closeModal()">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 class="modal-title">行前备忘清单与 24 小时应急热线</h3>
+        <h3 class="modal-title">首次访日必备清单与 24 小时应急求助指南</h3>
         <button class="modal-close" onclick="closeModal()">&times;</button>
       </div>
       <div class="modal-body">
-        <h4 style="color:var(--navy-900);margin-bottom:6px;">T-60 至 T-1 倒计时推进清单</h4>
-        <p style="margin-bottom:12px;">
-          • <strong>T-60 天</strong>：确认总天数（超过15天务必申请30天电子签或多次签）；锁定机票与热门町家/温泉房源。<br>
-          • <strong>T-45 天</strong>：递交签证申请材料；预约吉卜力、西芳寺苔寺等高难场馆。<br>
-          • <strong>T-30 天</strong>：查验签证；SmartEX 预约新干线特大行李席；购买区域铁路周游券。<br>
-          • <strong>T-14 天</strong>：配置原生日本数据 eSIM 或购买实体电话卡；手机充值 Suica/ICOCA。<br>
-          • <strong>T-7 天</strong>：登录 Visit Japan Web (VJW) 完成入境与海关单一 QR 码申报。<br>
-          • <strong>T-1 天</strong>：随身备好护照原件、电子签动态网址书签、20,000–30,000 日元应急现金。
-        </p>
-        <h4 style="color:var(--vermilion);margin-bottom:6px;">在日 24 小时应急求助网络</h4>
-        <p>
-          • <strong>警察报警</strong>：110 | <strong>火警/急救救护车</strong>：119<br>
-          • <strong>日本观光厅多语言游客热线</strong>：050-3816-2720 (中/英/日 24h)<br>
-          • <strong>中国驻日本大使馆领保电话</strong>：+81-3-6450-2195<br>
-          • <strong>外交部全球领事保护应急热线</strong>：+86-10-12308
-        </p>
+        <div style="background:var(--vermilion-soft);border:1px solid var(--vermilion-border);border-left:4px solid var(--vermilion);padding:12px;border-radius:6px;margin-bottom:12px;">
+          <h4 style="color:var(--vermilion);margin-bottom:6px;font-size:0.85rem;">24 小时官方紧急热线通讯录</h4>
+          <ul style="margin: 0.35rem 0 0 1.2rem; line-height: 1.7;">
+            <li><strong>警察报警</strong>：拨打 <code>110</code> (免费直拨，公用电话按红色紧急按钮)</li>
+            <li><strong>急救 / 火警救护车</strong>：拨打 <code>119</code></li>
+            <li><strong>JNTO 日本观光局多语种专线</strong>：拨打 <code>050-3816-2720</code> (24小时支持中文，医疗翻译与灾害求助)</li>
+            <li><strong>中国驻日使馆领保电话</strong>：拨打 <code>+81-3-6450-2195</code> / 外交部全球热线 <code>+86-10-12308</code></li>
+          </ul>
+        </div>
+
+        <div style="background:var(--washi-subtle);border:1px solid var(--slate-200);border-left:4px solid var(--indigo);padding:12px;border-radius:6px;">
+          <h4 style="color:var(--navy-900);margin-bottom:6px;font-size:0.85rem;">出发前倒计时准备清单 (T-60 至 T-1)</h4>
+          <div style="font-size:0.78rem;line-height:1.75;color:var(--slate-700);">
+            <p><strong>□ T-60 天</strong>：确定出行时段（1–2月雪季需留列车停运缓冲；9–10月初秋无红叶）；核对护照有效期 ≥6 个月、空白页 ≥2；选定福州领区指定旅行社并预订机票。</p>
+            <p><strong>□ T-45 天</strong>：递交签证申请材料；特展与美术馆预约（直岛地中美术馆、李禹焕、吉卜力提前 1–3 个月官网抢订指定时段票）。</p>
+            <p><strong>□ T-30 天</strong>：出签核对护照号与姓名拼音；下载日本原生 eSIM 或购买物理数据卡；预订热门不可退住宿（直岛岛上宿点等）。</p>
+            <p><strong>□ T-14 天</strong>：登录 Visit Japan Web 官方网页填写申报生成单一 QR 码；打印机票行程单、酒店确认单与签证 PDF；确认购买含日本紧急医疗的境外旅游保险。</p>
+            <p><strong>□ T-7 天</strong>：查询日本气象厅及各 JR 铁道公司运行预警；下载离线地图与翻译包；确认首晚酒店日文名称与地址。</p>
+            <p><strong>□ T-3 天</strong>：通过「厦门高崎国际机场」微信小程序提前进行出境证件预审核；重物打包规划黑猫宅急便分箱。</p>
+            <p><strong>□ T-1 天</strong>：准备 20,000–30,000 日元纸币与硬币；检查移动电源随身携带（严禁托运）；手机充满电迎接安静有序的旅程。</p>
+          </div>
+        </div>
       </div>
       <div class="modal-footer">
         <button class="btn-util" style="background:var(--washi-subtle);" onclick="closeModal()">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4.1 Modal: Visa Schedule of Stay Table -->
+  <div class="modal-backdrop" id="modal-visa" onclick="if(event.target===this)closeModal()">
+    <div class="modal-card" style="max-width:960px;">
+      <div class="modal-header">
+        <h3 class="modal-title">赴日签证送签专用《滞在予定表 (Schedule of Stay)》</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="visa-table-container">
+        <!-- Dynamically rendered -->
+      </div>
+      <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:8px;">
+        <button class="btn-util" style="background:var(--washi-subtle);" onclick="window.print()">打印 / 另存为 PDF</button>
+        <button class="btn-util" style="background:var(--active-color);color:#fff;" onclick="closeModal()">关闭窗口</button>
       </div>
     </div>
   </div>
@@ -1761,6 +1935,7 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
     function switchRoute(routeKey) {{
       if (!ROUTES_DATA[routeKey]) return;
       currentRouteKey = routeKey;
+      activeNodeIndex = 0;
       const route = ROUTES_DATA[routeKey];
 
       // Update root active-color
@@ -1822,14 +1997,52 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
       }}
     }}
 
+    let activeNodeIndex = 0;
+    let isIdpConfirmed = false;
+
+    // Focus Node Sync (Linkage matching v2.html)
+    function focusNode(idx, isFromMap) {{
+      activeNodeIndex = idx;
+      const route = ROUTES_DATA[currentRouteKey];
+      if (!route || !route.nodes || !route.nodes[idx]) return;
+      const node = route.nodes[idx];
+
+      // 1. Update active day card
+      document.querySelectorAll('.day-card').forEach((card, i) => {{
+        card.classList.toggle('active', i === idx);
+      }});
+
+      // 2. Scroll card into view if clicked from map/elevation
+      if (isFromMap) {{
+        const targetCard = document.getElementById('day-card-' + idx);
+        if (targetCard) {{
+          targetCard.scrollIntoView({{ behavior: 'smooth', block: 'nearest' }});
+        }}
+      }}
+
+      // 3. Fly to marker and open popup
+      if (nodeMarkers[idx]) {{
+        map.flyTo([node.lat, node.lng], Math.max(map.getZoom(), 9), {{ duration: 0.75 }});
+        nodeMarkers[idx].openPopup();
+      }}
+
+      // 4. Update probe readout
+      const distKmText = (node.distKm !== undefined) ? ` · 累计 ${{node.distKm}}km` : '';
+      document.getElementById('probe-readout').textContent = `当前聚焦：${{node.day}} ${{node.name}} (海拔 ${{node.elev}}m${{distKmText}})`;
+
+      // 5. Redraw elevation profile active indicator
+      renderElevationChart(route);
+    }}
+
     function renderDayCards(route) {{
       const container = document.getElementById('day-list-container');
       container.innerHTML = '';
 
       route.nodes.forEach((node, idx) => {{
         const card = document.createElement('div');
-        card.className = 'day-card';
+        card.className = 'day-card' + (idx === activeNodeIndex ? ' active' : '');
         card.id = 'day-card-' + idx;
+        card.onclick = () => focusNode(idx, false);
 
         const isPublic = currentTransportMode === 'public';
         const transitInfo = isPublic ? node.public : node.drive;
@@ -1867,10 +2080,6 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
           </div>
         `;
 
-        card.addEventListener('mouseenter', () => {{
-          highlightNode(idx);
-        }});
-
         container.appendChild(card);
       }});
     }}
@@ -1899,32 +2108,28 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
       // Add SVG Circle Markers
       route.nodes.forEach((n, idx) => {{
         const iconHtml = `
-          <div style="background:${{route.color}};width:18px;height:18px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-family:var(--font-mono);font-weight:700;">
+          <div style="background:${{route.color}};width:20px;height:20px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;color:#fff;font-size:9.5px;font-family:var(--font-mono);font-weight:700;cursor:pointer;">
             ${{idx + 1}}
           </div>
         `;
         const customIcon = L.divIcon({{
           html: iconHtml,
           className: 'custom-node-icon',
-          iconSize: [18, 18],
-          iconAnchor: [9, 9]
+          iconSize: [20, 20],
+          iconAnchor: [10, 10]
         }});
 
         const marker = L.marker([n.lat, n.lng], {{ icon: customIcon }}).addTo(map);
         marker.bindPopup(`
           <div style="font-family:var(--font-sans);font-size:12px;padding:2px;">
             <strong style="color:var(--navy-900);font-size:13px;">${{n.name}}</strong><br>
-            <span style="color:var(--slate-500);font-size:11px;">${{n.day}} · 标高 ${{n.elev}}m</span><br>
+            <span style="color:var(--slate-500);font-size:11px;">${{n.day}} · 标高 ${{n.elev}}m · 累计 ${{n.distKm}}km</span><br>
             <span style="color:var(--slate-700);margin-top:3px;display:block;">${{n.food || ''}}</span>
           </div>
         `);
 
         marker.on('click', () => {{
-          highlightNode(idx);
-          const dayCard = document.getElementById('day-card-' + idx);
-          if (dayCard) {{
-            dayCard.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
-          }}
+          focusNode(idx, true);
         }});
 
         nodeMarkers.push(marker);
@@ -1934,27 +2139,8 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
       map.fitBounds(routePolyline.getBounds(), {{ padding: [40, 40] }});
     }}
 
-    function highlightNode(idx) {{
-      const route = ROUTES_DATA[currentRouteKey];
-      if (!route || !route.nodes[idx]) return;
-      const node = route.nodes[idx];
-
-      // Update probe readout
-      document.getElementById('probe-readout').textContent = `聚焦：${{node.day}} ${{node.name}} (海拔 ${{node.elev}}m)`;
-
-      // Pan map slightly if marker exists
-      if (nodeMarkers[idx]) {{
-        nodeMarkers[idx].openPopup();
-      }}
-
-      // Highlight card
-      document.querySelectorAll('.day-card').forEach((c, i) => {{
-        c.style.borderColor = (i === idx) ? route.color : 'var(--slate-200)';
-      }});
-    }}
-
     // ==========================================
-    // 5. D3.JS ELEVATION CHART
+    // 5. D3.JS ELEVATION CHART (v2.html Linkage)
     // ==========================================
     function renderElevationChart(route) {{
       const svg = d3.select('#elevation-svg');
@@ -1962,7 +2148,7 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
 
       const containerNode = document.getElementById('elevation-svg');
       const width = containerNode.clientWidth || 400;
-      const height = containerNode.clientHeight || 120;
+      const height = containerNode.clientHeight || 119;
       const margin = {{ top: 10, right: 15, bottom: 25, left: 35 }};
 
       const innerWidth = width - margin.left - margin.right;
@@ -1976,13 +2162,11 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
         dist: n.distKm
       }}));
 
-      const xScale = d3.scaleLinear()
-        .domain([0, d3.max(data, d => d.dist) || 100])
-        .range([0, innerWidth]);
+      const maxDist = d3.max(data, d => d.dist) || 100;
+      const maxElev = Math.max(1200, (d3.max(data, d => d.elev) || 1000) * 1.15);
 
-      const yScale = d3.scaleLinear()
-        .domain([0, (d3.max(data, d => d.elev) || 1000) * 1.15])
-        .range([innerHeight, 0]);
+      const xScale = d3.scaleLinear().domain([0, maxDist]).range([0, innerWidth]);
+      const yScale = d3.scaleLinear().domain([0, maxElev]).range([innerHeight, 0]);
 
       const g = svg.append('g')
         .attr('transform', `translate(${{margin.left}}, ${{margin.top}})`);
@@ -2036,22 +2220,37 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
         .attr('font-size', '9px')
         .attr('font-family', 'var(--font-mono)');
 
-      // Dots on nodes
-      g.selectAll('.node-dot')
+      // Active guide vertical line
+      const activeDatum = data[activeNodeIndex];
+      if (activeDatum) {{
+        g.append('line')
+          .attr('x1', xScale(activeDatum.dist))
+          .attr('x2', xScale(activeDatum.dist))
+          .attr('y1', 0)
+          .attr('y2', innerHeight)
+          .attr('stroke', '#d97706')
+          .attr('stroke-width', 2)
+          .attr('stroke-dasharray', '3,2');
+      }}
+
+      // Interactive Circles
+      const nodesG = g.selectAll('.elev-node')
         .data(data)
         .enter()
-        .append('circle')
-        .attr('class', 'node-dot')
+        .append('g')
+        .attr('class', 'elev-node')
+        .style('cursor', 'pointer')
+        .on('click', (event, d) => {{
+          focusNode(d.idx, true);
+        }});
+
+      nodesG.append('circle')
         .attr('cx', d => xScale(d.dist))
         .attr('cy', d => yScale(d.elev))
-        .attr('r', 4)
-        .attr('fill', '#fff')
-        .attr('stroke', route.color)
-        .attr('stroke-width', 2)
-        .style('cursor', 'pointer')
-        .on('mouseenter', (e, d) => {{
-          highlightNode(d.idx);
-        }});
+        .attr('r', (d, i) => i === activeNodeIndex ? 6.5 : 4)
+        .attr('fill', (d, i) => i === activeNodeIndex ? '#f59e0b' : route.color)
+        .attr('stroke', '#ffffff')
+        .attr('stroke-width', 2);
 
       // Probe tracker line
       const probeLine = g.append('line')
@@ -2066,17 +2265,23 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
         if (mx >= 0 && mx <= innerWidth) {{
           probeLine.style('display', null).attr('x1', mx).attr('x2', mx);
           const dist = xScale.invert(mx);
-          // find closest node
           let closest = data[0];
           let minDiff = Math.abs(data[0].dist - dist);
           data.forEach(d => {{
             const diff = Math.abs(d.dist - dist);
             if (diff < minDiff) {{ minDiff = diff; closest = d; }}
           }});
-          highlightNode(closest.idx);
+          const closestNode = route.nodes[closest.idx];
+          const distKmText = (closestNode.distKm !== undefined) ? ` · 累计 ${{closestNode.distKm}}km` : '';
+          document.getElementById('probe-readout').textContent = `当前聚焦：${{closestNode.day}} ${{closestNode.name}} (海拔 ${{closestNode.elev}}m${{distKmText}})`;
         }}
       }}).on('mouseleave', function() {{
         probeLine.style('display', 'none');
+        const activeNode = route.nodes[activeNodeIndex];
+        if (activeNode) {{
+          const distKmText = (activeNode.distKm !== undefined) ? ` · 累计 ${{activeNode.distKm}}km` : '';
+          document.getElementById('probe-readout').textContent = `当前聚焦：${{activeNode.day}} ${{activeNode.name}} (海拔 ${{activeNode.elev}}m${{distKmText}})`;
+        }}
       }});
     }}
 
@@ -2122,6 +2327,10 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
     }}
 
     function setTransportMode(mode) {{
+      if (mode === 'drive' && !isIdpConfirmed) {{
+        openModal('modal-idp');
+        return;
+      }}
       currentTransportMode = mode;
       document.getElementById('mode-btn-public').classList.toggle('active', mode === 'public');
       document.getElementById('mode-btn-drive').classList.toggle('active', mode === 'drive');
@@ -2131,6 +2340,50 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
       if (route) {{
         renderDayCards(route);
       }}
+    }}
+
+    function confirmDriveMode() {{
+      isIdpConfirmed = true;
+      closeModal();
+      setTransportMode('drive');
+    }}
+
+    function cancelDriveMode() {{
+      closeModal();
+      setTransportMode('public');
+    }}
+
+    function openVisaModal() {{
+      const route = ROUTES_DATA[currentRouteKey];
+      if (!route) return;
+      const container = document.getElementById('visa-table-container');
+      const rowsHtml = route.nodes.map(n => `
+        <tr>
+          <td class="mono" style="white-space:nowrap;font-weight:700;">${{n.day}}</td>
+          <td><strong>${{n.name}}</strong><br><span style="color:var(--slate-500);font-size:0.75rem;">${{n.pref || ''}} · 行程游览与文化探索</span></td>
+          <td style="font-size:0.75rem;">${{currentTransportMode === 'public' ? (n.public ? n.public.line : '新干线 / 在来线特急') : 'レンタカー (Rental Car)'}}</td>
+          <td style="font-size:0.75rem;">${{n.stay ? n.stay.split('(')[0] : '车站周边商务酒店'}}<br><span class="mono" style="color:var(--slate-500);">TEL: ${{n.stayTel || '03-3212-2424'}}</span></td>
+        </tr>
+      `).join('');
+
+      container.innerHTML = `
+        <p style="font-size:0.8rem;color:var(--slate-600);margin-bottom:10px;">
+          当前申请路线：<strong>${{route.title}}</strong><br>
+          <span style="color:var(--slate-500);">提示：根据日本外务省标准格式自动生成，可直接使用浏览器打印（Ctrl+P / Cmd+P）另存为 PDF 提交福州领区指定代办旅行社。</span>
+        </p>
+        <table class="visa-table">
+          <thead>
+            <tr>
+              <th style="width:12%;">年月日 (Day)</th>
+              <th style="width:38%;">行動予定 (Activity Plan)</th>
+              <th style="width:25%;">交通機関 (Transport)</th>
+              <th style="width:25%;">宿泊先・連絡先 (Accommodation & Tel)</th>
+            </tr>
+          </thead>
+          <tbody>${{rowsHtml}}</tbody>
+        </table>
+      `;
+      openModal('modal-visa');
     }}
 
     function switchSubPanel(panelId) {{
