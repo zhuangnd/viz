@@ -1245,13 +1245,276 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
     .modal-title {{ font-family: var(--font-serif); font-size: 0.98rem; font-weight: 700; color: var(--navy-900); }}
     .modal-close {{ background: transparent; border: none; cursor: pointer; color: var(--slate-400); font-size: 1.2rem; }}
     .modal-body {{ padding: 14px 18px; overflow-y: auto; font-size: 0.8rem; line-height: 1.55; color: var(--slate-700); }}
-    .modal-footer {{ padding: 10px 16px; border-top: 1px solid var(--slate-200); display: flex; justify-content: flex-end; }}
+    /* Mobile Action Bar */
+    .mobile-action-bar {{
+      display: none;
+    }}
+    .mob-mode-capsule {{
+      display: flex; background: var(--washi-subtle); border: 1px solid var(--slate-300);
+      border-radius: 8px; padding: 3px; gap: 4px; width: 100%; box-sizing: border-box;
+    }}
+    .mob-mode-btn {{
+      flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+      border: none; background: transparent; padding: 7px 10px; font-size: 0.76rem;
+      font-weight: 500; color: var(--slate-600); border-radius: 6px; cursor: pointer;
+      transition: all 0.15s ease; font-family: var(--font-sans);
+    }}
+    .mob-mode-btn.active {{
+      background: var(--washi-card); color: var(--navy-900); font-weight: 700;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }}
+    .mob-quick-scroll {{
+      display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 4px;
+      -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    }}
+    .mob-quick-scroll::-webkit-scrollbar {{ display: none; }}
+    .mob-pill-btn {{
+      flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px;
+      background: var(--washi-card); border: 1px solid var(--slate-300);
+      border-radius: 9999px; padding: 5px 11px; font-size: 0.72rem; font-weight: 600;
+      color: var(--slate-700); cursor: pointer; white-space: nowrap;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }}
+    .mob-pill-btn:active {{
+      background: var(--washi-subtle); border-color: var(--active-color); color: var(--active-color);
+    }}
 
     @media (max-width: 900px) {{
-      .app-shell {{ grid-template-columns: 1fr; grid-template-rows: 45vh 1fr; }}
-      .viewport-col {{ order: 1; }}
-      .narrative-col {{ order: 2; height: 100%; }}
-      .header-right .btn-util span {{ display: none; }}
+      html, body {{
+        height: auto !important;
+        min-height: 100%;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+      }}
+      .global-header {{
+        padding: 0 10px;
+        height: 50px;
+        max-height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+      }}
+      .brand-group {{
+        flex-shrink: 0;
+        gap: 6px;
+      }}
+      .brand-seal {{
+        width: 22px;
+        height: 22px;
+        font-size: 0.68rem;
+      }}
+      .brand-title {{
+        font-size: 0.82rem;
+        letter-spacing: 0;
+      }}
+      .brand-badge {{
+        display: none !important;
+      }}
+      .header-center {{
+        flex: 1 1 auto;
+        min-width: 0;
+        justify-content: center;
+      }}
+      .header-center .mode-switch-capsule {{
+        display: none !important;
+      }}
+      .route-drawer-btn {{
+        padding: 4px 8px;
+        font-size: 0.72rem;
+        max-width: 135px;
+        min-width: 0;
+      }}
+      .route-drawer-label {{
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 95px;
+      }}
+      .header-right {{
+        flex-shrink: 0;
+        gap: 4px;
+      }}
+      .util-group .btn-util:not(.btn-visa) {{
+        display: none !important;
+      }}
+      .btn-visa {{
+        padding: 3px 6px;
+        font-size: 0.72rem;
+      }}
+      .btn-visa span {{
+        display: inline !important;
+      }}
+      .divider-vertical {{
+        display: none !important;
+      }}
+      .engine-group .tile-dropdown,
+      .engine-group .btn-icon:not(#btn-theme-toggle),
+      .engine-group .btn-version-pill {{
+        display: none !important;
+      }}
+
+      /* Mobile Action Bar */
+      .mobile-action-bar {{
+        display: flex !important;
+        flex-direction: column;
+        gap: 8px;
+        padding: 10px 12px 6px;
+        background: var(--washi);
+        border-bottom: 1px solid var(--slate-200);
+        order: 0;
+      }}
+
+      /* App Shell becomes normal document flow */
+      .app-shell {{
+        position: static !important;
+        display: flex !important;
+        flex-direction: column !important;
+        height: auto !important;
+        overflow: visible !important;
+        padding-top: 50px;
+      }}
+
+      /* Order of components on mobile */
+      .viewport-col {{
+        order: 1 !important;
+        height: auto !important;
+        min-height: auto !important;
+        padding: 10px 12px 6px !important;
+        background: transparent !important;
+      }}
+      .map-wrapper {{
+        height: 340px !important;
+        border-radius: 8px 8px 0 0 !important;
+        overflow: hidden !important;
+        border: 1px solid var(--slate-300) !important;
+        border-bottom: none !important;
+        box-shadow: var(--shadow-sm) !important;
+      }}
+      #map-canvas {{
+        height: 100% !important;
+        width: 100% !important;
+      }}
+      .elevation-dock {{
+        height: 140px !important;
+        min-height: 140px !important;
+        max-height: 140px !important;
+        border-radius: 0 0 8px 8px !important;
+        border: 1px solid var(--slate-300) !important;
+        border-top: 1px solid var(--slate-200) !important;
+        box-shadow: var(--shadow-sm) !important;
+        padding: 6px 10px 2px !important;
+      }}
+      #elevation-svg {{
+        height: 106px !important;
+        max-height: 106px !important;
+      }}
+      .dock-title {{
+        font-size: 0.68rem !important;
+      }}
+      .probe-readout {{
+        font-size: 0.68rem !important;
+      }}
+
+      .narrative-col {{
+        order: 2 !important;
+        height: auto !important;
+        overflow: visible !important;
+        padding: 10px 12px 24px !important;
+        border-right: none !important;
+      }}
+
+      /* Drawer on mobile */
+      .route-drawer {{
+        top: 50px !important;
+        max-height: calc(100vh - 50px) !important;
+        padding: 12px !important;
+      }}
+      .drawer-cat-tabs {{
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        padding-bottom: 6px !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+      }}
+      .drawer-cat-tabs::-webkit-scrollbar {{ display: none; }}
+      .drawer-tab {{
+        flex-shrink: 0 !important;
+        white-space: nowrap !important;
+      }}
+      .route-drawer-grid {{
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+      }}
+
+      /* Meta Grid, Hero & Elements on mobile */
+      .route-hero {{
+        padding: 12px 14px !important;
+      }}
+      .route-name {{
+        font-size: 1.02rem !important;
+      }}
+      .route-desc {{
+        font-size: 0.76rem !important;
+      }}
+      .route-meta-grid {{
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 6px !important;
+      }}
+      .meta-item {{
+        padding: 7px 8px !important;
+      }}
+      .meta-label {{
+        font-size: 0.66rem !important;
+      }}
+      .meta-val {{
+        font-size: 0.74rem !important;
+      }}
+      .month-pill {{
+        font-size: 0.6rem !important;
+        padding: 2px 0 !important;
+      }}
+      .seasonal-box {{
+        padding: 8px 10px !important;
+      }}
+      .seasonal-box h4 {{
+        font-size: 0.76rem !important;
+      }}
+      .seasonal-box p {{
+        font-size: 0.72rem !important;
+      }}
+      .panel-switcher {{
+        margin-bottom: 12px !important;
+      }}
+      .panel-tab {{
+        font-size: 0.72rem !important;
+        padding: 6px 2px !important;
+      }}
+      .day-card {{
+        padding: 10px 12px !important;
+      }}
+      .day-name {{
+        font-size: 0.9rem !important;
+      }}
+      .food-stay-block {{
+        grid-template-columns: 1fr !important;
+        gap: 6px !important;
+      }}
+
+      /* Modals on mobile */
+      .modal-backdrop {{
+        padding: 12px !important;
+      }}
+      .modal-card {{
+        max-height: 90vh !important;
+      }}
+      .modal-header {{
+        padding: 10px 12px !important;
+      }}
+      .modal-body {{
+        padding: 10px 12px !important;
+        font-size: 0.76rem !important;
+      }}
     }}
   </style>
 </head>
@@ -1271,7 +1534,7 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
       <!-- Route Drawer Trigger Button -->
       <button class="route-drawer-btn" id="btn-route-drawer" onclick="toggleRouteDrawer()">
         <span class="route-drawer-dot" id="header-route-dot" style="background:#264653"></span>
-        <span class="route-drawer-label" id="header-route-label">东海道黄金三角 (18D) · 共20条路线</span>
+        <span class="route-drawer-label" id="header-route-label">关西中部东京黄金环线 (18日)</span>
         <svg class="icon icon-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
       </button>
 
@@ -1307,7 +1570,7 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
           <svg class="icon" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
           <span>备忘</span>
         </button>
-        <button class="btn-util" onclick="openVisaModal()" title="生成日本领事馆标准格式送签《滞在予定表》">
+        <button class="btn-util btn-visa" onclick="openVisaModal()" title="生成日本领事馆标准格式送签《滞在予定表》">
           <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
           <span>送签</span>
         </button>
@@ -1359,6 +1622,46 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
 
   <!-- 3. MAIN APP SHELL -->
   <main class="app-shell">
+    <!-- Mobile Action Bar (Visible only on mobile <= 900px) -->
+    <div class="mobile-action-bar">
+      <div class="mob-mode-capsule">
+        <button class="mob-mode-btn active" id="mob-mode-public" onclick="setTransportMode('public')">
+          <svg class="icon" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="16" rx="2"/><path d="M4 11h16"/><path d="M12 3v8"/><path d="m8 19-2 3"/><path d="m16 19 2 3"/></svg>
+          公共交通+eBike
+        </button>
+        <button class="mob-mode-btn" id="mob-mode-drive" onclick="setTransportMode('drive')">
+          <svg class="icon" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+          合规自驾
+        </button>
+      </div>
+      <div class="mob-quick-scroll">
+        <button class="mob-pill-btn" onclick="openModal('modal-rules')">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          规制红线
+        </button>
+        <button class="mob-pill-btn" onclick="openModal('modal-transit')">
+          <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          交通详单
+        </button>
+        <button class="mob-pill-btn" onclick="openModal('modal-stay')">
+          <svg class="icon" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          食宿锦囊
+        </button>
+        <button class="mob-pill-btn" onclick="openModal('modal-checklist')">
+          <svg class="icon" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          应急清单
+        </button>
+        <button class="mob-pill-btn" onclick="openVisaModal()">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          送签行程
+        </button>
+        <button class="mob-pill-btn" onclick="openModal('modal-versions')">
+          <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          版本矩阵
+        </button>
+      </div>
+    </div>
+
     <!-- Left Column: Narrative & Planning Control -->
     <section class="narrative-col">
       <!-- Route Hero -->
@@ -1556,6 +1859,11 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
           </div>
         </div>
       </div>
+
+      <!-- App Narrative Footer -->
+      <footer style="margin-top:2.5rem;padding:1.25rem 0;border-top:1px solid var(--slate-200);font-size:0.72rem;color:var(--slate-400);text-align:center;">
+        <p>2026 日本深度自游全景导览 · 落地框架与专题大长线矩阵 · 数据基准 2026.07</p>
+      </footer>
     </section>
 
     <!-- Right Column: Interactive Map & Elevation Dock -->
@@ -1943,7 +2251,11 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
 
       // Update Header Trigger
       document.getElementById('header-route-dot').style.background = route.color;
-      document.getElementById('header-route-label').textContent = route.shortName || route.title;
+      const short = route.shortName || route.title;
+      const daysStr = route.daysText ? route.daysText.split('/')[0].trim() : '';
+      const labelText = daysStr ? `${{short}} (${{daysStr}})` : short;
+      document.getElementById('header-route-label').textContent = labelText;
+      document.getElementById('header-route-label').title = `${{route.title}} (${{route.daysText || ''}})`;
 
       // Update Hero
       const catNames = {{
@@ -1984,6 +2296,11 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
       document.querySelectorAll('.drawer-card').forEach(card => {{
         card.classList.toggle('active', card.dataset.key === routeKey);
       }});
+
+      // Recalculate map container size for mobile / layout changes
+      setTimeout(() => {{
+        if (map) map.invalidateSize();
+      }}, 200);
     }}
 
     function renderMonthPills(bestMonths) {{
@@ -2332,8 +2649,15 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
         return;
       }}
       currentTransportMode = mode;
-      document.getElementById('mode-btn-public').classList.toggle('active', mode === 'public');
-      document.getElementById('mode-btn-drive').classList.toggle('active', mode === 'drive');
+      const dPub = document.getElementById('mode-btn-public');
+      const dDrv = document.getElementById('mode-btn-drive');
+      const mPub = document.getElementById('mob-mode-public');
+      const mDrv = document.getElementById('mob-mode-drive');
+
+      if (dPub) dPub.classList.toggle('active', mode === 'public');
+      if (dDrv) dDrv.classList.toggle('active', mode === 'drive');
+      if (mPub) mPub.classList.toggle('active', mode === 'public');
+      if (mDrv) mDrv.classList.toggle('active', mode === 'drive');
 
       // Re-render day cards with new transport info
       const route = ROUTES_DATA[currentRouteKey];
@@ -2482,6 +2806,12 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
       // Load saved theme
       if (localStorage.getItem('theme_night') === '1') {{
         toggleNightTheme();
+      }}
+    }});
+
+    window.addEventListener('resize', () => {{
+      if (map) {{
+        map.invalidateSize();
       }}
     }});
   </script>
