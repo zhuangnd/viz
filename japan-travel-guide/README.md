@@ -11,11 +11,16 @@
 ```text
 japan-travel-guide/
 ├── README.md                                         # 本项目总体架构、版本矩阵与指引说明
+├── v4.html                                           # [v4.0 实践版] 严格以 wbd.md 为行程规划，以 v2.html 为主体的终极全景导览
 ├── v3.html                                           # [旗舰版] 终极集大成交互导览（基于Argon-v2主体+经典浮世绘路线+2026新政+多源底图）
 ├── v2.html                                           # [v2.0] 全景融合导览（侧边抽屉、双模切换、D3剖面与预算沙盒）
 ├── japan_deep_travel_interactive_guide_argon-v2.html # [Argon-v2] 文学深潜版（43/57分屏、暗黑山峦模式、村上春树文学地图）
 ├── japan_deep_travel_interactive_guide_argon.html    # [Argon-v1] 探索走廊版（6条深度走廊与文学寻踪原型）
 ├── index.html                                        # [v1.0] 经典版（原生轻量Leaflet、三大经典路线、深度人文解读）
+├── wbd/                                              # WBD 独立专业攻略与规划设计资产
+│   ├── japan-travel-guide-wbd.md                     # 厦门出发/福州领区 15-20日自助旅行完整攻略 (2026-10核验)
+│   ├── japan-travel-guide-web-design-wbd.md          # 网页版系统架构与设计规划规范
+│   └── japan-travel-guide-wbd.html                   # WBD 极简独立规划页面
 ├── docs/                                             # 核心文档资产
 │   ├── guides/                                       # 深度旅行指南（Markdown 详版）
 │   │   ├── JAPAN_INDEPENDENT_TRAVEL_GUIDE.md         # 原始完整版 15-20日全方位自由行指南
@@ -30,6 +35,7 @@ japan-travel-guide/
 │   ├── japan_raw.geojson                             # 日本行政区划与基础轮廓 GeoJSON
 │   └── routes_v2_spec.json                           # 6 大线路完整节点与经纬度规范数据
 └── scripts/                                          # 自动化构建与数据加工脚本
+    ├── build_v4_html.py                              # v4.0 WBD实践版自动化构建流水线脚本
     ├── build_v3_html.py                              # v3 旗舰版自动化组装与校验构建脚本
     ├── build_v2_html.py                              # v2 全景融合版构建流水线脚本
     └── generate_v2_data.py                           # 路线经纬度与多模式交通数据生成脚本
@@ -37,11 +43,12 @@ japan-travel-guide/
 
 ---
 
-## 二、5 个交互导览网页版本矩阵 (Version Matrix)
+## 二、交互导览网页版本矩阵 (Version Matrix)
 
 | 版本标识 | 核心网页入口 | 架构特点与视觉风格 | 核心路线与特色功能 |
 | :--- | :--- | :--- | :--- |
-| **v3 旗舰终极版** *(推荐)* | [`v3.html`](v3.html) | **以 Argon-v2 为主体**，43%/57% 黄金分割，D3 实时高程探针联动，暗色山峦夜景模式，全站采用内联 SVG 图标 | **汇聚集大成者**：强化路线一为《富岳三十六景》浮世绘大师溯源线（东京国立博物馆、墨田北斋馆、信州小布施晚年绝笔、松本城、上高地、五箇山合掌造、加贺兼六园等）；集成 2026 Visit Japan Web 单一 QR 码申报、eVISA 联网动态验真、严格 1949 IDP 自驾红线、MapCode 与车载 TEL 检索、CARTO 内置/自定义密钥管理、行前备忘清单与 24 小时应急求助热线。 |
+| **v4 实践版** *(WBD 核心落地)* | [`v4.html`](v4.html) | **以 v2.html 为主体**，全屏地图 + 侧边抽屉 + D3高程剖面，**严格按 `wbd.md` 行程规划与2026核验数据构建** | **三大板块 12 条线路全覆盖**：三大 15–20 日落地框架（框架 A 关西中部东京 18日、框架 B 关西濑户内四国 18日、框架 C 东京日光富士 15日）+ 六大专题深度路线（R1-R6）+ 三大村上文学寻踪（M1-M3）；深度融合 2026 福州领区新签证费 715/1430 元、全国版 JR Pass 涨价血亏实算与地区 Pass 替代、9–10月无红叶实情揭秘、T-60 至 T-1 倒计时清单。 |
+| **v3 旗舰终极版** | [`v3.html`](v3.html) | **以 Argon-v2 为主体**，43%/57% 黄金分割，D3 实时高程探针联动，暗色山峦夜景模式，全站采用内联 SVG 图标 | **经典大师路线**：强化路线一为《富岳三十六景》浮世绘大师溯源线（东京国立博物馆、墨田北斋馆、信州小布施晚年绝笔、松本城、上高地、五箇山合掌造、加贺兼六园等）；集成 2026 Visit Japan Web 单一 QR 码申报、eVISA 联网动态验真、严格 1949 IDP 自驾红线、CARTO 内置/自定义密钥管理。 |
 | **v2 全景融合版** | [`v2.html`](v2.html) | 全屏地图响应式底图，侧边滑动抽屉，Tab 标签分类联动，D3 剖面图 | 经典 3 条地理走廊 + 3 条村上春树文学寻踪，分类筛选，多源底图热切换（CARTO/GSI/OSM），动态预算沙盒。 |
 | **Argon v2 文学深潜版** | [`japan_deep_travel_interactive_guide_argon-v2.html`](japan_deep_travel_interactive_guide_argon-v2.html) | 极客文人 Editorial Cartography 风格，43/57 黄金双栏分屏，D3.js 高程图 | 首次推出 D3 地形起伏图联动探针，暗色山峦模式，6 条深度走廊。 |
 | **Argon 探索版** | [`japan_deep_travel_interactive_guide_argon.html`](japan_deep_travel_interactive_guide_argon.html) | 文艺轻量版空间导览 | 首次引入村上春树《寻羊冒险记》《海边的卡夫卡》《1Q84》文学巡礼路线。 |
