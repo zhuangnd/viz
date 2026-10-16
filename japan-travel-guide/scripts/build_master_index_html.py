@@ -1194,7 +1194,7 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
       display: flex; gap: 6px;
     }}
     .map-chip {{
-      background: var(--washi-card); border: 1px solid var(--slate-300);
+      background: rgba(250, 250, 250, 0.4); border: 1px solid var(--slate-300);
       border-radius: 6px; padding: 4px 8px; font-size: 0.72rem; box-shadow: var(--shadow-md);
       display: flex; align-items: center; gap: 5px;
     }}
@@ -1245,39 +1245,6 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
     .modal-title {{ font-family: var(--font-serif); font-size: 0.98rem; font-weight: 700; color: var(--navy-900); }}
     .modal-close {{ background: transparent; border: none; cursor: pointer; color: var(--slate-400); font-size: 1.2rem; }}
     .modal-body {{ padding: 14px 18px; overflow-y: auto; font-size: 0.8rem; line-height: 1.55; color: var(--slate-700); }}
-    /* Mobile Action Bar */
-    .mobile-action-bar {{
-      display: none;
-    }}
-    .mob-mode-capsule {{
-      display: flex; background: var(--washi-subtle); border: 1px solid var(--slate-300);
-      border-radius: 8px; padding: 3px; gap: 4px; width: 100%; box-sizing: border-box;
-    }}
-    .mob-mode-btn {{
-      flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
-      border: none; background: transparent; padding: 7px 10px; font-size: 0.76rem;
-      font-weight: 500; color: var(--slate-600); border-radius: 6px; cursor: pointer;
-      transition: all 0.15s ease; font-family: var(--font-sans);
-    }}
-    .mob-mode-btn.active {{
-      background: var(--washi-card); color: var(--navy-900); font-weight: 700;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-    }}
-    .mob-quick-scroll {{
-      display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 4px;
-      -webkit-overflow-scrolling: touch; scrollbar-width: none;
-    }}
-    .mob-quick-scroll::-webkit-scrollbar {{ display: none; }}
-    .mob-pill-btn {{
-      flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px;
-      background: var(--washi-card); border: 1px solid var(--slate-300);
-      border-radius: 9999px; padding: 5px 11px; font-size: 0.72rem; font-weight: 600;
-      color: var(--slate-700); cursor: pointer; white-space: nowrap;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-    }}
-    .mob-pill-btn:active {{
-      background: var(--washi-subtle); border-color: var(--active-color); color: var(--active-color);
-    }}
 
     /* Elevation Dock Toggle Button */
     .btn-dock-toggle {{
@@ -1309,20 +1276,21 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
         padding: 0 10px !important;
         z-index: 1000 !important;
       }}
-      .brand-group {{ flex-shrink: 0; gap: 6px; }}
-      .brand-seal {{ width: 22px; height: 22px; font-size: 0.68rem; }}
-      .brand-title {{ font-size: 0.82rem; letter-spacing: 0; }}
+      .brand-group {{ flex-shrink: 0; gap: 4px; }}
+      .brand-seal {{ width: 24px; height: 24px; font-size: 0.72rem; border-radius: 4px; }}
+      .brand-title {{ display: none !important; }}
       .brand-badge {{ display: none !important; }}
-      .header-center {{ flex: 1 1 auto; min-width: 0; justify-content: center; }}
+      .header-center {{ flex: 0 1 auto; min-width: 0; justify-content: center; }}
       .header-center .mode-switch-capsule {{ display: none !important; }}
-      .route-drawer-btn {{ padding: 4px 8px; font-size: 0.72rem; max-width: 135px; min-width: 0; }}
-      .route-drawer-label {{ overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 95px; }}
-      .header-right {{ flex-shrink: 0; gap: 4px; }}
-      .util-group .btn-util:not(.btn-visa) {{ display: none !important; }}
-      .btn-visa {{ padding: 3px 6px; font-size: 0.72rem; }}
-      .btn-visa span {{ display: inline !important; }}
+      .route-drawer-btn {{ padding: 4px 7px; font-size: 0.72rem; max-width: 120px; min-width: 0; }}
+      .route-drawer-label {{ overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 85px; }}
+      .header-right {{ flex: 0 0 auto; gap: 2px; }}
+      .util-group {{ gap: 1px; }}
+      .btn-util {{ padding: 4px 5px; min-width: 26px; justify-content: center; }}
+      .btn-util span {{ display: none !important; }}
       .divider-vertical {{ display: none !important; }}
-      .engine-group .tile-dropdown,
+      .engine-group {{ gap: 1px; }}
+      .engine-group .btn-icon {{ width: 26px; height: 26px; }}
       .engine-group .btn-icon:not(#btn-theme-toggle),
       .engine-group .btn-version-pill {{ display: none !important; }}
 
@@ -1341,32 +1309,9 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
         padding-top: 0 !important;
       }}
 
-      /* Locked Top Section: Action Bar + Viewport */
-      .mobile-action-bar {{
-        order: 0 !important;
-        flex-shrink: 0 !important;
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 6px !important;
-        padding: 6px 10px !important;
-        background: var(--washi) !important;
-        border-bottom: 1px solid var(--slate-200) !important;
-        z-index: 800 !important;
-      }}
-      .mob-mode-capsule {{
-        padding: 2px !important;
-      }}
-      .mob-mode-btn {{
-        padding: 5px 8px !important;
-        font-size: 0.72rem !important;
-      }}
-      .mob-pill-btn {{
-        padding: 4px 9px !important;
-        font-size: 0.7rem !important;
-      }}
-
+      /* Locked Top Section: Viewport (Map & D3 Elevation) */
       .viewport-col {{
-        order: 1 !important;
+        order: 0 !important;
         flex-shrink: 0 !important;
         display: flex !important;
         flex-direction: column !important;
@@ -1425,7 +1370,7 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
 
       /* Scrollable Bottom Section: Narrative Column */
       .narrative-col {{
-        order: 2 !important;
+        order: 1 !important;
         flex: 1 1 auto !important;
         height: 100% !important;
         overflow-y: auto !important;
@@ -1472,6 +1417,8 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
       .modal-card {{ max-height: 90vh !important; }}
       .modal-header {{ padding: 10px 12px !important; }}
       .modal-body {{ padding: 10px 12px !important; font-size: 0.76rem !important; }}
+
+      .tile-select {{ width: 20px; }}
     }}
   </style>
 </head>
@@ -1537,13 +1484,6 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
 
       <!-- Engine & Theme Group -->
       <div class="engine-group">
-        <select class="tile-dropdown" id="tile-selector" onchange="switchBaseTile(this.value)" title="切换底图引擎">
-          <option value="carto">CARTO 人文</option>
-          <option value="carto_positron">CARTO 浅灰</option>
-          <option value="gsi">GSI 国土院</option>
-          <option value="gsi_pale">GSI 淡彩</option>
-          <option value="osm">OSM 全球</option>
-        </select>
         <button class="btn-icon" id="btn-theme-toggle" onclick="toggleNightTheme()" title="切换暗色山峦/和纸日间模式">
           <svg class="icon" id="theme-icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         </button>
@@ -1579,46 +1519,6 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
 
   <!-- 3. MAIN APP SHELL -->
   <main class="app-shell">
-    <!-- Mobile Action Bar (Visible only on mobile <= 900px) -->
-    <div class="mobile-action-bar">
-      <div class="mob-mode-capsule">
-        <button class="mob-mode-btn active" id="mob-mode-public" onclick="setTransportMode('public')">
-          <svg class="icon" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="16" rx="2"/><path d="M4 11h16"/><path d="M12 3v8"/><path d="m8 19-2 3"/><path d="m16 19 2 3"/></svg>
-          公共交通+eBike
-        </button>
-        <button class="mob-mode-btn" id="mob-mode-drive" onclick="setTransportMode('drive')">
-          <svg class="icon" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-          合规自驾
-        </button>
-      </div>
-      <div class="mob-quick-scroll">
-        <button class="mob-pill-btn" onclick="openModal('modal-rules')">
-          <svg class="icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          规制红线
-        </button>
-        <button class="mob-pill-btn" onclick="openModal('modal-transit')">
-          <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-          交通详单
-        </button>
-        <button class="mob-pill-btn" onclick="openModal('modal-stay')">
-          <svg class="icon" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          食宿锦囊
-        </button>
-        <button class="mob-pill-btn" onclick="openModal('modal-checklist')">
-          <svg class="icon" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-          应急清单
-        </button>
-        <button class="mob-pill-btn" onclick="openVisaModal()">
-          <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          送签行程
-        </button>
-        <button class="mob-pill-btn" onclick="openModal('modal-versions')">
-          <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-          版本矩阵
-        </button>
-      </div>
-    </div>
-
     <!-- Left Column: Narrative & Planning Control -->
     <section class="narrative-col">
       <!-- Route Hero -->
@@ -1828,7 +1728,6 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
       <div class="map-wrapper">
         <div class="map-overlay-top">
           <div class="map-chip">
-            <span style="font-size:0.7rem;font-weight:600;color:var(--slate-500);">底图：</span>
             <select class="tile-select" id="tile-selector-overlay" onchange="switchBaseTile(this.value)">
               <option value="carto">CARTO 人文 (Voyager)</option>
               <option value="carto_positron">CARTO 浅灰 (Positron)</option>
@@ -1840,7 +1739,6 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
           <div class="map-chip">
             <button class="btn-util-sm" onclick="resetMapBounds()">
               <svg class="icon" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>
-              全览路线
             </button>
           </div>
         </div>
@@ -2195,8 +2093,8 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
       }}).addTo(map);
 
       // sync select elements
-      document.getElementById('tile-selector').value = tileKey;
-      document.getElementById('tile-selector-overlay').value = tileKey;
+      const tileSelOverlay = document.getElementById('tile-selector-overlay');
+      if (tileSelOverlay) tileSelOverlay.value = tileKey;
     }}
 
     function resetMapBounds() {{
@@ -2622,13 +2520,9 @@ HTML_TEMPLATE = f"""<!DOCTYPE html>
       currentTransportMode = mode;
       const dPub = document.getElementById('mode-btn-public');
       const dDrv = document.getElementById('mode-btn-drive');
-      const mPub = document.getElementById('mob-mode-public');
-      const mDrv = document.getElementById('mob-mode-drive');
 
       if (dPub) dPub.classList.toggle('active', mode === 'public');
       if (dDrv) dDrv.classList.toggle('active', mode === 'drive');
-      if (mPub) mPub.classList.toggle('active', mode === 'public');
-      if (mDrv) mDrv.classList.toggle('active', mode === 'drive');
 
       // Re-render day cards with new transport info
       const route = ROUTES_DATA[currentRouteKey];
