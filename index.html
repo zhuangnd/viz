@@ -530,30 +530,76 @@
       height: 14px;
     }
 
-    /* Variants & Sub-pages List */
-    .variants-section {
+    /* Variants & Sub-pages Collapsible (<details>) */
+    details.variants-section {
       margin-top: 4px;
       margin-bottom: 14px;
       flex-grow: 1;
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-sm);
+      background: var(--card-sub-bg);
+      overflow: hidden;
+      transition: var(--transition);
+    }
+    details.variants-section[open] {
+      background: var(--surface);
+      border-color: var(--box-inner-border);
     }
 
-    .variants-header {
+    summary.variants-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      padding: 8px 12px;
       font-size: 11.5px;
       font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      user-select: none;
+      list-style: none;
+      transition: var(--transition);
+    }
+    summary.variants-header::-webkit-details-marker {
+      display: none;
+    }
+    summary.variants-header:hover {
+      color: var(--accent);
+      background: var(--card-sub-hover);
+    }
+
+    .variants-header-left {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .variants-chevron {
+      width: 14px;
+      height: 14px;
       color: var(--text-dim);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 8px;
-      padding: 0 2px;
+      transition: transform 0.22s ease, color 0.2s ease;
+      flex-shrink: 0;
+    }
+    details.variants-section[open] .variants-chevron {
+      transform: rotate(90deg);
+      color: var(--accent);
+    }
+
+    .variants-count-pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: var(--surface-border);
+      color: var(--text-dim);
     }
 
     .variants-list {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
+      padding: 6px 10px 10px;
+      border-top: 1px solid var(--surface-border);
     }
 
     .variant-row {
@@ -758,8 +804,8 @@
     <!-- MAIN PROJECTS GRID (Sorted strictly by Recency & v3/v2 Priority) -->
     <div class="projects-grid" id="projectsGrid">
 
-      <!-- 1. 日本深度自助旅行（15–20日）空间交互导览系统 (2026-10-14) -->
-      <div class="project-card" data-category="geography" data-search="日本深度自助旅行 空间交互导览系统 japan-travel-guide v3 v2 argon 浮世绘 富岳三十六景 D3剖面 Leaflet 自驾新政 避坑指南 文学寻踪 兼六园 上高地">
+      <!-- 1. 日本深度自助旅行（15–20日）空间交互导览系统 (2026-10-16) -->
+      <div class="project-card" data-category="geography" data-search="日本深度自游全景导览 2026 典藏主控版 空间交互导览系统 japan-travel-guide index v4 v3 v2 argon wbd 浮世绘 富岳三十六景 D3剖面 Leaflet 自驾新政 避坑指南 文学寻踪 兼六园 上高地">
         <div class="card-meta-bar">
           <span class="badge-category">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -767,37 +813,67 @@
           </span>
           <span class="time-badge">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            2026-10-14
+            2026-10-16
           </span>
         </div>
 
-        <!-- 优先入口：v3 旗舰版 -->
+        <!-- 优先入口：2026 典藏主控版 index.html -->
         <div class="primary-entry-box">
           <div class="primary-title-row">
-            <a href="japan-travel-guide/v3.html" class="primary-link">
-              <span>日本深度自由行终极交互导览 (v3 旗舰版)</span>
+            <a href="japan-travel-guide/index.html" class="primary-link">
+              <span>日本深度自游全景导览 · 2026 典藏主控版</span>
               <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
             </a>
-            <span class="priority-badge v2">最新 v3 旗舰</span>
+            <span class="priority-badge v2">最新典藏版</span>
           </div>
-          <p class="primary-desc">终极集大成交互导览：立足官方地理与文化脉络，集成富岳三十六景浮世绘大师溯源线、D3.js 实时高程探针联动、2026 入境新政与严格自驾合规检索。</p>
+          <p class="primary-desc">终极集大成交互系统：43/57 黄金双栏分屏 + 伸缩路线抽屉，集成富岳三十六景浮世绘溯源线、D3.js 实时高程探针联动、2026 入境新政与严格自驾合规检视。</p>
           <div class="primary-footer">
-            <span class="path-code" title="japan-travel-guide/v3.html">japan-travel-guide/v3.html</span>
-            <a href="japan-travel-guide/v3.html" class="btn-launch-primary">
-              <span>开启旗舰导览</span>
+            <span class="path-code" title="japan-travel-guide/index.html">japan-travel-guide/index.html</span>
+            <a href="japan-travel-guide/index.html" class="btn-launch-primary">
+              <span>开启主控导览</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
             </a>
           </div>
         </div>
 
-        <!-- 其他版本与探索矩阵 (4个独立版本) -->
-        <div class="variants-section">
-          <div class="variants-header">
-            <span>其他版本与探索矩阵 (4)</span>
-            <span>修改时间</span>
-          </div>
+        <!-- 其他版本与演进矩阵 (共 7 个独立页面) -->
+        <details class="variants-section">
+          <summary class="variants-header">
+            <span class="variants-header-left"><svg class="variants-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg><span>其他版本与规划矩阵 (7)</span></span>
+            <span class="variants-count-pill">折叠查看</span>
+          </summary>
           <div class="variants-list">
-            <a href="japan-travel-guide/japan_deep_travel_interactive_guide_argon-v2.html" class="variant-row" title="japan-travel-guide/japan_deep_travel_interactive_guide_argon-v2.html">
+            <a href="japan-travel-guide/v4.html" class="variant-row" title="japan-travel-guide/v4.html">
+              <div class="variant-info">
+                <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <span class="variant-title">全景交互导览 v4 · WBD 深度实践版</span>
+              </div>
+              <div class="variant-side">
+                <span class="variant-tag">v4 实践版</span>
+                <span class="variant-date">10-15</span>
+              </div>
+            </a>
+            <a href="japan-travel-guide/v3.html" class="variant-row" title="japan-travel-guide/v3.html">
+              <div class="variant-info">
+                <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <span class="variant-title">终极交互导览系统 v3 (Editorial Cartography)</span>
+              </div>
+              <div class="variant-side">
+                <span class="variant-tag">v3 旗舰版</span>
+                <span class="variant-date">10-14</span>
+              </div>
+            </a>
+            <a href="japan-travel-guide/v2.html" class="variant-row" title="japan-travel-guide/v2.html">
+              <div class="variant-info">
+                <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <span class="variant-title">全景自由行导览平台 v2 (抽屉联动 & 预算沙盒)</span>
+              </div>
+              <div class="variant-side">
+                <span class="variant-tag">v2 全景版</span>
+                <span class="variant-date">10-14</span>
+              </div>
+            </a>
+            <a href="japan-travel-guide/_archived/japan_deep_travel_interactive_guide_argon-v2.html" class="variant-row" title="japan-travel-guide/_archived/japan_deep_travel_interactive_guide_argon-v2.html">
               <div class="variant-info">
                 <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
                 <span class="variant-title">Argon-v2 文学深潜版 (43/57分屏 & D3剖面)</span>
@@ -807,7 +883,7 @@
                 <span class="variant-date">10-14</span>
               </div>
             </a>
-            <a href="japan-travel-guide/japan_deep_travel_interactive_guide_argon.html" class="variant-row" title="japan-travel-guide/japan_deep_travel_interactive_guide_argon.html">
+            <a href="japan-travel-guide/_archived/japan_deep_travel_interactive_guide_argon.html" class="variant-row" title="japan-travel-guide/_archived/japan_deep_travel_interactive_guide_argon.html">
               <div class="variant-info">
                 <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
                 <span class="variant-title">Argon-v1 探索走廊版 (6大走廊与文学寻踪)</span>
@@ -817,28 +893,28 @@
                 <span class="variant-date">10-14</span>
               </div>
             </a>
-            <a href="japan-travel-guide/v2.html" class="variant-row" title="japan-travel-guide/v2.html">
+            <a href="japan-travel-guide/_archived/wbd/japan-travel-guide-wbd.html" class="variant-row" title="japan-travel-guide/_archived/wbd/japan-travel-guide-wbd.html">
               <div class="variant-info">
                 <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-                <span class="variant-title">日本深度自由行全景导览平台 (v2 抽屉联动版)</span>
+                <span class="variant-title">WBD 独立旅行规划 (地图 × 行程 × 预算)</span>
               </div>
               <div class="variant-side">
-                <span class="variant-tag">v2 全景版</span>
-                <span class="variant-date">10-14</span>
+                <span class="variant-tag">WBD 规划</span>
+                <span class="variant-date">10-15</span>
               </div>
             </a>
-            <a href="japan-travel-guide/index.html" class="variant-row" title="japan-travel-guide/index.html">
+            <a href="japan-travel-guide/_archived/wbd/index.html" class="variant-row" title="japan-travel-guide/_archived/wbd/index.html">
               <div class="variant-info">
                 <svg class="sub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-                <span class="variant-title">日本深度自由行可视化导览 (v1 经典和纸版)</span>
+                <span class="variant-title">自由行可视化交互导览 · 官方与本土视角原型</span>
               </div>
               <div class="variant-side">
-                <span class="variant-tag">v1 经典版</span>
-                <span class="variant-date">10-14</span>
+                <span class="variant-tag">WBD 原型</span>
+                <span class="variant-date">10-15</span>
               </div>
             </a>
           </div>
-        </div>
+        </details>
 
         <div class="card-tags">
           <span class="tech-tag">D3.js 高程探针</span>
@@ -921,11 +997,11 @@
         </div>
 
         <!-- 其他版本列表 -->
-        <div class="variants-section">
-          <div class="variants-header">
-            <span>其他版本 (1)</span>
-            <span>修改时间</span>
-          </div>
+        <details class="variants-section">
+          <summary class="variants-header">
+            <span class="variants-header-left"><svg class="variants-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg><span>其他版本 (1)</span></span>
+            <span class="variants-count-pill">折叠查看</span>
+          </summary>
           <div class="variants-list">
             <a href="quanzhou-food-atlas/index.html" class="variant-row" title="quanzhou-food-atlas/index.html">
               <div class="variant-info">
@@ -938,7 +1014,7 @@
               </div>
             </a>
           </div>
-        </div>
+        </details>
 
         <div class="card-tags">
           <span class="tech-tag">卡片瀑布流</span>
@@ -981,11 +1057,11 @@
         </div>
 
         <!-- 其他版本列表 -->
-        <div class="variants-section">
-          <div class="variants-header">
-            <span>其他版本 (1)</span>
-            <span>修改时间</span>
-          </div>
+        <details class="variants-section">
+          <summary class="variants-header">
+            <span class="variants-header-left"><svg class="variants-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg><span>其他版本 (1)</span></span>
+            <span class="variants-count-pill">折叠查看</span>
+          </summary>
           <div class="variants-list">
             <a href="fujian-food-capital/index.html" class="variant-row" title="fujian-food-capital/index.html">
               <div class="variant-info">
@@ -998,7 +1074,7 @@
               </div>
             </a>
           </div>
-        </div>
+        </details>
 
         <div class="card-tags">
           <span class="tech-tag">风味多维雷达</span>
@@ -1041,11 +1117,11 @@
         </div>
 
         <!-- 其他版本与关联页面 (共3个) -->
-        <div class="variants-section">
-          <div class="variants-header">
-            <span>其他版本与设计文档 (3)</span>
-            <span>修改时间</span>
-          </div>
+        <details class="variants-section">
+          <summary class="variants-header">
+            <span class="variants-header-left"><svg class="variants-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg><span>其他版本与设计文档 (3)</span></span>
+            <span class="variants-count-pill">折叠查看</span>
+          </summary>
           <div class="variants-list">
             <a href="rail-route-viz/rail-workbuddy/index.html" class="variant-row" title="rail-route-viz/rail-workbuddy/index.html">
               <div class="variant-info">
@@ -1078,7 +1154,7 @@
               </div>
             </a>
           </div>
-        </div>
+        </details>
 
         <div class="card-tags">
           <span class="tech-tag">SVG 拓扑</span>
@@ -1161,11 +1237,11 @@
         </div>
 
         <!-- 关联全量版本 (共7个页面，全部直接可点) -->
-        <div class="variants-section">
-          <div class="variants-header">
-            <span>系列课件与大屏矩阵 (7)</span>
-            <span>修改时间</span>
-          </div>
+        <details class="variants-section">
+          <summary class="variants-header">
+            <span class="variants-header-left"><svg class="variants-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg><span>系列课件与大屏矩阵 (7)</span></span>
+            <span class="variants-count-pill">折叠查看</span>
+          </summary>
           <div class="variants-list">
             <a href="slide/business-model_workbuddy_20260910/两种思维三个模型六步法_零基础培训演示_大屏版.html" class="variant-row" title="slide/business-model_workbuddy_20260910/两种思维三个模型六步法_零基础培训演示_大屏版.html">
               <div class="variant-info">
@@ -1238,7 +1314,7 @@
               </div>
             </a>
           </div>
-        </div>
+        </details>
 
         <div class="card-tags">
           <span class="tech-tag">自服务 BI</span>
@@ -1281,11 +1357,11 @@
         </div>
 
         <!-- 其他4份独立实验室页面 -->
-        <div class="variants-section">
-          <div class="variants-header">
-            <span>其他分析实验室 (4)</span>
-            <span>修改时间</span>
-          </div>
+        <details class="variants-section">
+          <summary class="variants-header">
+            <span class="variants-header-left"><svg class="variants-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg><span>其他分析实验室 (4)</span></span>
+            <span class="variants-count-pill">折叠查看</span>
+          </summary>
           <div class="variants-list">
             <a href="hollywood/ai-analysis-lab/attribution-wbd.html" class="variant-row" title="hollywood/ai-analysis-lab/attribution-wbd.html">
               <div class="variant-info">
@@ -1328,7 +1404,7 @@
               </div>
             </a>
           </div>
-        </div>
+        </details>
 
         <div class="card-tags">
           <span class="tech-tag">双盲评测</span>
@@ -1371,11 +1447,11 @@
         </div>
 
         <!-- 其他3套版本 (含Kimi 2最新版、Kimi 1与基础版) -->
-        <div class="variants-section">
-          <div class="variants-header">
-            <span>其他版本 (3)</span>
-            <span>修改时间</span>
-          </div>
+        <details class="variants-section">
+          <summary class="variants-header">
+            <span class="variants-header-left"><svg class="variants-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg><span>其他版本 (3)</span></span>
+            <span class="variants-count-pill">折叠查看</span>
+          </summary>
           <div class="variants-list">
             <a href="world-peaks/world-peaks-workbuddy-kimi-2.html" class="variant-row" title="world-peaks/world-peaks-workbuddy-kimi-2.html">
               <div class="variant-info">
@@ -1408,7 +1484,7 @@
               </div>
             </a>
           </div>
-        </div>
+        </details>
 
         <div class="card-tags">
           <span class="tech-tag">ECharts</span>
@@ -1451,11 +1527,11 @@
         </div>
 
         <!-- 配套卡片页面 -->
-        <div class="variants-section">
-          <div class="variants-header">
-            <span>配套卡片 (1)</span>
-            <span>修改时间</span>
-          </div>
+        <details class="variants-section">
+          <summary class="variants-header">
+            <span class="variants-header-left"><svg class="variants-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg><span>配套卡片 (1)</span></span>
+            <span class="variants-count-pill">折叠查看</span>
+          </summary>
           <div class="variants-list">
             <a href="viz_as_language/cards.html" class="variant-row" title="viz_as_language/cards.html">
               <div class="variant-info">
@@ -1468,7 +1544,7 @@
               </div>
             </a>
           </div>
-        </div>
+        </details>
 
         <div class="card-tags">
           <span class="tech-tag">媒介理论</span>
@@ -1493,7 +1569,7 @@
 
     <!-- Footer -->
     <footer>
-      <span>Viz Hub · 10 个可视化主题工程 · 34 套独立交互页面</span>
+      <span>Viz Hub · 10 个可视化主题工程 · 37 套独立交互页面</span>
     </footer>
   </div>
 
