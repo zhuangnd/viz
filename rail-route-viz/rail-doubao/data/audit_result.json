@@ -3,47 +3,54 @@
  "cross_diffs": [],
  "sample": [
   {
-   "code": "D686",
+   "code": "D6587",
    "date": "2026-09-23",
    "ok": true,
-   "stops": 7,
+   "stops": 15,
    "diffs": []
   },
   {
-   "code": "D2298",
+   "code": "G3128",
    "date": "2026-09-23",
    "ok": true,
-   "stops": 18,
+   "stops": 24,
    "diffs": []
   },
   {
-   "code": "G5123",
-   "date": "2026-09-23",
+   "code": "D9621",
+   "date": "2026-09-22",
    "ok": true,
-   "stops": 3,
+   "stops": 6,
    "diffs": []
   },
   {
-   "code": "D3160",
+   "code": "D6564",
+   "date": "2026-09-23",
+   "ok": true,
+   "stops": 8,
+   "diffs": []
+  },
+  {
+   "code": "K404",
+   "date": "2026-09-23",
+   "ok": false,
+   "stops": 22,
+   "diffs": [
+    {
+     "station": "吉安",
+     "field": "arrive",
+     "local": "21:30",
+     "fresh": "21:32"
+    }
+   ]
+  },
+  {
+   "code": "G1486",
    "date": "2026-09-23",
    "ok": true,
    "stops": 19,
    "diffs": []
-  },
-  {
-   "code": "D2352",
-   "date": "2026-09-23",
-   "ok": true,
-   "stops": 20,
-   "diffs": []
-  },
-  {
-   "code": "G1641",
-   "date": "2026-09-23",
-   "ok": true,
-   "stops": 17,
-   "diffs": []
   }
  ],
- "sample_rate": 100.0
+ "sample_rate": 83.33333333333334
 }
