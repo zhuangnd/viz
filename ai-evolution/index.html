@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 赋能下的全栈技术演进全景 (2023 — 2026)</title>
+  <style>
+    :root {
+      --bg: #F8FAFC;
+      --bg-card: #FFFFFF;
+      --bg-subtle: #F1F5F9;
+      --text-primary: #0F172A;
+      --text-secondary: #475569;
+      --text-muted: #94A3B8;
+      --border: #E2E8F0;
+      --border-strong: #CBD5E1;
+
+      --c-indigo: #4F46E5;
+      --c-indigo-bg: #EEF2FF;
+      --c-cyan: #0284C7;
+      --c-cyan-bg: #E0F2FE;
+      --c-emerald: #059669;
+      --c-emerald-bg: #D1FAE5;
+      --c-amber: #D97706;
+      --c-amber-bg: #FEF3C7;
+
+      --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 10px 28px -6px rgba(15, 23, 42, 0.06);
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0B0F19;
+      --bg-card: #111827;
+      --bg-subtle: #1E293B;
+      --text-primary: #F8FAFC;
+      --text-secondary: #94A3B8;
+      --text-muted: #64748B;
+      --border: #1E293B;
+      --border-strong: #334155;
+
+      --c-indigo: #818CF8;
+      --c-indigo-bg: rgba(99, 102, 241, 0.14);
+      --c-cyan: #38BDF8;
+      --c-cyan-bg: rgba(14, 165, 233, 0.14);
+      --c-emerald: #34D399;
+      --c-emerald-bg: rgba(16, 185, 129, 0.14);
+      --c-amber: #FBBF24;
+      --c-amber-bg: rgba(245, 158, 11, 0.14);
+
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+      --shadow-md: 0 12px 32px -6px rgba(0, 0, 0, 0.45);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      background-color: var(--bg);
+      color: var(--text-primary);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      padding: 40px 24px 64px;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    .canvas {
+      max-width: 1160px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 44px;
+    }
+
+    /* ============ Top Utility Bar ============ */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .kicker-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: var(--c-indigo-bg);
+      color: var(--c-indigo);
+      font-size: 12.5px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+    }
+
+    .kicker-pill svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    .theme-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease;
+    }
+
+    .theme-btn:hover {
+      border-color: var(--c-indigo);
+      color: var(--text-primary);
+    }
+
+    .theme-btn svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    /* ============ Hero Banner ============ */
+    .hero {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 40px 44px;
+      box-shadow: var(--shadow-md);
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 36px;
+      align-items: center;
+    }
+
+    .hero-title {
+      font-size: clamp(26px, 3.2vw, 36px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.28;
+      margin-bottom: 14px;
+    }
+
+    .hero-sub {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.75;
+    }
+
+    .paradigm-box {
+      background: var(--bg-subtle);
+      border-radius: var(--radius-md);
+      padding: 22px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      border: 1px solid var(--border);
+    }
+
+    .paradigm-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .paradigm-label {
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .paradigm-label.active {
+      color: var(--c-indigo);
+    }
+
+    .paradigm-flow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      flex-wrap: wrap;
+    }
+
+    .paradigm-flow.highlight {
+      color: var(--text-primary);
+    }
+
+    .paradigm-flow svg {
+      width: 14px;
+      height: 14px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .paradigm-divider {
+      height: 1px;
+      background: var(--border-strong);
+      opacity: 0.5;
+    }
+
+    /* ============ Section Header ============ */
+    .section-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 19px;
+      font-weight: 700;
+    }
+
+    .section-title svg {
+      width: 20px;
+      height: 20px;
+      color: var(--c-indigo);
+    }
+
+    .section-caption {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* ============ Section 1: Dual Timeline (2023-2026) ============ */
+    .timeline-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      position: relative;
+    }
+
+    .tl-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 24px 22px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .tl-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--c-indigo);
+    }
+
+    .tl-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .tl-year {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--c-indigo);
+      font-family: "SF Mono", "JetBrains Mono", monospace;
+    }
+
+    .tl-stage-tag {
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: var(--bg-subtle);
+      color: var(--text-secondary);
+    }
+
+    .tl-track {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-subtle);
+    }
+
+    .tl-track-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .tl-track-label svg {
+      width: 13px;
+      height: 13px;
+    }
+
+    .tl-track-content {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .tl-leap {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-top: 4px;
+    }
+
+    .tl-leap-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--c-emerald);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .tl-leap-label svg {
+      width: 13px;
+      height: 13px;
+    }
+
+    .tl-leap-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .tl-leap-list li {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .tl-leap-list li::before {
+      content: "";
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--c-indigo);
+      flex-shrink: 0;
+    }
+
+    /* ============ Section 2: 8 Core Achievements in 4 Domains ============ */
+    .domains-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 22px;
+    }
+
+    .domain-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 26px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .domain-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .domain-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .domain-icon svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .domain-icon.indigo { background: var(--c-indigo-bg); color: var(--c-indigo); }
+    .domain-icon.cyan { background: var(--c-cyan-bg); color: var(--c-cyan); }
+    .domain-icon.emerald { background: var(--c-emerald-bg); color: var(--c-emerald); }
+    .domain-icon.amber { background: var(--c-amber-bg); color: var(--c-amber); }
+
+    .domain-title-group h3 {
+      font-size: 16.5px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .domain-title-group span {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .milestone-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .ms-card {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .ms-top {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .ms-num-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .ms-index {
+      font-size: 11px;
+      font-weight: 700;
+      font-family: "SF Mono", "JetBrains Mono", monospace;
+      color: var(--text-muted);
+    }
+
+    .ms-top svg {
+      width: 16px;
+      height: 16px;
+      color: var(--text-secondary);
+    }
+
+    .ms-title {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .ms-desc {
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    .ms-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .ms-tag {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+
+    /* ============ Section 3: Synergy Loop Architecture ============ */
+    .synergy-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 30px 36px;
+      box-shadow: var(--shadow-sm);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+      align-items: stretch;
+      position: relative;
+    }
+
+    .syn-node {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 20px;
+      border-radius: var(--radius-md);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      position: relative;
+    }
+
+    .syn-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .syn-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--c-indigo-bg);
+      color: var(--c-indigo);
+      flex-shrink: 0;
+    }
+
+    .syn-badge svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .syn-title {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .syn-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+
+    .syn-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: auto;
+      padding-top: 6px;
+    }
+
+    .syn-pill {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--c-indigo);
+      background: var(--c-indigo-bg);
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      font-size: 12.5px;
+      color: var(--text-muted);
+      padding-top: 8px;
+    }
+
+    @media (max-width: 960px) {
+      .hero { grid-template-columns: 1fr; padding: 28px; }
+      .timeline-grid { grid-template-columns: repeat(2, 1fr); }
+      .domains-grid { grid-template-columns: 1fr; }
+      .synergy-panel { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 600px) {
+      .timeline-grid { grid-template-columns: 1fr; }
+      .milestone-pair { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="canvas">
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="kicker-pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+          <polyline points="2 17 12 22 22 17"/>
+          <polyline points="2 12 12 17 22 12"/>
+        </svg>
+        <span>AI-EMPOWERED FULL-STACK EVOLUTION · 2023 — 2026</span>
+      </div>
+
+      <button class="theme-btn" id="themeToggle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+        </svg>
+        <span id="themeLabel">切换深色</span>
+      </button>
+    </div>
+
+    <!-- Hero Banner -->
+    <section class="hero">
+      <div>
+        <h1 class="hero-title">AI 赋能下的全栈技术演进全景</h1>
+        <p class="hero-sub">
+          从基础前端页面切图出发，伴随生成式大模型与智能体技术演进，在三年间跨越编程语言、数据算法、硬件服务化与底层网络壁垒，构建端到端全栈工程与认知体系。
+        </p>
+      </div>
+
+      <div class="paradigm-box">
+        <div class="paradigm-row">
+          <span class="paradigm-label">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            传统线性学习路径
+          </span>
+          <div class="paradigm-flow">
+            <span>全量语法储备</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            <span>文档检索试错</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            <span>单一技术栈实现</span>
+          </div>
+        </div>
+
+        <div class="paradigm-divider"></div>
+
+        <div class="paradigm-row">
+          <span class="paradigm-label active">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            AI 驱动逆向内化路径
+          </span>
+          <div class="paradigm-flow highlight">
+            <span>问题与意图定义</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            <span>架构共谋与排障</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            <span>跨栈全链路闭环</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 1: Dual Track Timeline -->
+    <section>
+      <div class="section-head">
+        <div class="section-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <span>一、双轨演进脉络：AI 浪潮与技术破壁 (2023 — 2026)</span>
+        </div>
+        <span class="section-caption">模型能力跃升驱动工程边界持续外扩</span>
+      </div>
+
+      <div class="timeline-grid">
+        <!-- 2023 -->
+        <div class="tl-card">
+          <div class="tl-top">
+            <span class="tl-year">2023</span>
+            <span class="tl-stage-tag">单点辅助期</span>
+          </div>
+          <div class="tl-track">
+            <span class="tl-track-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4"/><path d="m16.2 7.8 2.9-2.9"/><path d="M18 12h4"/><path d="m16.2 16.2 2.9 2.9"/><path d="M12 18v4"/><path d="m4.9 19.1 2.9-2.9"/><path d="M2 12h4"/><path d="m4.9 4.9 2.9 2.9"/></svg>
+              AI 技术阶段
+            </span>
+            <div class="tl-track-content">对话式问答 · 单文件代码补全</div>
+          </div>
+          <div class="tl-leap">
+            <span class="tl-leap-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              工程能力解锁
+            </span>
+            <ul class="tl-leap-list">
+              <li>复杂前端页面结构生成</li>
+              <li>响应式样式与动画调试</li>
+              <li>基础交互事件快速排错</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 2024 -->
+        <div class="tl-card">
+          <div class="tl-top">
+            <span class="tl-year">2024</span>
+            <span class="tl-stage-tag">工程固化期</span>
+          </div>
+          <div class="tl-track">
+            <span class="tl-track-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4"/><path d="m16.2 7.8 2.9-2.9"/><path d="M18 12h4"/><path d="m16.2 16.2 2.9 2.9"/><path d="M12 18v4"/><path d="m4.9 19.1 2.9-2.9"/><path d="M2 12h4"/><path d="m4.9 4.9 2.9 2.9"/></svg>
+              AI 技术阶段
+            </span>
+            <div class="tl-track-content">百万级长上下文 · 高美感 UI 合成</div>
+          </div>
+          <div class="tl-leap">
+            <span class="tl-leap-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              工程能力解锁
+            </span>
+            <ul class="tl-leap-list">
+              <li>提示词工程与标准化技能封装</li>
+              <li>轻量后端接口与权限校验</li>
+              <li>长文档解析与演示课件自动生成</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 2025 -->
+        <div class="tl-card">
+          <div class="tl-top">
+            <span class="tl-year">2025</span>
+            <span class="tl-stage-tag">跨栈攻坚期</span>
+          </div>
+          <div class="tl-track">
+            <span class="tl-track-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4"/><path d="m16.2 7.8 2.9-2.9"/><path d="M18 12h4"/><path d="m16.2 16.2 2.9 2.9"/><path d="M12 18v4"/><path d="m4.9 19.1 2.9-2.9"/><path d="M2 12h4"/><path d="m4.9 4.9 2.9 2.9"/></svg>
+              AI 技术阶段
+            </span>
+            <div class="tl-track-content">思维链深度推理 · 复杂算法推演</div>
+          </div>
+          <div class="tl-leap">
+            <span class="tl-leap-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              工程能力解锁
+            </span>
+            <ul class="tl-leap-list">
+              <li>Python 网页抓取与量化成本算法</li>
+              <li>动态几何推演与数学动画渲染</li>
+              <li>家庭服务器架设与数据库主从同步</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 2026 -->
+        <div class="tl-card">
+          <div class="tl-top">
+            <span class="tl-year">2026</span>
+            <span class="tl-stage-tag">智能体协同</span>
+          </div>
+          <div class="tl-track">
+            <span class="tl-track-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4"/><path d="m16.2 7.8 2.9-2.9"/><path d="M18 12h4"/><path d="m16.2 16.2 2.9 2.9"/><path d="M12 18v4"/><path d="m4.9 19.1 2.9-2.9"/><path d="M2 12h4"/><path d="m4.9 4.9 2.9 2.9"/></svg>
+              AI 技术阶段
+            </span>
+            <div class="tl-track-content">多代理自主规划 · 终端级执行闭环</div>
+          </div>
+          <div class="tl-leap">
+            <span class="tl-leap-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              工程能力解锁
+            </span>
+            <ul class="tl-leap-list">
+              <li>SSH 流式管道多环境一键部署</li>
+              <li>原生 IPv6 公网穿透与远程直连</li>
+              <li>认知判断框架与全域工作流中枢</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: 4 Domains & 8 Core Milestones -->
+    <section>
+      <div class="section-head">
+        <div class="section-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>
+          </svg>
+          <span>二、四大技术域与八项核心工程落地</span>
+        </div>
+        <span class="section-caption">从应用层交互到底层网络与认知建模的全栈覆盖</span>
+      </div>
+
+      <div class="domains-grid">
+
+        <!-- Domain 1: Application & Visualization -->
+        <div class="domain-box">
+          <div class="domain-header">
+            <div class="domain-icon indigo">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>
+              </svg>
+            </div>
+            <div class="domain-title-group">
+              <h3>应用构建与交互可视</h3>
+              <span>Frontend Architecture & Interactive Systems</span>
+            </div>
+          </div>
+
+          <div class="milestone-pair">
+            <div class="ms-card">
+              <div class="ms-top">
+                <div class="ms-num-row">
+                  <span class="ms-index">MILESTONE 01</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                </div>
+                <div class="ms-title">前端页面与轻量后端 API</div>
+                <p class="ms-desc">构建多维数据可视化大屏、交互检索系统，打通轻量服务端接口与角色权限控制。</p>
+              </div>
+              <div class="ms-tags">
+                <span class="ms-tag">D3 / 三维渲染</span>
+                <span class="ms-tag">REST API</span>
+                <span class="ms-tag">权限鉴权</span>
+              </div>
+            </div>
+
+            <div class="ms-card">
+              <div class="ms-top">
+                <div class="ms-num-row">
+                  <span class="ms-index">MILESTONE 03</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 2 12h3v8h14v-8h3L12 3z"/><circle cx="12" cy="13" r="2"/></svg>
+                </div>
+                <div class="ms-title">学习框架与数学解题题库</div>
+                <p class="ms-desc">将复杂几何定理推演程序化，结合动态矢量画板与数学动画引擎实现分步可视化验证。</p>
+              </div>
+              <div class="ms-tags">
+                <span class="ms-tag">交互几何画板</span>
+                <span class="ms-tag">Manim 动画</span>
+                <span class="ms-tag">标准化题库</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Domain 2: Data & AI Engineering -->
+        <div class="domain-box">
+          <div class="domain-header">
+            <div class="domain-icon cyan">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/>
+              </svg>
+            </div>
+            <div class="domain-title-group">
+              <h3>数据工程与自动化认知</h3>
+              <span>Python Data Pipeline & Cognitive Framework</span>
+            </div>
+          </div>
+
+          <div class="milestone-pair">
+            <div class="ms-card">
+              <div class="ms-top">
+                <div class="ms-num-row">
+                  <span class="ms-index">MILESTONE 02</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                </div>
+                <div class="ms-title">Python 抓取、分析与模型调用</div>
+                <p class="ms-desc">实现接口逆向与浏览器自动化抓取，构建列式存储与先进先出量化核算，集成大模型批处理。</p>
+              </div>
+              <div class="ms-tags">
+                <span class="ms-tag">Requests / Selenium</span>
+                <span class="ms-tag">Parquet / FIFO</span>
+                <span class="ms-tag">AI API</span>
+              </div>
+            </div>
+
+            <div class="ms-card">
+              <div class="ms-top">
+                <div class="ms-num-row">
+                  <span class="ms-index">MILESTONE 04</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                </div>
+                <div class="ms-title">思考与判断体系梳理</div>
+                <p class="ms-desc">通过交互式知识图谱沉淀深度阅读脉络，建立讨论质量基线与逻辑谬误结构化辨析模型。</p>
+              </div>
+              <div class="ms-tags">
+                <span class="ms-tag">逻辑谬误剖析</span>
+                <span class="ms-tag">知识网络</span>
+                <span class="ms-tag">思辨模型</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Domain 3: Home Server & Database -->
+        <div class="domain-box">
+          <div class="domain-header">
+            <div class="domain-icon emerald">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/>
+              </svg>
+            </div>
+            <div class="domain-title-group">
+              <h3>私有服务器与数据同步</h3>
+              <span>Self-Hosted Server & Database Replication</span>
+            </div>
+          </div>
+
+          <div class="milestone-pair">
+            <div class="ms-card">
+              <div class="ms-top">
+                <div class="ms-num-row">
+                  <span class="ms-index">MILESTONE 05</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="12" x="3" y="4" rx="2"/><line x1="2" x2="22" y1="20" y2="20"/></svg>
+                </div>
+                <div class="ms-title">Mac mini 架设家庭服务器</div>
+                <p class="ms-desc">配置 Nginx 与 PHP-FPM 运行环境，通过系统级守护进程实现开机自启与全天候低功耗宿主服务。</p>
+              </div>
+              <div class="ms-tags">
+                <span class="ms-tag">Nginx / PHP-FPM</span>
+                <span class="ms-tag">LaunchDaemon</span>
+                <span class="ms-tag">共享目录规整</span>
+              </div>
+            </div>
+
+            <div class="ms-card">
+              <div class="ms-top">
+                <div class="ms-num-row">
+                  <span class="ms-index">MILESTONE 06</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+                </div>
+                <div class="ms-title">数据库操作与多端同步</div>
+                <p class="ms-desc">搭建跨节点数据库事务日志级单向主从同步，完成存储池离线迁移与系统休眠定时任务补漏。</p>
+              </div>
+              <div class="ms-tags">
+                <span class="ms-tag">MySQL 主从同步</span>
+                <span class="ms-tag">MariaDB 迁移</span>
+                <span class="ms-tag">休眠唤醒同步</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Domain 4: Remote DevOps & IPv6 Networking -->
+        <div class="domain-box">
+          <div class="domain-header">
+            <div class="domain-icon amber">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><line x1="2" x2="22" y1="12" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              </svg>
+            </div>
+            <div class="domain-title-group">
+              <h3>远程工程与公网穿透</h3>
+              <span>Automated Deployment & IPv6 Direct Access</span>
+            </div>
+          </div>
+
+          <div class="milestone-pair">
+            <div class="ms-card">
+              <div class="ms-top">
+                <div class="ms-num-row">
+                  <span class="ms-index">MILESTONE 07</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>
+                </div>
+                <div class="ms-title">SSH 远程与自动化管道部署</div>
+                <p class="ms-desc">配置密钥免密登录与局域网 Git 托管，设计 SSH + Tar 流式传输管道实现多节点一键并发发布。</p>
+              </div>
+              <div class="ms-tags">
+                <span class="ms-tag">SSH 免密</span>
+                <span class="ms-tag">Tar 流式管道</span>
+                <span class="ms-tag">服务热重载</span>
+              </div>
+            </div>
+
+            <div class="ms-card">
+              <div class="ms-top">
+                <div class="ms-num-row">
+                  <span class="ms-index">MILESTONE 08</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <div class="ms-title">IPv6 公网穿透与远程访问</div>
+                <p class="ms-desc">突破运营商无公网 IPv4 限制，利用原生 IPv6 结合动态域名解析与防火墙策略直连家庭设备。</p>
+              </div>
+              <div class="ms-tags">
+                <span class="ms-tag">原生 IPv6</span>
+                <span class="ms-tag">DDNS 解析</span>
+                <span class="ms-tag">外网点对点直连</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Section 3: Human-AI Synergy Loop -->
+    <section>
+      <div class="section-head">
+        <div class="section-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v8"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="m8 6 4-4 4 4"/><path d="M16 18a4 4 0 0 0-8 0"/>
+          </svg>
+          <span>三、人机协同核心方法论</span>
+        </div>
+        <span class="section-caption">意图定义 · 即时编译 · 资产复利</span>
+      </div>
+
+      <div class="synergy-panel">
+        <div class="syn-node">
+          <div class="syn-head">
+            <div class="syn-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+            <div class="syn-title">01 · 需求牵引与即时学习 (JIT)</div>
+          </div>
+          <p class="syn-desc">
+            摒弃前置盲目囤积语法的惯性，以真实场景痛点为锚点，在架构设计与报错排障的闭环中即时内化底层计算机原理。
+          </p>
+          <div class="syn-pills">
+            <span class="syn-pill">目标导向</span>
+            <span class="syn-pill">逆向解构</span>
+          </div>
+        </div>
+
+        <div class="syn-node">
+          <div class="syn-head">
+            <div class="syn-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/></svg>
+            </div>
+            <div class="syn-title">02 · 文档驱动与 SOP 资产沉淀</div>
+          </div>
+          <p class="syn-desc">
+            代码产出同步派生架构配置指南与排障手册，将每一次跨领域踩坑固化为可检索、可迁移的标准化操作规范。
+          </p>
+          <div class="syn-pills">
+            <span class="syn-pill">架构自解释</span>
+            <span class="syn-pill">知识显性化</span>
+          </div>
+        </div>
+
+        <div class="syn-node">
+          <div class="syn-head">
+            <div class="syn-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            </div>
+            <div class="syn-title">03 · 基础设施与工具链复利</div>
+          </div>
+          <p class="syn-desc">
+            通过统一导航入口、双机数据容灾与自动化发布脚本，将分散的单点工具收拢为彼此赋能、持续演进的私有数字底座。
+          </p>
+          <div class="syn-pills">
+            <span class="syn-pill">端到端闭环</span>
+            <span class="syn-pill">系统复利</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      AI-Empowered Full-Stack Evolution Panorama · 2023 — 2026
+    </footer>
+
+  </div>
+
+  <script>
+    const themeToggle = document.getElementById('themeToggle');
+    const themeLabel = document.getElementById('themeLabel');
+
+    themeToggle.addEventListener('click', () => {
+      const root = document.documentElement;
+      const isDark = root.getAttribute('data-theme') === 'dark';
+      const next = isDark ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      themeLabel.textContent = next === 'dark' ? '切换浅色' : '切换深色';
+    });
+  </script>
+</body>
+</html>
