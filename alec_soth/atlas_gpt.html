@@ -14,11 +14,17 @@
 @media(max-width:850px){#app{grid-template-rows:52px minmax(0,1fr)}.topbar{padding:0 12px;gap:10px}.top-caption{display:none}.brand span{display:none}.layout{grid-template-columns:minmax(280px,38%) minmax(0,62%)}.side-scroll{padding:20px 16px 8px}.side-footer{padding:9px 16px}.intro p{font-size:12px}.project-grid{grid-template-columns:1fr}.map-note{left:0}.map-top{left:10px;right:10px;top:10px}.legend{left:10px;bottom:12px}}
 @media(max-width:620px){#app{height:100dvh;min-height:500px;grid-template-rows:48px minmax(0,1fr)}.topbar{gap:8px}.brand strong{font-size:14px}.top-actions{gap:5px}.top-actions button,.top-actions select{height:30px;padding:0 7px;font-size:10px}.layout{grid-template-columns:1fr;grid-template-rows:43% 57%}.sidebar{grid-row:2;border-right:0;border-top:1px solid var(--line)}.map-wrap{grid-row:1}.side-scroll{padding:14px 16px 6px}.intro h1{font-size:23px;margin:5px 0}.intro p{display:none}.stats{margin:10px 0 8px;padding:7px 0}.stat b{font-size:17px}.stat span{font-size:9px}.section{padding:9px 0}.section-head{margin-bottom:6px}.hist{height:25px}.project-grid{grid-template-columns:1fr 1fr;gap:0 5px}.project-option{font-size:10px;padding:4px 1px}.side-footer{font-size:8px;padding:7px 14px}.map-note{max-width:72%;padding:8px 10px}.map-note b{font-size:12px}.map-note span{font-size:9px}.map-count{padding:7px 8px;font-size:10px}.map-tools{right:10px;bottom:12px}.map-tools button{width:32px;height:32px}.photo-item{grid-template-columns:56px 1fr;padding:8px 0}.thumb{width:56px;height:56px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+.home-btn{width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:2px;background:transparent;color:var(--ink);text-decoration:none;transition:border-color .15s,color .15s;flex-shrink:0}
+.home-btn:hover{border-color:var(--forest);color:var(--orange)}
+@media(max-width:620px){.home-btn{width:30px;height:30px}}
 </style>
 </head>
 <body>
 <div id="app">
   <header class="topbar">
+    <a class="home-btn" href="index.html" title="返回画册专题主页" aria-label="返回画册专题主页">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;display:block;"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-9.5z"/></svg>
+    </a>
     <div class="brand"><strong>Alec Soth</strong><span>Spatial Atlas</span></div>
     <div class="top-caption">A geography of looking, 1995—2024</div>
     <div class="top-actions">

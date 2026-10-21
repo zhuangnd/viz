@@ -10,8 +10,8 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <style>
     /* =====================================================================
-       DARKROOM ATLAS — 暗房 / 印样 (contact sheet) 视觉语言
-       与 atlas.html（暖色纸本编辑风）区分：深色底、安全灯红、等宽标注、胶片条
+       DARKROOM ATLAS — 暗房印样 (Darkroom) & 相纸看片台 (Light Mode) 双主题
+       与 atlas.html 区分：等宽底片编码、多选索引表、印样网格、35mm 胶片条
        ===================================================================== */
     :root {
       --bg: #0d0d0c;
@@ -26,10 +26,46 @@
       --safe: #e0452b;          /* 安全灯红 */
       --safe-soft: rgba(224, 69, 43, 0.14);
       --amber: #e6a83e;         /* 显影琥珀 */
+      --amber-soft: rgba(230, 168, 62, 0.08);
+      --glass: rgba(13, 13, 12, 0.86);
+      --stage-bg: #0a0a0a;
+      --strip-bg: #050505;
+      --film-hole: #1d1c1a;
+      --frame-bg: #000000;
+      --frame-border: #000000;
+      --hist-bg: #2a2926;
+      --hist-dim: #55503f;
+      --lb-bg: rgba(6, 6, 6, 0.96);
+      --shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
       --serif: 'Instrument Serif', 'Songti SC', serif;
       --mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
       --sans: 'Noto Sans SC', -apple-system, 'PingFang SC', sans-serif;
       --header-h: 50px;
+    }
+    body.theme-light {
+      --bg: #f4f1ea;
+      --panel: #faf8f3;
+      --panel-2: #eeeae0;
+      --panel-3: #e3ddd0;
+      --line: #ded8ca;
+      --line-2: #c8c0af;
+      --ink: #181715;
+      --ink-2: #4c473f;
+      --ink-3: #7e776b;
+      --safe: #c8371d;          /* 朱砂印记红 */
+      --safe-soft: rgba(200, 55, 29, 0.11);
+      --amber: #b06a00;         /* 银盐暖褐琥珀 */
+      --amber-soft: rgba(176, 106, 0, 0.10);
+      --glass: rgba(250, 248, 243, 0.90);
+      --stage-bg: #e7e2d7;
+      --strip-bg: #ebe6da;
+      --film-hole: #cec6b5;
+      --frame-bg: #e5dfd3;
+      --frame-border: #d4cdc0;
+      --hist-bg: #dfd9cb;
+      --hist-dim: #bfb6a3;
+      --lb-bg: rgba(246, 243, 236, 0.97);
+      --shadow: 0 12px 28px rgba(24, 23, 21, 0.16);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 13px; }
@@ -155,21 +191,26 @@
     .af-none { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
 
     /* Contact sheet grid */
+    .series-brief { display: none; margin: 12px 16px 0; padding: 10px 12px; background: var(--panel-2); border-left: 3px solid var(--safe); border-radius: 2px; font-size: 12px; line-height: 1.6; color: var(--ink-2); }
+    .series-brief.on { display: block; }
+    .series-brief b { color: var(--ink); font-weight: 500; }
+    .series-brief .rt { display: block; margin-top: 4px; font-family: var(--mono); font-size: 11px; color: var(--amber); }
     .sheet-hd { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px 8px; }
     .sheet { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 0 16px 20px; }
-    .frame { position: relative; aspect-ratio: 5 / 4; background: #000; overflow: hidden; border: 1px solid #000; cursor: pointer; }
-    .frame img { width: 100%; height: 100%; object-fit: cover; display: block; filter: grayscale(.25) contrast(1.05); transition: transform .3s, filter .3s; }
+    .frame { position: relative; aspect-ratio: 5 / 4; background: var(--frame-bg); overflow: hidden; border: 1px solid var(--frame-border); cursor: pointer; }
+    .frame img { width: 100%; height: 100%; object-fit: cover; display: block; filter: grayscale(.22) contrast(1.04); transition: transform .3s, filter .3s; }
+    body.theme-light .frame img { filter: grayscale(.12) contrast(1.02); }
     .frame:hover img { transform: scale(1.06); filter: none; }
-    .frame .fn { position: absolute; left: 3px; top: 2px; font-family: var(--mono); font-size: 9.5px; color: var(--amber); text-shadow: 0 1px 2px #000; }
+    .frame .fn { position: absolute; left: 3px; top: 2px; font-family: var(--mono); font-size: 9.5px; color: #ffcf70; background: rgba(0,0,0,.55); padding: 0 3px; border-radius: 2px; line-height: 1.35; }
     .frame .fc { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; }
     .frame.on { outline: 2px solid var(--safe); outline-offset: -2px; }
     .frame.on img { filter: none; }
     .empty { padding: 40px 16px; text-align: center; color: var(--ink-3); font-family: var(--mono); font-size: 12px; }
 
     /* Plate detail */
-    .plate-img { position: relative; background: #000; cursor: zoom-in; }
+    .plate-img { position: relative; background: var(--frame-bg); border-bottom: 1px solid var(--line); cursor: zoom-in; }
     .plate-img img { width: 100%; max-height: 46vh; object-fit: contain; display: block; }
-    .plate-img .zoom-hint { position: absolute; right: 8px; bottom: 8px; display: inline-flex; gap: 5px; align-items: center; font-family: var(--mono); font-size: 10.5px; padding: 3px 7px; background: rgba(0,0,0,.7); color: var(--ink-2); border-radius: 3px; }
+    .plate-img .zoom-hint { position: absolute; right: 8px; bottom: 8px; display: inline-flex; gap: 5px; align-items: center; font-family: var(--mono); font-size: 10.5px; padding: 3px 7px; background: var(--glass); color: var(--ink-2); border: 1px solid var(--line-2); border-radius: 3px; }
     .plate-body { padding: 16px; }
     .plate-series { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: .06em; }
     .plate-series i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
@@ -190,16 +231,16 @@
     .plate-empty svg { width: 36px; height: 36px; margin-bottom: 12px; color: var(--line-2); }
 
     /* ---------- MAP ---------- */
-    .stage { position: relative; min-width: 0; background: #0a0a0a; }
-    #map { position: absolute; inset: 0; z-index: 1; background: #0a0a0a; }
+    .stage { position: relative; min-width: 0; background: var(--stage-bg); }
+    #map { position: absolute; inset: 0; z-index: 1; background: var(--stage-bg); }
     .leaflet-container { font-family: var(--sans); }
     .leaflet-control-zoom a { background: var(--panel) !important; color: var(--ink-2) !important; border-color: var(--line-2) !important; }
-    .leaflet-control-attribution { background: rgba(0,0,0,.6) !important; color: var(--ink-3) !important; font-size: 9.5px !important; }
+    .leaflet-control-attribution { background: var(--glass) !important; color: var(--ink-3) !important; font-size: 9.5px !important; }
     .leaflet-control-attribution a { color: var(--ink-2) !important; }
 
     .hud {
       position: absolute; top: 12px; left: 56px; z-index: 500; display: flex; gap: 0;
-      background: rgba(13,13,12,.86); backdrop-filter: blur(6px); border: 1px solid var(--line-2); border-radius: 4px; overflow: hidden;
+      background: var(--glass); backdrop-filter: blur(6px); border: 1px solid var(--line-2); border-radius: 4px; overflow: hidden;
     }
     .hud-cell { padding: 7px 14px; border-right: 1px solid var(--line); }
     .hud-cell:last-child { border-right: none; }
@@ -208,7 +249,7 @@
 
     .legend {
       position: absolute; top: 12px; right: 12px; z-index: 500;
-      background: rgba(13,13,12,.86); backdrop-filter: blur(6px); border: 1px solid var(--line-2); border-radius: 4px;
+      background: var(--glass); backdrop-filter: blur(6px); border: 1px solid var(--line-2); border-radius: 4px;
       font-size: 11.5px; color: var(--ink-2);
     }
     .legend-hd { display: flex; align-items: center; gap: 6px; padding: 7px 10px; cursor: pointer; user-select: none; }
@@ -223,9 +264,9 @@
     /* Hover card */
     .hover {
       position: fixed; z-index: 1500; width: 236px; pointer-events: none; display: none;
-      background: var(--panel); border: 1px solid var(--line-2); box-shadow: 0 12px 32px rgba(0,0,0,.6);
+      background: var(--panel); border: 1px solid var(--line-2); box-shadow: var(--shadow);
     }
-    .hover img { width: 100%; height: 150px; object-fit: cover; display: block; background: #000; }
+    .hover img { width: 100%; height: 150px; object-fit: cover; display: block; background: var(--frame-bg); }
     .hover-b { padding: 8px 10px 10px; }
     .hover-s { font-family: var(--mono); font-size: 10px; letter-spacing: .05em; }
     .hover-t { font-family: var(--serif); font-size: 17px; line-height: 1.15; margin: 3px 0 4px; }
@@ -234,7 +275,7 @@
     /* Film strip */
     .strip {
       position: absolute; left: 0; right: 0; bottom: 0; z-index: 600;
-      background: #050505; border-top: 1px solid var(--line-2); transition: transform .25s;
+      background: var(--strip-bg); border-top: 1px solid var(--line-2); transition: transform .25s;
     }
     .strip.min { transform: translateY(calc(100% - 30px)); }
     .strip-hd { height: 30px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; font-family: var(--mono); font-size: 11px; color: var(--ink-3); cursor: pointer; user-select: none; }
@@ -244,13 +285,14 @@
     .film {
       position: relative; display: flex; gap: 6px; overflow-x: auto; padding: 14px 12px;
       background-image:
-        repeating-linear-gradient(90deg, #1d1c1a 0 8px, transparent 8px 16px),
-        repeating-linear-gradient(90deg, #1d1c1a 0 8px, transparent 8px 16px);
+        repeating-linear-gradient(90deg, var(--film-hole) 0 8px, transparent 8px 16px),
+        repeating-linear-gradient(90deg, var(--film-hole) 0 8px, transparent 8px 16px);
       background-size: 100% 5px, 100% 5px; background-position: 0 3px, 0 calc(100% - 3px); background-repeat: no-repeat;
       scroll-behavior: smooth;
     }
     .cell { position: relative; flex: 0 0 auto; width: 92px; cursor: pointer; }
-    .cell img { width: 92px; height: 64px; object-fit: cover; display: block; filter: grayscale(.6) brightness(.8); transition: filter .2s; border: 1px solid #000; }
+    .cell img { width: 92px; height: 64px; object-fit: cover; display: block; filter: grayscale(.55) brightness(.85); transition: filter .2s; border: 1px solid var(--frame-border); }
+    body.theme-light .cell img { filter: grayscale(.25) brightness(.96); }
     .cell:hover img, .cell.on img { filter: none; }
     .cell.on img { outline: 2px solid var(--safe); outline-offset: 1px; }
     .cell .cy { position: absolute; top: -12px; left: 0; font-family: var(--mono); font-size: 9.5px; color: var(--amber); }
@@ -261,7 +303,7 @@
     @keyframes pulse { from { transform: scale(.5); opacity: 1; } to { transform: scale(1.8); opacity: 0; } }
 
     /* Lightbox */
-    .lb { position: fixed; inset: 0; z-index: 3000; background: rgba(0,0,0,.96); display: none; flex-direction: column; }
+    .lb { position: fixed; inset: 0; z-index: 3000; background: var(--lb-bg); display: none; flex-direction: column; }
     .lb.open { display: flex; }
     .lb-hd { height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; border-bottom: 1px solid var(--line); gap: 16px; }
     .lb-t { font-family: var(--serif); font-size: 21px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -271,7 +313,7 @@
     .lb-stage.drag { cursor: grabbing; }
     .lb-stage img { max-width: 92vw; max-height: calc(100vh - 110px); object-fit: contain; transform-origin: center; user-select: none; -webkit-user-drag: none; }
     .lb-ft { height: 40px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
-    .lb-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: var(--ink-2); border: 1px solid var(--line-2); border-radius: 50%; background: rgba(0,0,0,.5); }
+    .lb-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: var(--ink-2); border: 1px solid var(--line-2); border-radius: 50%; background: var(--glass); }
     .lb-arrow:hover { color: var(--ink); border-color: var(--safe); }
     .lb-arrow.l { left: 18px; } .lb-arrow.r { right: 18px; }
 
@@ -292,9 +334,9 @@
       <svg class="icon" viewBox="0 0 24 24"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-9.5z"/></svg>
     </a>
     <div class="hd-brand">
-      <span class="hd-safelight"></span>
-      <span class="hd-title">Alec Soth <em>暗房地图</em></span>
-      <span class="hd-tag">Darkroom Atlas · 1995–2024</span>
+      <span class="hd-safelight" id="hd-dot"></span>
+      <span class="hd-title">Alec Soth <em id="hd-mode-em">暗房地图</em></span>
+      <span class="hd-tag" id="hd-mode-tag">Darkroom Atlas · 1995–2024</span>
     </div>
     <div class="hd-spacer"></div>
     <div class="hd-tools">
@@ -312,9 +354,18 @@
         <option value="dark">暗房底图</option>
         <option value="dark_nolabel">无注记暗图</option>
         <option value="light">相纸浅图</option>
+        <option value="voyager">暖色地图</option>
         <option value="sat">卫星影像</option>
         <option value="topo">地形图</option>
+        <option value="osm">街道图</option>
       </select>
+      <button class="tool" id="btn-theme" onclick="toggleTheme()" title="切换浅色看片台 / 暗房印样模式">
+        <svg class="icon" id="theme-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <span class="lbl" id="theme-lbl">浅色</span>
+      </button>
+      <a class="tool" href="atlas.html" title="切换至经典版导览 (atlas.html)">
+        <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg>
+      </a>
     </div>
   </header>
 
@@ -358,6 +409,7 @@
           </div>
           <div class="country-row" id="country-row"></div>
           <div class="bars" id="state-bars"></div>
+          <div id="county-wrap"></div>
           <div id="city-wrap"></div>
           <div class="row2">
             <select class="inp" id="src-sel" onchange="state.source=this.value; apply(true)">
@@ -370,6 +422,7 @@
           </div>
         </section>
 
+        <div class="series-brief" id="series-brief"></div>
         <div class="sheet-hd">
           <span class="sec-t">印样 <b id="sheet-n">268</b></span>
           <span class="mono" style="font-size:10.5px;color:var(--ink-3);">按拍摄顺序</span>
@@ -400,12 +453,12 @@
           <svg class="icon chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
         </div>
         <div class="legend-bd">
-          <div class="lg"><span class="lg-dot" style="border:2px solid #fff;"></span>实心：精确地标</div>
-          <div class="lg"><span class="lg-dot" style="opacity:.75;border:1px solid #fff;"></span>半透明：城镇中心</div>
+          <div class="lg"><span class="lg-dot" style="border:2px solid var(--ink);"></span>实心：精确地标</div>
+          <div class="lg"><span class="lg-dot" style="opacity:.75;border:1px solid var(--ink);"></span>半透明：城镇中心</div>
           <div class="lg"><span class="lg-dot" style="background:transparent;border:2px solid var(--ink-2);"></span>空心：作品集核心区</div>
           <div class="lg"><span class="lg-dot" style="background:transparent;border:2px dashed var(--safe);"></span>红色虚环：画册补全图版</div>
-          <div class="lg"><svg width="22" height="6"><line x1="0" y1="3" x2="22" y2="3" stroke="#b4ac9d" stroke-width="2" stroke-dasharray="4 3"/></svg>拍摄路线（按图版顺序）</div>
-          <div class="lg"><svg width="22" height="6"><line x1="0" y1="3" x2="22" y2="3" stroke="#e6a83e" stroke-width="3"/></svg>巡游已走路径</div>
+          <div class="lg"><svg width="22" height="6"><line x1="0" y1="3" x2="22" y2="3" stroke="var(--ink-2)" stroke-width="2" stroke-dasharray="4 3"/></svg>拍摄路线（按图版顺序）</div>
+          <div class="lg"><svg width="22" height="6"><line x1="0" y1="3" x2="22" y2="3" stroke="var(--amber)" stroke-width="3"/></svg>巡游已走路径</div>
         </div>
       </div>
 
@@ -465,19 +518,22 @@
     ];
     const state = {
       series: new Set(), y0: 1995, y1: 2024,
-      country: 'all', region: 'all', city: 'all', source: 'all', q: ''
+      country: 'all', region: 'all', county: 'all', city: 'all', source: 'all', q: ''
     };
     let filtered = [], sequence = [], activeId = null;
-    let showRoutes = true, showAllStates = false;
+    let showRoutes = true, showAllStates = false, isLight = false, curTile = 'dark';
     let map, tileLayer, routeLayer, markerLayer, playLayer, pulseMarker;
     const markers = {};
 
+    const DEFAULT_CARTO_KEY = 'cb1_4jug_1_dbb7506275049777c6a92fee';
     const TILES = {
-      dark: ['https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', '&copy; OpenStreetMap &copy; CARTO'],
-      dark_nolabel: ['https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', '&copy; OpenStreetMap &copy; CARTO'],
-      light: ['https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', '&copy; OpenStreetMap &copy; CARTO'],
+      dark: [`https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=${DEFAULT_CARTO_KEY}`, '&copy; OpenStreetMap &copy; CARTO'],
+      dark_nolabel: [`https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png?key=${DEFAULT_CARTO_KEY}`, '&copy; OpenStreetMap &copy; CARTO'],
+      light: [`https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=${DEFAULT_CARTO_KEY}`, '&copy; OpenStreetMap &copy; CARTO'],
+      voyager: [`https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=${DEFAULT_CARTO_KEY}`, '&copy; OpenStreetMap &copy; CARTO'],
       sat: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', '&copy; Esri, Maxar'],
-      topo: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', '&copy; Esri, USGS']
+      topo: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', '&copy; Esri, USGS'],
+      osm: ['https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', '&copy; OpenStreetMap contributors']
     };
 
     const $ = id => document.getElementById(id);
@@ -485,10 +541,16 @@
     const pad = n => String(n).padStart(2, '0');
 
     // =====================================================================
-    // INIT
+    // INIT & THEME
     // =====================================================================
     window.addEventListener('DOMContentLoaded', async () => {
+      const qs = new URLSearchParams(location.search);
+      try {
+        const saved = localStorage.getItem('soth_opus_theme');
+        if (qs.get('theme') === 'light' || (qs.get('theme') !== 'dark' && saved === 'light')) isLight = true;
+      } catch (_) {}
       initMap();
+      applyTheme(true);
       initLightbox();
       try {
         DATA = await (await fetch('./atlas-data.json')).json();
@@ -500,7 +562,7 @@
       DATA.projects.forEach(p => { PROJ[p.slug] = p; state.series.add(p.slug); });
       PHOTOS.forEach(p => { BY_ID[p.id] = p; });
 
-      const qp = new URLSearchParams(location.search).get('project');
+      const qp = qs.get('project');
       if (qp && PROJ[qp]) { state.series = new Set([qp]); }
 
       renderEras();
@@ -513,16 +575,37 @@
     function initMap() {
       map = L.map('map', { zoomControl: true, worldCopyJump: true, preferCanvas: false }).setView([39, -92], 4);
       map.zoomControl.setPosition('bottomright');
-      setTile('dark');
+      setTile(isLight ? 'light' : 'dark');
       routeLayer = L.layerGroup().addTo(map);
       markerLayer = L.layerGroup().addTo(map);
       playLayer = L.layerGroup().addTo(map);
     }
     function setTile(k) {
-      const t = TILES[k] || TILES.dark;
+      curTile = TILES[k] ? k : 'dark';
+      const t = TILES[curTile];
       if (tileLayer) map.removeLayer(tileLayer);
       tileLayer = L.tileLayer(t[0], { attribution: t[1], maxZoom: 18, subdomains: 'abcd' }).addTo(map);
-      $('tile-sel').value = k;
+      $('tile-sel').value = curTile;
+    }
+    function toggleTheme() {
+      isLight = !isLight;
+      try { localStorage.setItem('soth_opus_theme', isLight ? 'light' : 'dark'); } catch (_) {}
+      applyTheme(false);
+    }
+    function applyTheme(isInit) {
+      document.body.classList.toggle('theme-light', isLight);
+      $('btn-theme').classList.toggle('on', isLight);
+      $('theme-lbl').textContent = isLight ? '暗房' : '浅色';
+      $('theme-ico').innerHTML = isLight
+        ? '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>'
+        : '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>';
+      $('hd-mode-em').textContent = isLight ? '相纸印样' : '暗房地图';
+      $('hd-mode-tag').textContent = isLight ? 'Silver Gelatin Light Table · 1995–2024' : 'Darkroom Atlas · 1995–2024';
+      if (!isInit) {
+        if (isLight && (curTile === 'dark' || curTile === 'dark_nolabel')) setTile('light');
+        else if (!isLight && (curTile === 'light' || curTile === 'voyager')) setTile('dark');
+        if (DATA) { renderHist(); renderPlate(); renderMap(false); }
+      }
     }
 
     // =====================================================================
@@ -533,6 +616,7 @@
       if (!skip.year && (p.year < state.y0 || p.year > state.y1)) return false;
       if (!skip.country && state.country !== 'all' && p.country !== state.country) return false;
       if (!skip.region && state.region !== 'all' && p.state !== state.region) return false;
+      if (!skip.county && state.county !== 'all' && p.county !== state.county) return false;
       if (!skip.city && state.city !== 'all' && p.city !== state.city) return false;
       if (state.source === 'official_web' && p.sourceType !== 'official_web') return false;
       if (state.source === 'book_plate' && p.sourceType !== 'book_plate') return false;
@@ -579,7 +663,7 @@
       else if (state.series.size === DATA.projects.length) { state.series = new Set([slug]); }   // 全选状态下单击 = 聚焦
       else if (state.series.has(slug)) { state.series.delete(slug); if (!state.series.size) setAllSeries(true, false); }
       else state.series.add(slug);
-      state.region = 'all'; state.city = 'all';
+      state.region = 'all'; state.county = 'all'; state.city = 'all';
       apply(true);
     }
     function setAllSeries(on, run = true) {
@@ -606,13 +690,13 @@
         const hAll = ((counts[y] || 0) / max) * (h - padB - 4);
         const hSel = ((countsSel[y] || 0) / max) * (h - padB - 4);
         const inR = y >= state.y0 && y <= state.y1;
-        html += `<rect x="${x + 1}" y="${h - padB - hAll}" width="${bw - 2}" height="${hAll}" fill="#2a2926"/>`;
-        if (hSel > 0) html += `<rect x="${x + 1}" y="${h - padB - hSel}" width="${bw - 2}" height="${hSel}" fill="${inR ? '#e6a83e' : '#55503f'}"/>`;
-        if (y % 5 === 0 || y === 2024) html += `<text x="${x + bw / 2}" y="${h - 2}" fill="#7c7569" font-size="9" font-family="JetBrains Mono" text-anchor="middle">${y === 2024 ? '24' : "'" + String(y).slice(2)}</text>`;
+        html += `<rect x="${x + 1}" y="${h - padB - hAll}" width="${bw - 2}" height="${hAll}" fill="var(--hist-bg)"/>`;
+        if (hSel > 0) html += `<rect x="${x + 1}" y="${h - padB - hSel}" width="${bw - 2}" height="${hSel}" fill="${inR ? 'var(--amber)' : 'var(--hist-dim)'}"/>`;
+        if (y % 5 === 0 || y === 2024) html += `<text x="${x + bw / 2}" y="${h - 2}" fill="var(--ink-3)" font-size="9" font-family="JetBrains Mono" text-anchor="middle">${y === 2024 ? '24' : "'" + String(y).slice(2)}</text>`;
       });
       const bx = (state.y0 - 1995) * bw, bx2 = (state.y1 - 1995 + 1) * bw;
       if (!(state.y0 === 1995 && state.y1 === 2024)) {
-        html += `<rect x="${bx}" y="0" width="${bx2 - bx}" height="${h - padB}" fill="rgba(230,168,62,.07)" stroke="#e6a83e" stroke-width="1" stroke-dasharray="3 2"/>`;
+        html += `<rect x="${bx}" y="0" width="${bx2 - bx}" height="${h - padB}" fill="var(--amber-soft)" stroke="var(--amber)" stroke-width="1" stroke-dasharray="3 2"/>`;
       }
       svg.innerHTML = html;
       $('yr-read').textContent = state.y0 === state.y1 ? `${state.y0}` : `${state.y0} – ${state.y1}`;
@@ -646,7 +730,7 @@
 
     // ---------- Place ----------
     function renderPlace() {
-      const cPool = PHOTOS.filter(p => matchBase(p, { country: true, region: true, city: true }));
+      const cPool = PHOTOS.filter(p => matchBase(p, { country: true, region: true, county: true, city: true }));
       const cc = countBy(cPool, 'country');
       $('country-row').innerHTML =
         `<button class="chip ${state.country === 'all' ? 'on' : ''}" onclick="setCountry('all')">全部 ${cPool.length}</button>` +
@@ -666,17 +750,28 @@
         (sc.length > 7 ? `<button class="more-btn" onclick="showAllStates=!showAllStates; renderPlace()">${showAllStates ? '收起' : '展开全部 ' + sc.length + ' 个'}</button>` : '');
 
       if (state.region !== 'all') {
-        const cityPool = sPool.filter(p => p.state === state.region);
+        const regPool = sPool.filter(p => p.state === state.region);
+        const counties = Object.entries(countBy(regPool, 'county')).filter(([k]) => k).sort((a, b) => b[1] - a[1]);
+        $('county-wrap').innerHTML = counties.length > 1
+          ? `<div class="sub-lbl">县 / 郡 · ${esc(state.region)}</div><div class="country-row" style="margin-bottom:4px">` +
+            `<button class="chip ${state.county === 'all' ? 'on' : ''}" onclick="setCounty('all')">全部</button>` +
+            counties.map(([c, n]) => `<button class="chip ${state.county === c ? 'on' : ''}" onclick="setCounty('${esc(c).replace(/'/g, "\\'")}')">${esc(c)} ${n}</button>`).join('') + '</div>'
+          : '';
+        const cityPool = regPool.filter(p => state.county === 'all' || p.county === state.county);
         const ct = Object.entries(countBy(cityPool, 'city')).sort((a, b) => b[1] - a[1]);
-        $('city-wrap').innerHTML = `<div class="sub-lbl">城镇 · ${esc(state.region)}</div><div class="country-row" style="margin-bottom:0">` +
+        $('city-wrap').innerHTML = `<div class="sub-lbl">城镇 · ${ct.length}</div><div class="country-row" style="margin-bottom:0">` +
           `<button class="chip ${state.city === 'all' ? 'on' : ''}" onclick="setCity('all')">全部</button>` +
           ct.map(([c, n]) => `<button class="chip ${state.city === c ? 'on' : ''}" onclick="setCity('${esc(c).replace(/'/g, "\\'")}')">${esc(c)} ${n}</button>`).join('') + '</div>';
-      } else $('city-wrap').innerHTML = '';
+      } else {
+        $('county-wrap').innerHTML = '';
+        $('city-wrap').innerHTML = '';
+      }
     }
-    function setCountry(c) { state.country = c; state.region = 'all'; state.city = 'all'; apply(true); }
-    function setRegion(s) { state.region = state.region === s ? 'all' : s; state.city = 'all'; apply(true); }
+    function setCountry(c) { state.country = c; state.region = 'all'; state.county = 'all'; state.city = 'all'; apply(true); }
+    function setRegion(s) { state.region = state.region === s ? 'all' : s; state.county = 'all'; state.city = 'all'; apply(true); }
+    function setCounty(c) { state.county = c; state.city = 'all'; apply(true); }
     function setCity(c) { state.city = c; apply(true); }
-    function resetPlace() { state.country = 'all'; state.region = 'all'; state.city = 'all'; state.source = 'all'; state.q = ''; $('src-sel').value = 'all'; $('q').value = ''; apply(true); }
+    function resetPlace() { state.country = 'all'; state.region = 'all'; state.county = 'all'; state.city = 'all'; state.source = 'all'; state.q = ''; $('src-sel').value = 'all'; $('q').value = ''; apply(true); }
     let qTimer;
     function onSearch(v) { clearTimeout(qTimer); qTimer = setTimeout(() => { state.q = v.trim().toLowerCase(); apply(true); }, 200); }
     function zhCountry(c) {
@@ -694,6 +789,7 @@
       if (state.y0 !== 1995 || state.y1 !== 2024) chips.push([state.y0 === state.y1 ? `${state.y0}` : `${state.y0}–${state.y1}`, 'setYears(1995,2024)']);
       if (state.country !== 'all') chips.push([zhCountry(state.country), "setCountry('all')"]);
       if (state.region !== 'all') chips.push([state.region, "setRegion('" + state.region.replace(/'/g, "\\'") + "')"]);
+      if (state.county !== 'all') chips.push([state.county, "setCounty('all')"]);
       if (state.city !== 'all') chips.push([state.city, "setCity('all')"]);
       if (state.source !== 'all') chips.push([$('src-sel').selectedOptions[0].text, "state.source='all';$('src-sel').value='all';apply(true)"]);
       if (state.q) chips.push([`“${state.q}”`, "state.q='';$('q').value='';apply(true)"]);
@@ -704,7 +800,7 @@
     }
     function resetAll() {
       setAllSeries(true, false);
-      Object.assign(state, { y0: 1995, y1: 2024, country: 'all', region: 'all', city: 'all', source: 'all', q: '' });
+      Object.assign(state, { y0: 1995, y1: 2024, country: 'all', region: 'all', county: 'all', city: 'all', source: 'all', q: '' });
       $('src-sel').value = 'all'; $('q').value = '';
       apply(true);
     }
@@ -712,6 +808,16 @@
     // ---------- Contact sheet ----------
     function renderSheet() {
       $('sheet-n').textContent = sequence.length;
+      const sb = $('series-brief');
+      if (state.series.size === 1) {
+        const p = PROJ[[...state.series][0]];
+        sb.className = 'series-brief on';
+        sb.style.borderLeftColor = p.color;
+        sb.innerHTML = `<b>《${esc(p.titleZh)}》 ${esc(p.title)} (${esc(p.yearRange)})</b> · ${esc(p.description)}${p.routeSummary ? `<span class="rt">路线：${esc(p.routeSummary)}</span>` : ''}`;
+      } else {
+        sb.className = 'series-brief';
+        sb.innerHTML = '';
+      }
       if (!sequence.length) { $('sheet').innerHTML = '<div class="empty" style="grid-column:1/-1">当前筛选条件下没有作品</div>'; return; }
       $('sheet').innerHTML = sequence.map((p, i) => `
         <div class="frame ${p.id === activeId ? 'on' : ''}" data-id="${p.id}" title="${esc(p.title)}">
@@ -767,12 +873,13 @@
     // MAP
     // =====================================================================
     function markerStyle(p, on) {
-      const base = { color: '#ffffff', weight: 1, fillColor: p.projectColor, fillOpacity: .95, radius: 6, dashArray: null };
+      const ring = isLight ? '#181715' : '#ffffff';
+      const base = { color: ring, weight: 1.2, fillColor: p.projectColor, fillOpacity: .95, radius: 6, dashArray: null };
       if (p.precision === 'landmark') Object.assign(base, { weight: 2, radius: 6.5 });
-      if (p.precision === 'city') Object.assign(base, { fillOpacity: .7, radius: 5.5 });
-      if (p.precision === 'series_locus') Object.assign(base, { fillOpacity: .12, color: p.projectColor, weight: 2, radius: 5 });
-      if (p.sourceType === 'book_plate') Object.assign(base, { color: '#e0452b', weight: 2, dashArray: '2 2' });
-      if (on) Object.assign(base, { radius: 10, weight: 3, color: '#e6a83e', fillOpacity: 1, dashArray: null });
+      if (p.precision === 'city') Object.assign(base, { fillOpacity: .72, radius: 5.5 });
+      if (p.precision === 'series_locus') Object.assign(base, { fillOpacity: isLight ? .2 : .12, color: p.projectColor, weight: 2, radius: 5 });
+      if (p.sourceType === 'book_plate') Object.assign(base, { color: isLight ? '#c8371d' : '#e0452b', weight: 2, dashArray: '2 2' });
+      if (on) Object.assign(base, { radius: 10, weight: 3, color: isLight ? '#c8371d' : '#e6a83e', fillOpacity: 1, dashArray: null });
       return base;
     }
     function buildMarkers() {
@@ -801,8 +908,8 @@
         groupRoutes().forEach(pts => {
           const ll = pts.map(p => [p.lat, p.lng]);
           const c = pts[0].projectColor;
-          L.polyline(ll, { color: c, weight: 6, opacity: .16, interactive: false }).addTo(routeLayer);
-          L.polyline(ll, { color: c, weight: 1.6, opacity: .85, dashArray: '5 5', interactive: false }).addTo(routeLayer);
+          L.polyline(ll, { color: c, weight: 6, opacity: isLight ? .22 : .16, interactive: false }).addTo(routeLayer);
+          L.polyline(ll, { color: c, weight: 1.8, opacity: .88, dashArray: '5 5', interactive: false }).addTo(routeLayer);
         });
       }
       filtered.forEach(p => { markers[p.id].setStyle(markerStyle(p, p.id === activeId)); markers[p.id].addTo(markerLayer); });
@@ -821,7 +928,7 @@
     function showHover(p, ev) {
       $('hv-img').src = p.src;
       $('hv-s').textContent = `${p.projectTitle.toUpperCase()} · ${p.dateDisplay}`;
-      $('hv-s').style.color = p.projectColor === '#52684f' ? '#8fb38a' : lighten(p.projectColor);
+      $('hv-s').style.color = toneColor(p.projectColor);
       $('hv-t').textContent = p.title;
       $('hv-l').textContent = `${p.city}, ${p.stateCode || p.state} · ${p.precisionLabel}`;
       $('hover').style.display = 'block';
@@ -836,8 +943,12 @@
       el.style.left = x + 'px'; el.style.top = y + 'px';
     }
     function hideHover() { $('hover').style.display = 'none'; }
-    function lighten(hex) {
+    function toneColor(hex) {
       const n = parseInt(hex.slice(1), 16);
+      if (isLight) {
+        const f = c => Math.max(0, Math.round(c * .78));
+        return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`;
+      }
       const f = c => Math.min(255, Math.round(c + (255 - c) * .45));
       return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`;
     }
@@ -892,7 +1003,7 @@
           <span class="zoom-hint"><svg class="icon" style="width:12px;height:12px" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>全屏 · 可缩放</span>
         </div>
         <div class="plate-body">
-          <div class="plate-series" style="color:${lighten(p.projectColor)}"><i style="background:${p.projectColor}"></i>${esc(p.projectTitle)} · ${esc(p.projectTitleZh)}</div>
+          <div class="plate-series" style="color:${toneColor(p.projectColor)}"><i style="background:${p.projectColor}"></i>${esc(p.projectTitle)} · ${esc(p.projectTitleZh)}</div>
           <h2 class="plate-title">${esc(p.title)}</h2>
           <dl class="meta">
             <dt>拍摄</dt><dd>${esc(p.dateDisplay)} <small>· ${esc(proj.yearRange)}</small></dd>
@@ -910,7 +1021,7 @@
           </div>
           ${near.length ? `<div class="nearby"><span class="sec-t">同地点 · ${esc(p.city)} <b>${near.length}</b></span>
             <div class="nearby-grid">${near.map(x => `<div class="frame near" data-id="${x.id}" title="${esc(x.title)} · ${esc(x.projectTitleZh)}"><img src="${esc(x.src)}" loading="lazy" alt=""><span class="fc" style="background:${x.projectColor}"></span></div>`).join('')}</div></div>` : ''}
-          <button class="tool" style="width:100%;margin-top:16px" onclick="state.series=new Set(['${p.projectSlug}']);state.region='all';state.city='all';apply(true);showTab('index')">
+          <button class="tool" style="width:100%;margin-top:16px" onclick="state.series=new Set(['${p.projectSlug}']);state.region='all';state.county='all';state.city='all';apply(true);showTab('index')">
             <svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16l-6 8v6l-4 2v-8z"/></svg><span>只看《${esc(p.projectTitleZh)}》路线</span>
           </button>
         </div>`;
