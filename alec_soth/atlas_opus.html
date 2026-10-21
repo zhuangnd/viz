@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alec Soth · 暗房地图 Darkroom Atlas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <style>
+    /* =====================================================================
+       DARKROOM ATLAS — 暗房 / 印样 (contact sheet) 视觉语言
+       与 atlas.html（暖色纸本编辑风）区分：深色底、安全灯红、等宽标注、胶片条
+       ===================================================================== */
+    :root {
+      --bg: #0d0d0c;
+      --panel: #141412;
+      --panel-2: #1b1a18;
+      --panel-3: #23221f;
+      --line: #2a2926;
+      --line-2: #3a3834;
+      --ink: #ece6da;
+      --ink-2: #b4ac9d;
+      --ink-3: #7c7569;
+      --safe: #e0452b;          /* 安全灯红 */
+      --safe-soft: rgba(224, 69, 43, 0.14);
+      --amber: #e6a83e;         /* 显影琥珀 */
+      --serif: 'Instrument Serif', 'Songti SC', serif;
+      --mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+      --sans: 'Noto Sans SC', -apple-system, 'PingFang SC', sans-serif;
+      --header-h: 50px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 13px; }
+    button { font-family: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+    select, input { font-family: inherit; color: var(--ink); }
+    .icon { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+    .mono { font-family: var(--mono); }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+
+    /* ---------- HEADER ---------- */
+    .hd {
+      position: fixed; inset: 0 0 auto 0; height: var(--header-h); z-index: 1000;
+      display: flex; align-items: center; gap: 14px; padding: 0 14px;
+      background: var(--bg); border-bottom: 1px solid var(--line);
+    }
+    .hd-home {
+      width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;
+      border: 1px solid var(--line-2); border-radius: 4px; color: var(--ink-2); transition: .15s;
+    }
+    .hd-home:hover { color: var(--ink); border-color: var(--safe); }
+    .hd-brand { display: flex; align-items: baseline; gap: 10px; white-space: nowrap; }
+    .hd-title { font-family: var(--serif); font-size: 24px; letter-spacing: .01em; line-height: 1; }
+    .hd-title em { color: var(--safe); font-style: italic; }
+    .hd-tag { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); letter-spacing: .12em; text-transform: uppercase; }
+    .hd-safelight { width: 8px; height: 8px; border-radius: 50%; background: var(--safe); box-shadow: 0 0 10px var(--safe); align-self: center; }
+    .hd-spacer { flex: 1; }
+    .hd-tools { display: flex; align-items: center; gap: 6px; }
+    .tool {
+      height: 32px; min-width: 32px; padding: 0 9px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      border: 1px solid var(--line-2); border-radius: 4px; color: var(--ink-2); font-size: 12px; transition: .15s;
+    }
+    .tool:hover { color: var(--ink); border-color: var(--ink-3); }
+    .tool.on { color: var(--safe); border-color: var(--safe); background: var(--safe-soft); }
+    .tool.play { color: var(--bg); background: var(--amber); border-color: var(--amber); font-weight: 700; }
+    .tool.play.on { background: var(--safe); border-color: var(--safe); color: #fff; }
+    .tool-select {
+      height: 32px; padding: 0 8px; background: var(--panel); border: 1px solid var(--line-2); border-radius: 4px;
+      font-size: 12px; color: var(--ink-2); outline: none; cursor: pointer;
+    }
+
+    /* ---------- SHELL 3:7 ---------- */
+    .shell { position: absolute; top: var(--header-h); inset-inline: 0; bottom: 0; display: grid; grid-template-columns: 30% 70%; }
+
+    /* ---------- LEFT PANEL ---------- */
+    .side { display: flex; flex-direction: column; min-height: 0; background: var(--panel); border-right: 1px solid var(--line); }
+    .tabs { display: flex; border-bottom: 1px solid var(--line); flex-shrink: 0; }
+    .tab {
+      flex: 1; height: 40px; display: flex; align-items: center; justify-content: center; gap: 8px;
+      font-family: var(--mono); font-size: 12px; letter-spacing: .1em; color: var(--ink-3);
+      border-bottom: 2px solid transparent; transition: .15s;
+    }
+    .tab:hover { color: var(--ink-2); }
+    .tab.on { color: var(--ink); border-bottom-color: var(--safe); }
+    .tab .cnt { color: var(--safe); }
+    .pane { flex: 1; overflow-y: auto; min-height: 0; display: none; }
+    .pane.on { display: block; }
+
+    .sec { padding: 14px 16px; border-bottom: 1px solid var(--line); }
+    .sec-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .sec-t { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; color: var(--ink-3); text-transform: uppercase; }
+    .sec-t b { color: var(--ink); font-weight: 500; margin-left: 4px; letter-spacing: 0; text-transform: none; font-family: var(--sans); font-size: 13px; }
+    .link-btn { font-family: var(--mono); font-size: 11px; color: var(--ink-3); padding: 2px 4px; }
+    .link-btn:hover { color: var(--safe); }
+
+    /* Series index (multi-select) */
+    .series-list { display: flex; flex-direction: column; }
+    .srow {
+      display: grid; grid-template-columns: 12px 1fr auto; align-items: center; gap: 10px;
+      padding: 6px 6px; border-radius: 3px; text-align: left; transition: background .12s; opacity: .42;
+    }
+    .srow:hover { background: var(--panel-2); }
+    .srow.on { opacity: 1; }
+    .srow .sw { width: 12px; height: 12px; border-radius: 2px; border: 1px solid rgba(255,255,255,.15); }
+    .srow .nm { min-width: 0; }
+    .srow .zh { font-size: 13.5px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .srow .en { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .srow .n { font-family: var(--mono); font-size: 11px; color: var(--ink-2); text-align: right; }
+    .srow .n small { display: block; color: var(--ink-3); font-size: 10px; }
+
+    /* Time brush */
+    .hist-wrap { position: relative; user-select: none; }
+    #hist { width: 100%; height: 64px; display: block; cursor: crosshair; }
+    .hist-read { display: flex; justify-content: space-between; align-items: baseline; margin-top: 6px; font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+    .hist-read .rng { font-size: 15px; color: var(--amber); }
+    .era-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+    .chip {
+      font-size: 11.5px; padding: 3px 8px; border: 1px solid var(--line-2); border-radius: 3px; color: var(--ink-2); transition: .12s;
+    }
+    .chip:hover { border-color: var(--ink-3); color: var(--ink); }
+    .chip.on { border-color: var(--amber); color: var(--amber); }
+
+    /* Place */
+    .country-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
+    .bars { display: flex; flex-direction: column; gap: 3px; }
+    .bar {
+      position: relative; display: flex; justify-content: space-between; align-items: center;
+      height: 24px; padding: 0 8px; border-radius: 2px; font-size: 12px; color: var(--ink-2); overflow: hidden; text-align: left;
+    }
+    .bar .fill { position: absolute; inset: 0 auto 0 0; background: var(--panel-3); z-index: 0; transition: width .25s; }
+    .bar span { position: relative; z-index: 1; }
+    .bar .bn { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+    .bar:hover { color: var(--ink); }
+    .bar.on { color: var(--ink); }
+    .bar.on .fill { background: var(--safe-soft); box-shadow: inset 2px 0 0 var(--safe); }
+    .more-btn { margin-top: 4px; font-family: var(--mono); font-size: 11px; color: var(--ink-3); padding: 4px 0; }
+    .more-btn:hover { color: var(--ink); }
+    .sub-lbl { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); letter-spacing: .1em; margin: 12px 0 6px; }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 12px; }
+    .inp {
+      width: 100%; height: 32px; padding: 0 10px; background: var(--panel-2); border: 1px solid var(--line-2); border-radius: 3px;
+      font-size: 12.5px; outline: none;
+    }
+    .inp:focus { border-color: var(--safe); }
+    .inp::placeholder { color: var(--ink-3); }
+
+    /* Active filter chips */
+    .active-bar { display: flex; flex-wrap: wrap; gap: 5px; padding: 10px 16px; border-bottom: 1px solid var(--line); background: var(--panel-2); min-height: 44px; align-items: center; }
+    .af { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; padding: 3px 4px 3px 8px; border-radius: 3px; background: var(--panel-3); color: var(--ink); }
+    .af button { width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; color: var(--ink-3); }
+    .af button:hover { color: var(--safe); }
+    .af-none { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+
+    /* Contact sheet grid */
+    .sheet-hd { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px 8px; }
+    .sheet { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 0 16px 20px; }
+    .frame { position: relative; aspect-ratio: 5 / 4; background: #000; overflow: hidden; border: 1px solid #000; cursor: pointer; }
+    .frame img { width: 100%; height: 100%; object-fit: cover; display: block; filter: grayscale(.25) contrast(1.05); transition: transform .3s, filter .3s; }
+    .frame:hover img { transform: scale(1.06); filter: none; }
+    .frame .fn { position: absolute; left: 3px; top: 2px; font-family: var(--mono); font-size: 9.5px; color: var(--amber); text-shadow: 0 1px 2px #000; }
+    .frame .fc { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; }
+    .frame.on { outline: 2px solid var(--safe); outline-offset: -2px; }
+    .frame.on img { filter: none; }
+    .empty { padding: 40px 16px; text-align: center; color: var(--ink-3); font-family: var(--mono); font-size: 12px; }
+
+    /* Plate detail */
+    .plate-img { position: relative; background: #000; cursor: zoom-in; }
+    .plate-img img { width: 100%; max-height: 46vh; object-fit: contain; display: block; }
+    .plate-img .zoom-hint { position: absolute; right: 8px; bottom: 8px; display: inline-flex; gap: 5px; align-items: center; font-family: var(--mono); font-size: 10.5px; padding: 3px 7px; background: rgba(0,0,0,.7); color: var(--ink-2); border-radius: 3px; }
+    .plate-body { padding: 16px; }
+    .plate-series { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: .06em; }
+    .plate-series i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+    .plate-title { font-family: var(--serif); font-size: 28px; line-height: 1.12; margin: 8px 0 14px; }
+    .meta { display: grid; grid-template-columns: 64px 1fr; gap: 7px 12px; font-size: 12.5px; padding: 12px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .meta dt { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); letter-spacing: .08em; padding-top: 2px; }
+    .meta dd { color: var(--ink); line-height: 1.45; }
+    .meta dd small { color: var(--ink-3); font-family: var(--mono); font-size: 11px; }
+    .badge { display: inline-block; font-family: var(--mono); font-size: 10.5px; padding: 1px 6px; border-radius: 2px; border: 1px solid var(--line-2); color: var(--ink-2); margin-right: 4px; }
+    .badge.landmark { border-color: var(--amber); color: var(--amber); }
+    .badge.book { border-color: var(--safe); color: var(--safe); }
+    .plate-notes { font-size: 13px; line-height: 1.7; color: var(--ink-2); margin: 14px 0; }
+    .plate-nav { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+    .plate-nav .tool { width: 100%; }
+    .nearby { margin-top: 18px; }
+    .nearby-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 8px; }
+    .plate-empty { padding: 60px 24px; text-align: center; color: var(--ink-3); line-height: 1.8; }
+    .plate-empty svg { width: 36px; height: 36px; margin-bottom: 12px; color: var(--line-2); }
+
+    /* ---------- MAP ---------- */
+    .stage { position: relative; min-width: 0; background: #0a0a0a; }
+    #map { position: absolute; inset: 0; z-index: 1; background: #0a0a0a; }
+    .leaflet-container { font-family: var(--sans); }
+    .leaflet-control-zoom a { background: var(--panel) !important; color: var(--ink-2) !important; border-color: var(--line-2) !important; }
+    .leaflet-control-attribution { background: rgba(0,0,0,.6) !important; color: var(--ink-3) !important; font-size: 9.5px !important; }
+    .leaflet-control-attribution a { color: var(--ink-2) !important; }
+
+    .hud {
+      position: absolute; top: 12px; left: 56px; z-index: 500; display: flex; gap: 0;
+      background: rgba(13,13,12,.86); backdrop-filter: blur(6px); border: 1px solid var(--line-2); border-radius: 4px; overflow: hidden;
+    }
+    .hud-cell { padding: 7px 14px; border-right: 1px solid var(--line); }
+    .hud-cell:last-child { border-right: none; }
+    .hud-v { font-family: var(--mono); font-size: 17px; font-weight: 500; color: var(--ink); line-height: 1.1; }
+    .hud-l { font-size: 10.5px; color: var(--ink-3); margin-top: 2px; }
+
+    .legend {
+      position: absolute; top: 12px; right: 12px; z-index: 500;
+      background: rgba(13,13,12,.86); backdrop-filter: blur(6px); border: 1px solid var(--line-2); border-radius: 4px;
+      font-size: 11.5px; color: var(--ink-2);
+    }
+    .legend-hd { display: flex; align-items: center; gap: 6px; padding: 7px 10px; cursor: pointer; user-select: none; }
+    .legend-hd .icon { width: 13px; height: 13px; }
+    .legend-hd .chev { transition: transform .2s; }
+    .legend.open .legend-hd .chev { transform: rotate(180deg); }
+    .legend-bd { display: none; padding: 4px 12px 10px; flex-direction: column; gap: 6px; border-top: 1px solid var(--line); }
+    .legend.open .legend-bd { display: flex; }
+    .lg { display: flex; align-items: center; gap: 8px; }
+    .lg-dot { width: 11px; height: 11px; border-radius: 50%; background: var(--ink-2); }
+
+    /* Hover card */
+    .hover {
+      position: fixed; z-index: 1500; width: 236px; pointer-events: none; display: none;
+      background: var(--panel); border: 1px solid var(--line-2); box-shadow: 0 12px 32px rgba(0,0,0,.6);
+    }
+    .hover img { width: 100%; height: 150px; object-fit: cover; display: block; background: #000; }
+    .hover-b { padding: 8px 10px 10px; }
+    .hover-s { font-family: var(--mono); font-size: 10px; letter-spacing: .05em; }
+    .hover-t { font-family: var(--serif); font-size: 17px; line-height: 1.15; margin: 3px 0 4px; }
+    .hover-l { font-size: 11.5px; color: var(--ink-3); }
+
+    /* Film strip */
+    .strip {
+      position: absolute; left: 0; right: 0; bottom: 0; z-index: 600;
+      background: #050505; border-top: 1px solid var(--line-2); transition: transform .25s;
+    }
+    .strip.min { transform: translateY(calc(100% - 30px)); }
+    .strip-hd { height: 30px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; font-family: var(--mono); font-size: 11px; color: var(--ink-3); cursor: pointer; user-select: none; }
+    .strip-hd b { color: var(--amber); font-weight: 500; }
+    .strip-hd .chev { transition: transform .2s; width: 13px; height: 13px; }
+    .strip.min .strip-hd .chev { transform: rotate(180deg); }
+    .film {
+      position: relative; display: flex; gap: 6px; overflow-x: auto; padding: 14px 12px;
+      background-image:
+        repeating-linear-gradient(90deg, #1d1c1a 0 8px, transparent 8px 16px),
+        repeating-linear-gradient(90deg, #1d1c1a 0 8px, transparent 8px 16px);
+      background-size: 100% 5px, 100% 5px; background-position: 0 3px, 0 calc(100% - 3px); background-repeat: no-repeat;
+      scroll-behavior: smooth;
+    }
+    .cell { position: relative; flex: 0 0 auto; width: 92px; cursor: pointer; }
+    .cell img { width: 92px; height: 64px; object-fit: cover; display: block; filter: grayscale(.6) brightness(.8); transition: filter .2s; border: 1px solid #000; }
+    .cell:hover img, .cell.on img { filter: none; }
+    .cell.on img { outline: 2px solid var(--safe); outline-offset: 1px; }
+    .cell .cy { position: absolute; top: -12px; left: 0; font-family: var(--mono); font-size: 9.5px; color: var(--amber); }
+    .cell .cb { height: 2px; margin-top: 3px; }
+
+    /* Markers */
+    .pulse { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--safe); animation: pulse 1.4s ease-out infinite; }
+    @keyframes pulse { from { transform: scale(.5); opacity: 1; } to { transform: scale(1.8); opacity: 0; } }
+
+    /* Lightbox */
+    .lb { position: fixed; inset: 0; z-index: 3000; background: rgba(0,0,0,.96); display: none; flex-direction: column; }
+    .lb.open { display: flex; }
+    .lb-hd { height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; border-bottom: 1px solid var(--line); gap: 16px; }
+    .lb-t { font-family: var(--serif); font-size: 21px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .lb-s { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+    .lb-tools { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+    .lb-stage { flex: 1; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: grab; position: relative; }
+    .lb-stage.drag { cursor: grabbing; }
+    .lb-stage img { max-width: 92vw; max-height: calc(100vh - 110px); object-fit: contain; transform-origin: center; user-select: none; -webkit-user-drag: none; }
+    .lb-ft { height: 40px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+    .lb-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: var(--ink-2); border: 1px solid var(--line-2); border-radius: 50%; background: rgba(0,0,0,.5); }
+    .lb-arrow:hover { color: var(--ink); border-color: var(--safe); }
+    .lb-arrow.l { left: 18px; } .lb-arrow.r { right: 18px; }
+
+    @media (max-width: 1100px) { .hd-tag { display: none; } .tool .lbl { display: none; } }
+    @media (max-width: 900px) {
+      .shell { grid-template-columns: 1fr; grid-template-rows: 46% 54%; }
+      .side { border-right: none; border-bottom: 1px solid var(--line); order: 2; }
+      .stage { order: 1; }
+      .hud { left: 50px; } .hud-cell { padding: 5px 9px; } .hud-v { font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="hd">
+    <a class="hd-home" href="index.html" title="返回画册专题主页" aria-label="返回画册专题主页">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-9.5z"/></svg>
+    </a>
+    <div class="hd-brand">
+      <span class="hd-safelight"></span>
+      <span class="hd-title">Alec Soth <em>暗房地图</em></span>
+      <span class="hd-tag">Darkroom Atlas · 1995–2024</span>
+    </div>
+    <div class="hd-spacer"></div>
+    <div class="hd-tools">
+      <button class="tool play" id="btn-play" onclick="togglePlay()" title="按拍摄顺序自动巡游当前筛选的照片">
+        <svg class="icon" id="play-ico" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></svg>
+        <span class="lbl" id="play-lbl">巡游路线</span>
+      </button>
+      <button class="tool on" id="btn-route" onclick="toggleRoute()" title="显示 / 隐藏拍摄路线">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="5" cy="18" r="2"/><circle cx="19" cy="6" r="2"/><path d="M7 17.5c5 0 3-5.5 6-5.5s2.5-5.5 4.5-5.5"/></svg>
+      </button>
+      <button class="tool" onclick="fitView()" title="缩放至当前筛选范围">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+      </button>
+      <select class="tool-select" id="tile-sel" onchange="setTile(this.value)" title="切换底图">
+        <option value="dark">暗房底图</option>
+        <option value="dark_nolabel">无注记暗图</option>
+        <option value="light">相纸浅图</option>
+        <option value="sat">卫星影像</option>
+        <option value="topo">地形图</option>
+      </select>
+    </div>
+  </header>
+
+  <main class="shell">
+    <!-- LEFT 30% -->
+    <aside class="side">
+      <nav class="tabs">
+        <button class="tab on" data-tab="index" onclick="showTab('index')">索引 <span class="cnt" id="tab-cnt">268</span></button>
+        <button class="tab" data-tab="plate" onclick="showTab('plate')">图版 <span class="cnt" id="tab-plate-no">—</span></button>
+      </nav>
+
+      <!-- INDEX PANE -->
+      <div class="pane on" id="pane-index">
+        <div class="active-bar" id="active-bar"></div>
+
+        <section class="sec">
+          <div class="sec-hd">
+            <span class="sec-t">01 作品集</span>
+            <span>
+              <button class="link-btn" onclick="setAllSeries(true)">全选</button>
+              <button class="link-btn" onclick="setAllSeries(false)">清空</button>
+            </span>
+          </div>
+          <div class="series-list" id="series-list"></div>
+        </section>
+
+        <section class="sec">
+          <div class="sec-hd">
+            <span class="sec-t">02 拍摄时间</span>
+            <button class="link-btn" onclick="setYears(1995, 2024)">重置</button>
+          </div>
+          <div class="hist-wrap"><svg id="hist"></svg></div>
+          <div class="hist-read"><span>拖拽框选年份区间</span><span class="rng" id="yr-read">1995 – 2024</span></div>
+          <div class="era-row" id="era-row"></div>
+        </section>
+
+        <section class="sec">
+          <div class="sec-hd">
+            <span class="sec-t">03 地点</span>
+            <button class="link-btn" onclick="resetPlace()">重置</button>
+          </div>
+          <div class="country-row" id="country-row"></div>
+          <div class="bars" id="state-bars"></div>
+          <div id="city-wrap"></div>
+          <div class="row2">
+            <select class="inp" id="src-sel" onchange="state.source=this.value; apply(true)">
+              <option value="all">全部图源</option>
+              <option value="official_web">官网原作</option>
+              <option value="book_plate">画册补全</option>
+              <option value="landmark">仅精确地标</option>
+            </select>
+            <input class="inp" id="q" type="search" placeholder="搜索标题 / 地标" oninput="onSearch(this.value)">
+          </div>
+        </section>
+
+        <div class="sheet-hd">
+          <span class="sec-t">印样 <b id="sheet-n">268</b></span>
+          <span class="mono" style="font-size:10.5px;color:var(--ink-3);">按拍摄顺序</span>
+        </div>
+        <div class="sheet" id="sheet"></div>
+      </div>
+
+      <!-- PLATE PANE -->
+      <div class="pane" id="pane-plate"></div>
+    </aside>
+
+    <!-- RIGHT 70% -->
+    <section class="stage">
+      <div id="map"></div>
+
+      <div class="hud">
+        <div class="hud-cell"><div class="hud-v" id="h-photos">268</div><div class="hud-l">照片</div></div>
+        <div class="hud-cell"><div class="hud-v" id="h-series">11</div><div class="hud-l">作品集</div></div>
+        <div class="hud-cell"><div class="hud-v" id="h-states">45</div><div class="hud-l">州 / 省</div></div>
+        <div class="hud-cell"><div class="hud-v" id="h-cities">—</div><div class="hud-l">城镇</div></div>
+        <div class="hud-cell"><div class="hud-v" id="h-km">—</div><div class="hud-l">路线里程 km</div></div>
+      </div>
+
+      <div class="legend" id="legend">
+        <div class="legend-hd" onclick="this.parentNode.classList.toggle('open')">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5 9-5zM3 13l9 5 9-5"/></svg>
+          <span>图例</span>
+          <svg class="icon chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="legend-bd">
+          <div class="lg"><span class="lg-dot" style="border:2px solid #fff;"></span>实心：精确地标</div>
+          <div class="lg"><span class="lg-dot" style="opacity:.75;border:1px solid #fff;"></span>半透明：城镇中心</div>
+          <div class="lg"><span class="lg-dot" style="background:transparent;border:2px solid var(--ink-2);"></span>空心：作品集核心区</div>
+          <div class="lg"><span class="lg-dot" style="background:transparent;border:2px dashed var(--safe);"></span>红色虚环：画册补全图版</div>
+          <div class="lg"><svg width="22" height="6"><line x1="0" y1="3" x2="22" y2="3" stroke="#b4ac9d" stroke-width="2" stroke-dasharray="4 3"/></svg>拍摄路线（按图版顺序）</div>
+          <div class="lg"><svg width="22" height="6"><line x1="0" y1="3" x2="22" y2="3" stroke="#e6a83e" stroke-width="3"/></svg>巡游已走路径</div>
+        </div>
+      </div>
+
+      <div class="strip" id="strip">
+        <div class="strip-hd" onclick="document.getElementById('strip').classList.toggle('min'); setTimeout(()=>map.invalidateSize(),260)">
+          <span>FILM STRIP · <b id="strip-n">268</b> 帧 · <span id="strip-order">按年代</span></span>
+          <svg class="icon chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="film" id="film"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- HOVER CARD -->
+  <div class="hover" id="hover">
+    <img id="hv-img" alt="">
+    <div class="hover-b">
+      <div class="hover-s" id="hv-s"></div>
+      <div class="hover-t" id="hv-t"></div>
+      <div class="hover-l" id="hv-l"></div>
+    </div>
+  </div>
+
+  <!-- LIGHTBOX -->
+  <div class="lb" id="lb">
+    <div class="lb-hd">
+      <div style="min-width:0;">
+        <div class="lb-t" id="lb-t"></div>
+        <div class="lb-s" id="lb-s"></div>
+      </div>
+      <div class="lb-tools">
+        <button class="tool" onclick="lbZoom(-0.3)" title="缩小 (-)"><svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M8 11h6M21 21l-5-5"/></svg></button>
+        <span class="mono" id="lb-z" style="font-size:12px;color:var(--ink-2);width:46px;text-align:center;">100%</span>
+        <button class="tool" onclick="lbZoom(0.3)" title="放大 (+)"><svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M8 11h6M11 8v6M21 21l-5-5"/></svg></button>
+        <button class="tool" onclick="lbReset()" title="复位 (0)"><svg class="icon" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
+        <button class="tool" onclick="closeLb()" title="关闭 (Esc)"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+      </div>
+    </div>
+    <div class="lb-stage" id="lb-stage">
+      <img id="lb-img" alt="" draggable="false">
+      <button class="lb-arrow l" onclick="step(-1, true)" title="上一幅"><svg class="icon" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <button class="lb-arrow r" onclick="step(1, true)" title="下一幅"><svg class="icon" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+    </div>
+    <div class="lb-ft"><span id="lb-loc"></span><span>滚轮缩放 0.5x–4.5x · 拖拽平移 · 方向键切换 · Esc 关闭</span></div>
+  </div>
+
+  <script>
+    // =====================================================================
+    // DATA & STATE
+    // =====================================================================
+    let DATA = null, PHOTOS = [], PROJ = {}, BY_ID = {};
+    const ERAS = [
+      { k: 'all', t: '全时段', a: 1995, b: 2024 },
+      { k: 'e', t: '1995–03 早期·河流', a: 1995, b: 2003 },
+      { k: 'm', t: '2004–10 边境·隐遁', a: 2004, b: 2010 },
+      { k: 'l', t: '2012–24 社群·晚期', a: 2012, b: 2024 }
+    ];
+    const state = {
+      series: new Set(), y0: 1995, y1: 2024,
+      country: 'all', region: 'all', city: 'all', source: 'all', q: ''
+    };
+    let filtered = [], sequence = [], activeId = null;
+    let showRoutes = true, showAllStates = false;
+    let map, tileLayer, routeLayer, markerLayer, playLayer, pulseMarker;
+    const markers = {};
+
+    const TILES = {
+      dark: ['https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', '&copy; OpenStreetMap &copy; CARTO'],
+      dark_nolabel: ['https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', '&copy; OpenStreetMap &copy; CARTO'],
+      light: ['https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', '&copy; OpenStreetMap &copy; CARTO'],
+      sat: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', '&copy; Esri, Maxar'],
+      topo: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', '&copy; Esri, USGS']
+    };
+
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const pad = n => String(n).padStart(2, '0');
+
+    // =====================================================================
+    // INIT
+    // =====================================================================
+    window.addEventListener('DOMContentLoaded', async () => {
+      initMap();
+      initLightbox();
+      try {
+        DATA = await (await fetch('./atlas-data.json')).json();
+      } catch (e) {
+        $('sheet').innerHTML = '<div class="empty" style="grid-column:1/-1">无法读取 atlas-data.json，请通过本地 HTTP 服务打开页面</div>';
+        return;
+      }
+      PHOTOS = DATA.photos;
+      DATA.projects.forEach(p => { PROJ[p.slug] = p; state.series.add(p.slug); });
+      PHOTOS.forEach(p => { BY_ID[p.id] = p; });
+
+      const qp = new URLSearchParams(location.search).get('project');
+      if (qp && PROJ[qp]) { state.series = new Set([qp]); }
+
+      renderEras();
+      buildMarkers();
+      apply(true);
+      renderPlate();
+      window.addEventListener('resize', () => renderHist());
+    });
+
+    function initMap() {
+      map = L.map('map', { zoomControl: true, worldCopyJump: true, preferCanvas: false }).setView([39, -92], 4);
+      map.zoomControl.setPosition('bottomright');
+      setTile('dark');
+      routeLayer = L.layerGroup().addTo(map);
+      markerLayer = L.layerGroup().addTo(map);
+      playLayer = L.layerGroup().addTo(map);
+    }
+    function setTile(k) {
+      const t = TILES[k] || TILES.dark;
+      if (tileLayer) map.removeLayer(tileLayer);
+      tileLayer = L.tileLayer(t[0], { attribution: t[1], maxZoom: 18, subdomains: 'abcd' }).addTo(map);
+      $('tile-sel').value = k;
+    }
+
+    // =====================================================================
+    // FILTER PIPELINE
+    // =====================================================================
+    function matchBase(p, skip = {}) {
+      if (!skip.series && !state.series.has(p.projectSlug)) return false;
+      if (!skip.year && (p.year < state.y0 || p.year > state.y1)) return false;
+      if (!skip.country && state.country !== 'all' && p.country !== state.country) return false;
+      if (!skip.region && state.region !== 'all' && p.state !== state.region) return false;
+      if (!skip.city && state.city !== 'all' && p.city !== state.city) return false;
+      if (state.source === 'official_web' && p.sourceType !== 'official_web') return false;
+      if (state.source === 'book_plate' && p.sourceType !== 'book_plate') return false;
+      if (state.source === 'landmark' && p.precision !== 'landmark') return false;
+      if (state.q) {
+        const hay = `${p.title} ${p.projectTitle} ${p.projectTitleZh} ${p.city} ${p.county} ${p.state} ${p.country} ${p.landmark} ${p.notes}`.toLowerCase();
+        if (!hay.includes(state.q)) return false;
+      }
+      return true;
+    }
+
+    function apply(fly) {
+      stopPlay();
+      filtered = PHOTOS.filter(p => matchBase(p));
+      const single = state.series.size === 1;
+      sequence = [...filtered].sort((a, b) => single
+        ? a.routeOrder - b.routeOrder
+        : (a.year * 100 + a.month) - (b.year * 100 + b.month) || a.routeOrder - b.routeOrder);
+
+      renderSeries();
+      renderHist();
+      renderPlace();
+      renderActive();
+      renderSheet();
+      renderFilm();
+      renderMap(fly);
+      renderHud();
+      $('tab-cnt').textContent = filtered.length;
+    }
+
+    // ---------- Series ----------
+    function renderSeries() {
+      const cntAll = {};
+      PHOTOS.forEach(p => { if (matchBase(p, { series: true })) cntAll[p.projectSlug] = (cntAll[p.projectSlug] || 0) + 1; });
+      $('series-list').innerHTML = DATA.projects.map(p => `
+        <button class="srow ${state.series.has(p.slug) ? 'on' : ''}" onclick="toggleSeries('${p.slug}', event)" title="单击切换；按住 Alt / Option 单击仅看此作品集">
+          <span class="sw" style="background:${p.color}"></span>
+          <span class="nm"><span class="zh">${esc(p.titleZh)}</span><span class="en">${esc(p.title)} · ${esc(p.yearRange)}</span></span>
+          <span class="n">${cntAll[p.slug] || 0}<small>${PHOTOS.filter(x => x.projectSlug === p.slug).length}</small></span>
+        </button>`).join('');
+    }
+    function toggleSeries(slug, ev) {
+      if (ev && (ev.altKey || ev.metaKey)) { state.series = new Set([slug]); }
+      else if (state.series.size === DATA.projects.length) { state.series = new Set([slug]); }   // 全选状态下单击 = 聚焦
+      else if (state.series.has(slug)) { state.series.delete(slug); if (!state.series.size) setAllSeries(true, false); }
+      else state.series.add(slug);
+      state.region = 'all'; state.city = 'all';
+      apply(true);
+    }
+    function setAllSeries(on, run = true) {
+      state.series = new Set(on ? DATA.projects.map(p => p.slug) : []);
+      if (run) apply(true);
+    }
+
+    // ---------- Time histogram with brush ----------
+    let brush = null;
+    function renderHist() {
+      const svg = $('hist');
+      const w = svg.clientWidth || 300, h = 64, padB = 14;
+      const years = []; for (let y = 1995; y <= 2024; y++) years.push(y);
+      const counts = {}, countsSel = {};
+      PHOTOS.forEach(p => {
+        if (matchBase(p, { year: true })) countsSel[p.year] = (countsSel[p.year] || 0) + 1;
+        if (state.series.has(p.projectSlug)) counts[p.year] = (counts[p.year] || 0) + 1;
+      });
+      const max = Math.max(1, ...years.map(y => counts[y] || 0));
+      const bw = w / years.length;
+      let html = '';
+      years.forEach((y, i) => {
+        const x = i * bw;
+        const hAll = ((counts[y] || 0) / max) * (h - padB - 4);
+        const hSel = ((countsSel[y] || 0) / max) * (h - padB - 4);
+        const inR = y >= state.y0 && y <= state.y1;
+        html += `<rect x="${x + 1}" y="${h - padB - hAll}" width="${bw - 2}" height="${hAll}" fill="#2a2926"/>`;
+        if (hSel > 0) html += `<rect x="${x + 1}" y="${h - padB - hSel}" width="${bw - 2}" height="${hSel}" fill="${inR ? '#e6a83e' : '#55503f'}"/>`;
+        if (y % 5 === 0 || y === 2024) html += `<text x="${x + bw / 2}" y="${h - 2}" fill="#7c7569" font-size="9" font-family="JetBrains Mono" text-anchor="middle">${y === 2024 ? '24' : "'" + String(y).slice(2)}</text>`;
+      });
+      const bx = (state.y0 - 1995) * bw, bx2 = (state.y1 - 1995 + 1) * bw;
+      if (!(state.y0 === 1995 && state.y1 === 2024)) {
+        html += `<rect x="${bx}" y="0" width="${bx2 - bx}" height="${h - padB}" fill="rgba(230,168,62,.07)" stroke="#e6a83e" stroke-width="1" stroke-dasharray="3 2"/>`;
+      }
+      svg.innerHTML = html;
+      $('yr-read').textContent = state.y0 === state.y1 ? `${state.y0}` : `${state.y0} – ${state.y1}`;
+      document.querySelectorAll('#era-row .chip').forEach(c => {
+        const e = ERAS.find(x => x.k === c.dataset.k);
+        c.classList.toggle('on', e.a === state.y0 && e.b === state.y1);
+      });
+
+      svg.onmousedown = ev => {
+        const yr = yearAt(ev, svg, bw);
+        brush = { a: yr };
+        setYearsLive(yr, yr);
+      };
+      svg.onmousemove = ev => {
+        if (!brush) return;
+        const yr = yearAt(ev, svg, bw);
+        setYearsLive(Math.min(brush.a, yr), Math.max(brush.a, yr));
+      };
+      window.onmouseup = () => { if (brush) { brush = null; apply(true); } };
+      svg.ondblclick = () => setYears(1995, 2024);
+    }
+    function yearAt(ev, svg, bw) {
+      const r = svg.getBoundingClientRect();
+      return Math.max(1995, Math.min(2024, 1995 + Math.floor((ev.clientX - r.left) / bw)));
+    }
+    function setYearsLive(a, b) { state.y0 = a; state.y1 = b; renderHist(); }
+    function setYears(a, b) { state.y0 = a; state.y1 = b; apply(true); }
+    function renderEras() {
+      $('era-row').innerHTML = ERAS.map(e => `<button class="chip" data-k="${e.k}" onclick="setYears(${e.a}, ${e.b})">${e.t}</button>`).join('');
+    }
+
+    // ---------- Place ----------
+    function renderPlace() {
+      const cPool = PHOTOS.filter(p => matchBase(p, { country: true, region: true, city: true }));
+      const cc = countBy(cPool, 'country');
+      $('country-row').innerHTML =
+        `<button class="chip ${state.country === 'all' ? 'on' : ''}" onclick="setCountry('all')">全部 ${cPool.length}</button>` +
+        Object.entries(cc).sort((a, b) => b[1] - a[1]).map(([c, n]) =>
+          `<button class="chip ${state.country === c ? 'on' : ''}" onclick="setCountry('${esc(c)}')">${esc(zhCountry(c))} ${n}</button>`).join('');
+
+      const sPool = cPool.filter(p => state.country === 'all' || p.country === state.country);
+      const sc = Object.entries(countBy(sPool, 'state')).sort((a, b) => b[1] - a[1]);
+      const max = sc.length ? sc[0][1] : 1;
+      const shown = showAllStates ? sc : sc.slice(0, 7);
+      $('state-bars').innerHTML = `<div class="sub-lbl">州 / 省 · ${sc.length}</div>` +
+        shown.map(([s, n]) => `
+          <button class="bar ${state.region === s ? 'on' : ''}" onclick="setRegion('${esc(s).replace(/'/g, "\\'")}')">
+            <i class="fill" style="width:${(n / max) * 100}%"></i>
+            <span>${esc(s)}</span><span class="bn">${n}</span>
+          </button>`).join('') +
+        (sc.length > 7 ? `<button class="more-btn" onclick="showAllStates=!showAllStates; renderPlace()">${showAllStates ? '收起' : '展开全部 ' + sc.length + ' 个'}</button>` : '');
+
+      if (state.region !== 'all') {
+        const cityPool = sPool.filter(p => p.state === state.region);
+        const ct = Object.entries(countBy(cityPool, 'city')).sort((a, b) => b[1] - a[1]);
+        $('city-wrap').innerHTML = `<div class="sub-lbl">城镇 · ${esc(state.region)}</div><div class="country-row" style="margin-bottom:0">` +
+          `<button class="chip ${state.city === 'all' ? 'on' : ''}" onclick="setCity('all')">全部</button>` +
+          ct.map(([c, n]) => `<button class="chip ${state.city === c ? 'on' : ''}" onclick="setCity('${esc(c).replace(/'/g, "\\'")}')">${esc(c)} ${n}</button>`).join('') + '</div>';
+      } else $('city-wrap').innerHTML = '';
+    }
+    function setCountry(c) { state.country = c; state.region = 'all'; state.city = 'all'; apply(true); }
+    function setRegion(s) { state.region = state.region === s ? 'all' : s; state.city = 'all'; apply(true); }
+    function setCity(c) { state.city = c; apply(true); }
+    function resetPlace() { state.country = 'all'; state.region = 'all'; state.city = 'all'; state.source = 'all'; state.q = ''; $('src-sel').value = 'all'; $('q').value = ''; apply(true); }
+    let qTimer;
+    function onSearch(v) { clearTimeout(qTimer); qTimer = setTimeout(() => { state.q = v.trim().toLowerCase(); apply(true); }, 200); }
+    function zhCountry(c) {
+      return ({ 'United States': '美国', 'Canada': '加拿大', 'Colombia': '哥伦比亚', 'France': '法国', 'Ukraine': '乌克兰', 'Romania': '罗马尼亚', 'Poland': '波兰', 'Germany': '德国', 'United Kingdom': '英国' })[c] || c;
+    }
+    function countBy(arr, k) { const m = {}; arr.forEach(x => { m[x[k]] = (m[x[k]] || 0) + 1; }); return m; }
+
+    // ---------- Active filter chips ----------
+    function renderActive() {
+      const chips = [];
+      if (state.series.size !== DATA.projects.length) {
+        const names = [...state.series].map(s => PROJ[s].titleZh);
+        chips.push([names.length > 2 ? `${names.length} 部作品集` : names.join(' + '), 'setAllSeries(true)']);
+      }
+      if (state.y0 !== 1995 || state.y1 !== 2024) chips.push([state.y0 === state.y1 ? `${state.y0}` : `${state.y0}–${state.y1}`, 'setYears(1995,2024)']);
+      if (state.country !== 'all') chips.push([zhCountry(state.country), "setCountry('all')"]);
+      if (state.region !== 'all') chips.push([state.region, "setRegion('" + state.region.replace(/'/g, "\\'") + "')"]);
+      if (state.city !== 'all') chips.push([state.city, "setCity('all')"]);
+      if (state.source !== 'all') chips.push([$('src-sel').selectedOptions[0].text, "state.source='all';$('src-sel').value='all';apply(true)"]);
+      if (state.q) chips.push([`“${state.q}”`, "state.q='';$('q').value='';apply(true)"]);
+      $('active-bar').innerHTML = chips.length
+        ? chips.map(([t, fn]) => `<span class="af">${esc(t)}<button onclick="${esc(fn)}" title="移除"><svg class="icon" style="width:11px;height:11px" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></span>`).join('')
+          + `<button class="link-btn" style="margin-left:auto" onclick="resetAll()">全部清除</button>`
+        : `<span class="af-none">未设筛选 · 显示全部 ${PHOTOS.length} 幅作品</span>`;
+    }
+    function resetAll() {
+      setAllSeries(true, false);
+      Object.assign(state, { y0: 1995, y1: 2024, country: 'all', region: 'all', city: 'all', source: 'all', q: '' });
+      $('src-sel').value = 'all'; $('q').value = '';
+      apply(true);
+    }
+
+    // ---------- Contact sheet ----------
+    function renderSheet() {
+      $('sheet-n').textContent = sequence.length;
+      if (!sequence.length) { $('sheet').innerHTML = '<div class="empty" style="grid-column:1/-1">当前筛选条件下没有作品</div>'; return; }
+      $('sheet').innerHTML = sequence.map((p, i) => `
+        <div class="frame ${p.id === activeId ? 'on' : ''}" data-id="${p.id}" title="${esc(p.title)}">
+          <img src="${esc(p.src)}" loading="lazy" alt="">
+          <span class="fn">${pad(i + 1)}</span>
+          <span class="fc" style="background:${p.projectColor}"></span>
+        </div>`).join('');
+    }
+    $('sheet') && document.addEventListener('click', e => {
+      const f = e.target.closest('.frame, .cell, .near');
+      if (f && f.dataset.id) select(f.dataset.id, { fly: true, tab: f.classList.contains('cell') ? null : 'plate' });
+    });
+    document.addEventListener('mouseover', e => {
+      const f = e.target.closest('.frame, .cell');
+      if (f && f.dataset.id) highlight(f.dataset.id, true);
+    });
+    document.addEventListener('mouseout', e => {
+      const f = e.target.closest('.frame, .cell');
+      if (f && f.dataset.id) highlight(f.dataset.id, false);
+    });
+
+    // ---------- Film strip ----------
+    function renderFilm() {
+      $('strip-n').textContent = sequence.length;
+      $('strip-order').textContent = state.series.size === 1 ? '按图版路线顺序' : '按拍摄年月';
+      let last = null;
+      $('film').innerHTML = sequence.map(p => {
+        const yr = p.year !== last ? `<span class="cy">${p.year}</span>` : '';
+        last = p.year;
+        return `<div class="cell ${p.id === activeId ? 'on' : ''}" data-id="${p.id}" title="${esc(p.title)}">${yr}<img src="${esc(p.src)}" loading="lazy" alt=""><div class="cb" style="background:${p.projectColor}"></div></div>`;
+      }).join('');
+    }
+
+    // ---------- HUD ----------
+    function renderHud() {
+      $('h-photos').textContent = filtered.length;
+      $('h-series').textContent = new Set(filtered.map(p => p.projectSlug)).size;
+      $('h-states').textContent = new Set(filtered.map(p => p.country + p.state)).size;
+      $('h-cities').textContent = new Set(filtered.map(p => p.country + p.state + p.city)).size;
+      // 路线里程：按各作品集图版顺序累计大圆距离
+      let km = 0;
+      groupRoutes().forEach(pts => { for (let i = 1; i < pts.length; i++) km += hav(pts[i - 1], pts[i]); });
+      $('h-km').textContent = km ? Math.round(km).toLocaleString() : '—';
+    }
+    function hav(a, b) {
+      const R = 6371, r = Math.PI / 180;
+      const dLa = (b.lat - a.lat) * r, dLo = (b.lng - a.lng) * r;
+      const s = Math.sin(dLa / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dLo / 2) ** 2;
+      return 2 * R * Math.asin(Math.sqrt(s));
+    }
+
+    // =====================================================================
+    // MAP
+    // =====================================================================
+    function markerStyle(p, on) {
+      const base = { color: '#ffffff', weight: 1, fillColor: p.projectColor, fillOpacity: .95, radius: 6, dashArray: null };
+      if (p.precision === 'landmark') Object.assign(base, { weight: 2, radius: 6.5 });
+      if (p.precision === 'city') Object.assign(base, { fillOpacity: .7, radius: 5.5 });
+      if (p.precision === 'series_locus') Object.assign(base, { fillOpacity: .12, color: p.projectColor, weight: 2, radius: 5 });
+      if (p.sourceType === 'book_plate') Object.assign(base, { color: '#e0452b', weight: 2, dashArray: '2 2' });
+      if (on) Object.assign(base, { radius: 10, weight: 3, color: '#e6a83e', fillOpacity: 1, dashArray: null });
+      return base;
+    }
+    function buildMarkers() {
+      PHOTOS.forEach(p => {
+        const m = L.circleMarker([p.lat, p.lng], markerStyle(p, false));
+        m.on('mouseover', e => { showHover(p, e.originalEvent); m.setStyle(markerStyle(p, true)); m.bringToFront(); });
+        m.on('mousemove', e => moveHover(e.originalEvent));
+        m.on('mouseout', () => { hideHover(); if (p.id !== activeId) m.setStyle(markerStyle(p, false)); });
+        m.on('click', () => { hideHover(); select(p.id, { fly: false, tab: 'plate' }); });
+        markers[p.id] = m;
+      });
+    }
+    function groupRoutes() {
+      const g = {};
+      filtered.forEach(p => { (g[p.projectSlug] = g[p.projectSlug] || []).push(p); });
+      const showAll = state.series.size <= 3;
+      return Object.entries(g)
+        .filter(([s, pts]) => pts.length > 1 && (showAll || ['river-corridor', 'border-corridor'].includes(PROJ[s].routeType)))
+        .map(([, pts]) => pts.sort((a, b) => a.routeOrder - b.routeOrder));
+    }
+    function renderMap(fly) {
+      markerLayer.clearLayers();
+      routeLayer.clearLayers();
+      playLayer.clearLayers();
+      if (showRoutes) {
+        groupRoutes().forEach(pts => {
+          const ll = pts.map(p => [p.lat, p.lng]);
+          const c = pts[0].projectColor;
+          L.polyline(ll, { color: c, weight: 6, opacity: .16, interactive: false }).addTo(routeLayer);
+          L.polyline(ll, { color: c, weight: 1.6, opacity: .85, dashArray: '5 5', interactive: false }).addTo(routeLayer);
+        });
+      }
+      filtered.forEach(p => { markers[p.id].setStyle(markerStyle(p, p.id === activeId)); markers[p.id].addTo(markerLayer); });
+      if (activeId && markers[activeId] && filtered.some(p => p.id === activeId)) markers[activeId].bringToFront();
+      if (fly) fitView();
+    }
+    function fitView() {
+      if (!filtered.length) return;
+      const b = L.latLngBounds(filtered.map(p => [p.lat, p.lng]));
+      const stripH = $('strip').classList.contains('min') ? 40 : 150;
+      map.flyToBounds(b, { paddingTopLeft: [60, 80], paddingBottomRight: [60, stripH], maxZoom: filtered.length === 1 ? 13 : 11, duration: .8 });
+    }
+    function toggleRoute() { showRoutes = !showRoutes; $('btn-route').classList.toggle('on', showRoutes); renderMap(false); }
+
+    // ---------- Hover ----------
+    function showHover(p, ev) {
+      $('hv-img').src = p.src;
+      $('hv-s').textContent = `${p.projectTitle.toUpperCase()} · ${p.dateDisplay}`;
+      $('hv-s').style.color = p.projectColor === '#52684f' ? '#8fb38a' : lighten(p.projectColor);
+      $('hv-t').textContent = p.title;
+      $('hv-l').textContent = `${p.city}, ${p.stateCode || p.state} · ${p.precisionLabel}`;
+      $('hover').style.display = 'block';
+      moveHover(ev);
+    }
+    function moveHover(ev) {
+      if (!ev) return;
+      const el = $('hover'), w = 236, h = el.offsetHeight || 240;
+      let x = ev.clientX + 16, y = ev.clientY - h / 2;
+      if (x + w > innerWidth - 10) x = ev.clientX - w - 16;
+      y = Math.max(58, Math.min(innerHeight - h - 10, y));
+      el.style.left = x + 'px'; el.style.top = y + 'px';
+    }
+    function hideHover() { $('hover').style.display = 'none'; }
+    function lighten(hex) {
+      const n = parseInt(hex.slice(1), 16);
+      const f = c => Math.min(255, Math.round(c + (255 - c) * .45));
+      return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`;
+    }
+    function highlight(id, on) {
+      const p = BY_ID[id], m = markers[id];
+      if (!m || !map.hasLayer(m)) return;
+      m.setStyle(markerStyle(p, on || id === activeId));
+      if (on) m.bringToFront();
+    }
+
+    // =====================================================================
+    // SELECTION & PLATE DETAIL
+    // =====================================================================
+    function select(id, opt = {}) {
+      const p = BY_ID[id]; if (!p) return;
+      const prev = activeId; activeId = id;
+      if (prev && markers[prev] && BY_ID[prev]) markers[prev].setStyle(markerStyle(BY_ID[prev], false));
+      if (markers[id]) { markers[id].setStyle(markerStyle(p, true)); markers[id].bringToFront(); }
+      if (pulseMarker) map.removeLayer(pulseMarker);
+      pulseMarker = L.marker([p.lat, p.lng], { icon: L.divIcon({ className: '', html: '<div class="pulse"></div>', iconSize: [26, 26], iconAnchor: [13, 13] }), interactive: false }).addTo(map);
+
+      document.querySelectorAll('.frame.on, .cell.on').forEach(el => el.classList.remove('on'));
+      document.querySelectorAll(`[data-id="${CSS.escape(id)}"]`).forEach(el => el.classList.add('on'));
+      const cell = document.querySelector(`.cell[data-id="${CSS.escape(id)}"]`);
+      if (cell) { const film = $('film'); film.scrollLeft = cell.offsetLeft - film.clientWidth / 2 + 46; }
+
+      if (opt.fly !== false) {
+        const z = Math.max(map.getZoom(), p.precision === 'landmark' ? 11 : 9);
+        map.flyTo([p.lat, p.lng], Math.min(z, 13), { duration: .7 });
+      }
+      renderPlate();
+      if (opt.tab) showTab(opt.tab);
+      if ($('lb').classList.contains('open')) fillLb(p);
+    }
+
+    function renderPlate() {
+      const p = BY_ID[activeId];
+      if (!p) {
+        $('pane-plate').innerHTML = `<div class="plate-empty">
+          <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1"/><circle cx="12" cy="12" r="3.5"/><path d="M7 5l1.5-2h7L17 5"/></svg>
+          <div>尚未选择图版</div><div style="font-size:12px">点击地图圆点、印样或胶片条中的任一帧</div></div>`;
+        $('tab-plate-no').textContent = '—';
+        return;
+      }
+      const idx = sequence.findIndex(x => x.id === p.id);
+      $('tab-plate-no').textContent = idx >= 0 ? pad(idx + 1) : '·';
+      const proj = PROJ[p.projectSlug];
+      const near = PHOTOS.filter(x => x.id !== p.id && x.city === p.city && x.country === p.country).slice(0, 8);
+      $('pane-plate').innerHTML = `
+        <div class="plate-img" onclick="openLb()" title="点击全屏查看">
+          <img src="${esc(p.src)}" alt="${esc(p.title)}">
+          <span class="zoom-hint"><svg class="icon" style="width:12px;height:12px" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>全屏 · 可缩放</span>
+        </div>
+        <div class="plate-body">
+          <div class="plate-series" style="color:${lighten(p.projectColor)}"><i style="background:${p.projectColor}"></i>${esc(p.projectTitle)} · ${esc(p.projectTitleZh)}</div>
+          <h2 class="plate-title">${esc(p.title)}</h2>
+          <dl class="meta">
+            <dt>拍摄</dt><dd>${esc(p.dateDisplay)} <small>· ${esc(proj.yearRange)}</small></dd>
+            <dt>地标</dt><dd>${esc(p.landmark)}</dd>
+            <dt>行政区</dt><dd>${esc(p.city)} · ${esc(p.county)}<br>${esc(p.state)}, ${esc(zhCountry(p.country))}</dd>
+            <dt>坐标</dt><dd class="mono" style="font-size:12px">${p.lat.toFixed(4)}°, ${p.lng.toFixed(4)}°</dd>
+            <dt>考据</dt><dd><span class="badge ${p.precision === 'landmark' ? 'landmark' : ''}">${esc(p.precisionLabel)}</span><span class="badge ${p.sourceType === 'book_plate' ? 'book' : ''}">${esc(p.sourceLabel)}</span></dd>
+            <dt>序号</dt><dd class="mono" style="font-size:12px">路线第 ${p.routeOrder} 站${idx >= 0 ? ` · 当前序列 ${idx + 1}/${sequence.length}` : ' · 不在当前筛选中'}</dd>
+          </dl>
+          <p class="plate-notes">${esc(p.notes)}</p>
+          <div class="plate-nav">
+            <button class="tool" onclick="step(-1)"><svg class="icon" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg><span>上一幅</span></button>
+            <button class="tool" onclick="select(activeId,{fly:true})"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="10" r="3"/><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/></svg><span>定位</span></button>
+            <button class="tool" onclick="step(1)"><span>下一幅</span><svg class="icon" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+          </div>
+          ${near.length ? `<div class="nearby"><span class="sec-t">同地点 · ${esc(p.city)} <b>${near.length}</b></span>
+            <div class="nearby-grid">${near.map(x => `<div class="frame near" data-id="${x.id}" title="${esc(x.title)} · ${esc(x.projectTitleZh)}"><img src="${esc(x.src)}" loading="lazy" alt=""><span class="fc" style="background:${x.projectColor}"></span></div>`).join('')}</div></div>` : ''}
+          <button class="tool" style="width:100%;margin-top:16px" onclick="state.series=new Set(['${p.projectSlug}']);state.region='all';state.city='all';apply(true);showTab('index')">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16l-6 8v6l-4 2v-8z"/></svg><span>只看《${esc(p.projectTitleZh)}》路线</span>
+          </button>
+        </div>`;
+      $('pane-plate').scrollTop = 0;
+    }
+    function step(d, keepTab) {
+      if (!sequence.length) return;
+      let i = sequence.findIndex(x => x.id === activeId);
+      i = i < 0 ? 0 : (i + d + sequence.length) % sequence.length;
+      select(sequence[i].id, { fly: true, tab: keepTab ? null : 'plate' });
+    }
+    function showTab(t) {
+      document.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
+      $('pane-index').classList.toggle('on', t === 'index');
+      $('pane-plate').classList.toggle('on', t === 'plate');
+    }
+
+    // =====================================================================
+    // ROUTE PLAYBACK (巡游)
+    // =====================================================================
+    let playTimer = null, playIdx = 0;
+    function togglePlay() { playTimer ? stopPlay() : startPlay(); }
+    function startPlay() {
+      if (sequence.length < 2) return;
+      playLayer.clearLayers();
+      playIdx = Math.max(0, sequence.findIndex(x => x.id === activeId));
+      const trail = L.polyline([], { color: '#e6a83e', weight: 3, opacity: .95 }).addTo(playLayer);
+      const tick = () => {
+        const p = sequence[playIdx];
+        trail.addLatLng([p.lat, p.lng]);
+        select(p.id, { fly: true, tab: 'plate' });
+        playIdx++;
+        if (playIdx >= sequence.length) { stopPlay(true); }
+      };
+      tick();
+      playTimer = setInterval(tick, 2400);
+      $('btn-play').classList.add('on');
+      $('play-lbl').textContent = '停止巡游';
+      $('play-ico').innerHTML = '<rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/>';
+    }
+    function stopPlay(keepTrail) {
+      if (!playTimer) return;
+      clearInterval(playTimer); playTimer = null;
+      if (!keepTrail) playLayer.clearLayers();
+      $('btn-play').classList.remove('on');
+      $('play-lbl').textContent = '巡游路线';
+      $('play-ico').innerHTML = '<path d="M7 4l13 8-13 8z"/>';
+    }
+
+    // =====================================================================
+    // LIGHTBOX
+    // =====================================================================
+    let lz = 1, lx = 0, ly = 0, ldrag = null;
+    function openLb() { const p = BY_ID[activeId]; if (!p) return; fillLb(p); $('lb').classList.add('open'); }
+    function closeLb() { $('lb').classList.remove('open'); }
+    function fillLb(p) {
+      lbReset();
+      $('lb-img').src = p.src;
+      $('lb-t').textContent = p.title;
+      $('lb-s').textContent = `${p.projectTitle} · ${p.projectTitleZh} · ${p.dateDisplay}`;
+      $('lb-loc').textContent = `${p.landmark} · ${p.lat.toFixed(4)}°, ${p.lng.toFixed(4)}°`;
+    }
+    function lbApply() { $('lb-img').style.transform = `translate(${lx}px, ${ly}px) scale(${lz})`; $('lb-z').textContent = Math.round(lz * 100) + '%'; }
+    function lbZoom(d) { lz = Math.min(4.5, Math.max(0.5, +(lz + d).toFixed(2))); lbApply(); }
+    function lbReset() { lz = 1; lx = 0; ly = 0; lbApply(); }
+    function initLightbox() {
+      const st = $('lb-stage');
+      st.addEventListener('wheel', e => { e.preventDefault(); lbZoom(e.deltaY < 0 ? 0.2 : -0.2); }, { passive: false });
+      st.addEventListener('mousedown', e => { if (e.target.closest('.lb-arrow')) return; ldrag = { x: e.clientX - lx, y: e.clientY - ly }; st.classList.add('drag'); });
+      window.addEventListener('mousemove', e => { if (!ldrag) return; lx = e.clientX - ldrag.x; ly = e.clientY - ldrag.y; lbApply(); });
+      window.addEventListener('mouseup', () => { ldrag = null; st.classList.remove('drag'); });
+      st.addEventListener('dblclick', () => lz === 1 ? (lz = 2.2, lbApply()) : lbReset());
+      window.addEventListener('keydown', e => {
+        if (!$('lb').classList.contains('open')) {
+          if (e.target.tagName === 'INPUT') return;
+          if (e.key === 'ArrowRight') step(1); else if (e.key === 'ArrowLeft') step(-1);
+          return;
+        }
+        if (e.key === 'Escape') closeLb();
+        else if (e.key === 'ArrowRight') step(1, true);
+        else if (e.key === 'ArrowLeft') step(-1, true);
+        else if (e.key === '+' || e.key === '=') lbZoom(0.3);
+        else if (e.key === '-') lbZoom(-0.3);
+        else if (e.key === '0') lbReset();
+      });
+    }
+  </script>
+</body>
+</html>
