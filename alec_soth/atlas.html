@@ -79,38 +79,39 @@
        1. TOP GLOBAL HEADER (50px Fixed)
        ========================================================================== */
     .global-header {
-      position: fixed; top: 0; left: 0; right: 0; height: 50px; z-index: 1000;
+      position: fixed; top: 0; left: 0; right: 0; height: 52px; z-index: 1000;
       background: var(--bg-card); border-bottom: 1px solid var(--border-line);
       display: flex; align-items: center; justify-content: space-between;
       padding: 0 16px; box-shadow: var(--shadow-sm); user-select: none;
     }
-    .brand-left { display: flex; align-items: center; gap: 12px; }
+    .brand-left { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
     .back-link {
-      display: inline-flex; align-items: center; gap: 5px;
-      font-size: 12px; font-weight: 500; color: var(--ink-500);
-      text-decoration: none; padding: 4px 8px; border-radius: 5px;
-      border: 1px solid var(--border-line); background: var(--bg-subtle);
-      transition: all 0.15s ease;
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 6px;
+      font-size: 13px; color: var(--ink-700);
+      text-decoration: none; border: 1px solid var(--border-line); background: var(--bg-subtle);
+      transition: all 0.15s ease; flex-shrink: 0;
     }
     .back-link:hover { color: var(--ink-900); border-color: var(--accent); background: var(--bg-card); }
-    .brand-title-wrap { display: flex; align-items: baseline; gap: 8px; }
+    .back-link svg { width: 16px; height: 16px; }
+    .brand-title-wrap { display: flex; align-items: center; }
     .brand-title {
-      font-family: var(--font-serif); font-size: 18px; font-weight: 700;
+      font-family: var(--font-serif); font-size: 21px; font-weight: 700;
       color: var(--ink-900); letter-spacing: 0.02em;
-    }
-    .brand-sub {
-      font-family: var(--font-mono); font-size: 10.5px; font-weight: 600;
-      color: var(--accent); background: var(--accent-soft);
-      border: 1px solid var(--accent-border); padding: 1px 6px; border-radius: 4px;
     }
 
     /* Quick Route Presets in Header Center */
-    .header-center { display: flex; align-items: center; gap: 6px; overflow-x: auto; max-width: 52vw; }
+    .header-center {
+      display: flex; align-items: center; gap: 6px;
+      overflow-x: auto; max-width: 48vw; flex-shrink: 1;
+      scrollbar-width: none; -ms-overflow-style: none;
+    }
+    .header-center::-webkit-scrollbar { display: none; }
     .preset-btn {
       display: inline-flex; align-items: center; gap: 6px;
       background: var(--bg-subtle); border: 1px solid var(--border-line);
-      border-radius: 5px; padding: 4px 10px; font-size: 11.5px; font-weight: 500;
-      color: var(--ink-700); cursor: pointer; white-space: nowrap; transition: all 0.15s;
+      border-radius: 5px; padding: 5px 11px; font-size: 12.5px; font-weight: 500;
+      color: var(--ink-700); cursor: pointer; white-space: nowrap; transition: all 0.15s; flex-shrink: 0;
     }
     .preset-btn:hover { border-color: var(--accent); color: var(--ink-900); }
     .preset-btn.active {
@@ -120,26 +121,29 @@
     .preset-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 
     /* Header Right Controls */
-    .header-right { display: flex; align-items: center; gap: 8px; }
+    .header-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
     .ctrl-btn {
-      display: inline-flex; align-items: center; gap: 5px;
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 6px; padding: 0;
       background: var(--bg-subtle); border: 1px solid var(--border-line);
-      border-radius: 5px; padding: 4px 9px; font-size: 11.5px; font-weight: 500;
       color: var(--ink-700); cursor: pointer; transition: all 0.15s; text-decoration: none;
+      flex-shrink: 0;
     }
+    .ctrl-btn svg { width: 16px; height: 16px; }
     .ctrl-btn:hover { border-color: var(--accent); color: var(--ink-900); }
     .ctrl-btn.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 600; }
     .tile-select {
       background: var(--bg-subtle); border: 1px solid var(--border-line);
-      border-radius: 5px; padding: 4px 8px; font-size: 11.5px; color: var(--ink-700);
-      font-family: var(--font-sans); cursor: pointer; outline: none;
+      border-radius: 6px; padding: 5px 8px; font-size: 12px; color: var(--ink-700);
+      font-family: var(--font-sans); cursor: pointer; outline: none; height: 32px;
+      flex-shrink: 0;
     }
 
     /* ==========================================================================
        2. 3:7 SPLIT-SCREEN WORKSPACE (30% Left Info/Filter : 70% Right Map)
        ========================================================================== */
     .atlas-shell {
-      position: absolute; top: 50px; left: 0; right: 0; bottom: 0;
+      position: absolute; top: 52px; left: 0; right: 0; bottom: 0;
       display: grid; grid-template-columns: 30% 70%; overflow: hidden;
     }
 
@@ -158,52 +162,118 @@
     .sidebar-scroll::-webkit-scrollbar { width: 5px; }
     .sidebar-scroll::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
 
-    /* Active Project / Overview Banner */
-    .context-card {
-      background: var(--bg-card); border: 1px solid var(--border-line);
-      border-radius: 7px; padding: 11px 12px; box-shadow: var(--shadow-sm);
-      border-left: 4px solid var(--accent);
+    /* Sidebar Top Bar (About Card Trigger Pill) */
+    .sidebar-top-bar {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
     }
-    .context-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
-    .context-tag { font-family: var(--font-mono); font-size: 10px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em; }
-    .context-pub { font-family: var(--font-mono); font-size: 10px; color: var(--ink-400); }
-    .context-title { font-family: var(--font-serif); font-size: 17px; font-weight: 700; color: var(--ink-900); line-height: 1.25; margin-bottom: 4px; }
-    .context-desc { font-size: 11.5px; color: var(--ink-500); line-height: 1.5; }
+    .about-pill-btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      background: var(--bg-card); border: 1px solid var(--border-line);
+      border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 500;
+      color: var(--ink-700); cursor: pointer; transition: all 0.15s; width: 100%;
+    }
+    .about-pill-btn:hover { border-color: var(--accent); color: var(--ink-900); }
+    .about-pill-btn.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+    .about-pill-btn svg { width: 14px; height: 14px; }
 
-    /* 4-KPI Strip */
+    /* Merged About & KPI Narrative Card (Hidden by Default) */
+    .about-card, .context-card {
+      background: var(--bg-card); border: 1px solid var(--border-line);
+      border-radius: 8px; padding: 12px 14px; box-shadow: var(--shadow-sm);
+      border-left: 4px solid var(--accent);
+      animation: fadeInSlide 0.2s ease forwards;
+    }
+    @keyframes fadeInSlide {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .about-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+    .about-tags { display: flex; align-items: center; gap: 8px; }
+    .about-close-btn {
+      background: none; border: none; color: var(--ink-400); cursor: pointer;
+      width: 24px; height: 24px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .about-close-btn:hover { background: var(--bg-subtle); color: var(--ink-900); }
+    .about-close-btn svg { width: 14px; height: 14px; }
+    .context-tag { font-family: var(--font-mono); font-size: 10.5px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em; }
+    .context-pub { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-400); }
+    .context-title { font-family: var(--font-serif); font-size: 18px; font-weight: 700; color: var(--ink-900); line-height: 1.25; margin-bottom: 6px; }
+    .context-desc { font-size: 12.5px; color: var(--ink-600); line-height: 1.55; margin-bottom: 10px; }
+
+    /* 4-KPI Strip inside Merged About Card */
     .kpi-strip {
       display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+      padding-top: 8px; border-top: 1px dashed var(--border-line);
     }
     .kpi-box {
-      background: var(--bg-card); border: 1px solid var(--border-line);
-      border-radius: 6px; padding: 6px 8px; text-align: center;
+      background: var(--bg-subtle); border: 1px solid var(--border-line);
+      border-radius: 6px; padding: 6px 4px; text-align: center;
     }
-    .kpi-val { font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--ink-900); display: block; }
-    .kpi-lbl { font-size: 10px; color: var(--ink-500); display: block; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .kpi-val { font-family: var(--font-mono); font-size: 16px; font-weight: 700; color: var(--ink-900); display: block; }
+    .kpi-lbl { font-size: 11px; color: var(--ink-500); display: block; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     /* Multi-Dimensional Exploration Panel */
     .filter-panel {
       background: var(--bg-card); border: 1px solid var(--border-line);
-      border-radius: 7px; padding: 10px 12px; box-shadow: var(--shadow-sm);
-      display: flex; flex-direction: column; gap: 9px;
+      border-radius: 8px; padding: 12px 14px; box-shadow: var(--shadow-sm);
+      display: flex; flex-direction: column; gap: 11px;
     }
     .filter-sec-header {
       display: flex; align-items: center; justify-content: space-between;
-      font-size: 11px; font-weight: 600; color: var(--ink-700);
+      font-size: 13px; font-weight: 600; color: var(--ink-800);
     }
     .reset-link {
-      font-size: 10.5px; color: var(--accent); background: none; border: none;
-      cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 3px;
+      font-size: 11.5px; color: var(--accent); background: none; border: none;
+      cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;
     }
     .reset-link:hover { text-decoration: underline; }
 
+    /* Drawer Header for Dimension 1 */
+    .drawer-header {
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; user-select: none; padding: 1px 0;
+    }
+    .drawer-title-group { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .drawer-title { font-size: 13px; font-weight: 600; color: var(--ink-800); }
+    .drawer-active-tag {
+      font-size: 11px; font-family: var(--font-mono); color: var(--accent);
+      background: var(--accent-soft); border: 1px solid var(--accent-border);
+      padding: 1px 6px; border-radius: 4px; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis; max-width: 140px;
+    }
+    .drawer-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .drawer-chevron {
+      width: 14px; height: 14px; color: var(--ink-500);
+      transition: transform 0.2s ease; display: block;
+    }
+    .drawer-header.open .drawer-chevron { transform: rotate(180deg); }
+
+    /* Series Drawer Body (Collapsible, Default Collapsed) */
+    .series-drawer-body {
+      transition: max-height 0.25s ease, opacity 0.2s ease, margin-top 0.2s ease;
+      overflow: hidden;
+    }
+    .series-drawer-body.collapsed {
+      max-height: 0;
+      opacity: 0;
+      pointer-events: none;
+      margin-top: 0;
+    }
+    .series-drawer-body:not(.collapsed) {
+      max-height: 480px;
+      opacity: 1;
+      pointer-events: auto;
+      margin-top: 8px;
+    }
+
     /* Series Pills Grid */
     .series-pills {
-      display: flex; flex-wrap: wrap; gap: 4px;
+      display: flex; flex-wrap: wrap; gap: 5px;
     }
     .series-pill {
-      display: inline-flex; align-items: center; gap: 5px;
-      padding: 3px 7px; border-radius: 4px; font-size: 11px; font-weight: 500;
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 8px; border-radius: 5px; font-size: 12px; font-weight: 500;
       background: var(--bg-subtle); border: 1px solid var(--border-line);
       color: var(--ink-700); cursor: pointer; transition: all 0.14s;
     }
@@ -213,38 +283,38 @@
       border-color: var(--ink-900); font-weight: 600;
     }
     .series-pill .s-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-    .series-pill .s-cnt { font-family: var(--font-mono); font-size: 9.5px; opacity: 0.75; }
+    .series-pill .s-cnt { font-family: var(--font-mono); font-size: 10.5px; opacity: 0.75; }
 
     /* Timeline Histogram + Year Range */
     .timeline-box {
-      border-top: 1px solid var(--border-line); padding-top: 8px;
+      border-top: 1px solid var(--border-line); padding-top: 10px;
     }
     .year-hist-svg { width: 100%; height: 44px; display: block; margin: 4px 0; cursor: pointer; }
     .year-range-row {
       display: flex; align-items: center; justify-content: space-between; gap: 6px;
-      font-size: 11px; color: var(--ink-500);
+      font-size: 12px; color: var(--ink-600);
     }
     .year-select {
       background: var(--bg-subtle); border: 1px solid var(--border-line);
-      border-radius: 4px; padding: 2px 5px; font-family: var(--font-mono);
-      font-size: 11px; color: var(--ink-900); outline: none;
+      border-radius: 4px; padding: 3px 6px; font-family: var(--font-mono);
+      font-size: 12px; color: var(--ink-900); outline: none;
     }
     .era-chips { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
     .era-chip {
-      font-size: 10px; padding: 2px 6px; border-radius: 3px;
+      font-size: 11px; padding: 3px 7px; border-radius: 4px;
       background: var(--bg-subtle); border: 1px solid var(--border-line);
-      color: var(--ink-500); cursor: pointer;
+      color: var(--ink-600); cursor: pointer;
     }
     .era-chip:hover, .era-chip.active { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); font-weight: 600; }
 
     /* Location Cascader & Search */
     .loc-grid {
-      border-top: 1px solid var(--border-line); padding-top: 8px;
-      display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+      border-top: 1px solid var(--border-line); padding-top: 10px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 7px;
     }
     .loc-select, .search-input {
       width: 100%; background: var(--bg-subtle); border: 1px solid var(--border-line);
-      border-radius: 4px; padding: 4px 7px; font-size: 11px; color: var(--ink-900);
+      border-radius: 5px; padding: 5px 8px; font-size: 12px; color: var(--ink-900);
       font-family: var(--font-sans); outline: none;
     }
     .loc-select:focus, .search-input:focus { border-color: var(--accent); background: var(--bg-card); }
@@ -253,15 +323,15 @@
     /* Photo Feed List Header */
     .feed-header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 2px 2px 0; font-size: 11px; font-weight: 600; color: var(--ink-500);
+      padding: 4px 2px 0; font-size: 12.5px; font-weight: 600; color: var(--ink-600);
     }
     .feed-list {
       display: flex; flex-direction: column; gap: 7px;
     }
     .photo-card {
-      display: grid; grid-template-columns: 68px 1fr; gap: 9px;
+      display: grid; grid-template-columns: 72px 1fr; gap: 10px;
       background: var(--bg-card); border: 1px solid var(--border-line);
-      border-radius: 6px; padding: 7px; cursor: pointer;
+      border-radius: 6px; padding: 8px; cursor: pointer;
       transition: all 0.15s ease; align-items: center; position: relative;
     }
     .photo-card:hover {
@@ -273,7 +343,7 @@
       border-left: 4px solid var(--accent);
     }
     .card-thumb-wrap {
-      width: 68px; height: 54px; border-radius: 4px; overflow: hidden;
+      width: 72px; height: 56px; border-radius: 4px; overflow: hidden;
       background: var(--bg-subtle); position: relative; flex-shrink: 0;
     }
     .card-thumb {
@@ -284,28 +354,28 @@
     .card-route-num {
       position: absolute; top: 2px; left: 2px;
       background: rgba(26, 24, 21, 0.82); color: #fff;
-      font-family: var(--font-mono); font-size: 9px; font-weight: 600;
+      font-family: var(--font-mono); font-size: 9.5px; font-weight: 600;
       padding: 1px 4px; border-radius: 3px;
     }
-    .card-body { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+    .card-body { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
     .card-top-row { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
     .card-series-tag {
-      font-size: 9.5px; font-weight: 600; font-family: var(--font-mono);
+      font-size: 10.5px; font-weight: 600; font-family: var(--font-mono);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .card-date { font-family: var(--font-mono); font-size: 10px; color: var(--ink-400); flex-shrink: 0; }
+    .card-date { font-family: var(--font-mono); font-size: 11px; color: var(--ink-400); flex-shrink: 0; }
     .card-title {
-      font-family: var(--font-serif); font-size: 13.5px; font-weight: 700;
+      font-family: var(--font-serif); font-size: 14.5px; font-weight: 700;
       color: var(--ink-900); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .card-loc {
-      font-size: 10.5px; color: var(--ink-500);
+      font-size: 11.5px; color: var(--ink-600);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       display: flex; align-items: center; gap: 3px;
     }
-    .card-badges { display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+    .card-badges { display: flex; align-items: center; gap: 5px; margin-top: 2px; }
     .badge-mini {
-      font-size: 9px; font-family: var(--font-mono); padding: 0.5px 4px;
+      font-size: 10px; font-family: var(--font-mono); padding: 1px 5px;
       border-radius: 3px; border: 1px solid var(--border-line); color: var(--ink-500);
     }
     .badge-mini.landmark { color: var(--sage); background: var(--sage-soft); border-color: rgba(82,104,79,0.3); }
@@ -320,7 +390,7 @@
     }
     #map-canvas { width: 100%; height: 100%; z-index: 1; }
 
-    /* Floating Map Legend & Route Summary Overlay (Top-Left of Map) */
+    /* Floating Map Legend (Default Collapsed, Click to Toggle) */
     .map-overlay-bar {
       position: absolute; top: 12px; left: 52px; z-index: 500;
       display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
@@ -331,9 +401,31 @@
       background: var(--bg-glass); backdrop-filter: blur(8px);
       border: 1px solid var(--border-line); border-radius: 6px;
       padding: 6px 11px; box-shadow: var(--shadow-md);
-      display: flex; align-items: center; gap: 10px; font-size: 11.5px;
+      display: inline-flex; align-items: center; font-size: 12px;
+      cursor: pointer; user-select: none; transition: all 0.2s ease;
     }
-    .legend-item { display: inline-flex; align-items: center; gap: 5px; color: var(--ink-700); font-size: 11px; }
+    .map-pill-card:hover { border-color: var(--accent); }
+    .legend-trigger {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: var(--ink-800); font-weight: 500; font-size: 12px;
+    }
+    .legend-icon { width: 14px; height: 14px; color: var(--accent); }
+    .legend-chevron {
+      width: 12px; height: 12px; color: var(--ink-500);
+      transition: transform 0.2s ease; display: block;
+    }
+    .legend-items {
+      display: inline-flex; align-items: center; gap: 10px;
+      margin-left: 10px; padding-left: 10px; border-left: 1px solid var(--border-line);
+      transition: opacity 0.2s ease;
+    }
+    .map-pill-card.collapsed .legend-items {
+      display: none;
+    }
+    .map-pill-card:not(.collapsed) .legend-chevron {
+      transform: rotate(180deg);
+    }
+    .legend-item { display: inline-flex; align-items: center; gap: 5px; color: var(--ink-700); font-size: 11.5px; }
     .legend-circle { width: 10px; height: 10px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
     .legend-line { width: 18px; height: 3px; background: var(--accent); border-radius: 2px; }
 
@@ -513,13 +605,11 @@
   <!-- 1. TOP GLOBAL HEADER -->
   <header class="global-header">
     <div class="brand-left">
-      <a href="index.html" class="back-link" title="返回 Alec Soth 作品集画廊页">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        <span>画册专题导览</span>
+      <a href="index.html" class="back-link" title="返回画册专题主页" aria-label="返回画册专题主页">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-9.5z"/></svg>
       </a>
       <div class="brand-title-wrap">
         <span class="brand-title">Alec Soth 空间摄影导览</span>
-        <span class="brand-sub">3:7 SPATIAL ATLAS · 11 SERIES</span>
       </div>
     </div>
 
@@ -549,20 +639,21 @@
 
     <!-- Map & Theme Utilities -->
     <div class="header-right">
+      <button class="ctrl-btn" id="btn-toggle-about" onclick="toggleAboutCard()" title="项目介绍与空间统计 (点击显示/隐藏)">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      </button>
       <button class="ctrl-btn active" id="btn-toggle-route" onclick="toggleRouteLine()" title="显示或隐藏拍摄路线轨迹">
         <svg class="icon" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg>
-        <span>拍摄路线</span>
       </button>
       <button class="ctrl-btn" onclick="fitCurrentBounds()" title="缩放至当前筛选点位全景">
         <svg class="icon" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-        <span>全景复位</span>
       </button>
       <select class="tile-select" id="tile-select" onchange="switchBaseTile(this.value)" title="切换地图底图源">
-        <option value="carto_voyager">Carto 暖色人文底图</option>
-        <option value="carto_positron">Carto 极简浅灰底图</option>
-        <option value="carto_dark">Carto 暗房夜色底图</option>
-        <option value="esri_topo">Esri 北美地形地貌图</option>
-        <option value="osm">OpenStreetMap 标准图</option>
+        <option value="carto_voyager">暖色底图</option>
+        <option value="carto_positron">浅灰底图</option>
+        <option value="carto_dark">暗房底图</option>
+        <option value="esri_topo">地形图</option>
+        <option value="osm">街道图</option>
       </select>
       <button class="ctrl-btn" id="btn-theme" onclick="toggleNightTheme()" title="切换日间/暗房夜间模式">
         <svg class="icon" id="theme-icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -576,49 +667,70 @@
     <aside class="sidebar-col">
       <div class="sidebar-scroll" id="sidebar-scroll">
 
-        <!-- Active Series / Route Narrative Card -->
-        <section class="context-card" id="context-card">
-          <div class="context-top">
-            <span class="context-tag" id="ctx-tag">COMPLETE ARCHIVE · 1995–2024</span>
-            <span class="context-pub" id="ctx-pub">11 Monographs</span>
+        <!-- Quick About Toggle Pill in Sidebar -->
+        <div class="sidebar-top-bar">
+          <button class="about-pill-btn" id="btn-sidebar-about" onclick="toggleAboutCard()" title="点击展开/收起项目介绍与统计指标">
+            <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+            <span>关于专题介绍与空间统计</span>
+          </button>
+        </div>
+
+        <!-- Merged Active Series Narrative & KPI Metrics Card (Default Hidden) -->
+        <section class="about-card" id="about-card" style="display: none;">
+          <div class="about-top">
+            <div class="about-tags">
+              <span class="context-tag" id="ctx-tag">COMPLETE ARCHIVE · 1995–2024</span>
+              <span class="context-pub" id="ctx-pub">11 Monographs</span>
+            </div>
+            <button class="about-close-btn" onclick="toggleAboutCard(false)" title="收起介绍卡片">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
           </div>
           <h1 class="context-title" id="ctx-title">Alec Soth 全作品空间档案总览</h1>
           <p class="context-desc" id="ctx-desc">
             完整收录官网 11 部作品集及《Sleeping by the Mississippi》《Niagara》实体画册补全图版。点击任意作品集或通过下方时间、州县维度筛选，探索横跨密西西比河流域、美加边境与欧美的行旅轨迹。
           </p>
-        </section>
-
-        <!-- 4 KPI Metrics -->
-        <section class="kpi-strip">
-          <div class="kpi-box">
-            <span class="kpi-val" id="kpi-photos">268</span>
-            <span class="kpi-lbl">当前照片数</span>
-          </div>
-          <div class="kpi-box">
-            <span class="kpi-val" id="kpi-states">45</span>
-            <span class="kpi-lbl">覆盖州/省</span>
-          </div>
-          <div class="kpi-box">
-            <span class="kpi-val" id="kpi-counties">118</span>
-            <span class="kpi-lbl">跨越县/市</span>
-          </div>
-          <div class="kpi-box">
-            <span class="kpi-val" id="kpi-landmarks">114</span>
-            <span class="kpi-lbl">精确地标点</span>
+          <div class="kpi-strip">
+            <div class="kpi-box">
+              <span class="kpi-val" id="kpi-photos">268</span>
+              <span class="kpi-lbl">当前照片数</span>
+            </div>
+            <div class="kpi-box">
+              <span class="kpi-val" id="kpi-states">45</span>
+              <span class="kpi-lbl">覆盖州/省</span>
+            </div>
+            <div class="kpi-box">
+              <span class="kpi-val" id="kpi-counties">118</span>
+              <span class="kpi-lbl">跨越县/市</span>
+            </div>
+            <div class="kpi-box">
+              <span class="kpi-val" id="kpi-landmarks">114</span>
+              <span class="kpi-lbl">精确地标点</span>
+            </div>
           </div>
         </section>
 
         <!-- Multi-Dimensional Filter Panel -->
         <section class="filter-panel">
-          <!-- Dimension 1: Series -->
-          <div class="filter-sec-header">
-            <span>1. 作品集维度 (Series · 11部)</span>
-            <button class="reset-link" onclick="resetAllFilters()">
-              <svg class="icon" style="width:11px;height:11px;" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-              重置全部筛选
-            </button>
+          <!-- Dimension 1: Series (Collapsible Drawer, Default Collapsed) -->
+          <div class="drawer-header" id="series-drawer-trigger" onclick="toggleSeriesDrawer()">
+            <div class="drawer-title-group">
+              <span class="drawer-title">1. 作品集维度</span>
+              <span class="drawer-active-tag" id="series-active-badge">全部系列 (268)</span>
+            </div>
+            <div class="drawer-actions">
+              <button class="reset-link" onclick="event.stopPropagation(); resetAllFilters();" title="重置全部筛选">
+                <svg class="icon" style="width:11px;height:11px;" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                重置
+              </button>
+              <span class="drawer-chevron-wrap" id="series-chevron">
+                <svg class="icon drawer-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+              </span>
+            </div>
           </div>
-          <div class="series-pills" id="series-pills-container"></div>
+          <div class="series-drawer-body collapsed" id="series-drawer-body">
+            <div class="series-pills" id="series-pills-container"></div>
+          </div>
 
           <!-- Dimension 2: Shooting Time (1995-2024) -->
           <div class="timeline-box">
@@ -683,21 +795,28 @@
     <section class="map-col">
       <div id="map-canvas"></div>
 
-      <!-- Top-Left Map Legend Bar -->
+      <!-- Top-Left Map Legend Bar (Default Collapsed, Click to Toggle) -->
       <div class="map-overlay-bar">
-        <div class="map-pill-card">
-          <span class="legend-item">
-            <span class="legend-circle" style="background:#b55d35;"></span>
-            <span>实心圆点：官网原作</span>
-          </span>
-          <span class="legend-item">
-            <span class="legend-circle" style="background:#3d6b7d; border-style:dashed;"></span>
-            <span>虚线外环：实体书补全图版</span>
-          </span>
-          <span class="legend-item">
-            <span class="legend-line"></span>
-            <span>顺流/行旅拍摄路线</span>
-          </span>
+        <div class="map-pill-card collapsed" id="map-pill-card" onclick="toggleMapLegend()" title="点击展开/收起图例说明">
+          <div class="legend-trigger">
+            <svg class="icon legend-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+            <span>图例说明</span>
+            <svg class="icon legend-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+          <div class="legend-items" id="legend-items">
+            <span class="legend-item">
+              <span class="legend-circle" style="background:#b55d35;"></span>
+              <span>实心圆点：官网原作</span>
+            </span>
+            <span class="legend-item">
+              <span class="legend-circle" style="background:#3d6b7d; border-style:dashed;"></span>
+              <span>虚线外环：实体书补全图版</span>
+            </span>
+            <span class="legend-item">
+              <span class="legend-line"></span>
+              <span>顺流/行旅拍摄路线</span>
+            </span>
+          </div>
         </div>
       </div>
 
@@ -942,6 +1061,68 @@
     }
 
     // =========================================================================
+    // UI INTERACTION DRAWER / COLLAPSE CONTROLLERS
+    // =========================================================================
+    let isAboutCardOpen = false;
+    function toggleAboutCard(forceState) {
+      if (typeof forceState === 'boolean') {
+        isAboutCardOpen = forceState;
+      } else {
+        isAboutCardOpen = !isAboutCardOpen;
+      }
+      const card = document.getElementById('about-card');
+      if (card) {
+        card.style.display = isAboutCardOpen ? 'block' : 'none';
+      }
+      const hBtn = document.getElementById('btn-toggle-about');
+      if (hBtn) hBtn.classList.toggle('active', isAboutCardOpen);
+      const sBtn = document.getElementById('btn-sidebar-about');
+      if (sBtn) sBtn.classList.toggle('active', isAboutCardOpen);
+    }
+
+    let isSeriesDrawerOpen = false;
+    function toggleSeriesDrawer(forceState) {
+      if (typeof forceState === 'boolean') {
+        isSeriesDrawerOpen = forceState;
+      } else {
+        isSeriesDrawerOpen = !isSeriesDrawerOpen;
+      }
+      const body = document.getElementById('series-drawer-body');
+      const trigger = document.getElementById('series-drawer-trigger');
+      if (body) body.classList.toggle('collapsed', !isSeriesDrawerOpen);
+      if (trigger) trigger.classList.toggle('open', isSeriesDrawerOpen);
+    }
+
+    function updateSeriesActiveBadge() {
+      const badge = document.getElementById('series-active-badge');
+      if (!badge) return;
+      if (filterState.project === 'all') {
+        badge.textContent = `全部系列 (${ALL_PHOTOS.length})`;
+        badge.style.color = 'var(--accent)';
+        badge.style.borderColor = 'var(--accent-border)';
+      } else {
+        const p = PROJECTS_MAP[filterState.project];
+        const cnt = ALL_PHOTOS.filter(n => n.projectSlug === filterState.project).length;
+        if (p) {
+          badge.textContent = `${p.titleZh} (${cnt})`;
+          badge.style.color = p.color;
+          badge.style.borderColor = p.color;
+        }
+      }
+    }
+
+    let isMapLegendOpen = false;
+    function toggleMapLegend(forceState) {
+      if (typeof forceState === 'boolean') {
+        isMapLegendOpen = forceState;
+      } else {
+        isMapLegendOpen = !isMapLegendOpen;
+      }
+      const pill = document.getElementById('map-pill-card');
+      if (pill) pill.classList.toggle('collapsed', !isMapLegendOpen);
+    }
+
+    // =========================================================================
     // FILTER INITIALIZATION & MULTI-DIMENSIONAL CASCADING
     // =========================================================================
     function initFilterControls() {
@@ -966,6 +1147,7 @@
         `;
       });
       pillsWrap.innerHTML = pillsHtml;
+      updateSeriesActiveBadge();
 
       // 2. Year Selectors (1995 - 2024)
       const minSel = document.getElementById('year-min-sel');
@@ -1040,6 +1222,7 @@
       document.querySelectorAll('.preset-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.preset === slug);
       });
+      updateSeriesActiveBadge();
       populateLocationDropdowns();
       applyFilters(true);
     }
@@ -1112,6 +1295,7 @@
       document.querySelectorAll('.series-pill').forEach(b => b.classList.toggle('active', b.dataset.slug === 'all'));
       document.querySelectorAll('.preset-btn').forEach(b => b.classList.toggle('active', b.dataset.preset === 'all'));
       document.querySelectorAll('.era-chip').forEach(c => c.classList.toggle('active', c.dataset.era === 'all'));
+      updateSeriesActiveBadge();
       populateLocationDropdowns();
       if (triggerRender) applyFilters(true);
     }
@@ -1147,11 +1331,12 @@
     }
 
     function updateContextHero() {
-      const card = document.getElementById('context-card');
+      const card = document.getElementById('about-card') || document.getElementById('context-card');
       const tag = document.getElementById('ctx-tag');
       const pub = document.getElementById('ctx-pub');
       const title = document.getElementById('ctx-title');
       const desc = document.getElementById('ctx-desc');
+      if (!card || !tag) return;
 
       if (filterState.project !== 'all' && PROJECTS_MAP[filterState.project]) {
         const p = PROJECTS_MAP[filterState.project];
