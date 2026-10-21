@@ -2,7 +2,10 @@
 
 > **文献定位**：美国当代抒情纪实摄影先锋、玛格南图片社（Magnum Photos）成员埃里克·索斯（Alec Soth）代表作深度解析与创作演进谱系。  
 > **官方摄影档案**：[Alec Soth Projects 官网](https://alecsoth.com/photography/projects/)  
-> **配套交互导览页面**：[index.html](file:///Users/zhuangnd/Documents/my_projects/viz/alec_soth/index.html)（支持鼠标悬停预览与高分辨率弹窗缩放）
+> **配套交互导览系统**：
+> - [index.html](file:///Users/zhuangnd/Documents/my_projects/viz/alec_soth/index.html)：画册专题全景精读与标志性作品高清弹窗缩放检视。
+> - [atlas.html](file:///Users/zhuangnd/Documents/my_projects/viz/alec_soth/atlas.html)：3:7 空间摄影地图与公路行旅路线探索系统（涵盖 11 部作品集、268 幅照片与多维时空检索）。
+> - [ATLAS_PLAN.md](file:///Users/zhuangnd/Documents/my_projects/viz/alec_soth/ATLAS_PLAN.md)：空间摄影地图导览系统详细设计方案与地理编码规范。
 
 ---
 
@@ -79,7 +82,13 @@ flowchart LR
 
 ## 6. 交互功能与导览入口
 
-- **交互体验主页**：[viz/alec_soth/index.html](file:///Users/zhuangnd/Documents/my_projects/viz/alec_soth/index.html)
+- **空间地图导览系统**：[viz/alec_soth/atlas.html](file:///Users/zhuangnd/Documents/my_projects/viz/alec_soth/atlas.html)
+  - **3:7 分屏空间探索**：左侧 30% 多维筛选与作品流卡片，右侧 70% 交互式 Leaflet 地图与底部 D3 空间纬度剖面图。
+  - **全量 11 部作品集与实体书补全**：收录 268 幅照片（含《Sleeping by the Mississippi》53 幅河道全图版与《Niagara》33 幅边境汽车旅馆全图版），114 个精确地标定位点。
+  - **行旅轨迹与悬停缩略图**：顺流公路路线连线、悬停即时预览缩略图卡片、点击联动详情抽屉与全屏滚轮缩放灯箱。
+  - **多维过滤联动**：支持作品集（11 部胶囊）、拍摄时间（1995–2024 年份柱状图）、地理行政区（国家/州/县/市）与关键词组合过滤。
+- **画册专题精读主页**：[viz/alec_soth/index.html](file:///Users/zhuangnd/Documents/my_projects/viz/alec_soth/index.html)
   - **悬停预览**：鼠标悬停任意标志性作品条目，触发无延迟缩略图卡片浮层。
   - **缩放弹窗**：点击标志性作品打开全屏灯箱，支持**鼠标滚轮连续缩放（0.5x–4.5x）、拖拽自由平移、双击放大切换与键盘快捷键（方向键切图、+/-缩放、Esc退出）**。
+- **核心空间数据集**：[viz/alec_soth/atlas-data.json](file:///Users/zhuangnd/Documents/my_projects/viz/alec_soth/atlas-data.json)
 - **Viz 根目录作品索引**：[viz/index.html](file:///Users/zhuangnd/Documents/my_projects/viz/index.html)

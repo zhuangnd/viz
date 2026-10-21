@@ -1,0 +1,1703 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alec Soth 空间摄影地图导览 · Spatial Atlas (1995–2024)</title>
+  <meta name="description" content="美国纪实摄影师 Alec Soth 全部 11 部作品集（含《Sleeping by the Mississippi》《Niagara》实体画册完整补全图版）3:7 空间地图与公路拍摄路线交互导览系统。">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Serif+SC:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Leaflet & D3 -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+
+  <style>
+    :root {
+      --bg-paper: #f6f3ec;
+      --bg-card: #fdfbf7;
+      --bg-subtle: #ede8dd;
+      --bg-glass: rgba(253, 251, 247, 0.94);
+      --ink-900: #1a1815;
+      --ink-700: #3d3831;
+      --ink-500: #6e665b;
+      --ink-400: #948b7e;
+      --border-line: #dfd8ca;
+      --border-strong: #c7beac;
+      --accent: #b55d35;
+      --accent-soft: rgba(181, 93, 53, 0.11);
+      --accent-border: rgba(181, 93, 53, 0.35);
+      --teal: #3d6b7d;
+      --teal-soft: rgba(61, 107, 125, 0.12);
+      --sage: #52684f;
+      --sage-soft: rgba(82, 104, 79, 0.12);
+      --amber: #a8763e;
+      --font-serif: 'Cormorant Garamond', 'Noto Serif SC', Georgia, serif;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --shadow-sm: 0 1px 3px rgba(26, 24, 21, 0.06);
+      --shadow-md: 0 6px 18px rgba(26, 24, 21, 0.1);
+      --shadow-lg: 0 14px 34px rgba(26, 24, 21, 0.18);
+    }
+
+    body.theme-night {
+      --bg-paper: #121316;
+      --bg-card: #1a1c20;
+      --bg-subtle: #24272d;
+      --bg-glass: rgba(26, 28, 32, 0.94);
+      --ink-900: #f3efe6;
+      --ink-700: #d0c9bc;
+      --ink-500: #968f83;
+      --ink-400: #686258;
+      --border-line: #2d3037;
+      --border-strong: #3e424b;
+      --accent: #d47a50;
+      --accent-soft: rgba(212, 122, 80, 0.16);
+      --accent-border: rgba(212, 122, 80, 0.42);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
+      background: var(--bg-paper); color: var(--ink-900);
+      font-family: var(--font-sans); -webkit-font-smoothing: antialiased;
+    }
+
+    .icon {
+      width: 14px; height: 14px; stroke: currentColor; stroke-width: 1.8;
+      fill: none; stroke-linecap: round; stroke-linejoin: round;
+      vertical-align: middle; display: inline-block; flex-shrink: 0;
+    }
+    .icon-md { width: 16px; height: 16px; }
+    .mono { font-family: var(--font-mono); font-feature-settings: "tnum"; }
+
+    /* ==========================================================================
+       1. TOP GLOBAL HEADER (50px Fixed)
+       ========================================================================== */
+    .global-header {
+      position: fixed; top: 0; left: 0; right: 0; height: 50px; z-index: 1000;
+      background: var(--bg-card); border-bottom: 1px solid var(--border-line);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 16px; box-shadow: var(--shadow-sm); user-select: none;
+    }
+    .brand-left { display: flex; align-items: center; gap: 12px; }
+    .back-link {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 12px; font-weight: 500; color: var(--ink-500);
+      text-decoration: none; padding: 4px 8px; border-radius: 5px;
+      border: 1px solid var(--border-line); background: var(--bg-subtle);
+      transition: all 0.15s ease;
+    }
+    .back-link:hover { color: var(--ink-900); border-color: var(--accent); background: var(--bg-card); }
+    .brand-title-wrap { display: flex; align-items: baseline; gap: 8px; }
+    .brand-title {
+      font-family: var(--font-serif); font-size: 18px; font-weight: 700;
+      color: var(--ink-900); letter-spacing: 0.02em;
+    }
+    .brand-sub {
+      font-family: var(--font-mono); font-size: 10.5px; font-weight: 600;
+      color: var(--accent); background: var(--accent-soft);
+      border: 1px solid var(--accent-border); padding: 1px 6px; border-radius: 4px;
+    }
+
+    /* Quick Route Presets in Header Center */
+    .header-center { display: flex; align-items: center; gap: 6px; overflow-x: auto; max-width: 52vw; }
+    .preset-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--bg-subtle); border: 1px solid var(--border-line);
+      border-radius: 5px; padding: 4px 10px; font-size: 11.5px; font-weight: 500;
+      color: var(--ink-700); cursor: pointer; white-space: nowrap; transition: all 0.15s;
+    }
+    .preset-btn:hover { border-color: var(--accent); color: var(--ink-900); }
+    .preset-btn.active {
+      background: var(--ink-900); color: var(--bg-card);
+      border-color: var(--ink-900); font-weight: 600;
+    }
+    .preset-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+    /* Header Right Controls */
+    .header-right { display: flex; align-items: center; gap: 8px; }
+    .ctrl-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--bg-subtle); border: 1px solid var(--border-line);
+      border-radius: 5px; padding: 4px 9px; font-size: 11.5px; font-weight: 500;
+      color: var(--ink-700); cursor: pointer; transition: all 0.15s; text-decoration: none;
+    }
+    .ctrl-btn:hover { border-color: var(--accent); color: var(--ink-900); }
+    .ctrl-btn.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+    .tile-select {
+      background: var(--bg-subtle); border: 1px solid var(--border-line);
+      border-radius: 5px; padding: 4px 8px; font-size: 11.5px; color: var(--ink-700);
+      font-family: var(--font-sans); cursor: pointer; outline: none;
+    }
+
+    /* ==========================================================================
+       2. 3:7 SPLIT-SCREEN WORKSPACE (30% Left Info/Filter : 70% Right Map)
+       ========================================================================== */
+    .atlas-shell {
+      position: absolute; top: 50px; left: 0; right: 0; bottom: 0;
+      display: grid; grid-template-columns: 30% 70%; overflow: hidden;
+    }
+
+    /* LEFT 30% SIDEBAR */
+    .sidebar-col {
+      height: 100%; display: flex; flex-direction: column;
+      border-right: 1px solid var(--border-line); background: var(--bg-paper);
+      overflow: hidden;
+    }
+
+    /* Scrollable upper + feed container */
+    .sidebar-scroll {
+      flex: 1; overflow-y: auto; padding: 12px 14px 20px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .sidebar-scroll::-webkit-scrollbar { width: 5px; }
+    .sidebar-scroll::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+
+    /* Active Project / Overview Banner */
+    .context-card {
+      background: var(--bg-card); border: 1px solid var(--border-line);
+      border-radius: 7px; padding: 11px 12px; box-shadow: var(--shadow-sm);
+      border-left: 4px solid var(--accent);
+    }
+    .context-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+    .context-tag { font-family: var(--font-mono); font-size: 10px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em; }
+    .context-pub { font-family: var(--font-mono); font-size: 10px; color: var(--ink-400); }
+    .context-title { font-family: var(--font-serif); font-size: 17px; font-weight: 700; color: var(--ink-900); line-height: 1.25; margin-bottom: 4px; }
+    .context-desc { font-size: 11.5px; color: var(--ink-500); line-height: 1.5; }
+
+    /* 4-KPI Strip */
+    .kpi-strip {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+    }
+    .kpi-box {
+      background: var(--bg-card); border: 1px solid var(--border-line);
+      border-radius: 6px; padding: 6px 8px; text-align: center;
+    }
+    .kpi-val { font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--ink-900); display: block; }
+    .kpi-lbl { font-size: 10px; color: var(--ink-500); display: block; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Multi-Dimensional Exploration Panel */
+    .filter-panel {
+      background: var(--bg-card); border: 1px solid var(--border-line);
+      border-radius: 7px; padding: 10px 12px; box-shadow: var(--shadow-sm);
+      display: flex; flex-direction: column; gap: 9px;
+    }
+    .filter-sec-header {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 11px; font-weight: 600; color: var(--ink-700);
+    }
+    .reset-link {
+      font-size: 10.5px; color: var(--accent); background: none; border: none;
+      cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 3px;
+    }
+    .reset-link:hover { text-decoration: underline; }
+
+    /* Series Pills Grid */
+    .series-pills {
+      display: flex; flex-wrap: wrap; gap: 4px;
+    }
+    .series-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 7px; border-radius: 4px; font-size: 11px; font-weight: 500;
+      background: var(--bg-subtle); border: 1px solid var(--border-line);
+      color: var(--ink-700); cursor: pointer; transition: all 0.14s;
+    }
+    .series-pill:hover { border-color: var(--ink-400); color: var(--ink-900); }
+    .series-pill.active {
+      background: var(--ink-900); color: var(--bg-card);
+      border-color: var(--ink-900); font-weight: 600;
+    }
+    .series-pill .s-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .series-pill .s-cnt { font-family: var(--font-mono); font-size: 9.5px; opacity: 0.75; }
+
+    /* Timeline Histogram + Year Range */
+    .timeline-box {
+      border-top: 1px solid var(--border-line); padding-top: 8px;
+    }
+    .year-hist-svg { width: 100%; height: 44px; display: block; margin: 4px 0; cursor: pointer; }
+    .year-range-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 6px;
+      font-size: 11px; color: var(--ink-500);
+    }
+    .year-select {
+      background: var(--bg-subtle); border: 1px solid var(--border-line);
+      border-radius: 4px; padding: 2px 5px; font-family: var(--font-mono);
+      font-size: 11px; color: var(--ink-900); outline: none;
+    }
+    .era-chips { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
+    .era-chip {
+      font-size: 10px; padding: 2px 6px; border-radius: 3px;
+      background: var(--bg-subtle); border: 1px solid var(--border-line);
+      color: var(--ink-500); cursor: pointer;
+    }
+    .era-chip:hover, .era-chip.active { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+
+    /* Location Cascader & Search */
+    .loc-grid {
+      border-top: 1px solid var(--border-line); padding-top: 8px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+    }
+    .loc-select, .search-input {
+      width: 100%; background: var(--bg-subtle); border: 1px solid var(--border-line);
+      border-radius: 4px; padding: 4px 7px; font-size: 11px; color: var(--ink-900);
+      font-family: var(--font-sans); outline: none;
+    }
+    .loc-select:focus, .search-input:focus { border-color: var(--accent); background: var(--bg-card); }
+    .search-row { grid-column: 1 / -1; position: relative; display: flex; gap: 6px; }
+
+    /* Photo Feed List Header */
+    .feed-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 2px 2px 0; font-size: 11px; font-weight: 600; color: var(--ink-500);
+    }
+    .feed-list {
+      display: flex; flex-direction: column; gap: 7px;
+    }
+    .photo-card {
+      display: grid; grid-template-columns: 68px 1fr; gap: 9px;
+      background: var(--bg-card); border: 1px solid var(--border-line);
+      border-radius: 6px; padding: 7px; cursor: pointer;
+      transition: all 0.15s ease; align-items: center; position: relative;
+    }
+    .photo-card:hover {
+      border-color: var(--accent); transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+    .photo-card.active {
+      border-color: var(--accent); background: var(--accent-soft);
+      border-left: 4px solid var(--accent);
+    }
+    .card-thumb-wrap {
+      width: 68px; height: 54px; border-radius: 4px; overflow: hidden;
+      background: var(--bg-subtle); position: relative; flex-shrink: 0;
+    }
+    .card-thumb {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+      transition: transform 0.25s ease;
+    }
+    .photo-card:hover .card-thumb { transform: scale(1.06); }
+    .card-route-num {
+      position: absolute; top: 2px; left: 2px;
+      background: rgba(26, 24, 21, 0.82); color: #fff;
+      font-family: var(--font-mono); font-size: 9px; font-weight: 600;
+      padding: 1px 4px; border-radius: 3px;
+    }
+    .card-body { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+    .card-top-row { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+    .card-series-tag {
+      font-size: 9.5px; font-weight: 600; font-family: var(--font-mono);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .card-date { font-family: var(--font-mono); font-size: 10px; color: var(--ink-400); flex-shrink: 0; }
+    .card-title {
+      font-family: var(--font-serif); font-size: 13.5px; font-weight: 700;
+      color: var(--ink-900); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .card-loc {
+      font-size: 10.5px; color: var(--ink-500);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      display: flex; align-items: center; gap: 3px;
+    }
+    .card-badges { display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+    .badge-mini {
+      font-size: 9px; font-family: var(--font-mono); padding: 0.5px 4px;
+      border-radius: 3px; border: 1px solid var(--border-line); color: var(--ink-500);
+    }
+    .badge-mini.landmark { color: var(--sage); background: var(--sage-soft); border-color: rgba(82,104,79,0.3); }
+    .badge-mini.book { color: var(--teal); background: var(--teal-soft); border-color: rgba(61,107,125,0.3); }
+
+    /* ==========================================================================
+       3. RIGHT 70% MAP STAGE & OVERLAYS
+       ========================================================================== */
+    .map-col {
+      position: relative; width: 100%; height: 100%; overflow: hidden;
+      background: #e5e0d5;
+    }
+    #map-canvas { width: 100%; height: 100%; z-index: 1; }
+
+    /* Floating Map Legend & Route Summary Overlay (Top-Left of Map) */
+    .map-overlay-bar {
+      position: absolute; top: 12px; left: 52px; z-index: 500;
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      pointer-events: none;
+    }
+    .map-pill-card {
+      pointer-events: auto;
+      background: var(--bg-glass); backdrop-filter: blur(8px);
+      border: 1px solid var(--border-line); border-radius: 6px;
+      padding: 6px 11px; box-shadow: var(--shadow-md);
+      display: flex; align-items: center; gap: 10px; font-size: 11.5px;
+    }
+    .legend-item { display: inline-flex; align-items: center; gap: 5px; color: var(--ink-700); font-size: 11px; }
+    .legend-circle { width: 10px; height: 10px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+    .legend-line { width: 18px; height: 3px; background: var(--accent); border-radius: 2px; }
+
+    /* Hover Thumbnail Floating Tooltip on Map */
+    .map-hover-card {
+      position: fixed; z-index: 1200; pointer-events: none;
+      width: 248px; background: var(--bg-card);
+      border: 1px solid var(--border-strong); border-radius: 8px;
+      box-shadow: var(--shadow-lg); overflow: hidden;
+      display: none; transition: opacity 0.1s ease;
+    }
+    .hover-img-wrap {
+      width: 100%; height: 152px; background: #141413; position: relative; overflow: hidden;
+    }
+    .hover-img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .hover-badge-top {
+      position: absolute; top: 6px; left: 6px;
+      background: rgba(20, 20, 19, 0.84); color: #fff;
+      font-family: var(--font-mono); font-size: 10px; font-weight: 600;
+      padding: 2px 6px; border-radius: 4px;
+    }
+    .hover-body { padding: 8px 10px; }
+    .hover-series { font-family: var(--font-mono); font-size: 9.5px; font-weight: 600; color: var(--accent); text-transform: uppercase; }
+    .hover-title { font-family: var(--font-serif); font-size: 14px; font-weight: 700; color: var(--ink-900); line-height: 1.25; margin: 2px 0 4px; }
+    .hover-loc { font-size: 11px; color: var(--ink-500); line-height: 1.35; }
+    .hover-hint {
+      margin-top: 5px; padding-top: 4px; border-top: 1px dashed var(--border-line);
+      font-size: 10px; color: var(--accent); font-weight: 600;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    /* Active Photo Detail Card (Top-Right of Map Canvas when a marker is clicked) */
+    .map-detail-drawer {
+      position: absolute; top: 12px; right: 12px; width: 320px; z-index: 600;
+      background: var(--bg-glass); backdrop-filter: blur(10px);
+      border: 1px solid var(--border-strong); border-radius: 8px;
+      box-shadow: var(--shadow-lg); overflow: hidden;
+      transform: translateX(350px); transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .map-detail-drawer.open { transform: translateX(0); }
+    .detail-img-stage {
+      width: 100%; height: 205px; background: #121211; position: relative;
+      cursor: zoom-in; overflow: hidden;
+    }
+    .detail-img { width: 100%; height: 100%; object-fit: contain; display: block; transition: transform 0.25s; }
+    .detail-img-stage:hover .detail-img { transform: scale(1.03); }
+    .detail-close-btn {
+      position: absolute; top: 8px; right: 8px; width: 26px; height: 26px;
+      border-radius: 50%; background: rgba(20, 20, 19, 0.78); color: #fff;
+      border: 1px solid rgba(255,255,255,0.2); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .detail-zoom-pill {
+      position: absolute; bottom: 8px; right: 8px;
+      background: rgba(20, 20, 19, 0.82); color: #fff;
+      font-size: 10.5px; font-weight: 500; padding: 3px 8px; border-radius: 4px;
+      display: inline-flex; align-items: center; gap: 4px; pointer-events: none;
+    }
+    .detail-content { padding: 11px 13px 13px; }
+    .detail-meta-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px; }
+    .detail-series { font-family: var(--font-mono); font-size: 10px; font-weight: 700; color: var(--accent); }
+    .detail-date { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-500); }
+    .detail-title { font-family: var(--font-serif); font-size: 16.5px; font-weight: 700; color: var(--ink-900); line-height: 1.3; margin-bottom: 8px; }
+    .detail-kv-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 5px;
+      background: var(--bg-subtle); border: 1px solid var(--border-line);
+      border-radius: 5px; padding: 7px 8px; margin-bottom: 8px; font-size: 10.5px;
+    }
+    .kv-item { min-width: 0; }
+    .kv-lbl { color: var(--ink-400); font-size: 9.5px; display: block; }
+    .kv-val { color: var(--ink-900); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+    .detail-notes { font-size: 11.5px; color: var(--ink-700); line-height: 1.5; margin-bottom: 10px; }
+    .detail-actions { display: flex; gap: 6px; }
+    .btn-primary {
+      flex: 1; background: var(--ink-900); color: var(--bg-card);
+      border: none; border-radius: 5px; padding: 6px 10px;
+      font-size: 11.5px; font-weight: 600; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+    }
+    .btn-primary:hover { background: var(--accent); color: #fff; }
+    .btn-nav-step {
+      background: var(--bg-subtle); border: 1px solid var(--border-line);
+      color: var(--ink-700); border-radius: 5px; padding: 6px 9px;
+      font-size: 11px; font-weight: 600; cursor: pointer;
+    }
+    .btn-nav-step:hover { border-color: var(--accent); color: var(--ink-900); }
+
+    /* Bottom Collapsible D3 Route / Latitude Profile Dock */
+    .profile-dock {
+      position: absolute; left: 12px; right: 12px; bottom: 12px; z-index: 500;
+      background: var(--bg-glass); backdrop-filter: blur(8px);
+      border: 1px solid var(--border-strong); border-radius: 8px;
+      box-shadow: var(--shadow-md); transition: height 0.22s ease;
+      height: 126px; display: flex; flex-direction: column; overflow: hidden;
+    }
+    .profile-dock.collapsed { height: 32px; }
+    .dock-header {
+      height: 32px; padding: 0 12px; border-bottom: 1px solid var(--border-line);
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 11px; font-weight: 600; color: var(--ink-700); flex-shrink: 0;
+      cursor: pointer; user-select: none;
+    }
+    .dock-readout { font-family: var(--font-mono); font-size: 10.5px; color: var(--accent); }
+    .dock-chart-wrap { flex: 1; width: 100%; position: relative; }
+    #profile-svg { width: 100%; height: 100%; display: block; }
+
+    /* Custom Marker Styles on Leaflet Map */
+    .soth-marker-wrap {
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.15s ease;
+    }
+    .soth-marker-dot {
+      width: 100%; height: 100%; border-radius: 50%;
+      border: 2px solid #ffffff;
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.45);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-family: var(--font-mono); font-size: 8.5px; font-weight: 700;
+      transition: all 0.15s ease;
+    }
+    .soth-marker-dot.active-marker {
+      transform: scale(1.45);
+      border-color: #ffbe0b;
+      box-shadow: 0 0 0 4px rgba(255, 190, 11, 0.35), 0 2px 8px rgba(0,0,0,0.6);
+      z-index: 999 !important;
+    }
+
+    /* ==========================================================================
+       4. FULL-SCREEN ZOOMABLE LIGHTBOX (0.5x - 4.5x Wheel Zoom & Pan)
+       ========================================================================== */
+    .lightbox-modal {
+      position: fixed; inset: 0; z-index: 2000;
+      background: rgba(12, 12, 14, 0.95); backdrop-filter: blur(8px);
+      display: none; flex-direction: column; user-select: none;
+    }
+    .lightbox-modal.open { display: flex; }
+    .lb-topbar {
+      height: 52px; padding: 0 18px; border-bottom: 1px solid rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: space-between;
+      color: #e5e0d5; flex-shrink: 0;
+    }
+    .lb-title-group { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+    .lb-title { font-family: var(--font-serif); font-size: 18px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .lb-sub { font-family: var(--font-mono); font-size: 11px; color: #b5afa2; }
+    .lb-controls { display: flex; align-items: center; gap: 6px; }
+    .lb-btn {
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16);
+      color: #f3efe6; border-radius: 5px; padding: 5px 10px; font-size: 11.5px;
+      font-family: var(--font-mono); cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
+    }
+    .lb-btn:hover { background: rgba(255,255,255,0.18); border-color: #fff; }
+    .lb-stage {
+      flex: 1; position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      cursor: grab;
+    }
+    .lb-stage.dragging { cursor: grabbing; }
+    .lb-img {
+      max-width: 90vw; max-height: 80vh; object-fit: contain;
+      transform-origin: center center; transition: transform 0.06s linear;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.65);
+    }
+    .lb-footer {
+      height: 46px; padding: 0 18px; border-top: 1px solid rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 12px; color: #b5afa2; flex-shrink: 0;
+    }
+
+    @media (max-width: 960px) {
+      .atlas-shell { grid-template-columns: 1fr; grid-template-rows: 45% 55%; }
+      .sidebar-col { border-right: none; border-bottom: 1px solid var(--border-line); }
+      .header-center { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. TOP GLOBAL HEADER -->
+  <header class="global-header">
+    <div class="brand-left">
+      <a href="index.html" class="back-link" title="返回 Alec Soth 作品集画廊页">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <span>画册专题导览</span>
+      </a>
+      <div class="brand-title-wrap">
+        <span class="brand-title">Alec Soth 空间摄影导览</span>
+        <span class="brand-sub">3:7 SPATIAL ATLAS · 11 SERIES</span>
+      </div>
+    </div>
+
+    <!-- Quick Route Presets -->
+    <div class="header-center" id="header-presets">
+      <button class="preset-btn active" data-preset="all" onclick="applyQuickPreset('all')">
+        <span class="preset-dot" style="background:#1a1815;"></span>
+        <span>全部作品总览 (268)</span>
+      </button>
+      <button class="preset-btn" data-preset="sleeping-by-the-mississippi" onclick="applyQuickPreset('sleeping-by-the-mississippi')">
+        <span class="preset-dot" style="background:#b55d35;"></span>
+        <span>密西西比河顺流全线 (53)</span>
+      </button>
+      <button class="preset-btn" data-preset="niagara" onclick="applyQuickPreset('niagara')">
+        <span class="preset-dot" style="background:#3d6b7d;"></span>
+        <span>尼亚加拉美加边境线 (33)</span>
+      </button>
+      <button class="preset-btn" data-preset="songbook" onclick="applyQuickPreset('songbook')">
+        <span class="preset-dot" style="background:#4a5d80;"></span>
+        <span>Songbook 社群纪行 (20)</span>
+      </button>
+      <button class="preset-btn" data-preset="a-pound-of-pictures" onclick="applyQuickPreset('a-pound-of-pictures')">
+        <span class="preset-dot" style="background:#a8763e;"></span>
+        <span>一磅照片公路线 (25)</span>
+      </button>
+    </div>
+
+    <!-- Map & Theme Utilities -->
+    <div class="header-right">
+      <button class="ctrl-btn active" id="btn-toggle-route" onclick="toggleRouteLine()" title="显示或隐藏拍摄路线轨迹">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg>
+        <span>拍摄路线</span>
+      </button>
+      <button class="ctrl-btn" onclick="fitCurrentBounds()" title="缩放至当前筛选点位全景">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+        <span>全景复位</span>
+      </button>
+      <select class="tile-select" id="tile-select" onchange="switchBaseTile(this.value)" title="切换地图底图源">
+        <option value="carto_voyager">Carto 暖色人文底图</option>
+        <option value="carto_positron">Carto 极简浅灰底图</option>
+        <option value="carto_dark">Carto 暗房夜色底图</option>
+        <option value="esri_topo">Esri 北美地形地貌图</option>
+        <option value="osm">OpenStreetMap 标准图</option>
+      </select>
+      <button class="ctrl-btn" id="btn-theme" onclick="toggleNightTheme()" title="切换日间/暗房夜间模式">
+        <svg class="icon" id="theme-icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- 2. MAIN 3:7 SPLIT WORKSPACE -->
+  <main class="atlas-shell">
+    <!-- LEFT 30% SIDEBAR -->
+    <aside class="sidebar-col">
+      <div class="sidebar-scroll" id="sidebar-scroll">
+
+        <!-- Active Series / Route Narrative Card -->
+        <section class="context-card" id="context-card">
+          <div class="context-top">
+            <span class="context-tag" id="ctx-tag">COMPLETE ARCHIVE · 1995–2024</span>
+            <span class="context-pub" id="ctx-pub">11 Monographs</span>
+          </div>
+          <h1 class="context-title" id="ctx-title">Alec Soth 全作品空间档案总览</h1>
+          <p class="context-desc" id="ctx-desc">
+            完整收录官网 11 部作品集及《Sleeping by the Mississippi》《Niagara》实体画册补全图版。点击任意作品集或通过下方时间、州县维度筛选，探索横跨密西西比河流域、美加边境与欧美的行旅轨迹。
+          </p>
+        </section>
+
+        <!-- 4 KPI Metrics -->
+        <section class="kpi-strip">
+          <div class="kpi-box">
+            <span class="kpi-val" id="kpi-photos">268</span>
+            <span class="kpi-lbl">当前照片数</span>
+          </div>
+          <div class="kpi-box">
+            <span class="kpi-val" id="kpi-states">45</span>
+            <span class="kpi-lbl">覆盖州/省</span>
+          </div>
+          <div class="kpi-box">
+            <span class="kpi-val" id="kpi-counties">118</span>
+            <span class="kpi-lbl">跨越县/市</span>
+          </div>
+          <div class="kpi-box">
+            <span class="kpi-val" id="kpi-landmarks">114</span>
+            <span class="kpi-lbl">精确地标点</span>
+          </div>
+        </section>
+
+        <!-- Multi-Dimensional Filter Panel -->
+        <section class="filter-panel">
+          <!-- Dimension 1: Series -->
+          <div class="filter-sec-header">
+            <span>1. 作品集维度 (Series · 11部)</span>
+            <button class="reset-link" onclick="resetAllFilters()">
+              <svg class="icon" style="width:11px;height:11px;" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+              重置全部筛选
+            </button>
+          </div>
+          <div class="series-pills" id="series-pills-container"></div>
+
+          <!-- Dimension 2: Shooting Time (1995-2024) -->
+          <div class="timeline-box">
+            <div class="filter-sec-header">
+              <span>2. 拍摄时间维度 (Year · 1995–2024)</span>
+              <span class="mono" id="year-range-label" style="font-size:10.5px;color:var(--accent);">1995 – 2024</span>
+            </div>
+            <svg class="year-hist-svg" id="year-hist-svg"></svg>
+            <div class="year-range-row">
+              <div>
+                <span>自</span>
+                <select class="year-select" id="year-min-sel" onchange="onYearSelectChange()"></select>
+                <span>至</span>
+                <select class="year-select" id="year-max-sel" onchange="onYearSelectChange()"></select>
+              </div>
+              <div class="era-chips">
+                <span class="era-chip active" data-era="all" onclick="setEraRange(1995, 2024, 'all')">全时段</span>
+                <span class="era-chip" data-era="early" onclick="setEraRange(1995, 2003, 'early')">1995–03 密西西比期</span>
+                <span class="era-chip" data-era="mid" onclick="setEraRange(2004, 2010, 'mid')">2004–10 尼亚加拉/隐士</span>
+                <span class="era-chip" data-era="late" onclick="setEraRange(2012, 2024, 'late')">2012–24 歌本与新作</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dimension 3: Location (Country / State / County / Source / Keyword) -->
+          <div class="loc-grid">
+            <div class="filter-sec-header" style="grid-column: 1 / -1;">
+              <span>3. 地理与文献维度 (国家 / 州省 / 县市 / 图源)</span>
+            </div>
+            <select class="loc-select" id="sel-country" onchange="onCountryChange()">
+              <option value="all">全部国家 (Countries)</option>
+            </select>
+            <select class="loc-select" id="sel-state" onchange="onStateChange()">
+              <option value="all">全部州/省 (States)</option>
+            </select>
+            <select class="loc-select" id="sel-county" onchange="onFilterChange()">
+              <option value="all">全部县/市 (Counties/Cities)</option>
+            </select>
+            <select class="loc-select" id="sel-source" onchange="onFilterChange()">
+              <option value="all">全部图源 (官网 + 实体书补全)</option>
+              <option value="official_web">仅官网精选原作 (222)</option>
+              <option value="book_plate">仅实体画册补全图版 (46)</option>
+              <option value="landmark_only">仅精确地标定位点 (114)</option>
+            </select>
+            <div class="search-row">
+              <input type="text" class="search-input" id="search-input" placeholder="搜索照片标题、地标（如 Winona、Lundy's Lane、Angola、Motel）..." oninput="onFilterChange()">
+            </div>
+          </div>
+        </section>
+
+        <!-- Synchronized Photo Feed -->
+        <div class="feed-header">
+          <span id="feed-count-text">作品列表 (按拍摄路线/时间排序)</span>
+          <span style="font-size:10px;color:var(--ink-400);">悬停高亮 · 点击定位</span>
+        </div>
+        <div class="feed-list" id="feed-list"></div>
+
+      </div>
+    </aside>
+
+    <!-- RIGHT 70% INTERACTIVE MAP -->
+    <section class="map-col">
+      <div id="map-canvas"></div>
+
+      <!-- Top-Left Map Legend Bar -->
+      <div class="map-overlay-bar">
+        <div class="map-pill-card">
+          <span class="legend-item">
+            <span class="legend-circle" style="background:#b55d35;"></span>
+            <span>实心圆点：官网原作</span>
+          </span>
+          <span class="legend-item">
+            <span class="legend-circle" style="background:#3d6b7d; border-style:dashed;"></span>
+            <span>虚线外环：实体书补全图版</span>
+          </span>
+          <span class="legend-item">
+            <span class="legend-line"></span>
+            <span>顺流/行旅拍摄路线</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Top-Right Selected Photo Detail Drawer -->
+      <aside class="map-detail-drawer" id="map-detail-drawer">
+        <div class="detail-img-stage" onclick="openLightboxCurrent()" title="点击打开全屏可缩放高清灯箱">
+          <img class="detail-img" id="detail-img" src="" alt="">
+          <button class="detail-close-btn" onclick="event.stopPropagation(); closeDetailDrawer();" title="关闭详情面板">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+          <span class="detail-zoom-pill">
+            <svg class="icon" style="width:12px;height:12px;" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35M11 8v6M8 11h6"/></svg>
+            点击全屏滚轮缩放
+          </span>
+        </div>
+        <div class="detail-content">
+          <div class="detail-meta-row">
+            <span class="detail-series" id="detail-series">SLEEPING BY THE MISSISSIPPI</span>
+            <span class="detail-date" id="detail-date">2002.03 · #01</span>
+          </div>
+          <h2 class="detail-title" id="detail-title">Peter's Houseboat, Winona, MN, 2002</h2>
+          <div class="detail-kv-grid">
+            <div class="kv-item">
+              <span class="kv-lbl">州/省 · 国家</span>
+              <span class="kv-val" id="detail-state">Minnesota, US</span>
+            </div>
+            <div class="kv-item">
+              <span class="kv-lbl">县/郡 · 城市</span>
+              <span class="kv-val" id="detail-county">Winona County · Winona</span>
+            </div>
+            <div class="kv-item" style="grid-column: 1 / -1;">
+              <span class="kv-lbl">具体拍摄地标 (Landmark)</span>
+              <span class="kv-val" id="detail-landmark">Latsch Island Boathouse Community</span>
+            </div>
+            <div class="kv-item">
+              <span class="kv-lbl">地理经纬度</span>
+              <span class="kv-val mono" id="detail-coords">44.0588°N, 91.6322°W</span>
+            </div>
+            <div class="kv-item">
+              <span class="kv-lbl">定位精度与来源</span>
+              <span class="kv-val" id="detail-precision">精确地标 · 官网原作</span>
+            </div>
+          </div>
+          <p class="detail-notes" id="detail-notes"></p>
+          <div class="detail-actions">
+            <button class="btn-nav-step" onclick="stepPhoto(-1)" title="上一站作品">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> 上一站
+            </button>
+            <button class="btn-primary" onclick="openLightboxCurrent()">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+              高清缩放灯箱
+            </button>
+            <button class="btn-nav-step" onclick="stepPhoto(1)" title="下一站作品">
+              下一站 <svg class="icon" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Bottom Collapsible D3 Route / Latitude Profile Dock -->
+      <div class="profile-dock" id="profile-dock">
+        <div class="dock-header" onclick="toggleProfileDock()">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            <span id="dock-title">空间纬度与行旅序列剖面图 (North → South Latitude Profile)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="dock-readout" id="dock-readout">悬停或点击节点联动地图</span>
+            <svg class="icon" id="dock-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+        </div>
+        <div class="dock-chart-wrap">
+          <svg id="profile-svg"></svg>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 3. FLOATING HOVER THUMBNAIL TOOLTIP -->
+  <div class="map-hover-card" id="map-hover-card">
+    <div class="hover-img-wrap">
+      <img class="hover-img" id="hover-img" src="" alt="">
+      <span class="hover-badge-top" id="hover-badge">#01 · 2002.03</span>
+    </div>
+    <div class="hover-body">
+      <div class="hover-series" id="hover-series">Sleeping by the Mississippi</div>
+      <div class="hover-title" id="hover-title">Peter's Houseboat</div>
+      <div class="hover-loc" id="hover-loc">Winona, Winona County, MN</div>
+      <div class="hover-hint">
+        <span id="hover-precision">精确地标</span>
+        <span>点击查看详情与缩放 →</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. FULL-SCREEN ZOOMABLE LIGHTBOX MODAL -->
+  <div class="lightbox-modal" id="lightbox-modal" onclick="if(event.target===this) closeLightbox()">
+    <div class="lb-topbar">
+      <div class="lb-title-group">
+        <span class="lb-title" id="lb-title">Photo Title</span>
+        <span class="lb-sub" id="lb-sub">Series · Location · Date</span>
+      </div>
+      <div class="lb-controls">
+        <button class="lb-btn" onclick="stepPhoto(-1)">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> 上一幅
+        </button>
+        <button class="lb-btn" onclick="stepPhoto(1)">
+          下一幅 <svg class="icon" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+        <button class="lb-btn" onclick="zoomLightbox(-0.35)">
+          <svg class="icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <span class="lb-btn" id="lb-zoom-readout" onclick="resetLightboxZoom()">100%</span>
+        <button class="lb-btn" onclick="zoomLightbox(0.35)">
+          <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <button class="lb-btn" onclick="setLightbox1to1()">1:1 原大</button>
+        <button class="lb-btn" onclick="closeLightbox()">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg> 关闭 (Esc)
+        </button>
+      </div>
+    </div>
+    <div class="lb-stage" id="lb-stage">
+      <img class="lb-img" id="lb-img" src="" alt="" draggable="false">
+    </div>
+    <div class="lb-footer">
+      <span id="lb-notes">地标背景说明</span>
+      <span class="mono" id="lb-coords">滚轮缩放 (0.5x–4.5x) · 鼠标拖拽平移 · 方向键切换作品</span>
+    </div>
+  </div>
+
+  <!-- 5. APPLICATION CONTROLLER -->
+  <script>
+    // =========================================================================
+    // STATE & CONFIGURATION
+    // =========================================================================
+    let ATLAS_DATA = null;
+    let ALL_PHOTOS = [];
+    let PROJECTS_MAP = {};
+    let filteredPhotos = [];
+    let activePhotoId = null;
+
+    // Filter state
+    let filterState = {
+      project: 'all',
+      yearMin: 1995,
+      yearMax: 2024,
+      country: 'all',
+      state: 'all',
+      county: 'all',
+      source: 'all',
+      search: ''
+    };
+
+    // Map state
+    let map = null;
+    let baseTileLayer = null;
+    let routeLayerGroup = null;
+    let markersLayerGroup = null;
+    let markerInstances = {}; // photoId -> L.marker
+    let showRouteLines = true;
+    let isNightTheme = false;
+
+    const DEFAULT_CARTO_KEY = 'cb1_4jug_1_dbb7506275049777c6a92fee';
+    const TILE_SOURCES = {
+      carto_voyager: {
+        url: `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=${DEFAULT_CARTO_KEY}`,
+        attr: '&copy; OpenStreetMap &copy; CARTO'
+      },
+      carto_positron: {
+        url: `https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=${DEFAULT_CARTO_KEY}`,
+        attr: '&copy; OpenStreetMap &copy; CARTO'
+      },
+      carto_dark: {
+        url: `https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=${DEFAULT_CARTO_KEY}`,
+        attr: '&copy; OpenStreetMap &copy; CARTO'
+      },
+      esri_topo: {
+        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+        attr: '&copy; Esri &mdash; USGS, NOAA'
+      },
+      osm: {
+        url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        attr: '&copy; OpenStreetMap contributors'
+      }
+    };
+
+    // =========================================================================
+    // INITIALIZATION
+    // =========================================================================
+    window.addEventListener('DOMContentLoaded', async () => {
+      initLeafletMap();
+      initLightboxEvents();
+
+      try {
+        const res = await fetch('./atlas-data.json');
+        ATLAS_DATA = await res.json();
+        ALL_PHOTOS = ATLAS_DATA.photos || [];
+        (ATLAS_DATA.projects || []).forEach(p => { PROJECTS_MAP[p.slug] = p; });
+
+        initFilterControls();
+        applyFilters(true);
+
+        // Check URL hash or query param (e.g. ?project=sleeping-by-the-mississippi)
+        const params = new URLSearchParams(window.location.search);
+        const qProj = params.get('project');
+        if (qProj && PROJECTS_MAP[qProj]) {
+          applyQuickPreset(qProj);
+        }
+      } catch (err) {
+        console.error('Failed to load atlas-data.json:', err);
+      }
+
+      window.addEventListener('resize', () => {
+        if (map) map.invalidateSize();
+        renderYearHistogram();
+        renderProfileChart();
+      });
+    });
+
+    function initLeafletMap() {
+      map = L.map('map-canvas', {
+        zoomControl: true,
+        attributionControl: true,
+        minZoom: 2,
+        maxZoom: 18
+      }).setView([38.5, -92.0], 4);
+
+      switchBaseTile('carto_voyager');
+      routeLayerGroup = L.layerGroup().addTo(map);
+      markersLayerGroup = L.layerGroup().addTo(map);
+    }
+
+    function switchBaseTile(key) {
+      const cfg = TILE_SOURCES[key] || TILE_SOURCES.carto_voyager;
+      if (baseTileLayer) map.removeLayer(baseTileLayer);
+      baseTileLayer = L.tileLayer(cfg.url, {
+        attribution: cfg.attr,
+        maxZoom: 18
+      }).addTo(map);
+      document.getElementById('tile-select').value = key;
+    }
+
+    // =========================================================================
+    // FILTER INITIALIZATION & MULTI-DIMENSIONAL CASCADING
+    // =========================================================================
+    function initFilterControls() {
+      // 1. Series Pills
+      const pillsWrap = document.getElementById('series-pills-container');
+      let pillsHtml = `
+        <button class="series-pill active" data-slug="all" onclick="selectSeriesPill('all')">
+          <span class="s-dot" style="background:var(--ink-900);"></span>
+          <span>全部系列</span>
+          <span class="s-cnt">${ALL_PHOTOS.length}</span>
+        </button>
+      `;
+      ATLAS_DATA.projects.forEach(p => {
+        const cnt = ALL_PHOTOS.filter(n => n.projectSlug === p.slug).length;
+        const shortName = p.title.length > 20 ? p.title.split(' ').slice(0, 3).join(' ') + '…' : p.title;
+        pillsHtml += `
+          <button class="series-pill" data-slug="${p.slug}" onclick="selectSeriesPill('${p.slug}')" title="${p.title} (${p.titleZh})">
+            <span class="s-dot" style="background:${p.color};"></span>
+            <span>${shortName}</span>
+            <span class="s-cnt">${cnt}</span>
+          </button>
+        `;
+      });
+      pillsWrap.innerHTML = pillsHtml;
+
+      // 2. Year Selectors (1995 - 2024)
+      const minSel = document.getElementById('year-min-sel');
+      const maxSel = document.getElementById('year-max-sel');
+      minSel.innerHTML = '';
+      maxSel.innerHTML = '';
+      for (let y = 1995; y <= 2024; y++) {
+        minSel.innerHTML += `<option value="${y}" ${y === 1995 ? 'selected' : ''}>${y}</option>`;
+        maxSel.innerHTML += `<option value="${y}" ${y === 2024 ? 'selected' : ''}>${y}</option>`;
+      }
+
+      // 3. Country Cascader
+      populateLocationDropdowns();
+    }
+
+    function populateLocationDropdowns() {
+      const countrySel = document.getElementById('sel-country');
+      const stateSel = document.getElementById('sel-state');
+      const countySel = document.getElementById('sel-county');
+
+      // Base pool filtered by project & year
+      const basePool = ALL_PHOTOS.filter(n =>
+        (filterState.project === 'all' || n.projectSlug === filterState.project) &&
+        n.year >= filterState.yearMin && n.year <= filterState.yearMax
+      );
+
+      // Countries
+      const countries = countBy(basePool, 'country');
+      countrySel.innerHTML = `<option value="all">全部国家 (${Object.keys(countries).length})</option>` +
+        Object.entries(countries)
+          .sort((a, b) => b[1] - a[1])
+          .map(([c, cnt]) => `<option value="${c}" ${filterState.country === c ? 'selected' : ''}>${c} (${cnt})</option>`)
+          .join('');
+
+      // States filtered by selected country
+      const statePool = basePool.filter(n => filterState.country === 'all' || n.country === filterState.country);
+      const states = countBy(statePool, 'state');
+      stateSel.innerHTML = `<option value="all">全部州/省 (${Object.keys(states).length})</option>` +
+        Object.entries(states)
+          .sort((a, b) => b[1] - a[1])
+          .map(([s, cnt]) => `<option value="${s}" ${filterState.state === s ? 'selected' : ''}>${s} (${cnt})</option>`)
+          .join('');
+
+      // Counties/Cities filtered by selected state
+      const countyPool = statePool.filter(n => filterState.state === 'all' || n.state === filterState.state);
+      const counties = countBy(countyPool, n => `${n.city} (${n.county})`);
+      countySel.innerHTML = `<option value="all">全部城市/县 (${Object.keys(counties).length})</option>` +
+        Object.entries(counties)
+          .sort((a, b) => b[1] - a[1])
+          .map(([c, cnt]) => `<option value="${c}" ${filterState.county === c ? 'selected' : ''}>${c} (${cnt})</option>`)
+          .join('');
+    }
+
+    function countBy(arr, keyOrFn) {
+      const map = {};
+      arr.forEach(item => {
+        const k = typeof keyOrFn === 'function' ? keyOrFn(item) : item[keyOrFn];
+        map[k] = (map[k] || 0) + 1;
+      });
+      return map;
+    }
+
+    // Filter Trigger Handlers
+    function selectSeriesPill(slug) {
+      filterState.project = slug;
+      filterState.country = 'all';
+      filterState.state = 'all';
+      filterState.county = 'all';
+      document.querySelectorAll('.series-pill').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.slug === slug);
+      });
+      document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.preset === slug);
+      });
+      populateLocationDropdowns();
+      applyFilters(true);
+    }
+
+    function applyQuickPreset(presetSlug) {
+      resetAllFilters(false);
+      selectSeriesPill(presetSlug);
+    }
+
+    function onYearSelectChange() {
+      let y1 = parseInt(document.getElementById('year-min-sel').value, 10);
+      let y2 = parseInt(document.getElementById('year-max-sel').value, 10);
+      if (y1 > y2) { const tmp = y1; y1 = y2; y2 = tmp; }
+      filterState.yearMin = y1;
+      filterState.yearMax = y2;
+      document.querySelectorAll('.era-chip').forEach(c => c.classList.remove('active'));
+      populateLocationDropdowns();
+      applyFilters(true);
+    }
+
+    function setEraRange(y1, y2, eraKey) {
+      filterState.yearMin = y1;
+      filterState.yearMax = y2;
+      document.getElementById('year-min-sel').value = y1;
+      document.getElementById('year-max-sel').value = y2;
+      document.querySelectorAll('.era-chip').forEach(c => {
+        c.classList.toggle('active', c.dataset.era === eraKey);
+      });
+      populateLocationDropdowns();
+      applyFilters(true);
+    }
+
+    function onCountryChange() {
+      filterState.country = document.getElementById('sel-country').value;
+      filterState.state = 'all';
+      filterState.county = 'all';
+      populateLocationDropdowns();
+      applyFilters(true);
+    }
+
+    function onStateChange() {
+      filterState.state = document.getElementById('sel-state').value;
+      filterState.county = 'all';
+      populateLocationDropdowns();
+      applyFilters(true);
+    }
+
+    function onFilterChange() {
+      filterState.county = document.getElementById('sel-county').value;
+      filterState.source = document.getElementById('sel-source').value;
+      filterState.search = document.getElementById('search-input').value.trim().toLowerCase();
+      applyFilters(true);
+    }
+
+    function resetAllFilters(triggerRender = true) {
+      filterState = {
+        project: 'all',
+        yearMin: 1995,
+        yearMax: 2024,
+        country: 'all',
+        state: 'all',
+        county: 'all',
+        source: 'all',
+        search: ''
+      };
+      document.getElementById('year-min-sel').value = 1995;
+      document.getElementById('year-max-sel').value = 2024;
+      document.getElementById('sel-source').value = 'all';
+      document.getElementById('search-input').value = '';
+      document.querySelectorAll('.series-pill').forEach(b => b.classList.toggle('active', b.dataset.slug === 'all'));
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.toggle('active', b.dataset.preset === 'all'));
+      document.querySelectorAll('.era-chip').forEach(c => c.classList.toggle('active', c.dataset.era === 'all'));
+      populateLocationDropdowns();
+      if (triggerRender) applyFilters(true);
+    }
+
+    // =========================================================================
+    // CORE FILTER & RENDER PIPELINE
+    // =========================================================================
+    function applyFilters(shouldFlyBounds = true) {
+      filteredPhotos = ALL_PHOTOS.filter(n => {
+        if (filterState.project !== 'all' && n.projectSlug !== filterState.project) return false;
+        if (n.year < filterState.yearMin || n.year > filterState.yearMax) return false;
+        if (filterState.country !== 'all' && n.country !== filterState.country) return false;
+        if (filterState.state !== 'all' && n.state !== filterState.state) return false;
+        if (filterState.county !== 'all' && `${n.city} (${n.county})` !== filterState.county) return false;
+        if (filterState.source === 'official_web' && n.sourceType !== 'official_web') return false;
+        if (filterState.source === 'book_plate' && n.sourceType !== 'book_plate') return false;
+        if (filterState.source === 'landmark_only' && n.precision !== 'landmark') return false;
+        if (filterState.search) {
+          const hay = `${n.title} ${n.projectTitle} ${n.projectTitleZh} ${n.state} ${n.county} ${n.city} ${n.landmark} ${n.notes} ${n.year}`.toLowerCase();
+          if (!hay.includes(filterState.search)) return false;
+        }
+        return true;
+      });
+
+      document.getElementById('year-range-label').textContent = `${filterState.yearMin} – ${filterState.yearMax}`;
+
+      updateContextHero();
+      updateKPIs();
+      renderYearHistogram();
+      renderPhotoFeed();
+      renderMapLayers(shouldFlyBounds);
+      renderProfileChart();
+    }
+
+    function updateContextHero() {
+      const card = document.getElementById('context-card');
+      const tag = document.getElementById('ctx-tag');
+      const pub = document.getElementById('ctx-pub');
+      const title = document.getElementById('ctx-title');
+      const desc = document.getElementById('ctx-desc');
+
+      if (filterState.project !== 'all' && PROJECTS_MAP[filterState.project]) {
+        const p = PROJECTS_MAP[filterState.project];
+        card.style.borderLeftColor = p.color;
+        tag.style.color = p.color;
+        tag.textContent = `${p.title.toUpperCase()} · ${p.yearRange}`;
+        pub.textContent = `${p.publisher}, ${p.pubYear}`;
+        title.textContent = `《${p.titleZh}》· ${p.routeTitle}`;
+        desc.textContent = p.routeDesc;
+      } else {
+        card.style.borderLeftColor = 'var(--accent)';
+        tag.style.color = 'var(--accent)';
+        tag.textContent = `COMPLETE ARCHIVE · ${filterState.yearMin}–${filterState.yearMax}`;
+        pub.textContent = '11 Monographs · 268 Plates';
+        title.textContent = 'Alec Soth 全作品空间档案总览';
+        desc.textContent = '完整涵盖 11 部作品集与《Sleeping by the Mississippi》《Niagara》实体画册补全图版。悬停圆点预览缩略图，点击圆点检视精确地标考据与全屏缩放原图。';
+      }
+    }
+
+    function updateKPIs() {
+      const stSet = new Set(filteredPhotos.map(n => `${n.state}_${n.country}`));
+      const ctSet = new Set(filteredPhotos.map(n => `${n.county}_${n.stateCode}`));
+      const lmCnt = filteredPhotos.filter(n => n.precision === 'landmark').length;
+
+      document.getElementById('kpi-photos').textContent = filteredPhotos.length;
+      document.getElementById('kpi-states').textContent = stSet.size;
+      document.getElementById('kpi-counties').textContent = ctSet.size;
+      document.getElementById('kpi-landmarks').textContent = lmCnt;
+    }
+
+    // =========================================================================
+    // D3.JS TIMELINE HISTOGRAM IN SIDEBAR
+    // =========================================================================
+    function renderYearHistogram() {
+      const svg = d3.select('#year-hist-svg');
+      svg.selectAll('*').remove();
+      const node = document.getElementById('year-hist-svg');
+      if (!node) return;
+      const w = node.clientWidth || 260;
+      const h = 44;
+
+      const years = d3.range(1995, 2025);
+      const pool = ALL_PHOTOS.filter(n => filterState.project === 'all' || n.projectSlug === filterState.project);
+      const counts = years.map(y => ({
+        year: y,
+        count: pool.filter(n => n.year === y).length
+      }));
+
+      const maxC = Math.max(1, d3.max(counts, d => d.count));
+      const x = d3.scaleBand().domain(years).range([0, w]).padding(0.18);
+      const y = d3.scaleLinear().domain([0, maxC]).range([h - 12, 2]);
+
+      svg.selectAll('rect')
+        .data(counts)
+        .enter()
+        .append('rect')
+        .attr('x', d => x(d.year))
+        .attr('y', d => d.count > 0 ? y(d.count) : h - 13)
+        .attr('width', x.bandwidth())
+        .attr('height', d => d.count > 0 ? Math.max(3, (h - 12) - y(d.count)) : 1)
+        .attr('rx', 1.5)
+        .attr('fill', d => (d.year >= filterState.yearMin && d.year <= filterState.yearMax)
+          ? (d.count > 0 ? 'var(--accent)' : 'var(--border-line)')
+          : 'var(--border-line)')
+        .attr('opacity', d => (d.year >= filterState.yearMin && d.year <= filterState.yearMax) ? 1 : 0.35)
+        .on('click', (event, d) => {
+          if (filterState.yearMin === d.year && filterState.yearMax === d.year) {
+            setEraRange(1995, 2024, 'all');
+          } else {
+            setEraRange(d.year, d.year, '');
+          }
+        })
+        .append('title')
+        .text(d => `${d.year}年：${d.count} 幅作品 (点击单选该年份 / 再次点击恢复)`);
+
+      // Axis labels for 1995, 2002, 2008, 2015, 2024
+      [1995, 2002, 2008, 2015, 2024].forEach(yr => {
+        svg.append('text')
+          .attr('x', (x(yr) || 0) + x.bandwidth() / 2)
+          .attr('y', h - 1)
+          .attr('text-anchor', 'middle')
+          .attr('font-family', 'var(--font-mono)')
+          .attr('font-size', '8.5px')
+          .attr('fill', 'var(--ink-400)')
+          .text(yr);
+      });
+    }
+
+    // =========================================================================
+    // SIDEBAR PHOTO FEED CARDS
+    // =========================================================================
+    function renderPhotoFeed() {
+      const container = document.getElementById('feed-list');
+      document.getElementById('feed-count-text').textContent = `筛选结果 (${filteredPhotos.length} 幅作品)`;
+
+      if (filteredPhotos.length === 0) {
+        container.innerHTML = `<div style="padding:24px 12px;text-align:center;color:var(--ink-400);font-size:12px;">当前筛选条件下暂无匹配作品，请点击「重置全部筛选」。</div>`;
+        return;
+      }
+
+      container.innerHTML = filteredPhotos.map(n => `
+        <article class="photo-card ${n.id === activePhotoId ? 'active' : ''}" id="card-${n.id}"
+          onmouseenter="onCardHover('${n.id}', true)"
+          onmouseleave="onCardHover('${n.id}', false)"
+          onclick="selectPhoto('${n.id}', true)">
+          <div class="card-thumb-wrap">
+            <img class="card-thumb" src="${n.src}" alt="${escapeHtml(n.title)}" loading="lazy">
+            <span class="card-route-num">#${String(n.routeOrder).padStart(2, '0')}</span>
+          </div>
+          <div class="card-body">
+            <div class="card-top-row">
+              <span class="card-series-tag" style="color:${n.projectColor};">${n.projectTitle}</span>
+              <span class="card-date">${n.dateDisplay}</span>
+            </div>
+            <h3 class="card-title" title="${escapeHtml(n.title)}">${escapeHtml(n.title)}</h3>
+            <div class="card-loc" title="${escapeHtml(n.landmark)}">
+              <svg class="icon" style="width:11px;height:11px;color:var(--accent);" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <span>${escapeHtml(n.city)}, ${escapeHtml(n.stateCode)} · ${escapeHtml(n.landmark)}</span>
+            </div>
+            <div class="card-badges">
+              <span class="badge-mini ${n.precision === 'landmark' ? 'landmark' : ''}">${n.precisionLabel}</span>
+              <span class="badge-mini ${n.sourceType === 'book_plate' ? 'book' : ''}">${n.sourceLabel}</span>
+            </div>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    // =========================================================================
+    // LEAFLET MAP MARKERS, ROUTE POLYLINES & HOVER TOOLTIP
+    // =========================================================================
+    function renderMapLayers(shouldFlyBounds = true) {
+      routeLayerGroup.clearLayers();
+      markersLayerGroup.clearLayers();
+      markerInstances = {};
+
+      if (filteredPhotos.length === 0) return;
+
+      // 1. Draw Sequential Shooting Routes (per project when route toggle is active)
+      if (showRouteLines) {
+        const byProject = {};
+        filteredPhotos.forEach(n => {
+          if (!byProject[n.projectSlug]) byProject[n.projectSlug] = [];
+          byProject[n.projectSlug].push(n);
+        });
+
+        Object.entries(byProject).forEach(([slug, nodes]) => {
+          // Only draw route line if a specific project is selected OR for major road-trip series
+          if (filterState.project === 'all' && !['sleeping-by-the-mississippi', 'niagara', 'songbook', 'a-pound-of-pictures'].includes(slug)) {
+            return;
+          }
+          if (nodes.length < 2) return;
+          const ordered = [...nodes].sort((a, b) => a.routeOrder - b.routeOrder);
+          const latlngs = ordered.map(n => [n.lat, n.lng]);
+          const color = ordered[0].projectColor;
+
+          // Subtle outer glow line
+          L.polyline(latlngs, {
+            color: color,
+            weight: filterState.project === slug ? 6 : 3.5,
+            opacity: filterState.project === slug ? 0.25 : 0.14,
+            lineCap: 'round',
+            lineJoin: 'round'
+          }).addTo(routeLayerGroup);
+
+          // Main dashed directional route line
+          L.polyline(latlngs, {
+            color: color,
+            weight: filterState.project === slug ? 2.6 : 1.6,
+            opacity: filterState.project === slug ? 0.88 : 0.55,
+            dashArray: filterState.project === slug ? '6, 5' : '4, 5',
+            lineCap: 'round',
+            lineJoin: 'round'
+          }).addTo(routeLayerGroup);
+        });
+      }
+
+      // 2. Plot Circular Photo Markers
+      const isSingleSeries = filterState.project !== 'all';
+      filteredPhotos.forEach(n => {
+        const size = isSingleSeries ? 20 : 14;
+        const borderStyle = n.sourceType === 'book_plate' ? '2px dashed #ffffff' : '2px solid #ffffff';
+        const labelInside = isSingleSeries ? n.routeOrder : (n.precision === 'landmark' ? '•' : '');
+
+        const iconHtml = `
+          <div class="soth-marker-dot ${n.id === activePhotoId ? 'active-marker' : ''}"
+               id="marker-dot-${n.id}"
+               style="background:${n.projectColor};border:${borderStyle};">
+            ${labelInside}
+          </div>
+        `;
+
+        const divIcon = L.divIcon({
+          html: iconHtml,
+          className: 'soth-marker-wrap',
+          iconSize: [size, size],
+          iconAnchor: [size / 2, size / 2]
+        });
+
+        const marker = L.marker([n.lat, n.lng], { icon: divIcon }).addTo(markersLayerGroup);
+
+        marker.on('mouseover', (e) => {
+          showHoverCard(n, e.originalEvent);
+          const el = document.getElementById('marker-dot-' + n.id);
+          if (el) el.classList.add('active-marker');
+        });
+        marker.on('mousemove', (e) => {
+          moveHoverCard(e.originalEvent);
+        });
+        marker.on('mouseout', () => {
+          hideHoverCard();
+          if (n.id !== activePhotoId) {
+            const el = document.getElementById('marker-dot-' + n.id);
+            if (el) el.classList.remove('active-marker');
+          }
+        });
+        marker.on('click', () => {
+          hideHoverCard();
+          selectPhoto(n.id, false);
+        });
+
+        markerInstances[n.id] = marker;
+      });
+
+      if (shouldFlyBounds && filteredPhotos.length > 0) {
+        fitCurrentBounds();
+      }
+    }
+
+    function fitCurrentBounds() {
+      if (!map || filteredPhotos.length === 0) return;
+      const bounds = L.latLngBounds(filteredPhotos.map(n => [n.lat, n.lng]));
+      map.flyToBounds(bounds, {
+        paddingTopLeft: [40, 50],
+        paddingBottomRight: [50, 145],
+        maxZoom: filteredPhotos.length === 1 ? 14 : 12,
+        duration: 0.85
+      });
+    }
+
+    function toggleRouteLine() {
+      showRouteLines = !showRouteLines;
+      document.getElementById('btn-toggle-route').classList.toggle('active', showRouteLines);
+      renderMapLayers(false);
+    }
+
+    // =========================================================================
+    // HOVER THUMBNAIL CARD & CLICK DETAIL DRAWER
+    // =========================================================================
+    function showHoverCard(n, domEvent) {
+      const card = document.getElementById('map-hover-card');
+      document.getElementById('hover-img').src = n.src;
+      document.getElementById('hover-badge').textContent = `#${String(n.routeOrder).padStart(2, '0')} · ${n.dateDisplay}`;
+      document.getElementById('hover-series').style.color = n.projectColor;
+      document.getElementById('hover-series').textContent = `${n.projectTitle} (${n.projectTitleZh})`;
+      document.getElementById('hover-title').textContent = n.title;
+      document.getElementById('hover-loc').textContent = `${n.landmark} · ${n.city}, ${n.stateCode}`;
+      document.getElementById('hover-precision').textContent = `${n.precisionLabel} · ${n.sourceLabel}`;
+      card.style.display = 'block';
+      if (domEvent) moveHoverCard(domEvent);
+    }
+
+    function moveHoverCard(domEvent) {
+      if (!domEvent) return;
+      const card = document.getElementById('map-hover-card');
+      const cw = 256, ch = 265;
+      let x = domEvent.clientX + 16;
+      let y = domEvent.clientY - ch / 2;
+      if (x + cw > window.innerWidth - 12) x = domEvent.clientX - cw - 16;
+      if (y < 58) y = 58;
+      if (y + ch > window.innerHeight - 12) y = window.innerHeight - ch - 12;
+      card.style.left = x + 'px';
+      card.style.top = y + 'px';
+    }
+
+    function hideHoverCard() {
+      document.getElementById('map-hover-card').style.display = 'none';
+    }
+
+    function onCardHover(photoId, isEnter) {
+      const dot = document.getElementById('marker-dot-' + photoId);
+      if (dot) {
+        if (isEnter) dot.classList.add('active-marker');
+        else if (photoId !== activePhotoId) dot.classList.remove('active-marker');
+      }
+    }
+
+    function selectPhoto(photoId, fromSidebar) {
+      const n = ALL_PHOTOS.find(p => p.id === photoId);
+      if (!n) return;
+      activePhotoId = photoId;
+
+      // Highlight sidebar card
+      document.querySelectorAll('.photo-card').forEach(c => {
+        c.classList.toggle('active', c.id === 'card-' + photoId);
+      });
+      if (!fromSidebar) {
+        const cardEl = document.getElementById('card-' + photoId);
+        if (cardEl) cardEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      // Highlight marker dot
+      document.querySelectorAll('.soth-marker-dot').forEach(d => {
+        d.classList.toggle('active-marker', d.id === 'marker-dot-' + photoId);
+      });
+
+      // Fly to coordinates
+      if (map) {
+        const targetZoom = Math.max(map.getZoom(), n.projectSlug === 'niagara' ? 14 : 9);
+        map.flyTo([n.lat, n.lng], targetZoom, { duration: 0.7 });
+      }
+
+      // Populate Detail Drawer
+      document.getElementById('detail-img').src = n.src;
+      document.getElementById('detail-series').style.color = n.projectColor;
+      document.getElementById('detail-series').textContent = `${n.projectTitle} · ${n.projectTitleZh}`;
+      document.getElementById('detail-date').textContent = `${n.dateDisplay} · 路线 #${String(n.routeOrder).padStart(2, '0')}`;
+      document.getElementById('detail-title').textContent = n.title;
+      document.getElementById('detail-state').textContent = `${n.state} (${n.country})`;
+      document.getElementById('detail-county').textContent = `${n.county} · ${n.city}`;
+      document.getElementById('detail-landmark').textContent = n.landmark;
+      document.getElementById('detail-coords').textContent = `${n.lat.toFixed(4)}°, ${n.lng.toFixed(4)}°`;
+      document.getElementById('detail-precision').textContent = `${n.precisionLabel} · ${n.sourceLabel}`;
+      document.getElementById('detail-notes').textContent = n.notes;
+
+      document.getElementById('map-detail-drawer').classList.add('open');
+      renderProfileChart();
+    }
+
+    function closeDetailDrawer() {
+      document.getElementById('map-detail-drawer').classList.remove('open');
+    }
+
+    function stepPhoto(delta) {
+      if (filteredPhotos.length === 0) return;
+      const curIdx = filteredPhotos.findIndex(p => p.id === activePhotoId);
+      const nextIdx = curIdx === -1 ? 0 : (curIdx + delta + filteredPhotos.length) % filteredPhotos.length;
+      const nextPhoto = filteredPhotos[nextIdx];
+      selectPhoto(nextPhoto.id, false);
+      if (document.getElementById('lightbox-modal').classList.contains('open')) {
+        populateLightbox(nextPhoto);
+      }
+    }
+
+    // =========================================================================
+    // BOTTOM D3.JS LATITUDE / ROUTE SEQUENCE PROFILE CHART
+    // =========================================================================
+    function renderProfileChart() {
+      const svg = d3.select('#profile-svg');
+      svg.selectAll('*').remove();
+      const container = document.getElementById('profile-svg');
+      if (!container || filteredPhotos.length === 0) return;
+
+      const width = container.clientWidth || 680;
+      const height = container.clientHeight || 92;
+      const margin = { top: 10, right: 22, bottom: 20, left: 42 };
+      const iw = Math.max(100, width - margin.left - margin.right);
+      const ih = Math.max(30, height - margin.top - margin.bottom);
+
+      // Sort by routeOrder if single project, or year+month if all
+      const data = filterState.project !== 'all'
+        ? [...filteredPhotos].sort((a, b) => a.routeOrder - b.routeOrder)
+        : [...filteredPhotos].sort((a, b) => (a.year * 12 + a.month) - (b.year * 12 + b.month));
+
+      const xScale = d3.scaleLinear().domain([0, Math.max(1, data.length - 1)]).range([0, iw]);
+      const latExtent = d3.extent(data, d => d.lat);
+      const yMin = (latExtent[0] || 25) - 1.5;
+      const yMax = (latExtent[1] || 50) + 1.5;
+      const yScale = d3.scaleLinear().domain([yMin, yMax]).range([ih, 0]);
+
+      const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+      const mainColor = filterState.project !== 'all' && PROJECTS_MAP[filterState.project]
+        ? PROJECTS_MAP[filterState.project].color
+        : '#b55d35';
+
+      const defs = svg.append('defs');
+      const grad = defs.append('linearGradient').attr('id', 'lat-grad').attr('x1', '0%').attr('y1', '0%').attr('x2', '0%').attr('y2', '100%');
+      grad.append('stop').attr('offset', '0%').attr('stop-color', mainColor).attr('stop-opacity', 0.35);
+      grad.append('stop').attr('offset', '100%').attr('stop-color', mainColor).attr('stop-opacity', 0.03);
+
+      const area = d3.area()
+        .x((d, i) => xScale(i))
+        .y0(ih)
+        .y1(d => yScale(d.lat))
+        .curve(d3.curveMonotoneX);
+
+      const line = d3.line()
+        .x((d, i) => xScale(i))
+        .y(d => yScale(d.lat))
+        .curve(d3.curveMonotoneX);
+
+      g.append('path').datum(data).attr('fill', 'url(#lat-grad)').attr('d', area);
+      g.append('path').datum(data).attr('fill', 'none').attr('stroke', mainColor).attr('stroke-width', 2).attr('d', line);
+
+      // Y Axis (Latitude °N)
+      const yAxis = d3.axisLeft(yScale).ticks(3).tickFormat(d => `${d.toFixed(0)}°N`);
+      g.append('g')
+        .call(yAxis)
+        .attr('color', 'var(--ink-400)')
+        .attr('font-family', 'var(--font-mono)')
+        .attr('font-size', '8.5px');
+
+      // Interactive Dots
+      g.selectAll('.prof-dot')
+        .data(data)
+        .enter()
+        .append('circle')
+        .attr('class', 'prof-dot')
+        .attr('cx', (d, i) => xScale(i))
+        .attr('cy', d => yScale(d.lat))
+        .attr('r', d => d.id === activePhotoId ? 5.5 : 3.2)
+        .attr('fill', d => d.id === activePhotoId ? '#ffbe0b' : d.projectColor)
+        .attr('stroke', '#fff')
+        .attr('stroke-width', 1.2)
+        .style('cursor', 'pointer')
+        .on('mouseenter', (event, d) => {
+          document.getElementById('dock-readout').textContent =
+            `#${String(d.routeOrder).padStart(2, '0')} ${d.title} · ${d.city}, ${d.stateCode} (${d.lat.toFixed(2)}°N)`;
+          onCardHover(d.id, true);
+        })
+        .on('mouseleave', (event, d) => {
+          onCardHover(d.id, false);
+        })
+        .on('click', (event, d) => {
+          selectPhoto(d.id, false);
+        });
+    }
+
+    function toggleProfileDock() {
+      const dock = document.getElementById('profile-dock');
+      dock.classList.toggle('collapsed');
+    }
+
+    // =========================================================================
+    // FULL-SCREEN ZOOMABLE LIGHTBOX (0.5x - 4.5x Wheel Zoom & Pan)
+    // =========================================================================
+    let lbScale = 1;
+    let lbX = 0, lbY = 0;
+    let isDraggingLb = false;
+    let startX = 0, startY = 0;
+
+    function openLightboxCurrent() {
+      const n = ALL_PHOTOS.find(p => p.id === activePhotoId) || filteredPhotos[0];
+      if (!n) return;
+      populateLightbox(n);
+      document.getElementById('lightbox-modal').classList.add('open');
+    }
+
+    function populateLightbox(n) {
+      resetLightboxZoom();
+      document.getElementById('lb-img').src = n.src;
+      document.getElementById('lb-title').textContent = n.title;
+      document.getElementById('lb-sub').textContent = `${n.projectTitle} (${n.projectTitleZh}) · ${n.dateDisplay} · ${n.city}, ${n.stateCode}`;
+      document.getElementById('lb-notes').textContent = `${n.landmark} — ${n.notes}`;
+      document.getElementById('lb-coords').textContent = `坐标: ${n.lat.toFixed(4)}°N, ${n.lng.toFixed(4)}°W · [${n.precisionLabel} / ${n.sourceLabel}]`;
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox-modal').classList.remove('open');
+    }
+
+    function updateLightboxTransform() {
+      const img = document.getElementById('lb-img');
+      img.style.transform = `translate(${lbX}px, ${lbY}px) scale(${lbScale})`;
+      document.getElementById('lb-zoom-readout').textContent = `${Math.round(lbScale * 100)}%`;
+    }
+
+    function zoomLightbox(delta) {
+      lbScale = Math.min(4.5, Math.max(0.5, lbScale + delta));
+      updateLightboxTransform();
+    }
+
+    function resetLightboxZoom() {
+      lbScale = 1; lbX = 0; lbY = 0;
+      updateLightboxTransform();
+    }
+
+    function setLightbox1to1() {
+      lbScale = 2.2; lbX = 0; lbY = 0;
+      updateLightboxTransform();
+    }
+
+    function initLightboxEvents() {
+      const stage = document.getElementById('lb-stage');
+      stage.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 0.22 : -0.22;
+        zoomLightbox(delta);
+      }, { passive: false });
+
+      stage.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
+        isDraggingLb = true;
+        startX = e.clientX - lbX;
+        startY = e.clientY - lbY;
+        stage.classList.add('dragging');
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isDraggingLb) return;
+        lbX = e.clientX - startX;
+        lbY = e.clientY - startY;
+        updateLightboxTransform();
+      });
+
+      window.addEventListener('mouseup', () => {
+        isDraggingLb = false;
+        stage.classList.remove('dragging');
+      });
+
+      window.addEventListener('keydown', (e) => {
+        const isOpen = document.getElementById('lightbox-modal').classList.contains('open');
+        if (!isOpen) return;
+        if (e.key === 'Escape') closeLightbox();
+        else if (e.key === 'ArrowRight') stepPhoto(1);
+        else if (e.key === 'ArrowLeft') stepPhoto(-1);
+        else if (e.key === '+' || e.key === '=') zoomLightbox(0.3);
+        else if (e.key === '-') zoomLightbox(-0.3);
+        else if (e.key === '0') resetLightboxZoom();
+      });
+    }
+
+    // =========================================================================
+    // THEME SWITCHER & UTILS
+    // =========================================================================
+    function toggleNightTheme() {
+      isNightTheme = !isNightTheme;
+      document.body.classList.toggle('theme-night', isNightTheme);
+      const icon = document.getElementById('theme-icon');
+      if (isNightTheme) {
+        icon.innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>';
+        switchBaseTile('carto_dark');
+      } else {
+        icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+        switchBaseTile('carto_voyager');
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+  </script>
+</body>
+</html>
