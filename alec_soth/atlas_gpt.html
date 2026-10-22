@@ -17,6 +17,43 @@
 .home-btn{width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:2px;background:transparent;color:var(--ink);text-decoration:none;transition:border-color .15s,color .15s;flex-shrink:0}
 .home-btn:hover{border-color:var(--forest);color:var(--orange)}
 @media(max-width:620px){.home-btn{width:30px;height:30px}}
+/* Mobile map overlays and a fully scrollable sidebar */
+.map-display-controls{display:none;gap:5px;margin-left:8px;pointer-events:auto}
+.map-display-controls button{height:30px;padding:0 9px;border:1px solid var(--line);background:rgba(248,246,241,.96);color:var(--ink);font-size:10px;white-space:nowrap;box-shadow:0 1px 6px #25251b12}
+.map-display-controls button[aria-expanded="true"]{border-color:var(--forest);color:var(--forest)}
+@media(max-width:620px){
+  #app{min-height:460px}
+  .layout{grid-template-rows:minmax(190px,39%) minmax(0,61%)}
+  .sidebar{min-height:0}
+  .side-scroll{flex:1 1 auto;min-height:0;overscroll-behavior:contain}
+  .side-footer{flex:0 0 auto}
+  .map-top{left:8px;right:8px;top:8px;align-items:flex-start;gap:5px}
+  .map-note{display:none;position:absolute;left:0;top:40px;max-width:none;width:min(100%,390px);padding:9px 11px}
+  .map-note.expanded{display:block}
+  .map-note b{font-size:12px}
+  .map-note span{font-size:10px}
+  .map-count{margin-left:auto;padding:7px 8px;font-size:10px;white-space:nowrap}
+  .map-display-controls{display:flex;margin:0}
+  .map-display-controls button{height:30px;padding:0 7px}
+  .legend{display:none;left:8px;bottom:10px;padding:7px 9px}
+  .legend.expanded{display:flex}
+  .map-tools{right:8px;bottom:9px}
+  .project-grid{grid-template-columns:1fr;gap:0}
+  .project-option{min-height:30px;padding:5px 2px;font-size:11px}
+  .project-option span:last-child{white-space:normal;overflow:visible;text-overflow:clip}
+  .topbar{min-width:0;padding:0 9px}
+  .brand{flex:0 0 auto}
+  .top-actions{min-width:0;margin-left:auto}
+  .top-actions select{width:min(148px,39vw);min-width:0;text-overflow:ellipsis}
+  .top-actions button{white-space:nowrap}
+}
+@media(max-width:370px){
+  .brand strong{font-size:13px}
+  .top-actions select{width:34vw}
+  .map-display-controls{gap:3px}
+  .map-display-controls button{padding:0 5px;font-size:9px}
+  .stats .stat{padding-right:7px;padding-left:7px}
+}
 </style>
 </head>
 <body>
@@ -69,8 +106,8 @@
     <section class="map-wrap" aria-label="照片拍摄地点地图">
       <div class="loading" id="mapLoading">正在展开照片地图…</div>
       <div id="map"></div>
-      <div class="map-top"><div class="map-note"><b id="mapTitle">照片的地理索引</b><span id="mapDesc">选择作品集、年份或地点，在照片之间移动。</span></div><div class="map-count"><strong id="mapCount">268</strong> / 268 张</div></div>
-      <div class="legend"><i></i>照片拍摄地点 <span>·</span> 点击圆点查看照片</div>
+      <div class="map-top"><div class="map-note" id="mapNote"><b id="mapTitle">照片的地理索引</b><span id="mapDesc">选择作品集、年份或地点，在照片之间移动。</span></div><div class="map-count"><strong id="mapCount">268</strong> / 268 张</div><div class="map-display-controls"><button id="mapInfoToggle" type="button" aria-expanded="false" aria-controls="mapNote">说明</button><button id="mapLegendToggle" type="button" aria-expanded="false" aria-controls="mapLegend">图例</button></div></div>
+      <div class="legend" id="mapLegend"><i></i>照片拍摄地点 <span>·</span> 点击圆点查看照片</div>
       <div class="map-tools"><button id="fitMap" aria-label="缩放至筛选结果" type="button">⌖</button><button id="zoomIn" aria-label="放大地图" type="button">+</button><button id="zoomOut" aria-label="缩小地图" type="button">−</button></div>
     </section>
   </main>
@@ -124,6 +161,8 @@ document.addEventListener('click',e=>{const item=e.target.closest('.photo-item')
 $('closeLightbox').onclick=()=>$('lightbox').classList.remove('open');$('prevPhoto').onclick=()=>stepPhoto(-1);$('nextPhoto').onclick=()=>stepPhoto(1);$('lightbox').addEventListener('click',e=>{if(e.target===$('lightbox'))$('lightbox').classList.remove('open')});document.addEventListener('keydown',e=>{if(!$('lightbox').classList.contains('open'))return;if(e.key==='Escape')$('lightbox').classList.remove('open');if(e.key==='ArrowLeft')stepPhoto(-1);if(e.key==='ArrowRight')stepPhoto(1)});
 let scale=1,drag=null;const big=$('largePhoto');$('lightbox').addEventListener('wheel',e=>{if(!$('lightbox').classList.contains('open'))return;e.preventDefault();scale=Math.min(4.5,Math.max(.5,scale+(e.deltaY<0?.15:-.15)));big.style.transform=`scale(${scale})`},{passive:false});big.addEventListener('mousedown',e=>{if(scale<=1)return;drag={x:e.clientX,y:e.clientY,tx:0,ty:0};big.style.cursor='grabbing'});window.addEventListener('mousemove',e=>{if(!drag)return;drag.tx+=e.movementX;drag.ty+=e.movementY;big.style.transform=`translate(${drag.tx}px,${drag.ty}px) scale(${scale})`});window.addEventListener('mouseup',()=>{drag=null;big.style.cursor='grab'});
 $('fitMap').onclick=fitMap;$('zoomIn').onclick=()=>map.zoomIn();$('zoomOut').onclick=()=>map.zoomOut();
+function bindMapDisclosure(buttonId,panelId,label){const button=$(buttonId),panel=$(panelId);button.addEventListener('click',()=>{const expanded=button.getAttribute('aria-expanded')!=='true';button.setAttribute('aria-expanded',String(expanded));panel.classList.toggle('expanded',expanded);button.textContent=expanded?`收起${label}`:label;});}
+bindMapDisclosure('mapInfoToggle','mapNote','说明');bindMapDisclosure('mapLegendToggle','mapLegend','图例');
 makeControls();fillCities();update(true);$('mapLoading').style.display='none';setTimeout(()=>map.invalidateSize(),100);
 </script>
 </body>

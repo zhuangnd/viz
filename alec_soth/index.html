@@ -1361,6 +1361,11 @@
       color: var(--accent);
     }
 
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 84px;
+    }
+
     /* Responsive */
     @media (max-width: 1024px) {
       .hero-grid {
@@ -1372,8 +1377,28 @@
       .lbm-layout {
         grid-template-columns: 1fr;
       }
+      .brand-subtitle {
+        display: none;
+      }
+      .nav-inner {
+        padding: 10px 18px;
+        gap: 12px;
+      }
+      .nav-links {
+        gap: 12px;
+      }
+      .nav-link {
+        font-size: 12px;
+        gap: 4px;
+      }
+      .nav-actions {
+        gap: 6px;
+      }
     }
     @media (max-width: 768px) {
+      html {
+        scroll-padding-top: 96px;
+      }
       .works-grid {
         grid-template-columns: 1fr;
       }
@@ -1381,13 +1406,158 @@
         grid-template-columns: 1fr;
       }
       .hero-title {
-        font-size: 30px;
-      }
-      .nav-links {
-        display: none;
+        font-size: 28px;
       }
       .modal-tips {
         display: none;
+      }
+
+      /* Top Navigation Mobile 2-Tier Architecture */
+      .top-nav {
+        background: rgba(13, 15, 18, 0.94);
+      }
+      [data-theme="light"] .top-nav {
+        background: rgba(248, 247, 244, 0.95);
+      }
+      .nav-inner {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-rows: auto auto;
+        grid-template-areas:
+          "brand actions"
+          "links links";
+        row-gap: 8px;
+        column-gap: 8px;
+        padding: 8px 14px 6px;
+        align-items: center;
+      }
+
+      /* Brand in Tier 1 Left */
+      .brand {
+        grid-area: brand;
+        min-width: 0;
+        gap: 8px;
+        overflow: hidden;
+      }
+      .brand-mark {
+        width: 28px;
+        height: 28px;
+        flex-shrink: 0;
+      }
+      .brand-mark svg {
+        width: 15px;
+        height: 15px;
+      }
+      .brand-title {
+        font-size: 14px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
+      }
+      .brand-subtitle {
+        display: none !important;
+      }
+
+      /* Nav Actions in Tier 1 Right */
+      .nav-actions {
+        grid-area: actions;
+        justify-self: end;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        flex-shrink: 0;
+      }
+      .btn-official-source {
+        padding: 4px 7px;
+        font-size: 11px;
+        gap: 3px;
+        border-radius: 4px;
+        white-space: nowrap;
+      }
+      .btn-official-source svg {
+        width: 11px;
+        height: 11px;
+      }
+      .btn-icon {
+        width: 28px;
+        height: 28px;
+        flex-shrink: 0;
+        border-radius: 4px;
+      }
+      .btn-icon svg {
+        width: 14px;
+        height: 14px;
+      }
+
+      /* Nav Links in Tier 2 (Full Width Scrollable Subnav) */
+      .nav-links {
+        grid-area: links;
+        display: flex !important;
+        align-items: center;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        gap: 6px;
+        padding: 6px 0 2px;
+        border-top: 1px solid var(--surface-border);
+      }
+      .nav-links::-webkit-scrollbar {
+        display: none;
+      }
+      .nav-link {
+        font-size: 11.5px;
+        padding: 4px 9px;
+        border-radius: 12px;
+        background: var(--bg-card);
+        border: 1px solid var(--surface-border);
+        white-space: nowrap;
+        flex-shrink: 0;
+        gap: 4px;
+        color: var(--text-secondary);
+      }
+      .nav-link:hover, .nav-link.active {
+        color: var(--accent);
+        border-color: rgba(212, 163, 115, 0.4);
+        background: var(--accent-glow);
+      }
+      .nav-link svg {
+        width: 11px;
+        height: 11px;
+      }
+    }
+
+    /* Small Mobile (<= 420px) */
+    @media (max-width: 420px) {
+      .nav-inner {
+        padding: 6px 10px 5px;
+        row-gap: 6px;
+        column-gap: 6px;
+      }
+      .brand-title {
+        font-size: 13px;
+      }
+      .nav-actions {
+        gap: 3px;
+      }
+      .btn-official-source {
+        padding: 3px 5px;
+        font-size: 10px;
+        gap: 2px;
+      }
+      .btn-official-source span { display: none !important; }
+      .btn-official-source svg {
+        width: 10px;
+        height: 10px;
+      }
+      .btn-icon {
+        width: 26px;
+        height: 26px;
+      }
+      .nav-link {
+        font-size: 11px;
+        padding: 3px 7px;
       }
     }
   </style>
@@ -1430,21 +1600,21 @@
       </nav>
 
       <div class="nav-actions">
-        <a href="atlas.html" class="btn-official-source" style="background: var(--accent); color: #fff; border-color: var(--accent);" title="打开 3:7 空间摄影地图导览（经典画册版 atlas.html）">
+        <a href="atlas.html" class="btn-official-source" title="空间摄影导览 · 经典版 (atlas.html)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
-          <span>地图 · 经典</span>
+          <span>Argon</span>
         </a>
-        <a href="atlas_opus.html" class="btn-official-source" title="打开暗房印样与胶片条版地图导览 (atlas_opus.html)">
+        <a href="atlas_opus.html" class="btn-official-source" title="暗房印样与胶片条版 (atlas_opus.html)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="17" y2="20"/><line x1="3" y1="9" x2="7" y2="9"/><line x1="3" y1="15" x2="7" y2="15"/><line x1="17" y1="9" x2="21" y2="9"/><line x1="17" y1="15" x2="21" y2="15"/></svg>
-          <span>地图 · Opus</span>
+          <span>Opus</span>
         </a>
-        <a href="atlas_gpt.html" class="btn-official-source" title="打开极简编辑版地图导览 (atlas_gpt.html)">
+        <a href="atlas_gpt.html" class="btn-official-source" title="极简编辑风导览 (atlas_gpt.html)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>
-          <span>地图 · GPT</span>
+          <span>GPT</span>
         </a>
         <a href="https://alecsoth.com/photography/projects/" target="_blank" rel="noopener" class="btn-official-source" title="访问 Alec Soth 官方网站 Projects 档案">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          <span>官网源 ↗</span>
+          <span>官网</span>
         </a>
         <button id="themeToggleBtn" class="btn-icon" title="切换暗色/明亮模式">
           <svg id="themeIconDark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
@@ -2957,9 +3127,9 @@
         <a href="#works" class="footer-link">八大作品</a>
         <a href="#paradigms" class="footer-link">范式演进</a>
         <a href="#lbm" class="footer-link">LBM出版</a>
-        <a href="atlas.html" class="footer-link">地图 · 经典</a>
-        <a href="atlas_opus.html" class="footer-link">地图 · Opus</a>
-        <a href="atlas_gpt.html" class="footer-link">地图 · GPT</a>
+        <a href="atlas.html" class="footer-link">Argon</a>
+        <a href="atlas_opus.html" class="footer-link">Opus</a>
+        <a href="atlas_gpt.html" class="footer-link">GPT</a>
         <a href="https://alecsoth.com/photography/projects/" target="_blank" rel="noopener" class="footer-link">Alec Soth 官网</a>
       </div>
     </div>
