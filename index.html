@@ -8,6 +8,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <script>
+    // Immediately fix missing trailing slash (prevents relative path resolution errors when opened via /viz)
+    if (!location.pathname.endsWith('/') && !location.pathname.endsWith('.html') && !location.pathname.endsWith('.php')) {
+      location.replace(location.pathname + '/' + location.search + location.hash);
+    }
     // Immediately set theme to avoid flashing (default to light)
     (function() {
       const saved = localStorage.getItem('viz_theme');
