@@ -135,12 +135,42 @@
     .ctrl-btn svg { width: 16px; height: 16px; }
     .ctrl-btn:hover { border-color: var(--accent); color: var(--ink-900); }
     .ctrl-btn.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 600; }
-    .tile-select {
-      background: var(--bg-subtle); border: 1px solid var(--border-line);
-      border-radius: 6px; padding: 5px 8px; font-size: 12px; color: var(--ink-700);
-      font-family: var(--font-sans); cursor: pointer; outline: none; height: 32px;
-      flex-shrink: 0;
+    .tile-select-wrap {
+      position: relative;
+      cursor: pointer;
+      padding: 0 8px;
+      gap: 6px;
+      width: auto;
     }
+    .tile-select-wrap .tile-select {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      z-index: 2;
+      -webkit-appearance: none;
+      appearance: none;
+      border: none;
+      background: transparent;
+      font-size: 16px;
+    }
+    .tile-select-wrap:focus-within {
+      border-color: var(--accent);
+      color: var(--ink-900);
+    }
+    .tile-select-lbl {
+      font-size: 12px;
+      color: var(--ink-700);
+      font-family: var(--font-sans);
+      white-space: nowrap;
+    }
+    .tile-select option {
+      background: var(--bg-card);
+      color: var(--ink-900);
+    }
+    .detail-sheet-handle { display: none; }
 
     /* ==========================================================================
        2. 3:7 SPLIT-SCREEN WORKSPACE (30% Left Info/Filter : 70% Right Map)
@@ -621,11 +651,157 @@
       .aside-preset-bar { display: flex !important; }
     }
     @media (max-width: 960px) {
-      .atlas-shell { grid-template-columns: 1fr; grid-template-rows: 45% 55%; }
-      .sidebar-col { border-right: none; border-bottom: 1px solid var(--border-line); }
+      /* 1. Header & Controls */
+      .global-header { padding: 0 10px; }
+      .brand-left { gap: 8px; }
+      .brand-title { font-size: 16px; }
+      .header-right { gap: 4px; }
+      .ctrl-btn { width: 32px; min-width: 32px; }
+      .ctrl-btn:active, .preset-btn:active, .series-pill:active { transform: scale(0.95); }
+      .tile-select-wrap {
+        width: 32px !important;
+        min-width: 32px !important;
+        padding: 0 !important;
+        justify-content: center !important;
+      }
+      .tile-select-lbl { display: none !important; }
+
+      /* 2. Workspace Shell: Map on top (44%), Sidebar below (56%) */
+      .atlas-shell {
+        grid-template-columns: 1fr;
+        grid-template-rows: 44% 56%;
+      }
+      .map-col {
+        order: 1;
+        width: 100%;
+        height: 100%;
+      }
+      .sidebar-col {
+        order: 2;
+        border-right: none;
+        border-top: 1px solid var(--border-line);
+        height: 100%;
+      }
+      .sidebar-scroll {
+        padding: 10px 10px 18px;
+        gap: 8px;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* 3. Detail Drawer as Mobile Bottom Sheet */
+      .map-detail-drawer {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: auto;
+        width: 100%;
+        max-height: 75vh;
+        z-index: 1500;
+        border-radius: 14px 14px 0 0;
+        border-bottom: none;
+        box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.35);
+        transform: translateY(105%);
+        transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+        display: flex;
+        flex-direction: column;
+      }
+      .map-detail-drawer.open {
+        transform: translateY(0);
+      }
+      .detail-sheet-handle {
+        width: 36px;
+        height: 4px;
+        border-radius: 2px;
+        background: var(--border-strong);
+        margin: 6px auto 2px;
+        flex-shrink: 0;
+        display: block;
+      }
+      .detail-img-stage {
+        height: 175px;
+        flex-shrink: 0;
+      }
+      .detail-content {
+        overflow-y: auto;
+        max-height: calc(75vh - 185px);
+        -webkit-overflow-scrolling: touch;
+        padding: 10px 12px 18px;
+      }
+
+      /* 4. Profile Dock in compact mode on mobile */
+      .profile-dock {
+        left: 8px;
+        right: 8px;
+        bottom: 8px;
+        height: 110px;
+      }
+      .profile-dock.collapsed {
+        height: 30px;
+      }
+      .dock-header {
+        height: 30px;
+        padding: 0 8px;
+        font-size: 11px;
+      }
+      .dock-readout {
+        display: none !important;
+      }
+      .dock-sub-title {
+        display: none !important;
+      }
+
+      /* 5. Map Legend Pill */
+      .map-overlay-bar {
+        top: 10px;
+        left: 50px;
+      }
+      .map-pill-card {
+        padding: 5px 8px;
+        font-size: 11px;
+      }
+      .legend-trigger {
+        font-size: 11px;
+      }
+      .legend-items {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        margin-left: 6px;
+        padding-left: 6px;
+      }
+
+      /* 6. Form Controls: Prevent iOS Safari Auto-Zoom */
+      .loc-select, .search-input, .year-select {
+        font-size: 16px;
+      }
+      .loc-select {
+        height: 36px;
+      }
     }
-    @media (max-width: 420px) {
-      .dock-header div span {display:none;}
+
+    @media (max-width: 600px) {
+      .kpi-strip {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+      }
+      .kpi-box {
+        padding: 6px 8px;
+      }
+    }
+
+    @media (max-width: 440px) {
+      .global-header { padding: 0 8px; }
+      .brand-left { gap: 6px; }
+      .brand-title { font-size: 15px; }
+      .brand-artist { display: none; }
+      .header-right { gap: 3px; }
+    }
+
+    @media (hover: none) {
+      .map-hover-card {
+        display: none !important;
+      }
     }
   </style>
 </head>
@@ -638,7 +814,7 @@
         <svg class="icon" viewBox="0 0 24 24"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-9.5z"/></svg>
       </a>
       <div class="brand-title-wrap">
-        <span class="brand-title">Alec Soth 空间摄影导览</span>
+        <span class="brand-title"><span class="brand-artist">Alec Soth</span> <span class="brand-sub-title">空间摄影导览</span></span>
       </div>
     </div>
 
@@ -674,13 +850,17 @@
       <button class="ctrl-btn" onclick="fitCurrentBounds()" title="缩放至当前筛选点位全景">
         <svg class="icon" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
       </button>
-      <select class="tile-select" id="tile-select" onchange="switchBaseTile(this.value)" title="切换地图底图源">
-        <option value="carto_voyager">暖色底图</option>
-        <option value="carto_positron">浅灰底图</option>
-        <option value="carto_dark">暗房底图</option>
-        <option value="esri_topo">地形图</option>
-        <option value="osm">街道图</option>
-      </select>
+      <div class="ctrl-btn tile-select-wrap" title="切换地图底图源">
+        <svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        <span class="tile-select-lbl" id="tile-select-lbl">暖色底图</span>
+        <select class="tile-select" id="tile-select" onchange="switchBaseTile(this.value)" title="切换地图底图源" aria-label="切换地图底图源">
+          <option value="carto_voyager">暖色底图</option>
+          <option value="carto_positron">浅灰底图</option>
+          <option value="carto_dark">暗房底图</option>
+          <option value="esri_topo">地形图</option>
+          <option value="osm">街道图</option>
+        </select>
+      </div>
       <button class="ctrl-btn" id="btn-theme" onclick="toggleNightTheme()" title="切换日间/暗房夜间模式">
         <svg class="icon" id="theme-icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       </button>
@@ -878,6 +1058,7 @@
 
       <!-- Top-Right Selected Photo Detail Drawer -->
       <aside class="map-detail-drawer" id="map-detail-drawer">
+        <div class="detail-sheet-handle"></div>
         <div class="detail-img-stage" onclick="openLightboxCurrent()" title="点击打开全屏可缩放高清灯箱">
           <img class="detail-img" id="detail-img" src="" alt="">
           <button class="detail-close-btn" onclick="event.stopPropagation(); closeDetailDrawer();" title="关闭详情面板">
@@ -937,7 +1118,7 @@
         <div class="dock-header" onclick="toggleProfileDock()">
           <div style="display:flex;align-items:center;gap:6px;">
             <svg class="icon" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-            <span id="dock-title">空间纬度与行旅序列剖面图 (North → South Latitude Profile)</span>
+            <span id="dock-title">空间纬度与行旅序列剖面图 <span class="dock-sub-title">(North → South Latitude Profile)</span></span>
           </div>
           <div style="display:flex;align-items:center;gap:10px;">
             <span class="dock-readout" id="dock-readout">悬停或点击节点联动地图</span>
@@ -1067,6 +1248,11 @@
       initLeafletMap();
       initLightboxEvents();
 
+      if (window.innerWidth <= 960) {
+        const dock = document.getElementById('profile-dock');
+        if (dock) dock.classList.add('collapsed');
+      }
+
       try {
         const res = await fetch('./atlas-data.json');
         ATLAS_DATA = await res.json();
@@ -1101,6 +1287,10 @@
         maxZoom: 18
       }).setView([38.5, -92.0], 4);
 
+      map.on('click', () => {
+        closeDetailDrawer();
+      });
+
       switchBaseTile('carto_voyager');
       routeLayerGroup = L.layerGroup().addTo(map);
       markersLayerGroup = L.layerGroup().addTo(map);
@@ -1113,7 +1303,13 @@
         attribution: cfg.attr,
         maxZoom: 18
       }).addTo(map);
-      document.getElementById('tile-select').value = key;
+      const sel = document.getElementById('tile-select');
+      if (sel) {
+        sel.value = key;
+        const opt = sel.selectedOptions ? sel.selectedOptions[0] : null;
+        const lbl = document.getElementById('tile-select-lbl');
+        if (opt && lbl) lbl.textContent = opt.textContent;
+      }
     }
 
     // =========================================================================
@@ -1823,6 +2019,7 @@
     function toggleProfileDock() {
       const dock = document.getElementById('profile-dock');
       dock.classList.toggle('collapsed');
+      setTimeout(() => { renderProfileChart(); }, 250);
     }
 
     // =========================================================================

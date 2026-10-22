@@ -100,12 +100,35 @@
       border: 1px solid var(--line-2); border-radius: 4px; color: var(--ink-2); font-size: 12px; transition: .15s;
     }
     .tool:hover { color: var(--ink); border-color: var(--ink-3); }
+    .tool:active { transform: scale(0.95); }
     .tool.on { color: var(--safe); border-color: var(--safe); background: var(--safe-soft); }
     .tool.play { color: var(--bg); background: var(--amber); border-color: var(--amber); font-weight: 700; }
     .tool.play.on { background: var(--safe); border-color: var(--safe); color: #fff; }
-    .tool-select {
-      height: 32px; padding: 0 8px; background: var(--panel); border: 1px solid var(--line-2); border-radius: 4px;
-      font-size: 12px; color: var(--ink-2); outline: none; cursor: pointer;
+    .tool-select-wrap {
+      position: relative;
+      cursor: pointer;
+    }
+    .tool-select-wrap .tool-select {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      z-index: 2;
+      -webkit-appearance: none;
+      appearance: none;
+      border: none;
+      background: transparent;
+      font-size: 16px;
+    }
+    .tool-select-wrap:focus-within {
+      border-color: var(--safe);
+      color: var(--ink);
+    }
+    .tool-select option {
+      background: var(--panel);
+      color: var(--ink);
     }
 
     /* ---------- SHELL 3:7 ---------- */
@@ -317,12 +340,30 @@
     .lb-arrow:hover { color: var(--ink); border-color: var(--safe); }
     .lb-arrow.l { left: 18px; } .lb-arrow.r { right: 18px; }
 
-    @media (max-width: 1100px) { .hd-tag { display: none; } .tool .lbl { display: none; } }
+    @media (max-width: 1100px) {
+      .hd-tag { display: none; }
+      .tool .lbl { display: none; }
+    }
     @media (max-width: 900px) {
+      .hd { padding: 0 10px; gap: 8px; }
+      .hd-brand { gap: 6px; }
+      .hd-title { font-size: 17px; }
+      .hd-tools { gap: 4px; }
+      .tool { width: 32px; min-width: 32px; padding: 0; justify-content: center; }
+      .tool .lbl { display: none !important; }
+      .tool-select-wrap { width: 32px; min-width: 32px; padding: 0; justify-content: center; }
       .shell { grid-template-columns: 1fr; grid-template-rows: 46% 54%; }
       .side { border-right: none; border-bottom: 1px solid var(--line); order: 2; }
       .stage { order: 1; }
-      .hud { left: 50px; } .hud-cell { padding: 5px 9px; } .hud-v { font-size: 14px; }
+      .hud { display: none !important; }
+      .leaflet-bottom { bottom: 36px !important; }
+    }
+    @media (max-width: 420px) {
+      .hd { padding: 0 6px; gap: 6px; }
+      .hd-brand { gap: 4px; }
+      .hd-title { font-size: 15px; }
+      .hd-artist { display: none; }
+      .hd-tools { gap: 3px; }
     }
   </style>
 </head>
@@ -335,7 +376,7 @@
     </a>
     <div class="hd-brand">
       <span class="hd-safelight" id="hd-dot"></span>
-      <span class="hd-title">Alec Soth <em id="hd-mode-em">暗房地图</em></span>
+      <span class="hd-title"><span class="hd-artist">Alec Soth</span> <em id="hd-mode-em">暗房地图</em></span>
       <span class="hd-tag" id="hd-mode-tag">Darkroom Atlas · 1995–2024</span>
     </div>
     <div class="hd-spacer"></div>
@@ -350,22 +391,23 @@
       <button class="tool" onclick="fitView()" title="缩放至当前筛选范围">
         <svg class="icon" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
       </button>
-      <select class="tool-select" id="tile-sel" onchange="setTile(this.value)" title="切换底图">
-        <option value="dark">暗房底图</option>
-        <option value="dark_nolabel">无注记暗图</option>
-        <option value="light">相纸浅图</option>
-        <option value="voyager">暖色地图</option>
-        <option value="sat">卫星影像</option>
-        <option value="topo">地形图</option>
-        <option value="osm">街道图</option>
-      </select>
+      <div class="tool tool-select-wrap" title="切换底图">
+        <svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        <span class="lbl" id="tile-lbl">暗房底图</span>
+        <select class="tool-select" id="tile-sel" onchange="setTile(this.value)" title="切换底图" aria-label="切换底图">
+          <option value="dark">暗房底图</option>
+          <option value="dark_nolabel">无注记暗图</option>
+          <option value="light">相纸浅图</option>
+          <option value="voyager">暖色地图</option>
+          <option value="sat">卫星影像</option>
+          <option value="topo">地形图</option>
+          <option value="osm">街道图</option>
+        </select>
+      </div>
       <button class="tool" id="btn-theme" onclick="toggleTheme()" title="切换浅色看片台 / 暗房印样模式">
         <svg class="icon" id="theme-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
         <span class="lbl" id="theme-lbl">浅色</span>
       </button>
-      <a class="tool" href="atlas.html" title="切换至经典版导览 (atlas.html)">
-        <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg>
-      </a>
     </div>
   </header>
 
@@ -586,6 +628,8 @@
       if (tileLayer) map.removeLayer(tileLayer);
       tileLayer = L.tileLayer(t[0], { attribution: t[1], maxZoom: 18, subdomains: 'abcd' }).addTo(map);
       $('tile-sel').value = curTile;
+      const opt = $('tile-sel').selectedOptions ? $('tile-sel').selectedOptions[0] : null;
+      if (opt && $('tile-lbl')) $('tile-lbl').textContent = opt.textContent;
     }
     function toggleTheme() {
       isLight = !isLight;
